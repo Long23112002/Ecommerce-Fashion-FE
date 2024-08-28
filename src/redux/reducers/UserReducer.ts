@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import {createSlice} from "@reduxjs/toolkit";
 import User from "../../types/User";
 
 const initState: User = {
@@ -10,9 +10,7 @@ const initState: User = {
 const UserReducer = createSlice({
     initialState: initState,
     name: 'User',
-    reducers: {
-
-    }
+    reducers: {}
 })
 
 export const userSelector = (state: { user: User | null }) => state.user;
