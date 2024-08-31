@@ -9,7 +9,7 @@ interface IProps {
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
+const UserAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
     const user = useSelector(userSelector)
 
@@ -98,4 +98,4 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
     );
 };
 
-export default AdminAvatarDrawer;
+export default UserAvatarDrawer;
