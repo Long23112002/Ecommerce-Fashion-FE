@@ -1,5 +1,5 @@
-import { Box, Divider, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import React, { SetStateAction, useEffect, useState } from 'react'
+import {Box, Divider, Drawer, IconButton, Stack, Tooltip, Typography} from '@mui/material'
+import React, {SetStateAction, useEffect, useState} from 'react'
 import Button from '../Button'
 import Notification from '../../types/Notification'
 import NotificationItem from './NotificationItem'
@@ -15,7 +15,7 @@ const actionStyle = {
     backgroundColor: '#DFE8F2'
 }
 
-const NotificationBox: React.FC<IProps> = ({ open, toggleDrawer, setTotalNotifications }) => {
+const NotificationBox: React.FC<IProps> = ({open, toggleDrawer, setTotalNotifications}) => {
 
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [actionButton, setActionButton] = useState<number>(0)
@@ -143,7 +143,7 @@ const NotificationBox: React.FC<IProps> = ({ open, toggleDrawer, setTotalNotific
                         <IconButton
                             onClick={toggleDrawer ? toggleDrawer(false) : undefined}
                         >
-                            <i className="fa-solid fa-xmark" />
+                            <i className="fa-solid fa-xmark"/>
                         </IconButton>
                         <Typography variant='h6'>Thông báo</Typography>
                     </Stack>
@@ -163,7 +163,7 @@ const NotificationBox: React.FC<IProps> = ({ open, toggleDrawer, setTotalNotific
                             p: 2,
                             py: 0.5,
                             borderRadius: 100,
-                            ...actionButton == 0 ? { ...actionStyle } : {}
+                            ...actionButton == 0 ? {...actionStyle} : {}
                         }}
                         onClick={handleAllNotification}
                     >
@@ -174,14 +174,14 @@ const NotificationBox: React.FC<IProps> = ({ open, toggleDrawer, setTotalNotific
                             p: 1.5,
                             py: 0.5,
                             borderRadius: 100,
-                            ...actionButton == 1 ? { ...actionStyle } : {}
+                            ...actionButton == 1 ? {...actionStyle} : {}
                         }}
                         onClick={handleUnreadNotification}
                     >
                         Chưa đọc
                     </Button>
                 </Stack>
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{my: 2}}/>
                 <Stack>
                     {notifications.map(n =>
                         <NotificationItem
@@ -191,7 +191,7 @@ const NotificationBox: React.FC<IProps> = ({ open, toggleDrawer, setTotalNotific
                     )}
                 </Stack>
             </Box>
-        </Drawer >
+        </Drawer>
     )
 }
 

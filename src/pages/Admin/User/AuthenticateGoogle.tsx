@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Box, CircularProgress, Typography} from "@mui/material";
-import {storeUserData} from "../../../api/LoginApi.ts";
+import {storeUserData} from "../../../api/AuthApi.ts";
 import Cookie from "js-cookie";
 import {Spin} from "antd";
 
