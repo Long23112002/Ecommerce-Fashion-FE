@@ -21,35 +21,42 @@ const ChatArea: React.FC<IProps> = ({ selectedRoom }) => {
     const chatBoxRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
-        const token = Cookie.get('accessToken')
-
+        const token = Cookie.get('accessToken');
+    
         const sock = new SockJS(SOCKET_API);
         const stompClient = new Client({
             webSocketFactory: () => sock as WebSocket,
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,  // Gửi token trong headers
-            },
             onConnect: () => {
-                stompClient.subscribe(`/room`, (chat: IMessage) => {
+                console.log("Connecting...")
+                stompClient.subscribe(`/room/public`, (chat: IMessage) => {
                     setChats(prevChats => [
                         ...prevChats,
                         JSON.parse(chat.body)
-                    ])
-                });
-            }
+                    ]);
+                }),
+                {
+                    token: token + ""
+                }
+            },
+            connectHeaders: {
+                Authorization: `Bearer ${token}`,
+            },
+            debug: function (str) {
+                console.log(str);
+            },
         });
-
+    
         stompClient.activate();
         setClient(stompClient);
-
+    
         return () => {
             if (stompClient) {
                 stompClient.deactivate();
             }
         }
-    }, [])
+    }, [user]);
+    
 
-    if (user)
         return (
             <Box
                 sx={{
@@ -75,18 +82,18 @@ const ChatArea: React.FC<IProps> = ({ selectedRoom }) => {
                         <Box
                             key={index}
                             display="flex"
-                            justifyContent={chat.createBy == user.id ? 'flex-end' : 'flex-start'}
+                            justifyContent={chat.createBy == user?.id ? 'flex-end' : 'flex-start'}
                             sx={{ mb: 1 }}
                         >
-                            {!(chat.createBy == user.id) &&
+                            {!(chat.createBy == user?.id) &&
                                 <Avatar />
                             }
                             <Paper
                                 sx={{
                                     p: 1.5,
                                     m: 1,
-                                    backgroundColor: chat.createBy == user.id ? '#3A99D9' : '#C9E0F7',
-                                    color: chat.createBy == user.id ? '#fff' : '#000',
+                                    backgroundColor: chat.createBy == user?.id ? '#3A99D9' : '#C9E0F7',
+                                    color: chat.createBy == user?.id ? '#fff' : '#000',
                                     maxWidth: 750,
                                     wordBreak: 'break-word',
                                 }}

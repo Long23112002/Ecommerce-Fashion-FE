@@ -26,6 +26,7 @@ const AppRoutes = () => {
             <Route path='/login' element={<Login/>}/>
             <Route path="/authenticate" element={<AuthenticateGoogle />} />
             <Route path="/authenticate-fb" element={<AuthenticateFacebook />} />
+
         </Routes>
     )
 }

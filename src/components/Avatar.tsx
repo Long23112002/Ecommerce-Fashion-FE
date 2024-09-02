@@ -10,7 +10,7 @@ interface IProps {
 const Avatar: React.FC<IProps> = ({ draw }) => {
 
     const user = useSelector(userSelector)
-
+    
     const [open, setOpen] = useState(false);
 
     const toggleDrawer = (open: boolean) => () => {

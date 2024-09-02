@@ -13,7 +13,19 @@ const ChatInput: React.FC<IProps> = ({ client, selectedRoom }) => {
 
     const user = useSelector(userSelector)
     const [content, setContent] = useState<string>('')
-    console.log(client)
+
+    const handleSend = () => {
+        if (client && client.connected && content.trim().length > 0) {
+            client.publish({
+                destination: `/app/chat.sendMessage`,
+                body: JSON.stringify({
+                    content: content,
+                    createBy: user?.id
+                }),
+            })
+            setContent('')
+        }
+    }
 
     return (
         <Box display="flex" sx={{
@@ -33,6 +45,7 @@ const ChatInput: React.FC<IProps> = ({ client, selectedRoom }) => {
             />
             <Button
                 color="primary"
+                onClick={handleSend}
             >
                 <i className="fa-solid fa-paper-plane"
                     style={{

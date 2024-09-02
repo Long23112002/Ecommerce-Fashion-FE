@@ -14,7 +14,6 @@ const Sidebar: React.FC<IProps> = ({ setSelectedRoom }) => {
     const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
     const [users, setUsers] = useState<User[]>([])
     const [selectedUser, setSelectedUser] = useState<number>(0)
-    const autocompleteRef = useRef<HTMLInputElement>(null);
 
     return (
         <>
@@ -26,19 +25,6 @@ const Sidebar: React.FC<IProps> = ({ setSelectedRoom }) => {
                         alignItems: 'center'
                     }}
                 >
-                    <Autocomplete
-                        disablePortal
-                        size='small'
-                        value={null}
-                        options={users}
-                        ref={autocompleteRef}
-                        getOptionLabel={option => option.fullName + ""}
-                        getOptionKey={option => option.id ?? -1}
-                        sx={{ width: 300, mr: 2 }}
-                        renderInput={(params) => <TextField {...params} label="User" />}
-                    />
-                    <Button variant='contained'
-                    >Thêm</Button>
                 </ListItem>
                 {chatRooms.map(cr => (
                     <ListItem button key={cr.id}
