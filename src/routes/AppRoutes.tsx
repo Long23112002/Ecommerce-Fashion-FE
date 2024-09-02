@@ -7,6 +7,7 @@ import AuthenticateGoogle from "../pages/Admin/User/AuthenticateGoogle.tsx";
 import AuthenticateFacebook from "../pages/Admin/User/AuthenticateFacebook.tsx";
 import UserLayout from '../layouts/Customer/index.tsx';
 import Home from '../pages/Customer/Home/index.tsx';
+import ChatPage from '../pages/Chat/index.tsx';
 
 const AppRoutes = () => {
     return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
 
             <Route element={<UserLayout/>}>
                 <Route path='/' element={<Home/>}/>
+                <Route path='/chat' element={<ChatPage/>}/>
             </Route>
 
             <Route element={<AdminLayout/>}>

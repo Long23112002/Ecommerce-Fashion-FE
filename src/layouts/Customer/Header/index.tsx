@@ -45,7 +45,7 @@ const UserHeader: React.FC = () => {
                                     }
                                 }}
                             >
-                                {user?.name}
+                                {user?.fullName}
                             </Typography>
 
                             <Avatar draw={<UserAvatarDrawer />} />

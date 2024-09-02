@@ -54,7 +54,7 @@ const UserAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         >
                             <Avatar
                                 alt="Remy Sharp"
-                                src={user?.avatar}
+                                src={user?.avatar+''}
                                 sx={{
                                     width: '100%',
                                     height: '100%',
@@ -70,7 +70,7 @@ const UserAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='h6'>
-                            {user?.name}
+                            {user?.fullName}
                         </Typography>
                     </Grid>
                     <Grid
@@ -80,7 +80,7 @@ const UserAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='body2' noWrap>
-                            {user?.username}
+                            {user?.email}
                         </Typography>
                     </Grid>
                 </Grid>

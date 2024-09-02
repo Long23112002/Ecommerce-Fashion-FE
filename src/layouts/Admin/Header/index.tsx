@@ -53,7 +53,7 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                                     }
                                 }}
                             >
-                                {user?.name}
+                                {user?.fullName}
                             </Typography>
 
                             <Avatar draw={<AdminAvatarDrawer />} />
