@@ -16,7 +16,6 @@ const Avatar: React.FC<IProps> = ({ draw }) => {
     const toggleDrawer = (open: boolean) => () => {
         setOpen(open);
     };
-
     return (
         <>
             <Avt 
