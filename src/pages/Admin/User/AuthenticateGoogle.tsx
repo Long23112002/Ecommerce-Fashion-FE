@@ -1,14 +1,11 @@
 
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {Box, CircularProgress, Typography} from "@mui/material";
 import {storeUserData} from "../../../api/AuthApi.ts";
 import { Box, Typography } from "@mui/material";
 import { Spin } from "antd";
 import Cookie from "js-cookie";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { storeUserData } from "../../../api/LoginApi.ts";
+
 
 export default function AuthenticateGoogle() {
     const navigate = useNavigate();
