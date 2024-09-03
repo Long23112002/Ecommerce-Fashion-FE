@@ -18,7 +18,10 @@ const Notification: React.FC = () => {
                 aria-label="account of current notification"
                 sx={{
                     color: '#A6B0B8',
-                    mr: 2,
+                    mr: {
+                        xs: 0.5,
+                        md: 3
+                    },
                     position: 'relative'
                 }}
                 onClick={toggleDrawer(true)}
@@ -35,7 +38,7 @@ const Notification: React.FC = () => {
                         backgroundColor: 'red',
                         color: 'white',
                         borderRadius: '50%',
-                        display: totalNotifications?'flex':'none',
+                        display: totalNotifications ? 'flex' : 'none',
                         justifyContent: 'center',
                         alignItems: 'center',
                         fontSize: 15,

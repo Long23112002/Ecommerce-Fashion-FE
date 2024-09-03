@@ -21,7 +21,10 @@ const Chat: React.FC = () => {
                 aria-label="account of current notification"
                 sx={{
                     color: '#A6B0B8',
-                    mr: 2,
+                    mr: {
+                        xs: 0.5,
+                        md: 3
+                    },
                     position: 'relative'
                 }}
                 onClick={toggleChat}

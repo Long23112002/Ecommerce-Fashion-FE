@@ -60,10 +60,16 @@ const ChatRoom: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
       <Box
         sx={{
           position: 'fixed',
+          zIndex: 20,
           bottom: 0,
-          right: 20,
-          width: 600,
-          height: 700,
+          right: {
+            xs: 0,
+            md: 15
+          },
+          width: '100%',
+          height: '100%',
+          maxWidth: 600,
+          maxHeight: 700,
           bgcolor: 'white',
           border: '1px solid #ddd',
           borderRadius: '8px 8px 0 0',

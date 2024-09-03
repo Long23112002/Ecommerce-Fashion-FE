@@ -1,10 +1,11 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../../../components/Notification'
-import { userSelector } from '../../../redux/reducers/UserReducer'
+import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
 import Avatar from '../../../components/Avatar'
 import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
+import { getUserData } from '../../../api/AuthApi'
 
 interface IProps {
     handleCollapse: () => void,
@@ -15,6 +16,17 @@ interface IProps {
 const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }) => {
 
     const user = useSelector(userSelector)
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const userData = getUserData();
+        dispatch(setUser({
+            id: Number(userData.id),
+            fullName: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar
+        }));
+    }, [dispatch]);
 
     return (
         <Box position='sticky' top={0} zIndex={10}>
@@ -51,7 +63,11 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                                     display: {
                                         xs: "none",
                                         md: "block"
-                                    }
+                                    },
+                                    textAlign: 'end',
+                                    maxWidth: 220,
+                                    height: 25,
+                                    overflow: 'hidden'
                                 }}
                             >
                                 {user?.fullName}

@@ -1,18 +1,30 @@
 import { AppBar, Box, Toolbar, Typography } from '@mui/material'
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Chat from '../../../components/Chat'
 import Notification from '../../../components/Notification'
-import { userSelector } from '../../../redux/reducers/UserReducer'
+import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
 import Avatar from '../../../components/Avatar'
 import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
+import { getUserData } from '../../../api/AuthApi'
 
 const UserHeader: React.FC = () => {
 
     const user = useSelector(userSelector)
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const userData = getUserData();
+        dispatch(setUser({
+            id: Number(userData.id),
+            fullName: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar
+        }));
+    }, [dispatch]);
 
     return (
-        <Box position='sticky' top={0}>
+        <Box position='sticky' top={0} zIndex={10}>
             <AppBar
                 position='static'
                 sx={{
