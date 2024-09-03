@@ -1,17 +1,29 @@
 import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
 import React from 'react';
-import Button from '../../../components/Button';
 import { useSelector } from 'react-redux';
-import { userSelector } from '../../../redux/reducers/UserReducer';
+import { useNavigate } from "react-router-dom";
+import { handleLogout } from '../../api/AuthApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import Button from '../Button';
 
 interface IProps {
     open?: boolean;
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
+const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
-    const user = useSelector(userSelector)
+    const navigate = useNavigate();
+
+    const logout = () => {
+        handleLogout();
+        navigate('/login');
+    }
+
+
+    const user = useSelector(userSelector);
+
+    console.log(user);
 
     return (
         <Drawer
@@ -79,13 +91,14 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='body2' noWrap>
-                            {user?.fullName}
+                            {user?.email}
                         </Typography>
                     </Grid>
                 </Grid>
 
                 <Stack>
                     <Button
+                        onClick={logout}
                         backgroundColor='rgba(255, 86, 48, 0.18)'
                         color='rgba(255, 86, 48)'
                     >
@@ -97,4 +110,4 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
     );
 };
 
-export default AdminAvatarDrawer;
+export default AvatarDrawer;

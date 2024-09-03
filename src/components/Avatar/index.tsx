@@ -1,7 +1,7 @@
 import { Avatar as Avt } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { userSelector } from '../redux/reducers/UserReducer';
+import { userSelector } from '../../redux/reducers/UserReducer';
 
 interface IProps {
     draw: ReactElement;

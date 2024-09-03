@@ -1,10 +1,11 @@
 import { AppBar, Box, Toolbar, Typography } from '@mui/material'
 import React from 'react'
 import { useSelector } from 'react-redux'
-import Avatar from '../../../components/Avatar'
+import Chat from '../../../components/Chat'
 import Notification from '../../../components/Notification'
 import { userSelector } from '../../../redux/reducers/UserReducer'
-import UserAvatarDrawer from './UserAvatarDrawer'
+import Avatar from '../../../components/Avatar'
+import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
 
 const UserHeader: React.FC = () => {
 
@@ -32,6 +33,8 @@ const UserHeader: React.FC = () => {
                     </Box>
                     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
 
+                        <Chat/>
+
                         <Notification />
 
                         <Box component='span' display='flex' alignItems='center'>
@@ -48,7 +51,7 @@ const UserHeader: React.FC = () => {
                                 {user?.fullName}
                             </Typography>
 
-                            <Avatar draw={<UserAvatarDrawer />} />
+                            <Avatar draw={<AvatarDrawer />} />
 
                         </Box>
                     </Box>

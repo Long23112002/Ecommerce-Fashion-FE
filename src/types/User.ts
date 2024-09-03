@@ -1,12 +1,8 @@
 type User = {
-    id: number;
-    email: string;
-    fullName: string;
-    phoneNumber: string;
-    birth: string;
-    gender: 'MALE' | 'FEMALE' | 'OTHER';
-    avatar: string | null;
-    roles: string[] | null;
+    id: number,
+    username: string,
+    name: string,
+    avatar: string
 }
 
 export default User

@@ -1,10 +1,10 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
 import React from 'react'
-import Avatar from '../../../components/Avatar'
-import AdminAvatarDrawer from './AdminAvatarDrawer'
 import { useSelector } from 'react-redux'
-import { userSelector } from '../../../redux/reducers/UserReducer'
 import Notification from '../../../components/Notification'
+import { userSelector } from '../../../redux/reducers/UserReducer'
+import Avatar from '../../../components/Avatar'
+import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
 
 interface IProps {
     handleCollapse: () => void,
@@ -17,17 +17,18 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
     const user = useSelector(userSelector)
 
     return (
-        <Box position='sticky' top={0}>
+        <Box position='sticky' top={0} zIndex={10}>
             <AppBar
                 position='static'
                 sx={{
-                    backgroundColor: 'white',
                     boxShadow: 'none',
-                    height: 50
                 }}
             >
-                <Toolbar>
-
+                <Toolbar
+                    sx={{
+                        backgroundColor: 'white',
+                    }}
+                >
                     <IconButton
                         size="large"
                         edge="start"
@@ -56,7 +57,7 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                                 {user?.fullName}
                             </Typography>
 
-                            <Avatar draw={<AdminAvatarDrawer />} />
+                            <Avatar draw={<AvatarDrawer />} />
 
                         </Box>
                     </Box>

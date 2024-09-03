@@ -1,14 +1,13 @@
+
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {storeUserData} from "../../../api/AuthApi.ts";
 import { Box, Typography } from "@mui/material";
 import { Spin } from "antd";
 import Cookie from "js-cookie";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { storeUserData } from "../../../api/LoginApi.ts";
-import { useDispatch } from "react-redux";
-import UserReducer from "../../../redux/reducers/UserReducer.ts";
+
 
 export default function AuthenticateGoogle() {
-    const dispatch = useDispatch()
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
@@ -28,7 +27,6 @@ export default function AuthenticateGoogle() {
                 .then((data) => {
                     console.log(data);
                     storeUserData(data);
-                    dispatch(UserReducer.actions.setUser(data.userResponse));
                     setLoading(false);
                 });
         } else {
