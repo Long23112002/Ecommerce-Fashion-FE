@@ -1,8 +1,10 @@
 import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
-import React from 'react';
+import React, {useEffect} from 'react';
 import Button from '../../../components/Button';
-import { useSelector } from 'react-redux';
-import { userSelector } from '../../../redux/reducers/UserReducer';
+import {useDispatch, useSelector} from 'react-redux';
+import {setUser, userSelector} from '../../../redux/reducers/UserReducer';
+import {getUserData, handleLogout} from "../../../api/AuthApi.ts";
+import {useNavigate} from "react-router-dom";
 
 interface IProps {
     open?: boolean;
@@ -11,7 +13,29 @@ interface IProps {
 
 const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
-    const user = useSelector(userSelector)
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        handleLogout();
+        navigate('/login');
+    }
+
+    useEffect(() => {
+        const userData = getUserData();
+        dispatch(setUser({
+            fullName: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar
+        }));
+    }, [dispatch]);
+
+
+    const user = useSelector(userSelector);
+
+    console.log(user);
+
+
 
     return (
         <Drawer
@@ -70,7 +94,7 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='h6'>
-                            {user?.name}
+                            {user?.fullName}
                         </Typography>
                     </Grid>
                     <Grid
@@ -80,13 +104,14 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='body2' noWrap>
-                            {user?.username}
+                            {user?.email}
                         </Typography>
                     </Grid>
                 </Grid>
 
                 <Stack>
                     <Button
+                        onClick={logout}
                         backgroundColor='rgba(255, 86, 48, 0.18)'
                         color='rgba(255, 86, 48)'
                     >

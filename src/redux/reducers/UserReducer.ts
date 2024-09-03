@@ -1,18 +1,29 @@
-import {createSlice} from "@reduxjs/toolkit";
-import User from "../../types/User";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initState: User = {
-    username: 'thaitranminh564@gmail.com',
-    name: 'Trần Minh Thái',
-    avatar: 'https://hoang-phuc.com/media/magefan_blog/2021/12/meme-cheems-1.jpg'
+interface UserState {
+    fullName: string;
+    email: string;
+    avatar: string;
 }
+
+const initState: UserState = {
+    fullName: '',
+    email: '',
+    avatar: ''
+};
 
 const UserReducer = createSlice({
     initialState: initState,
     name: 'User',
-    reducers: {}
-})
+    reducers: {
+        setUser: (state, action: PayloadAction<UserState>) => {
+            state.fullName = action.payload.fullName;
+            state.email = action.payload.email;
+            state.avatar = action.payload.avatar;
+        }
+    }
+});
 
-export const userSelector = (state: { user: User | null }) => state.user;
-
-export default UserReducer
+export const { setUser } = UserReducer.actions;
+export const userSelector = (state: { user: UserState }) => state.user;
+export default UserReducer.reducer;
