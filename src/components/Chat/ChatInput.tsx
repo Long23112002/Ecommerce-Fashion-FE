@@ -6,10 +6,11 @@ import { userSelector } from '../../redux/reducers/UserReducer'
 import Cookies from "js-cookie";
 
 interface IProps {
-    client: Client | null
+    client: Client | null,
+    idRoom: string
 }
 
-const ChatInput: React.FC<IProps> = ({ client }) => {
+const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
 
     const user = useSelector(userSelector)
     const [content, setContent] = useState<string>('')
@@ -20,6 +21,7 @@ const ChatInput: React.FC<IProps> = ({ client }) => {
             client.publish({
                 destination: `/app/chat.sendMessage`,
                 body: JSON.stringify({
+                    idRoom: idRoom,
                     content: content,
                     createBy: user.id
                 }),

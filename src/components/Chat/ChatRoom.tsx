@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 import SockJS from 'sockjs-client';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { Client, IMessage } from '@stomp/stompjs';
+import { callFindIdChatRoomByUserId } from '../../api/ChatApi';
 
 interface IProps {
   closeChat: () => void
@@ -20,16 +21,22 @@ const ChatRoom: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
   const user = useSelector(userSelector)
   const [client, setClient] = useState<Client | null>(null)
   const [chats, setChats] = useState<Chat[]>([])
+  const [idRoom, setIdRoom] = useState<string>('')
+
+  const fetchFindIdChatRoomByUserId = async () => {
+    const res = await callFindIdChatRoomByUserId(user.id)
+    setIdRoom(res)
+  }
 
   useEffect(() => {
     const token = Cookies.get('accessToken');
-
+    fetchFindIdChatRoomByUserId()
     const sock = new SockJS(SOCKET_API);
     const stompClient = new Client({
       webSocketFactory: () => sock as WebSocket,
       onConnect: () => {
         console.log("Connecting...")
-        stompClient.subscribe(`/room/public`, (chat: IMessage) => {
+        stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
           setChats(prevChats => [
             ...prevChats,
             JSON.parse(chat.body)
@@ -119,6 +126,7 @@ const ChatRoom: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
 
         <ChatInput
           client={client}
+          idRoom={idRoom}
         />
 
       </Box>
