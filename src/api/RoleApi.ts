@@ -1,7 +1,7 @@
-import axios from "axios";
 import {BASE_API} from "../constants/BaseApi.ts";
 import {ResponseData} from "../types/responseApi.ts";
 import {Role} from "../types/role.ts";
+import axiosInstance from "./AxiosInstance.ts";
 
 
 export interface RoleRequest {
@@ -16,7 +16,7 @@ export const fetchAllRole = async (
 ): Promise<ResponseData> => {
     try {
         const url = `${BASE_API}/api/v1/role?page=${page}&size=${size}`;
-        const response = await axios.get<{ data: Role[], total: number }>(url);
+        const response = await axiosInstance.get<{ data: Role[], total: number }>(url);
         return response.data as ResponseData;
     } catch (error) {
         throw error;
@@ -37,7 +37,7 @@ export const createRole = async (role: RoleRequest, token: string): Promise<Resp
                 'Content-Type': 'application/json',
             },
         };
-        const response = await axios.post<Role>(url, modifiedRole, auth);
+        const response = await axiosInstance.post<Role>(url, modifiedRole, auth);
         return response.data as ResponseData;
     } catch (error) {
         throw error;
@@ -53,7 +53,7 @@ export const deleteRole = async (roleId: number, token: string): Promise<Respons
                 'Content-Type': 'application/json',
             },
         };
-        const response = await axios.delete(url, auth);
+        const response = await axiosInstance.delete(url, auth);
         return response as ResponseData;
     } catch (error) {
         console.error("Error deleting role:", error);
@@ -64,7 +64,7 @@ export const deleteRole = async (roleId: number, token: string): Promise<Respons
 export const getRoleById = async (roleId: number): Promise<Role> => {
     try {
         const url = `${BASE_API}/api/v1/role/${roleId}`;
-        const response = await axios.get<Role>(url);
+        const response = await axiosInstance.get<Role>(url);
         return response.data as Role;
     } catch (error) {
         throw error;
@@ -90,7 +90,7 @@ export const updateRole = async (roleId: number, role: RoleRequest, token: strin
         };
 
         const url = `${BASE_API}/api/v1/role/${roleId}`;
-        const response = await axios.put<Role>(url, modifiedRole, auth);
+        const response = await axiosInstance.put<Role>(url, modifiedRole, auth);
         return response.data as ResponseData;
     } catch (error) {
         throw error;

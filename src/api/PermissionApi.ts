@@ -1,6 +1,7 @@
 import axios from "axios";
 import {BASE_API} from "../constants/BaseApi.ts";
 import {ResponseData} from "../types/responseApi.ts";
+import axiosInstance from "./AxiosInstance.ts";
 
 export interface Permission {
     id: number;
@@ -20,7 +21,7 @@ export interface PermissionAssign {
 export const fetchAllPermission = async (params: PermissionParam): Promise<ResponseData> => {
     try {
         const url = `${BASE_API}/api/v1/permission`;
-        const response = await axios.get(url, {params});
+        const response = await axiosInstance.get(url, {params});
         return response.data as ResponseData;
     } catch (error) {
         console.error("Error fetching permissions:", error);
@@ -32,7 +33,7 @@ export const fetchAllPermission = async (params: PermissionParam): Promise<Respo
 export const assignPermissionToRole = async (permissionAssign: PermissionAssign): Promise<any> => {
     try {
         const url = `${BASE_API}/api/v1/permission/assign-permission-to-role`;
-        const response = await axios.patch(url, permissionAssign);
+        const response = await axiosInstance.patch(url, permissionAssign);
         console.log(response);
         return response.data;
     } catch (error) {
