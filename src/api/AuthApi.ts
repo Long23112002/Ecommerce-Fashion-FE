@@ -14,6 +14,7 @@ export interface UserData {
     gender: string;
     avatar: string;
     roles: string[] | null;
+    isAdmin: boolean;
     accessToken: string | undefined;
     refreshToken: string | undefined;
 }
@@ -53,12 +54,13 @@ export const clearUserData = () => {
     localStorage.removeItem('roles');
 
     Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');``
+    Cookies.remove('refreshToken');
+    ``
 };
 
 
 export const storeUserData = (data: LoginResponse) => {
-    const {id, email, fullName, phoneNumber, birth, gender, avatar, roles} = data.userResponse;
+    const {id, email, fullName, phoneNumber, birth, gender, avatar, roles, isAdmin} = data.userResponse;
 
     localStorage.setItem('userId', id.toString());
     localStorage.setItem('email', email);
@@ -68,13 +70,26 @@ export const storeUserData = (data: LoginResponse) => {
     localStorage.setItem('gender', gender);
     localStorage.setItem('avatar', avatar ? avatar : '');
     localStorage.setItem('roles', roles ? JSON.stringify(roles) : '');
+    localStorage.setItem("isAdmin", isAdmin)
 
     Cookies.set('accessToken', data.authResponse.accessToken);
     Cookies.set('refreshToken', data.authResponse.refreshToken);
 };
 
 
-export const getUserData = (): UserData => {
+export const getUserData = (): {
+    phoneNumber: string;
+    gender: string;
+    roles: any;
+    fullName: string;
+    birth: string;
+    id: string;
+    avatar: string;
+    isAdmin: string | null;
+    accessToken: string | undefined;
+    email: string;
+    refreshToken: string | undefined
+} => {
     const id = localStorage.getItem('userId') || '';
     const email = localStorage.getItem('email') || '';
     const fullName = localStorage.getItem('fullName') || '';
@@ -84,6 +99,7 @@ export const getUserData = (): UserData => {
     const avatar = localStorage.getItem('avatar') || '';
     const rolesString = localStorage.getItem('roles');
     const roles = rolesString ? JSON.parse(rolesString) : null;
+    const isAdmin = localStorage.getItem("isAdmin");
 
     const accessToken = Cookies.get('accessToken');
     const refreshToken = Cookies.get('refreshToken');
@@ -97,6 +113,7 @@ export const getUserData = (): UserData => {
         gender,
         avatar,
         roles,
+        isAdmin,
         accessToken,
         refreshToken,
     };
