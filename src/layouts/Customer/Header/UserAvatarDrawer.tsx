@@ -1,41 +1,17 @@
 import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
-import React, {useEffect} from 'react';
+import React from 'react';
 import Button from '../../../components/Button';
-import {useDispatch, useSelector} from 'react-redux';
-import {setUser, userSelector} from '../../../redux/reducers/UserReducer';
-import {getUserData, handleLogout} from "../../../api/AuthApi.ts";
-import {useNavigate} from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { userSelector } from '../../../redux/reducers/UserReducer';
 
 interface IProps {
     open?: boolean;
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
+const UserAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const logout = () => {
-        handleLogout();
-        navigate('/login');
-    }
-
-    useEffect(() => {
-        const userData = getUserData();
-        dispatch(setUser({
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar
-        }));
-    }, [dispatch]);
-
-
-    const user = useSelector(userSelector);
-
-    console.log(user);
-
-
+    const user = useSelector(userSelector)
 
     return (
         <Drawer
@@ -94,7 +70,7 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='h6'>
-                            {user?.fullName}
+                            {user?.name}
                         </Typography>
                     </Grid>
                     <Grid
@@ -104,14 +80,13 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         justifyContent='center'
                     >
                         <Typography variant='body2' noWrap>
-                            {user?.email}
+                            {user?.username}
                         </Typography>
                     </Grid>
                 </Grid>
 
                 <Stack>
                     <Button
-                        onClick={logout}
                         backgroundColor='rgba(255, 86, 48, 0.18)'
                         color='rgba(255, 86, 48)'
                     >
@@ -123,4 +98,4 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
     );
 };
 
-export default AdminAvatarDrawer;
+export default UserAvatarDrawer;
