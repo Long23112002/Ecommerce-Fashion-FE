@@ -1,9 +1,10 @@
 import { Box, Button, TextField } from '@mui/material'
 import { Client } from '@stomp/stompjs'
+import Cookies from 'js-cookie'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
+import { refreshToken } from '../../api/AxiosInstance'
 import { userSelector } from '../../redux/reducers/UserReducer'
-import Cookies from "js-cookie";
 
 interface IProps {
     client: Client | null,
@@ -15,23 +16,29 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
     const user = useSelector(userSelector)
     const [content, setContent] = useState<string>('')
 
-    const handleSend = () => {
-        const token = Cookies.get('accessToken')
+    const sendWebSocket = (token: string) => {
         if (client && client.connected && content.trim().length > 0) {
             client.publish({
-                destination: `/app/chat.sendMessage`,
+                destination: `/app/chat.sendMessage/${idRoom}`,
                 body: JSON.stringify({
                     idRoom: idRoom,
                     content: content,
                     createBy: user.id
                 }),
                 headers: {
-                    token: token + ''
+                    Authorization: token
                 }
             })
-            setContent('')
         }
     }
+
+    const handleSend = async () => {
+        // const newToken = await refreshToken();
+        sendWebSocket(Cookies.get('accessToken')+'');
+        setContent('')
+    }
+
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter') {
@@ -57,6 +64,7 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
                 variant="outlined"
                 size="small"
                 fullWidth
+                value={content}
                 onKeyDown={handleKeyDown}
                 onChange={handleChange}
             />

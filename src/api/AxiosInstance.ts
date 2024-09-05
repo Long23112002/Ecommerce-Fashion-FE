@@ -1,14 +1,15 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
+import { BASE_API } from "../constants/BaseApi";
 
 const refreshAxiosInstance = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: BASE_API,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-const refreshToken = async (): Promise<string> => {
+export const refreshToken = async (): Promise<string> => {
     const refreshToken = Cookies.get('refreshToken');
     const response = await refreshAxiosInstance.post(`/api/v1/auth/refresh-token`, {}, {
         headers: {
@@ -21,7 +22,7 @@ const refreshToken = async (): Promise<string> => {
 };
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: BASE_API,
     headers: {
         'Content-Type': 'application/json',
     },

@@ -1,15 +1,15 @@
-import { Box, IconButton, Slide, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, CircularProgress, IconButton, Slide, Typography } from '@mui/material';
+import { Client, IMessage } from '@stomp/stompjs';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import SockJS from 'sockjs-client';
+import { refreshToken } from '../../api/AxiosInstance';
+import { callFindAllChatByIdChatRoom, callFindIdChatRoomByUserId } from '../../api/ChatApi';
+import { SOCKET_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
 import ChatInput from './ChatInput';
 import ChatItem from './ChatItem';
-import Cookies from "js-cookie";
-import SockJS from 'sockjs-client';
-import { SOCKET_API } from '../../constants/BaseApi';
-import { Client, IMessage } from '@stomp/stompjs';
-import { callFindIdChatRoomByUserId } from '../../api/ChatApi';
 
 interface IProps {
   closeChat: () => void
@@ -22,44 +22,82 @@ const ChatRoom: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
   const [client, setClient] = useState<Client | null>(null)
   const [chats, setChats] = useState<Chat[]>([])
   const [idRoom, setIdRoom] = useState<string>('')
+  const chatBoxRef = useRef<HTMLElement | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
   const fetchFindIdChatRoomByUserId = async () => {
-    const res = await callFindIdChatRoomByUserId(user.id)
-    setIdRoom(res)
+    if (user.id != -1) {
+      const res = await callFindIdChatRoomByUserId(user.id)
+      setIdRoom(res)
+    }
+  }
+
+  const fetchFindAllChatByIdChatRoom = async () => {
+    if (user.id != -1 && idRoom) {
+      const res = await callFindAllChatByIdChatRoom(idRoom)
+      setChats(res)
+    }
   }
 
   useEffect(() => {
-    const token = Cookies.get('accessToken');
-    fetchFindIdChatRoomByUserId()
-    const sock = new SockJS(SOCKET_API);
-    const stompClient = new Client({
-      webSocketFactory: () => sock as WebSocket,
-      onConnect: () => {
-        console.log("Connecting...")
-        stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
-          setChats(prevChats => [
-            ...prevChats,
-            JSON.parse(chat.body)
-          ]);
-        })
-      },
-      connectHeaders: {
-        Authorization: token + '',
-      },
-      debug: function (str) {
-        console.log(str);
-      },
+    const initializeWebSocket = async () => {
+      const token = await refreshToken();
+      await fetchFindIdChatRoomByUserId();
+
+      if (idRoom) {
+        const sock = new SockJS(SOCKET_API);
+        const stompClient = new Client({
+          webSocketFactory: () => sock as WebSocket,
+          onConnect: () => {
+            stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
+              setChats(prevChats => [
+                ...prevChats,
+                JSON.parse(chat.body)
+              ]);
+            },
+              {
+                Authorization: token
+              });
+            fetchFindAllChatByIdChatRoom();
+          },
+          connectHeaders: {
+            Authorization: token,
+          },
+          debug: (str) => {
+            console.log(str);
+          }
+        });
+
+        stompClient.activate();
+        setClient(stompClient);
+
+        setLoading(false)
+
+        return () => {
+          stompClient.deactivate();
+        };
+      }
+    };
+
+    initializeWebSocket().catch(error => {
+      console.error('Error initializing WebSocket:', error);
     });
 
-    stompClient.activate();
-    setClient(stompClient);
-
     return () => {
-      if (stompClient) {
-        stompClient.deactivate();
+      if (client) {
+        client.deactivate();
       }
+    };
+  }, [user, idRoom]);
+
+
+
+  useEffect(() => {
+    const item = chatBoxRef.current;
+    if (item) {
+      item.scrollTop = item.scrollHeight
     }
-  }, [user]);
+  }, [chats])
 
   return (
 
@@ -109,19 +147,36 @@ const ChatRoom: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
 
         </Box>
 
-        <Box sx={{
-          flex: 1,
-          overflowY: 'auto',
-          py: 3,
-          px: 4
-        }}>
-          {chats.map((chat, index) =>
-            <ChatItem
-              key={index}
-              chat={chat}
-              id={user.id}
-            />
-          )}
+        <Box
+          ref={chatBoxRef}
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            py: 3,
+            px: 4
+          }}>
+          {
+            !loading
+              ?
+              chats.map((chat, index) =>
+                <ChatItem
+                  key={index}
+                  chat={chat}
+                  id={user.id}
+                />
+              )
+              :
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%'
+                }}
+              >
+                <CircularProgress />
+              </Box>
+          }
         </Box>
 
         <ChatInput

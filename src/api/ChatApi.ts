@@ -1,13 +1,12 @@
-import axios from "axios"
-import { BASE_API } from "../constants/BaseApi"
-import Cookies from "js-cookie"
+import axiosInstance from "./AxiosInstance"
 
-export const callFindIdChatRoomByUserId = async (id: string|number) => {
-    const {data} = await axios({
-        url: `${BASE_API}/api/v1/chat_room/user/${id}`,
-        headers: {
-            Authorization: `Bearer ${Cookies.get('accessToken')}`
-        }
-    })
+export const callFindIdChatRoomByUserId = async (id: string | number) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/user/${id}`)
+    return data
+}
+
+export const callFindAllChatByIdChatRoom = async (id: string) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`)
+    console.log(data)
     return data
 }
