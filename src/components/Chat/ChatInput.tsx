@@ -1,6 +1,5 @@
 import { Box, Button, TextField } from '@mui/material'
 import { Client } from '@stomp/stompjs'
-import Cookies from 'js-cookie'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { refreshToken } from '../../api/AxiosInstance'
@@ -16,27 +15,29 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
     const user = useSelector(userSelector)
     const [content, setContent] = useState<string>('')
 
-    const sendWebSocket = (token: string) => {
+    const sendMessage = (token: string) => {
         if (client && client.connected && content.trim().length > 0) {
             client.publish({
                 destination: `/app/chat.sendMessage/${idRoom}`,
                 body: JSON.stringify({
                     idRoom: idRoom,
                     content: content,
-                    createBy: user.id
+                    createBy: user.id,
                 }),
                 headers: {
-                    Authorization: token
-                }
-            })
+                    Authorization: token,
+                },
+            });
         }
-    }
+    };
 
     const handleSend = async () => {
-        // const newToken = await refreshToken();
-        sendWebSocket(Cookies.get('accessToken')+'');
-        setContent('')
-    }
+        const token: string = await refreshToken() + '';
+        sendMessage(token);
+        setContent('');
+    };
+
+
 
 
 

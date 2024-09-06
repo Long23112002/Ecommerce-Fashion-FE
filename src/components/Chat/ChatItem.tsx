@@ -3,11 +3,12 @@ import React from 'react'
 import Chat from '../../types/Chat'
 
 interface IProps {
-  chat: Chat
-  id: number
+  chat: Chat,
+  id: number,
+  isAdmin: boolean
 }
 
-const ChatItem: React.FC<IProps> = ({ chat, id }) => {
+const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin }) => {
   return (
     <Box
       display="flex"
@@ -16,7 +17,7 @@ const ChatItem: React.FC<IProps> = ({ chat, id }) => {
     >
       {!(chat.createBy == id) &&
         <Avatar
-          src={chat.avatar}
+          src={isAdmin ? chat.avatar : "logo.png"}
         />
       }
       <Paper

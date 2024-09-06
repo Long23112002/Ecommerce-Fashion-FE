@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material'
 import React, { useState } from 'react'
-import ChatRoom from './ChatRoom';
+import ChatRoomBox from './ChatRoomBox';
 
 const Chat: React.FC = () => {
 
@@ -48,7 +48,7 @@ const Chat: React.FC = () => {
                 >
                 </Box>
             </IconButton>
-            <ChatRoom
+            <ChatRoomBox
                 isChatOpen={isChatOpen}
                 closeChat={closeChat}
             />
