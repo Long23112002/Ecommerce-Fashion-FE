@@ -3,7 +3,7 @@ import ChatInput from './ChatInput'
 import { Box, CircularProgress } from '@mui/material'
 import ChatItem from './ChatItem'
 import Chat from '../../types/Chat'
-import { callFindAllChatByIdChatRoom } from '../../api/ChatApi'
+import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi'
 import { useSelector } from 'react-redux'
 import { userSelector } from '../../redux/reducers/UserReducer'
 import { refreshToken } from '../../api/AxiosInstance'
@@ -16,7 +16,7 @@ interface IProps {
     isAdmin?: boolean
 }
 
-const ChatArea: React.FC<IProps> = ({idRoom, isAdmin}) => {
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
 
     const user = useSelector(userSelector)
     const chatBoxRef = useRef<HTMLElement | null>(null)
@@ -32,10 +32,11 @@ const ChatArea: React.FC<IProps> = ({idRoom, isAdmin}) => {
     }
 
     useEffect(() => {
+        setLoading(true)
+        setChats([])
         const initializeWebSocket = async () => {
-            const token = await refreshToken();
-
             if (idRoom) {
+                const token = await refreshToken();
                 const sock = new SockJS(SOCKET_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
@@ -70,9 +71,7 @@ const ChatArea: React.FC<IProps> = ({idRoom, isAdmin}) => {
             }
         };
 
-        initializeWebSocket().catch(error => {
-            console.error('Error initializing WebSocket:', error);
-        });
+        initializeWebSocket()
 
         return () => {
             if (client) {
@@ -81,12 +80,16 @@ const ChatArea: React.FC<IProps> = ({idRoom, isAdmin}) => {
         };
     }, [user, idRoom]);
 
-
-
     useEffect(() => {
         const item = chatBoxRef.current;
         if (item) {
             item.scrollTop = item.scrollHeight
+        }
+        if (idRoom.length > 0 && user.isAdmin) {
+            const fetchSeenAllChatByIdChatRoom = async () => {
+                await callSeenAllChatByIdChatRoom(idRoom)
+            }
+            fetchSeenAllChatByIdChatRoom()
         }
     }, [chats])
 
@@ -109,7 +112,7 @@ const ChatArea: React.FC<IProps> = ({idRoom, isAdmin}) => {
                                 key={index}
                                 chat={chat}
                                 id={user.id}
-                                isAdmin={isAdmin||false}
+                                isAdmin={isAdmin || false}
                             />
                         )
                         :

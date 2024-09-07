@@ -1,14 +1,14 @@
 import { Box, Grid } from '@mui/material'
 import React, { useState } from 'react'
-import ChatRoomList from '../../../components/Chat/ChatRoomList'
 import ChatArea from '../../../components/Chat/ChatArea'
+import ChatRoomList from '../../../components/Chat/ChatRoomList'
 
 const ChatPage: React.FC = () => {
 
     const [idRoom, setIdRoom] = useState<string>('')
 
     return (
-        <Box sx={{display: 'flex', height: '82vh'}}>
+        <Box sx={{ display: 'flex', height: '82vh' }}>
             <Grid container justifyContent='space-between'>
                 <Grid item xs={2.5}>
                     <ChatRoomList

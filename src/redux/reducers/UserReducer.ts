@@ -5,13 +5,15 @@ interface UserState {
     fullName: string;
     email: string;
     avatar: string;
+    isAdmin: boolean;
 }
 
 const initState: UserState = {
     id: -1,
     fullName: '',
     email: '',
-    avatar: ''
+    avatar: '',
+    isAdmin: false
 };
 
 const UserReducer = createSlice({
@@ -23,6 +25,7 @@ const UserReducer = createSlice({
             state.fullName = action.payload.fullName;
             state.email = action.payload.email;
             state.avatar = action.payload.avatar;
+            state.isAdmin = action.payload.isAdmin;
         }
     }
 });

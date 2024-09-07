@@ -4,6 +4,10 @@ import ChatRoom from '../../types/ChatRoom'
 import { useSelector } from 'react-redux'
 import { userSelector } from '../../redux/reducers/UserReducer'
 import { callFindAllChatRoom } from '../../api/ChatApi'
+import { refreshToken } from '../../api/AxiosInstance';
+import SockJS from 'sockjs-client';
+import { Client, IMessage } from '@stomp/stompjs';
+import { SOCKET_API } from '../../constants/BaseApi';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -13,16 +17,60 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
 
   const user = useSelector(userSelector)
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true)
+  const [client, setClient] = useState<Client | null>(null)
+
+  const fetchFindAllChatRoom = async () => {
+    const data = await callFindAllChatRoom()
+    setChatRooms([...data])
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const fetchFindAllChatRoom = async () => {
-      const data = await callFindAllChatRoom()
-      setChatRooms([...data])
-      setLoading(false)
-    }
-    fetchFindAllChatRoom()
-  }, [user])
+    const initializeWebSocket = async () => {
+      if (user.id) {
+        const token = await refreshToken();
+        const sock = new SockJS(SOCKET_API);
+        const stompClient = new Client({
+          webSocketFactory: () => sock as WebSocket,
+          onConnect: () => {
+            stompClient.subscribe(`/admin`, (chatRoom: IMessage) => {
+              setChatRooms([...JSON.parse(chatRoom.body)]);
+            },
+              {
+                Authorization: token
+              });
+            fetchFindAllChatRoom();
+          },
+          connectHeaders: {
+            Authorization: token,
+          },
+          debug: function (str) {
+            console.log(str);
+          }
+        });
+
+        stompClient.activate();
+        setClient(stompClient);
+
+        setLoading(false)
+
+        return () => {
+          stompClient.deactivate();
+        };
+      }
+    };
+
+    initializeWebSocket().catch(error => {
+      console.error('Error initializing WebSocket:', error);
+    });
+
+    return () => {
+      if (client) {
+        client.deactivate();
+      }
+    };
+  }, [user]);
 
   const handleChangeRoom = (id: string) => {
     setIdRoom(id)
@@ -40,7 +88,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
         </Box>
       ) : (
         <List>
-          {chatRooms.length > 0 ? (
+          {
             chatRooms.map((room) => (
               <ListItem button key={room.id}
                 onClick={() => handleChangeRoom(room.id + '')}
@@ -52,13 +100,13 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   }} />
                 <ListItemText
                   primary={room.nameClient}
-                  // secondary={room.lastMessage}
+                  secondary={room.lastChat}
                   sx={{
                     overflow: 'hidden',
                     textWrap: 'nowrap'
                   }} />
                 {
-                  // ((room.unseenMessageCount ?? 0) > 0 && room.idLastSender != user.id) &&
+                  (room.seen !== null && room.seen === false) &&
                   <Box
                     sx={{
                       position: 'absolute',
@@ -75,17 +123,11 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
-                  >
-                    {/* {(room.unseenMessageCount ?? 0) > 9 ? "9+" : room.unseenMessageCount} */}
-                  </Box>
+                  />
                 }
               </ListItem>
             ))
-          ) : (
-            <Typography variant="body1" align="center" sx={{ p: 2 }}>
-              Không có phòng chat nào
-            </Typography>
-          )}
+          }
         </List>
       )}
     </Box>

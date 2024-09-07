@@ -14,3 +14,7 @@ export const callFindAllChatByIdChatRoom = async (id: string) => {
     const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`)
     return data
 }
+
+export const callSeenAllChatByIdChatRoom = async (id: string) => {
+    await axiosInstance.patch(`/api/v1/chat_room/chats/${id}`)
+}

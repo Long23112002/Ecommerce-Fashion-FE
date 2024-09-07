@@ -19,7 +19,8 @@ const UserHeader: React.FC = () => {
             id: Number(userData.id),
             fullName: userData.fullName,
             email: userData.email,
-            avatar: userData.avatar
+            avatar: userData.avatar,
+            isAdmin: false
         }));
     }, [dispatch]);
 

@@ -24,7 +24,8 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
             id: Number(userData.id),
             fullName: userData.fullName,
             email: userData.email,
-            avatar: userData.avatar
+            avatar: userData.avatar,
+            isAdmin: Boolean(userData.isAdmin)
         }));
     }, [dispatch]);
 
