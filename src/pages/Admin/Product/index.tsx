@@ -1,8 +1,11 @@
+import { Box, TextField } from '@mui/material'
 import React from 'react'
 
 const ProductManager = () => {
   return (
-    <div style={{height: '200vh'}}>ProductManager</div>
+    <Box sx={{height: '200vh'}}>
+      <TextField></TextField>
+    </Box>
   )
 }
 

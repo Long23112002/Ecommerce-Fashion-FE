@@ -1,15 +1,18 @@
 import { Box, IconButton } from '@mui/material'
 import React, { useState } from 'react'
-import NotificationBox from './NotificationBox'
+import ChatRoomBox from './ChatRoomBox';
 
-const Notification: React.FC = () => {
+const Chat: React.FC = () => {
 
-    const [open, setOpen] = useState(false);
-    const [totalNotifications, setTotalNotifications] = useState<number>(0)
+    const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
-    const toggleDrawer = (open: boolean) => () => {
-        setOpen(open);
+    const toggleChat = () => {
+        setIsChatOpen(!isChatOpen)
     };
+
+    const closeChat = () => {
+        setIsChatOpen(false)
+    }
 
     return (
         <>
@@ -24,9 +27,9 @@ const Notification: React.FC = () => {
                     },
                     position: 'relative'
                 }}
-                onClick={toggleDrawer(true)}
+                onClick={toggleChat}
             >
-                <i className='fa-solid fa-bell fs-2' />
+                <i className="fa-solid fa-message fs-2" />
                 <Box
                     component='span'
                     sx={{
@@ -38,23 +41,19 @@ const Notification: React.FC = () => {
                         backgroundColor: 'red',
                         color: 'white',
                         borderRadius: '50%',
-                        display: totalNotifications ? 'flex' : 'none',
                         justifyContent: 'center',
                         alignItems: 'center',
                         fontSize: 15,
                     }}
                 >
-                    {totalNotifications}
                 </Box>
             </IconButton>
-
-            <NotificationBox
-                open={open}
-                toggleDrawer={toggleDrawer}
-                setTotalNotifications={setTotalNotifications}
+            <ChatRoomBox
+                isChatOpen={isChatOpen}
+                closeChat={closeChat}
             />
         </>
     )
 }
 
-export default Notification
+export default Chat

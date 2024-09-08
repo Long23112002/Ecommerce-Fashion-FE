@@ -54,7 +54,7 @@ const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
                 <IconButton
                     onClick={toggleDrawer ? toggleDrawer(false) : undefined}
                 >
-                    <i className="fa-solid fa-xmark"/>
+                    <i className="fa-solid fa-xmark" />
                 </IconButton>
                 <Grid
                     container

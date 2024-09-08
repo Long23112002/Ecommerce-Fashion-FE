@@ -1,10 +1,11 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import React from 'react'
-import Avatar from '../../../components/Avatar'
-import AdminAvatarDrawer from './AdminAvatarDrawer'
-import { useSelector } from 'react-redux'
-import { userSelector } from '../../../redux/reducers/UserReducer'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Notification from '../../../components/Notification'
+import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
+import Avatar from '../../../components/Avatar'
+import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
+import { getUserData } from '../../../api/AuthApi'
 
 interface IProps {
     handleCollapse: () => void,
@@ -15,19 +16,32 @@ interface IProps {
 const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }) => {
 
     const user = useSelector(userSelector)
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const userData = getUserData();
+        dispatch(setUser({
+            id: Number(userData.id),
+            fullName: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar,
+            isAdmin: Boolean(userData.isAdmin)
+        }));
+    }, [dispatch]);
 
     return (
-        <Box position='sticky' top={0}>
+        <Box position='sticky' top={0} zIndex={10}>
             <AppBar
                 position='static'
                 sx={{
-                    backgroundColor: 'white',
                     boxShadow: 'none',
-                    height: 50
                 }}
             >
-                <Toolbar>
-
+                <Toolbar
+                    sx={{
+                        backgroundColor: 'white',
+                    }}
+                >
                     <IconButton
                         size="large"
                         edge="start"
@@ -50,13 +64,17 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                                     display: {
                                         xs: "none",
                                         md: "block"
-                                    }
+                                    },
+                                    textAlign: 'end',
+                                    maxWidth: 220,
+                                    height: 25,
+                                    overflow: 'hidden'
                                 }}
                             >
-                                {user?.name}
+                                {user?.fullName}
                             </Typography>
 
-                            <Avatar draw={<AdminAvatarDrawer />} />
+                            <Avatar draw={<AvatarDrawer />} />
 
                         </Box>
                     </Box>
