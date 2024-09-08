@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Form, Modal, Input, Button, Select, Spin} from 'antd';
+import {Button, Form, Input, Modal, Select, Spin} from 'antd';
 import {fetchAllPermission} from '../../api/PermissionApi.ts';
 import {Role} from "../../types/role.ts";
 

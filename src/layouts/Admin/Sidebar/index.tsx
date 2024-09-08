@@ -93,7 +93,7 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                     </MenuItem>
 
                     <MenuItem
-                        to='/admin/special-attributes'
+                        to='/admin/user'
                         collapse={collapse}
                     >
                         Manager user

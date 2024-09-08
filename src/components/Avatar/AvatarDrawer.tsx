@@ -1,18 +1,19 @@
-import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
-import { handleLogout } from '../../api/AuthApi';
-import { userSelector } from '../../redux/reducers/UserReducer';
-import Button from '../Button';
+import {Avatar, Box, Drawer, Grid, IconButton, Stack, Typography} from '@mui/material';
+import React, {useEffect} from 'react';
+import Button from '../../../components/Button';
+import {useDispatch, useSelector} from 'react-redux';
+import {setUser, userSelector} from '../../../redux/reducers/UserReducer';
+import {getUserData, handleLogout} from "../../../api/AuthApi.ts";
+import {useNavigate} from "react-router-dom";
 
 interface IProps {
     open?: boolean;
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
+const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
 
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const logout = () => {
@@ -20,10 +21,18 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
         navigate('/login');
     }
 
+    useEffect(() => {
+        const userData = getUserData();
+        dispatch(setUser({
+            fullName: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar
+        }));
+    }, [dispatch]);
+
 
     const user = useSelector(userSelector);
 
-    console.log(user);
 
     return (
         <Drawer
@@ -65,7 +74,8 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                             }}
                         >
                             <Avatar
-                                src={user?.avatar + ''}
+                                alt="Remy Sharp"
+                                src={user?.avatar}
                                 sx={{
                                     width: '100%',
                                     height: '100%',
@@ -110,4 +120,4 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
     );
 };
 
-export default AvatarDrawer;
+export default AdminAvatarDrawer;
