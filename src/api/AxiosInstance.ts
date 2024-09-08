@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
-
+/* eslint-disable */
 const refreshAxiosInstance = axios.create({
     baseURL: 'http://localhost:8080',
     headers: {

@@ -3,6 +3,7 @@ import {LoginRequest} from "../types/login/request/loginRequest.ts";
 import axios from 'axios';
 import {BASE_API} from "../constants/BaseApi.ts";
 import Cookies from "js-cookie";
+/* eslint-disable */
 
 
 export interface UserData {

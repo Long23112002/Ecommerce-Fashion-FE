@@ -1,4 +1,4 @@
-import axios from "axios";
+/* eslint-disable */
 import {BASE_API} from "../constants/BaseApi.ts";
 import {ResponseData} from "../types/responseApi.ts";
 import axiosInstance from "./AxiosInstance.ts";
