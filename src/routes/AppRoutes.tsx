@@ -8,6 +8,8 @@ import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AdminRoute from "../hook/AdminRoute.tsx";
 import {ManagerRole} from "../pages/Admin/User";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
+import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 
 
 const AppRoutes = () => {
@@ -22,8 +24,15 @@ const AppRoutes = () => {
                 <Route element={<AdminLayout/>}>
                     <Route path="/admin/product/*" element={<ProductManager/>}/>
                     <Route path="/admin/user/role" element={<ManagerRole/>}/>
+
+                    
+                    <Route path="/admin/color" element={<ManagerColor/>}/>
+                    <Route path="/admin/size" element={<ManagerSize/>}/>
                 </Route>
             </Route>
+
+
+          
 
             {/* Route xử lý lỗi */}
             <Route path="/403" element={<ForbiddenPage />} />
