@@ -84,15 +84,15 @@ const ManagerRole = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            const { name, permissionIds } = values;
+            const {name, permissionIds} = values;
             const token = Cookies.get("accessToken");
 
             if (token) {
                 if (mode === 'add') {
-                    await createRole({ name, permissionIds }, token);
+                    await createRole({name, permissionIds}, token);
                     toast.success('Role added successfully');
                 } else if (mode === 'update' && editingRole) {
-                    await updateRole(editingRole.id, { name, permissionIds }, token);
+                    await updateRole(editingRole.id, {name, permissionIds}, token);
                     toast.success('Role updated successfully');
                 }
                 handleCancel();

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import UserHeader from './Header';
 
 const UserLayout: React.FC = () => {
+    
     return (
         <div className="d-flex">
             <div className='w-100'>

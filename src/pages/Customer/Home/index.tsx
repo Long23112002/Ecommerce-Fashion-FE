@@ -1,8 +1,11 @@
+import { Box, TextField } from '@mui/material'
 import React from 'react'
 
 const Home: React.FC = () => {
   return (
-    <div>Home</div>
+    <Box sx={{height: '200vh'}}>
+      <TextField></TextField>
+    </Box>
   )
 }
 
