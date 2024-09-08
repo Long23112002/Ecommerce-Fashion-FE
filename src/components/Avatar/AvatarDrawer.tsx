@@ -1,10 +1,11 @@
 import {Avatar, Box, Drawer, Grid, IconButton, Stack, Typography} from '@mui/material';
 import React, {useEffect} from 'react';
-import Button from '../../../components/Button';
 import {useDispatch, useSelector} from 'react-redux';
-import {setUser, userSelector} from '../../../redux/reducers/UserReducer';
-import {getUserData, handleLogout} from "../../../api/AuthApi.ts";
+
 import {useNavigate} from "react-router-dom";
+import {getUserData, handleLogout} from "../../api/AuthApi.ts";
+import {setUser, userSelector} from "../../redux/reducers/UserReducer.ts";
+import Button from "../Button.tsx";
 
 interface IProps {
     open?: boolean;
