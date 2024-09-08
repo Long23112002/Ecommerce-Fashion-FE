@@ -1,18 +1,17 @@
 import React from 'react';
-import {Form, Input, Button, Divider, Typography} from 'antd';
+import {Button, Divider, Form, Input, Typography} from 'antd';
 import {
-    UserOutlined,
-    LockOutlined,
     EyeInvisibleOutlined,
     EyeTwoTone,
+    FacebookFilled,
     GoogleOutlined,
-    FacebookFilled
+    LockOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import {LoginRequest} from "../../../types/login/request/loginRequest.ts";
-import {ToastContainer, toast} from 'react-toastify';
+import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {handleLogin, storeUserData} from "../../../api/AuthApi.ts";
-import Cookies from 'js-cookie'
 import {useNavigate} from "react-router-dom";
 import {OAuth2Config, OAuth2ConfigFB} from "../../../config/auth2Config.ts";
 

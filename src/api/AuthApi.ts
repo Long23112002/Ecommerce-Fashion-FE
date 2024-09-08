@@ -6,18 +6,19 @@ import Cookies from "js-cookie";
 
 
 export interface UserData {
-    id: string;
+    id: number;
     email: string;
+    roles: { id: number; name: string }[];
     fullName: string;
     phoneNumber: string;
-    birth: string;
     gender: string;
+    birth: string;
     avatar: string;
-    roles: string[] | null;
     isAdmin: boolean;
-    accessToken: string | undefined;
-    refreshToken: string | undefined;
+    accessToken?: string;
+    refreshToken?: string;
 }
+
 
 export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResponse> => {
 

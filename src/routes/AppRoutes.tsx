@@ -1,13 +1,9 @@
 import {Route, Routes} from 'react-router-dom';
 import ProductManager from '../pages/Admin/Product';
 import AdminLayout from '../layouts/Admin';
-
-import Login from '../pages/Admin/User/Login';
-import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
-import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AdminRoute from "../hook/AdminRoute.tsx";
-import {ManagerRole} from "../pages/Admin/User";
-import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import {ForbiddenPage} from '../pages/Error';
+import {AuthenticateFacebook, AuthenticateGoogle, Login, ManagerRole, ManagerUser} from '../pages/Admin/User';
 
 
 const AppRoutes = () => {
@@ -22,11 +18,12 @@ const AppRoutes = () => {
                 <Route element={<AdminLayout/>}>
                     <Route path="/admin/product/*" element={<ProductManager/>}/>
                     <Route path="/admin/user/role" element={<ManagerRole/>}/>
+                    <Route path="/admin/user" element={<ManagerUser/>}/>
                 </Route>
             </Route>
 
             {/* Route xử lý lỗi */}
-            <Route path="/403" element={<ForbiddenPage />} />
+            <Route path="/403" element={<ForbiddenPage/>}/>
         </Routes>
     );
 };

@@ -8,7 +8,7 @@ export interface Permission {
     name: string;
 }
 
-export interface PermissionParam {
+export interface PaginationParam {
     page: number;
     size: number;
 }
@@ -18,13 +18,12 @@ export interface PermissionAssign {
     permissionIds: number[];
 }
 
-export const fetchAllPermission = async (params: PermissionParam): Promise<ResponseData> => {
+export const fetchAllPermission = async (params: PaginationParam): Promise<ResponseData> => {
     try {
         const url = `${BASE_API}/api/v1/permission`;
         const response = await axiosInstance.get(url, {params});
         return response.data as ResponseData;
     } catch (error) {
-        console.error("Error fetching permissions:", error);
         throw error;
     }
 }
@@ -37,7 +36,6 @@ export const assignPermissionToRole = async (permissionAssign: PermissionAssign)
         console.log(response);
         return response.data;
     } catch (error) {
-        console.error("Error assigning permission:", error);
         throw error;
     }
 }

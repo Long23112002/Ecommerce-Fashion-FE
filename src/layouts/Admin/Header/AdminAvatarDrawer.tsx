@@ -1,4 +1,4 @@
-import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
+import {Avatar, Box, Drawer, Grid, IconButton, Stack, Typography} from '@mui/material';
 import React, {useEffect} from 'react';
 import Button from '../../../components/Button';
 import {useDispatch, useSelector} from 'react-redux';
@@ -11,7 +11,7 @@ interface IProps {
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
+const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -32,9 +32,6 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
 
     const user = useSelector(userSelector);
-
-    console.log(user);
-
 
 
     return (
@@ -57,7 +54,7 @@ const AdminAvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                 <IconButton
                     onClick={toggleDrawer ? toggleDrawer(false) : undefined}
                 >
-                    <i className="fa-solid fa-xmark" />
+                    <i className="fa-solid fa-xmark"/>
                 </IconButton>
                 <Grid
                     container
