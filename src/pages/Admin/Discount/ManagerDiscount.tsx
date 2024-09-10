@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import { fetchAllDiscounts, createDiscount, updateDiscount, deleteDiscount, getDiscountById } from "../../../api/DiscountApi.ts";
+import { fetchAllDiscount, createDiscount, updateDiscount, deleteDiscount, getDiscountById } from "../../../api/DiscountApi.ts";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
-import DiscountModal from "../../../components/Discount/DiscountModal.tsx";
-import { Discount } from "../../../types/discount.ts";
+import AddDiscountModal from "../../../components/Discount/AddDiscountModal.tsx";
+import UpdateDiscountModal from "../../../components/Discount/UpdateDiscountModal.tsx";
+import { Discount } from "../../../types/discount";
 
 const ManagerDiscount = () => {
     const [loading, setLoading] = useState(true);
@@ -16,15 +17,17 @@ const ManagerDiscount = () => {
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
-        total: 20,
-        totalPage: 4
+        total: 0,
+        totalPage: 1
     });
 
-    const mode = editingDiscount ? 'update' : 'add';
+    const isUpdateMode = Boolean(editingDiscount);
 
+    // Hàm lấy danh sách discount từ API
     const fetchDiscounts = async (current: number, pageSize: number) => {
+        setLoading(true);
         try {
-            const response = await fetchAllDiscounts("", pageSize, current - 1);
+            const response = await fetchAllDiscount({ type: '', status: '', name: '' }, pageSize, current - 1);
             setDiscounts(response.data);
             setPagination({
                 current: response.metaData.page + 1,
@@ -33,17 +36,22 @@ const ManagerDiscount = () => {
                 totalPage: response.metaData.totalPage
             });
         } catch (error) {
-            console.error("Error fetching discounts:", error);
+            toast.error("Error fetching discounts");
         } finally {
             setLoading(false);
         }
     };
 
+    // Mở modal cho việc tạo mới hoặc chỉnh sửa discount
     const showModal = async (discount: Discount | null = null) => {
         if (discount) {
             try {
                 const discountDetails = await getDiscountById(discount.id);
-                form.setFieldsValue(discountDetails);
+                form.setFieldsValue({
+                    ...discountDetails,
+                    startDate: dayjs(discountDetails.startDate),
+                    endDate: dayjs(discountDetails.endDate),
+                });
                 setEditingDiscount(discountDetails);
             } catch (error) {
                 toast.error(error.response?.data?.message || 'Failed to fetch discount details');
@@ -55,52 +63,59 @@ const ManagerDiscount = () => {
         setIsModalOpen(true);
     };
 
-    const handleOk = async () => {
-        try {
-            const values = await form.validateFields();
-            const token = Cookies.get("accessToken");
+    // Xử lý khi nhấn OK trong modal
+    const handleModalOk = async (values: any) => {
+        const token = Cookies.get("accessToken");
+        if (!token) {
+            toast.error("Authorization failed");
+            return;
+        }
 
-            if (token) {
-                if (mode === 'add') {
-                    await createDiscount(values, token);
-                    toast.success('Discount added successfully');
-                } else if (mode === 'update' && editingDiscount) {
+        try {
+            if (isUpdateMode) {
+                if (editingDiscount) {
                     await updateDiscount(editingDiscount.id, values, token);
                     toast.success('Discount updated successfully');
                 }
-                handleCancel();
-                refreshDiscounts();
             } else {
-                toast.error("Authorization failed");
+                await createDiscount(values, token);
+                toast.success('Discount added successfully');
             }
+            handleModalCancel();
+            refreshDiscounts();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to save discount');
         }
     };
 
-    const handleCancel = () => {
+    // Đóng modal
+    const handleModalCancel = () => {
         setIsModalOpen(false);
     };
 
+    // Xử lý xóa discount
     const handleDelete = async (discountId: number) => {
+        const token = Cookies.get("accessToken");
+        if (!token) {
+            toast.error("Authorization failed");
+            return;
+        }
+
         try {
-            const token = Cookies.get("accessToken");
-            if (token) {
-                await deleteDiscount(discountId, token);
-                toast.success("Discount deleted successfully");
-                refreshDiscounts();
-            } else {
-                toast.error("Authorization failed");
-            }
+            await deleteDiscount(discountId, token);
+            toast.success("Discount deleted successfully");
+            refreshDiscounts();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to delete discount');
         }
     };
 
+    // Làm mới danh sách discount
     const refreshDiscounts = () => {
         fetchDiscounts(pagination.current, pagination.pageSize);
     };
 
+    // Lấy dữ liệu khi trang hoặc pageSize thay đổi
     useEffect(() => {
         fetchDiscounts(pagination.current, pagination.pageSize);
     }, [pagination.current, pagination.pageSize]);
@@ -115,6 +130,14 @@ const ManagerDiscount = () => {
             title: 'Discount Code',
             dataIndex: 'code',
             key: 'code',
+        },
+        {
+            title: 'Condition',
+            dataIndex: 'condition',
+            key: 'condition',
+            render: (condition: any) => 
+                `Product ID: ${condition.productId}, Brand ID: ${condition.brandId}, Category ID: ${condition.categoryId}, Product Detail ID: ${condition.productDetailId}`
+        
         },
         {
             title: 'Name',
@@ -140,18 +163,18 @@ const ManagerDiscount = () => {
             title: 'Start Date',
             dataIndex: 'startDate',
             key: 'startDate',
-            render: (timestamp) => new Date(timestamp).toLocaleDateString()
+            render: (timestamp: number) => new Date(timestamp).toLocaleDateString(),
         },
         {
             title: 'End Date',
             dataIndex: 'endDate',
             key: 'endDate',
-            render: (timestamp) => new Date(timestamp).toLocaleDateString()
+            render: (timestamp: number) => new Date(timestamp).toLocaleDateString(),
         },
         {
             title: 'Actions',
             key: 'actions',
-            render: (_, record) => (
+            render: (_: any, record: Discount) => (
                 <div>
                     <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
                         Update
@@ -166,7 +189,7 @@ const ManagerDiscount = () => {
                     </Popconfirm>
                 </div>
             ),
-        }
+        },
     ];
 
     return (
@@ -180,15 +203,22 @@ const ManagerDiscount = () => {
             >
                 Add Discount
             </Button>
-            <DiscountModal
-                isModalOpen={isModalOpen}
-                handleOk={handleOk}
-                handleCancel={handleCancel}
-                form={form}
-                mode={editingDiscount ? 'update' : 'add'}
-                discount={editingDiscount || undefined}
-            />
-
+            {isUpdateMode ? (
+                <UpdateDiscountModal
+                    isModalOpen={isModalOpen}
+                    handleOk={handleModalOk}
+                    handleCancel={handleModalCancel}
+                    form={form}
+                    discount={editingDiscount!}
+                />
+            ) : (
+                <AddDiscountModal
+                    isModalOpen={isModalOpen}
+                    handleOk={handleModalOk}
+                    handleCancel={handleModalCancel}
+                    form={form}
+                />
+            )}
             <Table
                 dataSource={discounts}
                 columns={columns}

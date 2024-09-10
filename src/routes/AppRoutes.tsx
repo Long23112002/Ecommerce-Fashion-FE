@@ -8,7 +8,7 @@ import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AdminRoute from "../hook/AdminRoute.tsx";
 import { ManagerRole } from "../pages/Admin/User";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-import Index from '../pages/Admin/Discount/index.tsx';
+import ManagerDiscount from '../pages/Admin/Discount/ManagerDiscount.tsx';
 
 
 const AppRoutes = () => {
@@ -23,7 +23,7 @@ const AppRoutes = () => {
                 <Route element={<AdminLayout />}>
                     <Route path="/admin/product/*" element={<ProductManager />} />
                     <Route path="/admin/user/role" element={<ManagerRole />} />
-                    <Route path='/admin/discount/table' element={<Index />}></Route>
+                    <Route path='/admin/discount/table' element={<ManagerDiscount />}></Route>
                 </Route>
             </Route>
 
