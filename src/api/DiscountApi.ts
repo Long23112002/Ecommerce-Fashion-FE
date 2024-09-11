@@ -1,6 +1,6 @@
 import axiosInstance from './AxiosInstance';  // Sử dụng axios instance đã cấu hình sẵn
 import { ResponseData } from '../types/responseApi';  // Định nghĩa phản hồi API
-import { Discount } from '../types/discount';  // Định nghĩa kiểu Discount
+import { Discount } from '../types/discount.ts';  // Định nghĩa kiểu Discount
 import { AxiosResponse } from 'axios';
 import { BASE_API } from "../constants/BaseApi.ts";
 /* eslint-disable */

@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Form, Input, Select, InputNumber, DatePicker, FormInstance } from "antd";
-import { Discount } from "../../types/discount";
+import { Discount } from "../../types/discount.ts";
 import { TypeDiscount, StatusDiscount, updateDiscount } from "../../api/DiscountApi";
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
@@ -29,14 +29,14 @@ const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
             toast.error("Authorization failed");
             return;
         }
-    
+
         try {
             const values = await form.validateFields();
-    
+
             // Chuyển đổi ngày tháng về dạng timestamp
             values.startDate = values.startDate.valueOf();
             values.endDate = values.endDate.valueOf();
-    
+
             await updateDiscount(discount.id, values, token);
             toast.success('Discount updated successfully');
             handleCancel();

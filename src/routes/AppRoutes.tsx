@@ -9,6 +9,7 @@ import AdminRoute from "../hook/AdminRoute.tsx";
 import { ManagerRole } from "../pages/Admin/User";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerDiscount from '../pages/Admin/Discount/ManagerDiscount.tsx';
+import ManagerVoucher from '../pages/Admin/Voucher/ManagerVoucher.tsx';
 
 
 const AppRoutes = () => {
@@ -24,6 +25,7 @@ const AppRoutes = () => {
                     <Route path="/admin/product/*" element={<ProductManager />} />
                     <Route path="/admin/user/role" element={<ManagerRole />} />
                     <Route path='/admin/discount/table' element={<ManagerDiscount />}></Route>
+                    <Route path='/admin/voucher/table' element={<ManagerVoucher />}></Route>
                 </Route>
             </Route>
 

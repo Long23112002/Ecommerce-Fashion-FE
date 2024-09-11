@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Form, Input, Select, InputNumber, DatePicker, FormInstance } from "antd";
-import { Discount } from "../../types/discount";
+import { Discount } from "../../types/discount.ts";
 import { TypeDiscount, StatusDiscount, createDiscount } from "../../api/DiscountApi";
 import dayjs from "dayjs";
 import Cookies from "js-cookie";

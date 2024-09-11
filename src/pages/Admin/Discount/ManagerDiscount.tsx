@@ -6,7 +6,7 @@ import { fetchAllDiscount, createDiscount, updateDiscount, deleteDiscount, getDi
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import AddDiscountModal from "../../../components/Discount/AddDiscountModal.tsx";
 import UpdateDiscountModal from "../../../components/Discount/UpdateDiscountModal.tsx";
-import { Discount } from "../../../types/discount";
+import { Discount } from "../../../types/discount.ts";
 
 const ManagerDiscount = () => {
     const [loading, setLoading] = useState(true);
@@ -135,9 +135,9 @@ const ManagerDiscount = () => {
             title: 'Condition',
             dataIndex: 'condition',
             key: 'condition',
-            render: (condition: any) => 
+            render: (condition: any) =>
                 `Product ID: ${condition.productId}, Brand ID: ${condition.brandId}, Category ID: ${condition.categoryId}, Product Detail ID: ${condition.productDetailId}`
-        
+
         },
         {
             title: 'Name',

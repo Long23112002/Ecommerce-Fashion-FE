@@ -6,7 +6,8 @@ export enum TypeDiscount {
 
 export enum StatusDiscount {
     ACTIVE = 'ACTIVE',  // Đang hoạt động
-    INACTIVE = 'INACTIVE'  // Không hoạt động
+    INACTIVE = 'INACTIVE',  // Không hoạt động
+    EXPIRED = 'EXPIRED' // ko hoat dong
 }
 
 export interface Condition {
