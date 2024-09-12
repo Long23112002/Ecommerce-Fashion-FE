@@ -1,11 +1,17 @@
+import { CategoryRequest, CategoryData } from '../types/Category';
+import { BASE_API } from "../constants/BaseApi";
+import axiosInstance from './AxiosInstance';
 
-import { CategoryRequest, CategoryData } from '../types/Category.ts';
-import {BASE_API} from "../constants/BaseApi.ts";
-import axiosInstance from './AxiosInstance.ts';
-// Define the base URL for the categories API
+// Định nghĩa URL cơ bản cho API danh mục
 const BASE_URL = `${BASE_API}/api/v1/category`;
 
-// Get all categories with pagination and optional filters
+// Hàm xử lý lỗi tập trung cho các cuộc gọi API
+const handleApiError = (error: any) => {
+  const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định';
+  throw new Error(`Lỗi API: ${errorMessage}`);
+};
+
+// Lấy tất cả danh mục với phân trang và bộ lọc tùy chọn
 export const getAllCategories = async (params: { page: number; size: number; name?: string }) => {
   try {
     const response = await axiosInstance.get<{ data: CategoryData[]; metaData: { page: number; size: number; total: number; totalPage: number } }>(`${BASE_URL}`, {
@@ -13,36 +19,50 @@ export const getAllCategories = async (params: { page: number; size: number; nam
     });
     return response.data;
   } catch (error) {
-    throw new Error(`Failed to fetch categories: ${error.response?.data?.message || error.message}`);
+    handleApiError(error);
   }
 };
 
-// Create a new category
-export const createCategory = async (category: CategoryRequest) => {
+// Tạo một danh mục mới
+export const createCategory = async (category: CategoryRequest, token: string): Promise<CategoryData> => {
   try {
-    const response = await axiosInstance.post<CategoryData>(`${BASE_URL}`, category);
+    const response = await axiosInstance.post<CategoryData>(`${BASE_URL}`, category, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
     return response.data;
   } catch (error) {
-    throw new Error(`Failed to create category: ${error.response?.data?.message || error.message}`);
+    handleApiError(error);
   }
 };
 
-// Update an existing category
-export const updateCategory = async (id: number, category: CategoryRequest) => {
+// Cập nhật một danh mục hiện có
+export const updateCategory = async (id: number, category: CategoryRequest, token: string): Promise<CategoryData> => {
   try {
-    const response = await axiosInstance.put<CategoryData>(`${BASE_URL}/${id}`, category);
+    const response = await axiosInstance.put<CategoryData>(`${BASE_URL}/${id}`, category, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
     return response.data;
   } catch (error) {
-    throw new Error(`Failed to update category: ${error.response?.data?.message || error.message}`);
+    handleApiError(error);
   }
 };
 
-// Delete a category by ID
-export const deleteCategory = async (id: number) => {
+// Xóa một danh mục theo ID
+export const deleteCategory = async (id: number, token: string): Promise<void> => {
   try {
-    const response = await axiosInstance.delete(`${BASE_URL}/${id}`);
-    return response.data;
+    await axiosInstance.delete(`${BASE_URL}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
   } catch (error) {
-    throw new Error(`Failed to delete category: ${error.response?.data?.message || error.message}`);
+    handleApiError(error);
   }
 };
