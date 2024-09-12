@@ -37,6 +37,7 @@ export const getDiscountById = async (discountId: number): Promise<Discount> => 
   try {
     const url = `${BASE_API}/api/v1/discount/${discountId}`;
     const response = await axiosInstance.get(url);
+    console.log("Dữ liệu nhận được từ API:", response.data);
     return response.data;
   } catch (error) {
     throw error;

@@ -7,6 +7,7 @@ import createPaginationConfig, { PaginationState } from "../../../config/paginat
 import AddDiscountModal from "../../../components/Discount/AddDiscountModal.tsx";
 import UpdateDiscountModal from "../../../components/Discount/UpdateDiscountModal.tsx";
 import { Discount } from "../../../types/discount.ts";
+import dayjs from "dayjs";
 
 const ManagerDiscount = () => {
     const [loading, setLoading] = useState(true);

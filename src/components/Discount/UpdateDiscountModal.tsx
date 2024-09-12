@@ -1,10 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Modal, Form, Input, Select, InputNumber, DatePicker, FormInstance } from "antd";
-import { Discount } from "../../types/discount.ts";
-import { TypeDiscount, StatusDiscount, updateDiscount } from "../../api/DiscountApi";
 import dayjs from "dayjs";
-import Cookies from "js-cookie";
-import { toast } from "react-toastify";
+import { Discount } from "../../types/discount";
 
 const { Option } = Select;
 
@@ -13,7 +10,7 @@ interface UpdateDiscountModalProps {
     handleOk: () => void;
     handleCancel: () => void;
     form: FormInstance;
-    discount: Discount;
+    discount: Discount | null;
 }
 
 const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
@@ -23,57 +20,39 @@ const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
     form,
     discount
 }) => {
-    const handleOkClick = async () => {
-        const token = Cookies.get("accessToken");
-        if (!token) {
-            toast.error("Authorization failed");
-            return;
+
+    // useEffect để set các giá trị form khi dữ liệu discount thay đổi
+    useEffect(() => {
+        if (discount) {
+            console.log("Setting form values with discount data:", discount);
+            form.setFieldsValue({
+                name: discount.name || "",
+                type: discount.type || "",
+                value: discount.value || 0,
+                maxValue: discount.maxValue || 0,
+                discountStatus: discount.discountStatus || "",
+                startDate: discount.startDate ? dayjs(discount.startDate) : null,
+                endDate: discount.endDate ? dayjs(discount.endDate) : null,
+                productId: discount.condition.productId || 0,
+                brandId: discount.condition.brandId || 0,
+                categoryId: discount.condition.categoryId || 0,
+                productDetailId: discount.condition.productDetailId || 0,
+            });
+        } else {
+            form.resetFields(); // Reset form khi không có discount
         }
-
-        try {
-            const values = await form.validateFields();
-
-            // Chuyển đổi ngày tháng về dạng timestamp
-            values.startDate = values.startDate.valueOf();
-            values.endDate = values.endDate.valueOf();
-
-            await updateDiscount(discount.id, values, token);
-            toast.success('Discount updated successfully');
-            handleCancel();
-            // Refresh discounts if needed, assuming a refreshDiscounts function exists
-            // refreshDiscounts();
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to update discount');
-        }
-    };
+    }, [discount, form]);  // Chạy lại effect khi discount hoặc form thay đổi
 
     return (
         <Modal
             title="Update Discount"
             visible={isModalOpen}
-            onOk={handleOkClick}
+            onOk={handleOk}
             onCancel={handleCancel}
             okText="Update"
             cancelText="Cancel"
         >
-            <Form
-                form={form}
-                layout="vertical"
-                initialValues={{
-                    name: discount.name,
-                    type: discount.type,
-                    value: discount.value,
-                    maxValue: discount.maxValue,
-                    discountStatus: discount.discountStatus,
-                    startDate: dayjs(discount.startDate),
-                    endDate: dayjs(discount.endDate),
-                    productId: discount.condition.productId,
-                    brandId: discount.condition.brandId,
-                    categoryId: discount.condition.categoryId,
-                    productDetailId: discount.condition.productDetailId,
-                }}
-            >
-                {/* Common Fields for Updating a Discount */}
+            <Form form={form} layout="vertical">
                 <Form.Item
                     label="Discount Name"
                     name="name"
@@ -87,8 +66,8 @@ const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
                     rules={[{ required: true, message: "Please select the discount type" }]}
                 >
                     <Select>
-                        <Option value={TypeDiscount.PERCENTAGE}>Percentage</Option>
-                        <Option value={TypeDiscount.FIXED_AMOUNT}>Fixed Amount</Option>
+                        <Option value="PERCENTAGE">Percentage</Option>
+                        <Option value="FIXED_AMOUNT">Fixed Amount</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item
@@ -111,9 +90,9 @@ const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
                     rules={[{ required: true, message: "Please select the discount status" }]}
                 >
                     <Select>
-                        <Option value={StatusDiscount.ACTIVE}>Active</Option>
-                        <Option value={StatusDiscount.INACTIVE}>Inactive</Option>
-                        <Option value={StatusDiscount.EXPIRED}>Expired</Option>
+                        <Option value="ACTIVE">Active</Option>
+                        <Option value="INACTIVE">Inactive</Option>
+                        <Option value="EXPIRED">Expired</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item
@@ -130,31 +109,30 @@ const UpdateDiscountModal: React.FC<UpdateDiscountModalProps> = ({
                 >
                     <DatePicker style={{ width: '100%' }} />
                 </Form.Item>
-                {/* Condition Fields */}
                 <Form.Item
                     label="Product ID"
-                    name={['condition', 'productId']}
+                    name="productId"
                     rules={[{ required: true, message: "Please enter the product ID" }]}
                 >
                     <InputNumber min={0} style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item
                     label="Brand ID"
-                    name={['condition', 'brandId']}
+                    name="brandId"
                     rules={[{ required: true, message: "Please enter the brand ID" }]}
                 >
                     <InputNumber min={0} style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item
                     label="Category ID"
-                    name={['condition', 'categoryId']}
+                    name="categoryId"
                     rules={[{ required: true, message: "Please enter the category ID" }]}
                 >
                     <InputNumber min={0} style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item
                     label="Product Detail ID"
-                    name={['condition', 'productDetailId']}
+                    name="productDetailId"
                     rules={[{ required: true, message: "Please enter the product detail ID" }]}
                 >
                     <InputNumber min={0} style={{ width: '100%' }} />
