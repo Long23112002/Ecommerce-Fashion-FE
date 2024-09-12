@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Select, Table } from 'antd';
+import { Button, Form, Input, Popconfirm, Table } from 'antd';
 import { getAllCategories, createCategory, updateCategory, deleteCategory } from '../../../../api/CategoryApi.ts';
 import { CategoryData, CategoryRequest } from '../../../../types/Category.ts';
 import { toast } from 'react-toastify';
@@ -28,7 +28,7 @@ const ManagerCategory = () => {
     setLoading(true);
     try {
       const response = await getAllCategories({ ...params, page: params.page - 1 });
-      setCategories(response.data);
+      setCategories(transformCategoriesToTree(response.data)); // Transform flat list to tree
       setPagination({
         current: response.metaData.page + 1,
         pageSize: response.metaData.size,
@@ -45,6 +45,30 @@ const ManagerCategory = () => {
   useEffect(() => {
     fetchCategories();
   }, [filterParams]);
+
+  // Function to transform flat categories into a tree structure
+  const transformCategoriesToTree = (categories: CategoryData[]): CategoryData[] => {
+    const categoryMap: { [key: number]: CategoryData } = {};
+    const tree: CategoryData[] = [];
+
+    // Initialize category map
+    categories.forEach(category => {
+      categoryMap[category.id] = { ...category, children: [] };
+    });
+
+    // Populate the tree
+    categories.forEach(category => {
+      if (category.parentCategory) {
+        // If a parent exists, add this category to its children array
+        categoryMap[category.parentCategory.id].children.push(categoryMap[category.id]);
+      } else {
+        // Otherwise, it's a root category, add it to the tree
+        tree.push(categoryMap[category.id]);
+      }
+    });
+
+    return tree;
+  };
 
   const handleTableChange = (newPagination) => {
     setFilterParams((prevParams) => ({

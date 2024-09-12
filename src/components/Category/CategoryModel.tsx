@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Select } from 'antd';
+import { Modal, Form, Input, TreeSelect } from 'antd';
 import { CategoryRequest } from '../../types/Category';
 import { toast } from 'react-toastify';
 
@@ -10,7 +10,7 @@ interface CategoryModelProps {
   form: any;
   mode: 'add' | 'update';
   category?: CategoryRequest;
-  parentCategories: CategoryRequest[];
+  parentCategories: CategoryRequest[]; // Parent categories list
 }
 
 const CategoryModel: React.FC<CategoryModelProps> = ({
@@ -20,30 +20,41 @@ const CategoryModel: React.FC<CategoryModelProps> = ({
   form,
   mode,
   category,
-  parentCategories = [] // Đảm bảo parentCategories luôn là mảng
+  parentCategories = [] // Ensure parentCategories is always an array
 }) => {
 
+  // UseEffect to set the form values when the category is provided
   useEffect(() => {
     if (category) {
       form.setFieldsValue({
         name: category.name,
-        parentCategory: category.parentCategory ? category.parentCategory.id : undefined, // Nếu không có parentCategory thì để undefined
+        parentCategory: category.parentCategoryId || undefined, // Set parentCategoryId if available
       });
     } else {
       form.resetFields();
     }
   }, [category, form]);
 
+  // Recursive function to map categories to TreeSelect structure
+  const mapCategoriesToTreeData = (categories: CategoryRequest[]) => {
+    return categories.map((category) => ({
+      title: category.name,
+      value: category.id,
+      children: category.subCategories ? mapCategoriesToTreeData(category.subCategories) : [], // Recurse on subCategories
+    }));
+  };
+
+  // On form submit
   const onSubmit = async () => {
     try {
       const values = await form.validateFields();
-      // Nếu parentCategory không được chọn, loại bỏ nó khỏi dữ liệu gửi đi
-      if (values.parentCategory === undefined || values.parentCategory === null) {
+      // Remove parentCategory if not selected
+      if (!values.parentCategory) {
         delete values.parentCategory;
       }
-      handleOk(values); // Gửi dữ liệu form lên handler cha
+      handleOk(values); // Send the form data to the parent handler
     } catch (error) {
-      console.error('Failed to create category:', error); // In chi tiết lỗi vào console
+      console.error('Failed to create category:', error); // Log error details
       toast.error("Please fill out the form correctly.");
     }
   };
@@ -70,17 +81,12 @@ const CategoryModel: React.FC<CategoryModelProps> = ({
           name="parentCategory"
           label="Parent Category"
         >
-          <Select placeholder="Select parent category" allowClear>
-            {parentCategories.length > 0 ? (
-              parentCategories.map((parent) => (
-                <Select.Option key={parent.id} value={parent.id}>
-                  {parent.name}
-                </Select.Option>
-              ))
-            ) : (
-              <Select.Option disabled>No parent categories available</Select.Option>
-            )}
-          </Select>
+          <TreeSelect
+            placeholder="Select parent category"
+            treeData={mapCategoriesToTreeData(parentCategories)} // Use recursive data mapping
+            allowClear
+            treeDefaultExpandAll
+          />
         </Form.Item>
       </Form>
     </Modal>
