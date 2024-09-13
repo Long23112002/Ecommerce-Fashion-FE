@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import createPaginationConfig, {PaginationState} from "../../../../config/paginationConfig.ts";
 import { SearchOutlined } from '@ant-design/icons';
 
-const ManagerColor = () => {
+const ManagerSize = () => {
     const [loading, setLoading] = useState(true);
     const [sizes, setSizes] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,14 +131,16 @@ const ManagerColor = () => {
                     <Input
                         placeholder="Search size name"
                         value={selectedKeys[0]}
-                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onChange={(e) => {setSelectedKeys(e.target.value ? [e.target.value] : []);
+                            confirm({ closeDropdown: false });
+                        }}
                         onPressEnter={confirm}
                         style={{ marginBottom: 8, display: 'block' }}
                     />
                     <Space>
                         <Button
                             type="primary"
-                            onClick={confirm}
+                            onClick={()=>confirm({ closeDropdown: true })}
                             icon={<SearchOutlined />}
                             size="small"
                             style={{ width: 90 }}
@@ -165,7 +167,9 @@ const ManagerColor = () => {
             title: 'Updated At',
             dataIndex: 'updatedAt',
             key: 'updatedAt',
-            render: (date) => new Date(date).toLocaleString(),
+            render: (date) => date ? 
+            (new Date(date).toLocaleString())
+            : 'No updated available',
         },
         {
             title: 'Created By',
@@ -173,6 +177,14 @@ const ManagerColor = () => {
             key: 'createdBy',
             render: (createdBy) => (
                 <div>
+                     <img 
+                    src={createdBy.avatar} 
+                    style={{
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%', 
+                        marginRight: 20}}
+                    />
                     {createdBy.fullName}
                 </div>
             )
@@ -184,6 +196,14 @@ const ManagerColor = () => {
             render: (updatedBy) => (
                 updatedBy ? (
                     <div>
+                         <img 
+                    src={updatedBy.avatar} 
+                    style={{
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%', 
+                        marginRight: 10}}
+                    />
                         {updatedBy.fullName}
                     </div>
                 ) : 'No updated available'
@@ -254,4 +274,4 @@ const ManagerColor = () => {
     );
 };
 
-export default ManagerColor;
+export default ManagerSize;

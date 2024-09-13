@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {PaginationState} from "../../../../config/paginationConfig.ts";
 import { SearchOutlined } from '@ant-design/icons';
+import { SketchPicker } from 'react-color';
 
 const ManagerColor = () => {
     const [loading, setLoading] = useState(true);
@@ -20,6 +21,8 @@ const ManagerColor = () => {
     });
 
     const [filterName, setFilterName] = useState('');
+
+    const [color, setColor] = useState('#fff');
 
     const mode = editingColor ? 'update' : 'add';
 
@@ -46,12 +49,14 @@ const ManagerColor = () => {
                 const colorDetails = await getColorById(color.id);
                 form.setFieldsValue(colorDetails);
                 setEditingColor(colorDetails);
+                setColor(colorDetails.name || '#fff');
             } catch (error) {
                 toast.error(error.response?.data?.message || 'Failed to fetch color details');
             }
         } else {
             form.resetFields();
             setEditingColor(null);
+            setColor('#fff');
         }
         setIsModalOpen(true);
     };
@@ -64,10 +69,10 @@ const ManagerColor = () => {
 
             if (token) {
                 if (mode === 'add') {
-                    await createColor({ name }, token);
+                    await createColor({name}, token);
                     toast.success('Color added successfully');
                 } else if (mode === 'update' && editingColor) {
-                    await updateColor(editingColor.id, { name }, token);
+                    await updateColor(editingColor.id, {name}, token);
                     toast.success('Color updated successfully');
                 }
                 handleCancel();
@@ -112,6 +117,11 @@ const ManagerColor = () => {
        fetchColors(pagination.current, pagination.pageSize, nameFilter);
     };
 
+    const handleColorChange = (color) => {
+        setColor(color.hex); // Cập nhật mã màu khi người dùng chọn màu
+        form.setFieldsValue({ name: color.hex }); // Cập nhật ô nhập liệu với mã màu
+    };
+
     useEffect(() => {
         fetchColors(pagination.current, pagination.pageSize, filterName);
     }, [pagination.current, pagination.pageSize,filterName]);
@@ -126,22 +136,40 @@ const ManagerColor = () => {
             title: 'Color Name',
             dataIndex: 'name',
             key: 'name',
+            render: (text, record) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div
+                        style={{
+                            
+                            height: 20,
+                            backgroundColor: record.name, // Assuming 'color' field holds the color code
+                            marginRight: 10,
+                            width: 20, 
+                            borderRadius: 4, 
+                        }}
+                    />
+                    {text}
+                </div>
+            ),
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters}) => (
                 <div style={{ padding: 8 }}>
                     <Input
                         placeholder="Search color name"
                         value={selectedKeys[0]}
-                        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onChange={(e) => {setSelectedKeys(e.target.value ? [e.target.value] : []);
+                            confirm({ closeDropdown: false });
+                        }}
                         onPressEnter={confirm}
                         style={{ marginBottom: 8, display: 'block' }}
                     />
                     <Space>
                         <Button
                             type="primary"
-                            onClick={confirm}
+                            onClick={()=>confirm({ closeDropdown: true })}
                             icon={<SearchOutlined />}
                             size="small"
                             style={{ width: 90 }}
+                            
                         >
                             Search
                         </Button>
@@ -165,7 +193,9 @@ const ManagerColor = () => {
             title: 'Updated At',
             dataIndex: 'updatedAt',
             key: 'updatedAt',
-            render: (date) => new Date(date).toLocaleString(),
+            render: (date) => date ? 
+            (new Date(date).toLocaleString())
+            : 'No updated available',
         },
         {
             title: 'Created By',
@@ -173,6 +203,15 @@ const ManagerColor = () => {
             key: 'createdBy',
             render: (createdBy) => (
                 <div>
+                    <img 
+                    src={createdBy.avatar} 
+                    style={{
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%', 
+                        marginRight: 10
+                    }}
+                    />
                     {createdBy.fullName}
                 </div>
             )
@@ -184,6 +223,14 @@ const ManagerColor = () => {
             render: (updatedBy) => (
                 updatedBy ? (
                     <div>
+                        <img 
+                    src={updatedBy.avatar} 
+                    style={{
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%', 
+                        marginRight: 10}}
+                    />
                         {updatedBy.fullName}
                     </div>
                 ) : 'No updated available'
@@ -237,8 +284,16 @@ const ManagerColor = () => {
                         label="Color Name"
                         rules={[{ required: true, message: 'Please input the color name!' }]}
                     >
-                        <Input />
+                        <Input readOnly/>
                     </Form.Item>
+
+                    <Form.Item label="Pick Color">
+                    <SketchPicker
+                            color={color}
+                            onChangeComplete={handleColorChange} // Cập nhật mã màu khi chọn màu
+                        />
+                    </Form.Item>
+
                 </Form>
             </Modal>
 
