@@ -11,6 +11,8 @@ import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import UserLayout from "../layouts/Customer";
 import Home from "../pages/Customer/Home";
 import ChatPage from "../pages/Admin/Chat";
+import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
+import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
 
 
 const AppRoutes = () => {
@@ -31,6 +33,8 @@ const AppRoutes = () => {
                     <Route path="/admin/user/role" element={<ManagerRole />} />
                     <Route path="/admin/chat" element={<ChatPage />} />
                     <Route path="/admin/user" element={<ManagerUser />} />
+                    <Route path="/admin/brand" element={<ManagerBrand />} />
+                    <Route path="/admin/origin" element={<ManaggerOrigin />} />
                 </Route>
             </Route>
 
