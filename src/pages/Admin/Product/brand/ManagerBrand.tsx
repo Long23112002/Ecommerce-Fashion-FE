@@ -3,25 +3,26 @@ import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { fetchAllBrands, createBrand, updateBrand, deleteBrand, getBrandById } from "../../../../api/BrandApi.ts";
-import BrandModel from "../../../../components/Brand/BrandModel.tsx"; // Assuming you have a similar modal for brand
+import BrandModel from "../../../../components/Brand/BrandModel.tsx";
+import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"; // New detail modal
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
-import { Brand } from "../../../../types/brand.ts"; // Define this type similarly to `Role`
+import { Brand } from "../../../../types/brand.ts";
 
 const ManagerBrand = () => {
     const [loading, setLoading] = useState(true);
     const [brands, setBrands] = useState<Brand[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // State for detail modal
     const [form] = Form.useForm();
     const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+    const [detailBrand, setDetailBrand] = useState<Brand | null>(null); // State for brand details
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
         total: 20,
         totalPage: 4
     });
-    const [searchParams, setSearchParams] = useState<{ name: string }>({
-        name: '',
-    });
+    const [searchParams, setSearchParams] = useState<{ name: string }>({ name: '' });
 
     const mode = editingBrand ? 'update' : 'add';
 
@@ -59,6 +60,16 @@ const ManagerBrand = () => {
             setEditingBrand(null);
         }
         setIsModalOpen(true);
+    };
+
+    const handleViewDetails = (brand: Brand) => {
+        setDetailBrand(brand);
+        setIsDetailModalOpen(true);
+    };
+
+    const handleDetailCancel = () => {
+        setIsDetailModalOpen(false);
+        setDetailBrand(null);
     };
 
     const handleOk = async () => {
@@ -135,12 +146,81 @@ const ManagerBrand = () => {
             key: 'name',
         },
         {
+            title: 'Create at',
+            dataIndex: 'createAt',
+            key: 'createAt',
+            render: (date) => new Date(date).toLocaleDateString(),
+        },
+        {
+            title: 'Update at',
+            dataIndex: 'updateAt',
+            key: 'updateAt',
+            render: (date) => {
+                if (date) {
+                    return (new Date(date).toLocaleDateString())
+
+                } else {
+                    return <span>Chưa có</span>;
+                }
+
+            }
+        },
+        {
+            title: 'Create By',
+            dataIndex: 'createBy',
+            key: 'createBy',
+            render: (createBy) => (
+                <div>
+                    <img
+                        src={createBy.avatar}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            marginRight: 10,
+                        }}
+                    />
+                    {createBy.fullName}
+                </div>
+            ),
+        },
+        {
+            title: 'Update By',
+            dataIndex: 'updateBy',
+            key: 'updateBy',
+            render: (updateBy) => {
+                if (updateBy) {
+                    return (
+                        <div>
+                            <img
+                                src={updateBy.avatar}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: "50%",
+                                    marginRight: 10,
+                                }}
+                                alt="Avatar"
+                            />
+                            {updateBy.fullName}
+                        </div>
+                    );
+                } else {
+                    return <span>Chưa có</span>;
+                }
+            },
+
+        },
+        {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
                 <div>
                     <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
                         Update
+                    </Button>
+                    <Button onClick={() => handleViewDetails(record)} style={{ marginRight: 8 }}>
+                        View Details
                     </Button>
                     <Popconfirm
                         title="Are you sure you want to delete this brand?"
@@ -183,6 +263,11 @@ const ManagerBrand = () => {
                 form={form}
                 mode={editingBrand ? 'update' : 'add'}
                 brand={editingBrand || undefined}
+            />
+            <BrandDetailModal
+                visible={isDetailModalOpen}
+                onCancel={handleDetailCancel}
+                brand={detailBrand}
             />
             <Table
                 dataSource={brands}

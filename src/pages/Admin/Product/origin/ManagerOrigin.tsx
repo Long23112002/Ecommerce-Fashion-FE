@@ -3,16 +3,19 @@ import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { fetchAllOrigins, createOrigin, updateOrigin, deleteOrigin, getOriginById } from "../../../../api/OriginApi.ts";
-import OriginModel from "../../../../components/Origin/OriginModel.tsx"; // Modal cho Origin
+import OriginModel from "../../../../components/Origin/OriginModel.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/origin/paginationConfig.ts";
-import { Origin } from "../../../../types/origin.ts"; // Định nghĩa type tương tự như `Brand`
+import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
+import { Origin } from "../../../../types/origin.ts";
 
 const ManaggerOrigin = () => {
     const [loading, setLoading] = useState(true);
     const [origins, setOrigins] = useState<Origin[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [editingOrigin, setEditingOrigin] = useState<Origin | null>(null);
+    const [detailOrigin, setDetailOrigin] = useState<Origin | null>(null);
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
@@ -60,6 +63,14 @@ const ManaggerOrigin = () => {
         }
         setIsModalOpen(true);
     };
+    const handleViewDetails = (origin: Origin) => {
+        setDetailOrigin(origin);
+        setIsDetailModalOpen(true);
+    };
+    const handleDetailCancel = () => {
+        setIsDetailModalOpen(false);
+        setDetailOrigin(null);
+    };
 
     const handleOk = async () => {
         try {
@@ -88,6 +99,8 @@ const ManaggerOrigin = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+
+
 
     const handleDelete = async (originId: number) => {
         try {
@@ -135,12 +148,82 @@ const ManaggerOrigin = () => {
             key: 'name',
         },
         {
+            title: 'Create at',
+            dataIndex: 'createAt',
+            key: 'createAt',
+            render: (date) => new Date(date).toLocaleDateString(),
+        },
+        {
+            title: 'Update at',
+            dataIndex: 'updateAt',
+            key: 'updateAt',
+            render: (date) => {
+                if (date) {
+                    return (new Date(date).toLocaleDateString())
+
+                } else {
+                    return <span>Chưa có</span>;
+                }
+
+            }
+        },
+        {
+            title: 'Create By',
+            dataIndex: 'createBy',
+            key: 'createBy',
+            render: (createBy) => (
+                <div>
+                    <img
+                        src={createBy.avatar}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            marginRight: 10,
+                        }}
+                    />
+                    {createBy.fullName}
+                </div>
+            ),
+
+        },
+        {
+            title: 'Update By',
+            dataIndex: 'updateBy',
+            key: 'updateBy',
+            render: (updateBy) => {
+                if (updateBy) {
+                    return (
+                        <div>
+                            <img
+                                src={updateBy.avatar}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: "50%",
+                                    marginRight: 10,
+                                }}
+                                alt="Avatar"
+                            />
+                            {updateBy.fullName}
+                        </div>
+                    );
+                } else {
+                    return <span>Chưa có</span>;
+                }
+            },
+
+        },
+        {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
                 <div>
                     <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
                         Update
+                    </Button>
+                    <Button onClick={() => handleViewDetails(record)} style={{ marginRight: 8 }}>
+                        View Details
                     </Button>
                     <Popconfirm
                         title="Are you sure you want to delete this origin?"
@@ -183,6 +266,11 @@ const ManaggerOrigin = () => {
                 form={form}
                 mode={editingOrigin ? 'update' : 'add'}
                 origin={editingOrigin || undefined}
+            />
+            <OriginDetailModal
+                visible={isDetailModalOpen}
+                onCancel={handleDetailCancel}
+                origin={detailOrigin}
             />
             <Table
                 dataSource={origins}
