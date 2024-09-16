@@ -34,7 +34,7 @@ const ManagerCategory = () => {
       children: category.subCategories?.length > 0 ? buildCategoryTree(category.subCategories) : []
     }));
   };
-  
+
   const fetchCategories = async (current: number, pageSize: number) => {
     setLoading(true);
     try {
@@ -210,6 +210,52 @@ const ManagerCategory = () => {
           return <span>Chưa có</span>;
         }
       }
+    },
+    {
+      title: 'Create By',
+      dataIndex: 'createBy',
+      key: 'createBy',
+      render: (createBy) => (
+        <div>
+          <img
+            src={createBy.avatar}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              marginRight: 10,
+            }}
+          />
+          {createBy.fullName}
+        </div>
+      ),
+    },
+    {
+      title: 'Update By',
+      dataIndex: 'updateBy',
+      key: 'updateBy',
+      render: (updateBy) => {
+        if (updateBy) {
+          return (
+            <div>
+              <img
+                src={updateBy.avatar}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  marginRight: 10,
+                }}
+                alt="Avatar"
+              />
+              {updateBy.fullName}
+            </div>
+          );
+        } else {
+          return <span>Chưa có</span>;
+        }
+      },
+
     },
     {
       title: 'Actions',
