@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Button, Select } from 'antd';
-import { Category } from '../../types/Category';
+import { Category, SubCategory } from '../../types/Category';
 
 interface UpdateCategoryModalProps {
     isModalOpen: boolean;
-    handleOk: () => void;
+    handleOk: (values: any) => void;  // Hàm để xử lý cập nhật
     handleCancel: () => void;
     form: any;  // Ant Design form instance
-    category: Category | null;  // Category to be updated
-    parentCategories: Category[];  // List of parent categories for the Select
+    category: Category | null;  // Category để cập nhật
+    parentCategories: SubCategory[];  // Danh sách danh mục cha
 }
 
 const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
@@ -19,6 +19,7 @@ const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
     category,
     parentCategories
 }) => {
+    // Khi category thay đổi, đặt lại giá trị form
     useEffect(() => {
         if (category) {
             form.setFieldsValue({
@@ -28,19 +29,29 @@ const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
         }
     }, [category, form]);
 
-    const selectedParentCategory = parentCategories.find(cat => cat.id === form.getFieldValue('parentId'));
+    const onOk = () => {
+        // Lấy tất cả các giá trị từ form khi nhấn OK
+        form.validateFields()
+            .then((values: any) => {
+                console.log('Form values:', values);  // Xem giá trị form lấy được
+                handleOk(values);  // Gọi hàm xử lý với dữ liệu từ form
+            })
+            .catch((errorInfo: any) => {
+                console.error('Validation failed:', errorInfo);
+            });
+    };
 
     return (
         <Modal
             title="Update Category"
             visible={isModalOpen}
-            onOk={handleOk}
+            onOk={onOk}
             onCancel={handleCancel}
             footer={[
                 <Button key="cancel" onClick={handleCancel}>
                     Cancel
                 </Button>,
-                <Button key="submit" type="primary" onClick={handleOk}>
+                <Button key="submit" type="primary" onClick={onOk}>
                     Update
                 </Button>
             ]}
@@ -60,7 +71,6 @@ const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
                     <Select
                         placeholder="Select parent category"
                         allowClear
-                        value={form.getFieldValue('parentId') || undefined}
                     >
                         {parentCategories.map(parentCategory => (
                             <Select.Option key={parentCategory.id} value={parentCategory.id}>
@@ -69,11 +79,6 @@ const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
                         ))}
                     </Select>
                 </Form.Item>
-                {selectedParentCategory && (
-                    <div>
-                        <strong>Current Parent Category:</strong> {selectedParentCategory.name}
-                    </div>
-                )}
             </Form>
         </Modal>
     );

@@ -26,19 +26,17 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
             width={700}
         >
             <Descriptions bordered column={2}>
-                <Descriptions.Item label="Category ID">{category.id}</Descriptions.Item>
+                <Descriptions.Item label="Category ID"span={2}>{category.id}</Descriptions.Item>
                 <Descriptions.Item label="Category Name">{category.name}</Descriptions.Item>
                 <Descriptions.Item label="Level">{category.lever}</Descriptions.Item>
-                <Descriptions.Item label="Created By">{category.createBy.fullName}</Descriptions.Item>
+                {/* <Descriptions.Item></Descriptions.Item> */}
                 <Descriptions.Item label="Created At">
                     {new Date(category.createAt).toLocaleString()}
                 </Descriptions.Item>
-                <Descriptions.Item label="Updated At">
+                <Descriptions.Item label="Updated At" >
                     {category.updateAt ? new Date(category.updateAt).toLocaleString() : "N/A"}
                 </Descriptions.Item>
-                <Descriptions.Item label="Parent Category">
-                    {category.parentCategory ? category.parentCategory.name : "None"}
-                </Descriptions.Item>
+                
                 <Descriptions.Item label="Created By" span={2}>
                     {category.createBy?.avatar ? (
                         <img
@@ -72,6 +70,9 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
                         <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#ccc", marginRight: 10 }} />
                     )}
                     {category.updateBy?.fullName || "Not Updated"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Parent Category">
+                    {category.parentCategory ? category.parentCategory.name : "None"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Subcategories">
                     {category.subCategories.length > 0 ? (

@@ -60,3 +60,18 @@ export const getCategoryById = async (categoryId: number) => {
     throw new Error(`Error fetching category details: ${error.response?.data?.message || error.message}`);
   }
 };
+// select
+export const getAllCategories = async (pageSize: number, pageIndex: number, searchName: string) => {
+  const params = {
+    size: pageSize,
+    page: pageIndex,
+    name: searchName || '',
+  };
+
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}/select`, { params });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error fetching categories: ${error.response?.data?.message || error.message}`);
+  }
+};

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
-import { fetchAllCategories, createCategory, updateCategory, deleteCategory, getCategoryById } from '../../../../api/CategoryApi.ts';
+import { getAllCategories, fetchAllCategories, createCategory, updateCategory, deleteCategory, getCategoryById } from '../../../../api/CategoryApi.ts';
 import AddCategoryModal from '../../../../components/Category/AddCategoryModal.tsx';
 import UpdateCategoryModal from '../../../../components/Category/UpdateCategoryModal.tsx';
 import createPaginationConfig, { PaginationState } from '../../../../config/paginationConfig.ts';
@@ -28,12 +28,20 @@ const ManagerCategory = () => {
   const [searchParams, setSearchParams] = useState<{ name: string }>({
     name: '',
   });
-
+  const buildCategoryTree = (categories: Category[]): Category[] => {
+    return categories.map((category) => ({
+      ...category,
+      children: category.subCategories?.length > 0 ? buildCategoryTree(category.subCategories) : []
+    }));
+  };
+  
   const fetchCategories = async (current: number, pageSize: number) => {
     setLoading(true);
     try {
       const response = await fetchAllCategories(pageSize, current - 1, searchParams.name);
-      setCategories(response.data);
+      const categoryTree = buildCategoryTree(response.data); // Xây dựng cây danh mục
+      setCategories(categoryTree); // Lưu cây danh mục
+      // setCategories(response.data);
       setPagination({
         current: response.metaData.page + 1,
         pageSize: response.metaData.size,
@@ -49,7 +57,7 @@ const ManagerCategory = () => {
 
   const fetchParentCategories = async () => {
     try {
-      const response = await fetchAllCategories(); // Assuming this fetches all categories
+      const response = await getAllCategories(); // Assuming this fetches all categories
       setParentCategories(response.data.filter(category => !category.parentId)); // Filter to get top-level categories
     } catch (error) {
       console.error("Error fetching parent categories:", error);
@@ -58,6 +66,7 @@ const ManagerCategory = () => {
 
   const showAddModal = () => {
     form.resetFields();
+    fetchParentCategories()
     setIsAddModalOpen(true);
   };
 
@@ -69,6 +78,7 @@ const ManagerCategory = () => {
         parentId: categoryDetails.parentId
       });
       setEditingCategory(categoryDetails);
+      fetchParentCategories()
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch category details');
     }
@@ -268,6 +278,7 @@ const ManagerCategory = () => {
         loading={loading}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination)}
+        expandable={{ childrenColumnName: 'children' }} // Cấu hình expandable cho bảng
       />
     </div>
   );

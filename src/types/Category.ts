@@ -9,6 +9,7 @@ export interface SubCategory {
   createBy: UserData;  // Can be an ID or User object based on how you load data
   updateBy: UserData | null;  // Nullable if no update
   deleted: boolean;
+  parentCategory: Category | null;
   subCategories: SubCategory[];  // Recursive structure for nested subcategories
 }
 
