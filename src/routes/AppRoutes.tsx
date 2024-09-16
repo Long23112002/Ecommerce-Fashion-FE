@@ -11,7 +11,7 @@ import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import UserLayout from "../layouts/Customer";
 import Home from "../pages/Customer/Home";
 import ChatPage from "../pages/Admin/Chat";
-import ManagerCategory from '../pages/Admin/Product/ManagerCategory/ManagerCategory.tsx';
+import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
 
 
 const AppRoutes = () => {
