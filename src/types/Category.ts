@@ -1,22 +1,26 @@
 import { UserData } from "../api/AuthApi"
 
-// CategoryData represents the structure of a category object returned from the API
-export interface CategoryData {
+export interface SubCategory {
   id: number;
   name: string;
-  lever: number;
-  createAt: string; // Timestamps as strings (ISO format)
-  updateAt: string;
-  createBy: UserData | null; // Can be null if not set
-  updateBy: UserData | null;
+  lever: number;  // Level of the category (e.g., 1 for parent, 2 for subcategory)
+  createAt: string | number;  // ISO date string or timestamp
+  updateAt: string | number;  // ISO date string or timestamp
+  createBy: UserData;  // Can be an ID or User object based on how you load data
+  updateBy: UserData | null;  // Nullable if no update
   deleted: boolean;
-  parentCategory: CategoryData | null; // Can be null for top-level categories
-  children: CategoryData[]; // Nested subcategories
+  subCategories: SubCategory[];  // Recursive structure for nested subcategories
 }
 
-// CategoryRequest represents the structure of a category object to be sent to the API
-export interface CategoryRequest {
+export interface Category {
+  id: number;
   name: string;
-  createBy: UserData | null; // The ID of the creator (can be null)
-  parentCategoryId?: number | null; // Optional, for setting the parent category
+  lever: number;  // Category level (e.g., main or subcategory)
+  createAt: string | number;  // ISO date string or timestamp
+  updateAt: string | number;  // ISO date string or timestamp
+  createBy: UserData;
+  updateBy: UserData | null;  // Can be null if no updates
+  deleted: boolean;
+  parentCategory: Category | null;  // Nullable, points to parent category if exists
+  subCategories: SubCategory[];  // List of subcategories under this category
 }

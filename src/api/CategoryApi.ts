@@ -1,68 +1,62 @@
-import { CategoryRequest, CategoryData } from '../types/Category';
-import { BASE_API } from "../constants/BaseApi";
+import Cookies from 'js-cookie';
+import { BASE_API } from '../constants/BaseApi';
 import axiosInstance from './AxiosInstance';
 
-// Định nghĩa URL cơ bản cho API danh mục
-const BASE_URL = `${BASE_API}/api/v1/category`;
+// Define the base URL for the API
+const API_BASE_URL = `${BASE_API}/api/v1/category`;
 
-// Hàm xử lý lỗi tập trung cho các cuộc gọi API
-const handleApiError = (error: any) => {
-  const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định';
-  throw new Error(`Lỗi API: ${errorMessage}`);
-};
+// Fetch all categories with pagination and optional search parameters
+export const fetchAllCategories = async (pageSize: number, pageIndex: number, searchName: string) => {
+  const params = {
+    size: pageSize,
+    page: pageIndex,
+    name: searchName || '',
+  };
 
-// Lấy tất cả danh mục với phân trang và bộ lọc tùy chọn
-export const getAllCategories = async (params: { page: number; size: number; name?: string }) => {
   try {
-    const response = await axiosInstance.get<{ data: CategoryData[]; metaData: { page: number; size: number; total: number; totalPage: number } }>(`${BASE_URL}`, {
-      params,
-    });
+    const response = await axiosInstance.get(`${API_BASE_URL}`, { params });
     return response.data;
-  } catch (error) {
-    handleApiError(error);
+  } catch (error: any) {
+    throw new Error(`Error fetching categories: ${error.response?.data?.message || error.message}`);
   }
 };
 
-// Tạo một danh mục mới
-export const createCategory = async (category: CategoryRequest, token: string): Promise<CategoryData> => {
+// Create a new category
+export const createCategory = async (categoryData: { name: string, parentId?: number }) => {
   try {
-    const response = await axiosInstance.post<CategoryData>(`${BASE_URL}`, category, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-    });
+    const response = await axiosInstance.post(`${API_BASE_URL}`, categoryData);
     return response.data;
-  } catch (error) {
-    handleApiError(error);
+  } catch (error: any) {
+    throw new Error(`Error creating category: ${error.response?.data?.message || error.message}`);
   }
 };
 
-// Cập nhật một danh mục hiện có
-export const updateCategory = async (id: number, category: CategoryRequest, token: string): Promise<CategoryData> => {
+// Update an existing category by ID
+export const updateCategory = async (categoryId: number, categoryData: { name: string }) => {
   try {
-    const response = await axiosInstance.put<CategoryData>(`${BASE_URL}/${id}`, category, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-    });
+    const response = await axiosInstance.put(`${API_BASE_URL}/${categoryId}`, categoryData);
     return response.data;
-  } catch (error) {
-    handleApiError(error);
+  } catch (error: any) {
+    throw new Error(`Error updating category: ${error.response?.data?.message || error.message}`);
   }
 };
 
-// Xóa một danh mục theo ID
-export const deleteCategory = async (id: number, token: string): Promise<void> => {
+// Delete a category by ID
+export const deleteCategory = async (categoryId: number) => {
   try {
-    await axiosInstance.delete(`${BASE_URL}/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }
-    });
-  } catch (error) {
-    handleApiError(error);
+    const response = await axiosInstance.delete(`${API_BASE_URL}/${categoryId}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error deleting category: ${error.response?.data?.message || error.message}`);
+  }
+};
+
+// Get details of a single category by ID
+export const getCategoryById = async (categoryId: number) => {
+  try {
+    const response = await axiosInstance.get(`${API_BASE_URL}/${categoryId}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error fetching category details: ${error.response?.data?.message || error.message}`);
   }
 };

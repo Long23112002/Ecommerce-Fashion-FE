@@ -1,123 +1,171 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import { getAllCategories, createCategory, updateCategory, deleteCategory } from '../../../../api/CategoryApi.ts';
-import { CategoryData, CategoryRequest } from '../../../../types/Category.ts';
+import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
+import { fetchAllCategories, createCategory, updateCategory, deleteCategory, getCategoryById } from '../../../../api/CategoryApi.ts';
+import AddCategoryModal from '../../../../components/Category/AddCategoryModal.tsx';
+import UpdateCategoryModal from '../../../../components/Category/UpdateCategoryModal.tsx';
 import createPaginationConfig, { PaginationState } from '../../../../config/paginationConfig.ts';
-import CategoryModel from '../../../../components/Category/CategoryModel.tsx';
+import CategoryDetailModal from '../../../../components/Category/CategoryDetailModal.tsx';
+import { Category } from '../../../../types/Category.ts';
 
 const ManagerCategory = () => {
-  const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [detailCategory, setDetailCategory] = useState<Category | null>(null);
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
     pageSize: 5,
-    total: 0,
-    totalPage: 1,
+    total: 20,
+    totalPage: 4
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<CategoryRequest | null>(null);
-  const [filterParams, setFilterParams] = useState({
-    page: 1,
-    size: 5,
+  const [searchParams, setSearchParams] = useState<{ name: string }>({
     name: '',
   });
 
-  const fetchCategories = async (params = filterParams) => {
+  const fetchCategories = async (current: number, pageSize: number) => {
     setLoading(true);
     try {
-      const response = await getAllCategories({ ...params, page: params.page - 1 });
-      setCategories(transformCategoriesToTree(response.data)); // Transform flat list to tree
+      const response = await fetchAllCategories(pageSize, current - 1, searchParams.name);
+      setCategories(response.data);
       setPagination({
         current: response.metaData.page + 1,
         pageSize: response.metaData.size,
         total: response.metaData.total,
-        totalPage: response.metaData.totalPage,
+        totalPage: response.metaData.totalPage
       });
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, [filterParams]);
-
-  // Function to transform flat categories into a tree structure
-  const transformCategoriesToTree = (categories: CategoryData[]): CategoryData[] => {
-    const categoryMap: { [key: number]: CategoryData } = {};
-    const tree: CategoryData[] = [];
-
-    // Initialize category map
-    categories.forEach(category => {
-      categoryMap[category.id] = { ...category, children: [] };
-    });
-
-    // Populate the tree
-    categories.forEach(category => {
-      if (category.parentCategory) {
-        // If a parent exists, add this category to its children array
-        categoryMap[category.parentCategory.id].children.push(categoryMap[category.id]);
-      } else {
-        // Otherwise, it's a root category, add it to the tree
-        tree.push(categoryMap[category.id]);
-      }
-    });
-
-    return tree;
+  const fetchParentCategories = async () => {
+    try {
+      const response = await fetchAllCategories(); // Assuming this fetches all categories
+      setParentCategories(response.data.filter(category => !category.parentId)); // Filter to get top-level categories
+    } catch (error) {
+      console.error("Error fetching parent categories:", error);
+    }
   };
 
-  const handleTableChange = (newPagination) => {
-    setFilterParams((prevParams) => ({
-      ...prevParams,
-      page: newPagination.current,
-      size: newPagination.pageSize,
-    }));
+  const showAddModal = () => {
+    form.resetFields();
+    setIsAddModalOpen(true);
   };
 
-  const handleFilterChange = (changedValues) => {
-    setFilterParams((prevParams) => ({
-      ...prevParams,
-      ...changedValues,
-      name: changedValues.name || prevParams.name,
-      page: 1,
-    }));
+  const showUpdateModal = async (category: Category) => {
+    try {
+      const categoryDetails = await getCategoryById(category.id);
+      form.setFieldsValue({
+        name: categoryDetails.name,
+        parentId: categoryDetails.parentId
+      });
+      setEditingCategory(categoryDetails);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fetch category details');
+    }
+    setIsUpdateModalOpen(true);
   };
 
-  const handleModalOk = async () => {
+  const handleViewDetails = (category: Category) => {
+    setDetailCategory(category);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDetailCancel = () => {
+    setIsDetailModalOpen(false);
+    setDetailCategory(null);
+  };
+
+  const handleAddOk = async () => {
     try {
       const values = await form.validateFields();
-      if (currentCategory) {
-        await updateCategory(currentCategory.id, { ...currentCategory, ...values });
-        toast.success('Category updated successfully.');
+      const { name, parentId } = values;
+      const token = Cookies.get("accessToken");
+
+      if (token) {
+        await createCategory({ name, parentId }, token);
+        toast.success('Category added successfully');
+        handleAddCancel();
+        refreshCategories();
       } else {
-        await createCategory(values);
-        toast.success('Category added successfully.');
+        toast.error("Authorization failed");
       }
-      setIsModalOpen(false);
-      fetchCategories();
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || 'Failed to add category');
     }
   };
 
-  const handleDelete = async (id: number) => {
+
+  const handleUpdateOk = async () => {
     try {
-      await deleteCategory(id);
-      fetchCategories();
-      toast.success('Category deleted successfully.');
+      const values = await form.validateFields();
+      const { name, parentId } = values;
+      const token = Cookies.get("accessToken");
+
+      if (token && editingCategory) {
+        await updateCategory(editingCategory.id, { name, parentId }, token);
+        toast.success('Category updated successfully');
+        handleUpdateCancel();
+        refreshCategories();
+      } else {
+        toast.error("Authorization failed");
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || 'Failed to update category');
     }
   };
 
-  const showModal = (record: CategoryRequest | null) => {
-    setCurrentCategory(record);
-    setIsModalOpen(true);
+  const handleAddCancel = () => {
+    setIsAddModalOpen(false);
   };
+
+  const handleUpdateCancel = () => {
+    setIsUpdateModalOpen(false);
+  };
+
+  const handleDelete = async (categoryId: number) => {
+    try {
+      const token = Cookies.get("accessToken");
+      if (token) {
+        await deleteCategory(categoryId, token);
+        toast.success("Category deleted successfully");
+        refreshCategories();
+      } else {
+        toast.error("Authorization failed");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete category');
+    }
+  };
+
+  const handleSearch = (changedValues: any) => {
+    setSearchParams(prevParams => ({
+      ...prevParams,
+      ...changedValues,
+    }));
+    setPagination(prevPagination => ({
+      ...prevPagination,
+      current: 1
+    }));
+  };
+
+  const refreshCategories = () => {
+    fetchCategories(pagination.current, pagination.pageSize);
+  };
+
+  useEffect(() => {
+    fetchCategories(pagination.current, pagination.pageSize);
+    fetchParentCategories();
+  }, [pagination.current, pagination.pageSize, searchParams]);
 
   const columns = [
     {
@@ -126,23 +174,40 @@ const ManagerCategory = () => {
       key: 'id',
     },
     {
-      title: 'Name',
+      title: 'Category Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Level',
+      title: 'Lever',
       dataIndex: 'lever',
       key: 'lever',
+    },
+    {
+      title: 'Create at',
+      dataIndex: 'createAt',
+      key: 'createAt',
+      render: (date) => new Date(date).toLocaleDateString(),
+    },
+    {
+      title: 'Update at',
+      dataIndex: 'updateAt',
+      key: 'updateAt',
+      render: (date) => {
+        if (date) {
+          return (new Date(date).toLocaleDateString());
+        } else {
+          return <span>Chưa có</span>;
+        }
+      }
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <div>
-          <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
-            Update
-          </Button>
+          <Button onClick={() => handleViewDetails(record)}>View</Button>
+          <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 8px' }}>Edit</Button>
           <Popconfirm
             title="Are you sure you want to delete this category?"
             onConfirm={() => handleDelete(record.id)}
@@ -153,7 +218,7 @@ const ManagerCategory = () => {
           </Popconfirm>
         </div>
       ),
-    },
+    }
   ];
 
   return (
@@ -161,41 +226,49 @@ const ManagerCategory = () => {
       <h1 className="text-danger">Manager Category</h1>
       <Button
         className="mt-3 mb-3"
-        style={{ display: 'flex', backgroundColor: 'black', color: 'white' }}
+        style={{ display: "flex", backgroundColor: "black", color: "white" }}
         type="default"
-        onClick={() => showModal(null)}
+        onClick={showAddModal}
       >
         Add Category
       </Button>
       <Form
         layout="inline"
-        onValuesChange={handleFilterChange}
+        onValuesChange={handleSearch}
         style={{ display: 'flex', justifyContent: 'flex-end' }}
         className="mt-2 mb-2"
       >
-        <Form.Item name="name" label="Name">
-          <Input placeholder="Search by name" />
+        <Form.Item name="name" label="Category Name">
+          <Input placeholder="Search by category name" />
         </Form.Item>
       </Form>
+      <AddCategoryModal
+        isModalOpen={isAddModalOpen}
+        handleOk={handleAddOk}
+        handleCancel={handleAddCancel}
+        form={form}
+        parentCategories={parentCategories}
+      />
+      <UpdateCategoryModal
+        isModalOpen={isUpdateModalOpen}
+        handleOk={handleUpdateOk}
+        handleCancel={handleUpdateCancel}
+        form={form}
+        category={editingCategory}
+        parentCategories={parentCategories}
+      />
+      <CategoryDetailModal
+        visible={isDetailModalOpen}
+        onCancel={handleDetailCancel}
+        category={detailCategory}
+      />
       <Table
         dataSource={categories}
         columns={columns}
         loading={loading}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination)}
-        onChange={handleTableChange}
       />
-      {isModalOpen && (
-        <CategoryModel
-          isModalOpen={isModalOpen}
-          handleOk={handleModalOk}
-          handleCancel={() => setIsModalOpen(false)}
-          form={form}
-          refreshCategories={fetchCategories}
-          mode={currentCategory ? 'update' : 'add'}
-          category={currentCategory ? { ...currentCategory } : undefined}
-        />
-      )}
     </div>
   );
 };
