@@ -1,4 +1,7 @@
-type User = {
+
+import {GenderEnum} from "../enum/GenderEnum.ts";
+
+export type User = {
     id: number,
     username: string,
     name: string,
@@ -6,4 +9,12 @@ type User = {
     isAdmin: boolean
 }
 
-export default User
+export interface UserRequest {
+    email: string;
+    password: string;
+    fullName: string;
+    phoneNumber: string;
+    birth: string;
+    gender: GenderEnum,
+    avatar: string;
+}
