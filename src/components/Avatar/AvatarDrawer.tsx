@@ -57,7 +57,8 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                     onClick={toggleDrawer ? toggleDrawer(false) : undefined}
                 >
                     <i className="fa-solid fa-xmark" />
-                </IconButton >
+
+                </IconButton>
                 <Grid
                     container
                     justifyContent='center'

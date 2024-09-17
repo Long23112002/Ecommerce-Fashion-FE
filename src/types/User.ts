@@ -1,5 +1,4 @@
-
-import {GenderEnum} from "../enum/GenderEnum.ts";
+import { GenderEnum } from "../enum/GenderEnum.ts";
 
 export type User = {
     id: number,
