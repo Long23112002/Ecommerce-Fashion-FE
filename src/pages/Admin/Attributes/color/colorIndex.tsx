@@ -29,9 +29,10 @@ import {
   DeleteFilled,
   BookFilled,
 } from "@ant-design/icons";
+import type { FilterDropdownProps } from "antd/es/table/interface";
 
 const ManagerColor = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [colors, setColors] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -56,6 +57,7 @@ const ManagerColor = () => {
     pageSize: number,
     filterName: string = ""
   ) => {
+    setLoading(true);
     try {
       const response = await fetchAllColors(filterName, pageSize, current - 1);
       setColors(response.data);
@@ -152,6 +154,21 @@ const ManagerColor = () => {
     setIsDetailModalOpen(true); // Open detail modal
   };
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"]
+  ) => {
+    setFilterName(selectedKeys[0] || "");
+    fetchColors(pagination.current, pagination.pageSize, filterName);
+    confirm();
+  };
+
+  const handleSearchReset = (clearFilters: () => void) => {
+    clearFilters();
+    setFilterName("");
+    fetchColors(pagination.current, pagination.pageSize, filterName);
+  };
+
   useEffect(() => {
     fetchColors(pagination.current, pagination.pageSize, filterName);
   }, [pagination.current, pagination.pageSize, filterName]);
@@ -197,23 +214,34 @@ const ManagerColor = () => {
             placeholder="Search color name"
             value={selectedKeys[0]}
             onChange={(e) => {
-              setSelectedKeys(e.target.value ? [e.target.value] : []);
-              confirm({ closeDropdown: false });
+              const value = e.target.value;
+              setSelectedKeys(value ? [value] : []);
             }}
-            onPressEnter={confirm}
+            onPressEnter={() =>
+              handleSearch(selectedKeys, confirm({ closeDropdown: true }))
+            }
             style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
             <Button
               type="primary"
-              onClick={() => confirm({ closeDropdown: true })}
+              onClick={() => {
+                handleSearch(selectedKeys, confirm);
+                confirm({ closeDropdown: true });
+              }}
               icon={<SearchOutlined />}
               size="small"
               style={{ width: 90 }}
             >
               Search
             </Button>
-            <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+            <Button
+              onClick={() => {
+                handleSearchReset(clearFilters);
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
               Reset
             </Button>
           </Space>
@@ -401,7 +429,8 @@ const ManagerColor = () => {
                   ? new Date(selectedColor.updatedAt).toLocaleDateString()
                   : "No updated available"}
               </p>
-              <b>Created By:</b><br/>
+              <b>Created By:</b>
+              <br />
               <p className="mt-3 mx-5">
                 <img
                   src={selectedColor.createdBy.avatar}
@@ -414,10 +443,11 @@ const ManagerColor = () => {
                 />
                 {selectedColor.createdBy.fullName}
               </p>
-              <b>Updated By:</b><br/>
+              <b>Updated By:</b>
+              <br />
               <p>
-                {selectedColor.updatedBy
-                  ? (<p className="mt-3 mx-5">
+                {selectedColor.updatedBy ? (
+                  <p className="mt-3 mx-5">
                     <img
                       src={selectedColor.updatedBy.avatar}
                       style={{
@@ -428,8 +458,10 @@ const ManagerColor = () => {
                       }}
                     />
                     {selectedColor.updatedBy.fullName}
-                  </p>)
-                  : "No updated available"}
+                  </p>
+                ) : (
+                  "No updated available"
+                )}
               </p>
             </div>
           </div>
