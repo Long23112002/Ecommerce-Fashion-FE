@@ -21,6 +21,7 @@
     "color": "^4.2.3",
     "color-namer": "^1.4.0",
     "framer-motion": "^11.4.0",
+    "frontend-ecommerce-fashion": "file:",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "lucide-react": "^0.436.0",
