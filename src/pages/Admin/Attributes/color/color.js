@@ -1,64 +1,78 @@
 const colorMap = {
-    // Màu Đỏ
-    "đỏ đậm": "#8B0000",
-    "đỏ": "#FF0000",
-    "đỏ nhạt": "#FF7F7F",
-    "đỏ cam": "#FF4500",
-    "đỏ tím": "#C71585",
 
-    // Màu Xanh Lá
-    "xanh": "#00FF00",
-    "xanh lá cây đậm": "#004d00",
-    "xanh lá cây": "#00FF00",
-    "xanh lá cây nhạt": "#7FFF00",
-    "xanh lá đậm": "#004d00",
-    "xanh lá": "#00FF00",
-    "xanh lá nhạt": "#7FFF00",
+  // Màu Hổ phách
+  "hổ phách": "#FFBF00",
 
-    // Màu Xanh Dương
-    "xanh dương đậm": "#00008B",
-    "xanh dương": "#0000FF",
-    "xanh dương nhạt": "#ADD8E6",
-    "xanh da trời": "#87CEEB",
-    "xanh biển": "#4682B4",
+  // Màu Ametit
+  "ametit": "#9966CC",
 
-    // Màu Vàng
-    "vàng đậm": "#FFD700",
-    "vàng": "#FFFF00",
-    "vàng nhạt": "#FFFFE0",
-    "vàng cam": "#FFA500",
-    "vàng ánh kim": "#FFD700",
+  // Màu Xanh
+  "xanh berin": "#7FFFD4",
+  "xanh da trời": "#007FFF",
+  "xanh dương": "#0000FF",
+  "xanh cô ban": "#0047AB",
+  "xanh hoàng hôn": "#007BA7",
+  "xanh nõn chuối": "#7FFF00",
+  "xanh lá cây": "#008000",
+  "xanh lơ": "#00FFFF",
+  "xanh cánh chả": "#00FFFF",
+  "xanh thủy tinh": "#003399",
+  "xanh Thổ": "#40E0D0",
+  "xanh crôm": "#40826D",
+  "xanh lá" : "#008000",
+  "xanh": "#008000",
 
-    // Màu Cyan
-    "cyan đậm": "#008B8B",
-    "cyan": "#00FFFF",
-    "cyan nhạt": "#E0FFFF",
+  // Màu Nâu
+  "nâu sẫm": "#3D2B1F",
+  "nâu": "#993300",
+  "nâu đen": "#704214",
+  "nâu tanin": "#D2B48C",
 
-    // Màu Hồng
-    "hồng đậm": "#8B008B",
-    "hồng": "#FF00FF",
-    "hồng nhạt": "#FF77FF",
+  // Màu Vàng
+  "vàng": "#FFD700",
+  "vàng da bò": "#F0DC82",
+  "vàng kim loại": "#FFD700",
+  "vàng chanh": "#CCFF00",
 
-    // Màu Xám
-    "xám đậm": "#404040",
-    "xám": "#808080",
-    "xám nhạt": "#D3D3D3",
-    "xám bạc": "#A9A9A9",
-    "xám đen": "#2F4F4F",
+  // Màu Đỏ
+  "đỏ": "#FF0000",
+  "đỏ yên chi": "#960018",
+  "đỏ thắm": "#DC143C",
+  "đỏ tươi": "#FF2400",
+  "đỏ son": "#FF4D00",
+  "đỏ hồng y": "#C41E3A",
 
-    // Màu Tím
-    "tím đậm": "#4B0082",
-    "tím": "#800080",
-    "tím nhạt": "#D8BFD8",
-    "tím hồng": "#DDA0DD",
-    "tím xanh": "#6A5ACD",
+  // Màu Hồng
+  "hồng": "#FFC0CB",
+  "hồng đất": "#CC8899",
+  "hồng sẫm": "#FF00FF",
 
-    // Các màu khác
-    "bạc": "#C0C0C0",
-    "trắng": "#FFFFFF",
-    "trắng nhạt": "#F5F5F5",
-    "đen":"#000"
-  };
+  // Màu Tím
+  "tím": "#8000FF",
+  "tím hồng": "#DA70D6",
+  "tím cẩm quỳ": "#E0B0FF",
+
+  // Màu Oải hương
+  "oải hương": "#B57EDC",
+
+  // Màu Đen, Trắng, Xám
+  "đen": "#000000",
+  "trắng": "#FFFFFF",
+  "xám": "#808080",
+
+  // Các màu khác
+  "san hô": "#FF7F50",
+  "đồng": "#B87333",
+  "men ngọc": "#ACE1AF",
+  "ngọc thạch": "#00A86B",
+  "hạt dẻ": "#800000",
+  "vòi voi": "#DF73FF",
+  "bạc": "#C0C0C0",
+  "kaki": "#C3B091",
+  "mận": "#8E4585",
+  "lan tím": "#DA70D6"
+};
+
 
 export const getColorCode = (colorName) => {
     // Chuyển đổi tên màu thành chữ thường trước khi so sánh

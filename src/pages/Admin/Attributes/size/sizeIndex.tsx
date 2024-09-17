@@ -28,9 +28,10 @@ import {
   DeleteFilled,
   BookFilled,
 } from "@ant-design/icons";
+import type { FilterDropdownProps } from "antd/es/table/interface";
 
 const ManagerSize = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [sizes, setSizes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -151,6 +152,23 @@ const ManagerSize = () => {
     setIsDetailModalOpen(true); // Open detail modal
   };
 
+
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"]
+  ) => {
+    setFilterName(selectedKeys[0] || "");
+    fetchSizes(pagination.current, pagination.pageSize, filterName);
+    confirm();
+  };
+
+  const handleSearchReset = (clearFilters: () => void) => {
+    clearFilters();
+    setFilterName("");
+    fetchSizes(pagination.current, pagination.pageSize, filterName);
+  };
+
+
   useEffect(() => {
     fetchSizes(pagination.current, pagination.pageSize, filterName);
   }, [pagination.current, pagination.pageSize, filterName]);
@@ -176,23 +194,37 @@ const ManagerSize = () => {
             placeholder="Search size name"
             value={selectedKeys[0]}
             onChange={(e) => {
-              setSelectedKeys(e.target.value ? [e.target.value] : []);
-              confirm({ closeDropdown: false });
+
+              const value = e.target.value;
+              setSelectedKeys(value ? [value] : []);
             }}
-            onPressEnter={confirm}
+            onPressEnter={() =>
+              handleSearch(selectedKeys, confirm({ closeDropdown: true }))
+            }
             style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
             <Button
               type="primary"
-              onClick={() => confirm({ closeDropdown: true })}
+
+              onClick={() => {
+                handleSearch(selectedKeys, confirm);
+                confirm({ closeDropdown: true });
+              }}
               icon={<SearchOutlined />}
               size="small"
               style={{ width: 90 }}
             >
               Search
             </Button>
-            <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+
+            <Button
+              onClick={() => {
+                handleSearchReset(clearFilters);
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
               Reset
             </Button>
           </Space>
@@ -261,10 +293,14 @@ const ManagerSize = () => {
       key: "actions",
       render: (_, record) => (
         <div>
-            <Tooltip title="Chỉnh sửa">
-          <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
-            <EditFilled/>
-          </Button>
+
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              onClick={() => showModal(record)}
+              style={{ marginRight: 8 }}
+            >
+              <EditFilled />
+            </Button>
           </Tooltip>
 
           <Tooltip title="Chi tiết">
@@ -277,7 +313,6 @@ const ManagerSize = () => {
             </Button>
           </Tooltip>
 
-          
           <Popconfirm
             title="Are you sure you want to delete this size?"
             onConfirm={() => handleDelete(record.id)}
@@ -285,9 +320,11 @@ const ManagerSize = () => {
             cancelText="No"
           >
             <Tooltip title="Xóa size">
-            <Button className="btn-outline-danger">
+
+              <Button className="btn-outline-danger">
                 <DeleteFilled />
-            </Button>
+              </Button>
+
             </Tooltip>
           </Popconfirm>
         </div>
@@ -368,7 +405,9 @@ const ManagerSize = () => {
                   ? new Date(selectedSize.updatedAt).toLocaleDateString()
                   : "No updated available"}
               </p>
-              <b>Created By:</b><br/>
+
+              <b>Created By:</b>
+              <br />
               <p className="mt-3 mx-5">
                 <img
                   src={selectedSize.createdBy.avatar}
@@ -381,10 +420,13 @@ const ManagerSize = () => {
                 />
                 {selectedSize.createdBy.fullName}
               </p>
-              <b>Updated By:</b><br/>
+
+              <b>Updated By:</b>
+              <br />
               <p>
-                {selectedSize.updatedBy
-                  ? (<p className="mt-3 mx-5">
+                {selectedSize.updatedBy ? (
+                  <p className="mt-3 mx-5">
+
                     <img
                       src={selectedSize.updatedBy.avatar}
                       style={{
@@ -395,8 +437,12 @@ const ManagerSize = () => {
                       }}
                     />
                     {selectedSize.updatedBy.fullName}
-                  </p>)
-                  : "No updated available"}
+
+                  </p>
+                ) : (
+                  "No updated available"
+                )}
+
               </p>
             </div>
           </div>
