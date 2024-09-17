@@ -11,9 +11,3 @@ export interface Color {
 export interface ColorRequest {
     name: string;
 }
-
-export interface ColorParam{
-    page: number;
-    size: number;
-    name: string;
-}
