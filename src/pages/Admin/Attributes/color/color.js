@@ -1,4 +1,5 @@
 const colorMap = {
+
   // Màu Hổ phách
   "hổ phách": "#FFBF00",
 
@@ -71,6 +72,7 @@ const colorMap = {
   "mận": "#8E4585",
   "lan tím": "#DA70D6"
 };
+
 
 export const getColorCode = (colorName) => {
     // Chuyển đổi tên màu thành chữ thường trước khi so sánh

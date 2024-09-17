@@ -29,10 +29,12 @@ import {
   DeleteFilled,
   BookFilled,
 } from "@ant-design/icons";
+
 import type { FilterDropdownProps } from "antd/es/table/interface";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);
+
   const [colors, setColors] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -57,7 +59,9 @@ const ManagerColor = () => {
     pageSize: number,
     filterName: string = ""
   ) => {
+
     setLoading(true);
+
     try {
       const response = await fetchAllColors(filterName, pageSize, current - 1);
       setColors(response.data);
@@ -154,6 +158,7 @@ const ManagerColor = () => {
     setIsDetailModalOpen(true); // Open detail modal
   };
 
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"]
@@ -168,6 +173,7 @@ const ManagerColor = () => {
     setFilterName("");
     fetchColors(pagination.current, pagination.pageSize, filterName);
   };
+
 
   useEffect(() => {
     fetchColors(pagination.current, pagination.pageSize, filterName);
@@ -214,6 +220,7 @@ const ManagerColor = () => {
             placeholder="Search color name"
             value={selectedKeys[0]}
             onChange={(e) => {
+
               const value = e.target.value;
               setSelectedKeys(value ? [value] : []);
             }}
@@ -225,6 +232,7 @@ const ManagerColor = () => {
           <Space>
             <Button
               type="primary"
+
               onClick={() => {
                 handleSearch(selectedKeys, confirm);
                 confirm({ closeDropdown: true });
@@ -429,8 +437,10 @@ const ManagerColor = () => {
                   ? new Date(selectedColor.updatedAt).toLocaleDateString()
                   : "No updated available"}
               </p>
+
               <b>Created By:</b>
               <br />
+
               <p className="mt-3 mx-5">
                 <img
                   src={selectedColor.createdBy.avatar}
@@ -443,11 +453,13 @@ const ManagerColor = () => {
                 />
                 {selectedColor.createdBy.fullName}
               </p>
+
               <b>Updated By:</b>
               <br />
               <p>
                 {selectedColor.updatedBy ? (
                   <p className="mt-3 mx-5">
+
                     <img
                       src={selectedColor.updatedBy.avatar}
                       style={{
@@ -462,6 +474,7 @@ const ManagerColor = () => {
                 ) : (
                   "No updated available"
                 )}
+
               </p>
             </div>
           </div>

@@ -152,6 +152,7 @@ const ManagerSize = () => {
     setIsDetailModalOpen(true); // Open detail modal
   };
 
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"]
@@ -166,6 +167,7 @@ const ManagerSize = () => {
     setFilterName("");
     fetchSizes(pagination.current, pagination.pageSize, filterName);
   };
+
 
   useEffect(() => {
     fetchSizes(pagination.current, pagination.pageSize, filterName);
@@ -192,6 +194,7 @@ const ManagerSize = () => {
             placeholder="Search size name"
             value={selectedKeys[0]}
             onChange={(e) => {
+
               const value = e.target.value;
               setSelectedKeys(value ? [value] : []);
             }}
@@ -203,6 +206,7 @@ const ManagerSize = () => {
           <Space>
             <Button
               type="primary"
+
               onClick={() => {
                 handleSearch(selectedKeys, confirm);
                 confirm({ closeDropdown: true });
@@ -213,6 +217,7 @@ const ManagerSize = () => {
             >
               Search
             </Button>
+
             <Button
               onClick={() => {
                 handleSearchReset(clearFilters);
@@ -288,6 +293,7 @@ const ManagerSize = () => {
       key: "actions",
       render: (_, record) => (
         <div>
+
           <Tooltip title="Chỉnh sửa">
             <Button
               onClick={() => showModal(record)}
@@ -314,9 +320,11 @@ const ManagerSize = () => {
             cancelText="No"
           >
             <Tooltip title="Xóa size">
+
               <Button className="btn-outline-danger">
                 <DeleteFilled />
               </Button>
+
             </Tooltip>
           </Popconfirm>
         </div>
@@ -397,6 +405,7 @@ const ManagerSize = () => {
                   ? new Date(selectedSize.updatedAt).toLocaleDateString()
                   : "No updated available"}
               </p>
+
               <b>Created By:</b>
               <br />
               <p className="mt-3 mx-5">
@@ -411,11 +420,13 @@ const ManagerSize = () => {
                 />
                 {selectedSize.createdBy.fullName}
               </p>
+
               <b>Updated By:</b>
               <br />
               <p>
                 {selectedSize.updatedBy ? (
                   <p className="mt-3 mx-5">
+
                     <img
                       src={selectedSize.updatedBy.avatar}
                       style={{
@@ -426,10 +437,12 @@ const ManagerSize = () => {
                       }}
                     />
                     {selectedSize.updatedBy.fullName}
+
                   </p>
                 ) : (
                   "No updated available"
                 )}
+
               </p>
             </div>
           </div>
