@@ -219,11 +219,11 @@ const ManaggerOrigin = () => {
             key: 'actions',
             render: (_, record) => (
                 <div>
-                    <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
-                        Update
+                    <Button onClick={() => handleViewDetails(record)} style={{ marginRight: 8 }} className="btn-outline-primary">
+                        <i className="fa-solid fa-eye"></i>
                     </Button>
-                    <Button onClick={() => handleViewDetails(record)} style={{ marginRight: 8 }}>
-                        View Details
+                    <Button onClick={() => showModal(record)} style={{ marginRight: 8 }} className="btn-outline-warning">
+                        <i className="fa-solid fa-pen-to-square"></i>
                     </Button>
                     <Popconfirm
                         title="Are you sure you want to delete this origin?"
@@ -231,7 +231,9 @@ const ManaggerOrigin = () => {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="btn-outline-danger">Delete</Button>
+                        <Button className="btn-outline-danger">
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
                     </Popconfirm>
                 </div>
             ),
@@ -247,7 +249,7 @@ const ManaggerOrigin = () => {
                 type="default"
                 onClick={() => showModal(null)}
             >
-                Add Origin
+                <i className="fa-solid fa-circle-plus"></i>
             </Button>
             <Form
                 layout="inline"
