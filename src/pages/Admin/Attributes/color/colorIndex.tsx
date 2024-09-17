@@ -220,7 +220,6 @@ const ManagerColor = () => {
             placeholder="Search color name"
             value={selectedKeys[0]}
             onChange={(e) => {
-
               const value = e.target.value;
               setSelectedKeys(value ? [value] : []);
             }}
@@ -232,7 +231,6 @@ const ManagerColor = () => {
           <Space>
             <Button
               type="primary"
-
               onClick={() => {
                 handleSearch(selectedKeys, confirm);
                 confirm({ closeDropdown: true });
@@ -243,9 +241,11 @@ const ManagerColor = () => {
             >
               Search
             </Button>
+            
             <Button
               onClick={() => {
                 handleSearchReset(clearFilters);
+                confirm({ closeDropdown: false});
               }}
               size="small"
               style={{ width: 90 }}

@@ -15,6 +15,7 @@ import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import UserLayout from "../layouts/Customer";
 import Home from "../pages/Customer/Home";
 import ChatPage from "../pages/Admin/Chat";
+import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 
 
 
@@ -37,9 +38,11 @@ const AppRoutes = () => {
                     <Route path="/admin/user/role" element={<ManagerRole/>}/>
 
 
-                    
+                    {/* Attribute */}
                     <Route path="/admin/color" element={<ManagerColor/>}/>
                     <Route path="/admin/size" element={<ManagerSize/>}/>
+                    <Route path="/admin/material" element={<ManagerMaterial/>}/>
+                    {/*  */}
 
                     <Route path="/admin/chat" element={<ChatPage/>}/>
                     <Route path="/admin/user" element={<ManagerUser/>}/>
