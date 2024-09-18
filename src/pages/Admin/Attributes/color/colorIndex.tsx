@@ -22,7 +22,7 @@ import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
 import { SearchOutlined } from "@ant-design/icons";
-import { getColorCode } from "./color.js";
+import { getColorCode } from "./mapColor.ts";
 import {
   PlusSquareFilled,
   EditFilled,
@@ -164,6 +164,7 @@ const ManagerColor = () => {
     confirm: FilterDropdownProps["confirm"]
   ) => {
     setFilterName(selectedKeys[0] || "");
+    setPagination();
     fetchColors(pagination.current, pagination.pageSize, filterName);
     confirm();
   };
