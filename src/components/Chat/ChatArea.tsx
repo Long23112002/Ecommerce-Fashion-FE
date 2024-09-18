@@ -33,52 +33,42 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
 
     useEffect(() => {
         setLoading(true)
-        setChats([])
         const initializeWebSocket = async () => {
-            if (idRoom) {
-                const token = await refreshToken();
-                const sock = new SockJS(SOCKET_API);
-                const stompClient = new Client({
-                    webSocketFactory: () => sock as WebSocket,
-                    onConnect: () => {
-                        stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
-                            setChats(prevChats => [
-                                ...prevChats,
-                                JSON.parse(chat.body)
-                            ]);
-                        },
-                            {
-                                Authorization: token
-                            });
-                        fetchFindAllChatByIdChatRoom();
-                    },
-                    connectHeaders: {
-                        Authorization: token,
-                    },
-                    debug: function (str) {
-                        console.log(str);
-                    }
-                });
+            const token = await refreshToken();
+            const sock = new SockJS(SOCKET_API);
+            const stompClient = new Client({
+                webSocketFactory: () => sock as WebSocket,
+                onConnect: () => {
+                    stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
+                        setChats(prevChats => [...prevChats, JSON.parse(chat.body)]);
+                    }, { Authorization: token });
 
-                stompClient.activate();
-                setClient(stompClient);
+                    fetchFindAllChatByIdChatRoom();
+                },
+                connectHeaders: { Authorization: token },
+                debug: (str) => console.log(str),
+            });
 
-                setLoading(false)
+            stompClient.activate();
+            setClient(stompClient);
 
-                return () => {
-                    stompClient.deactivate();
-                };
-            }
+            setLoading(false);
+
+            return () => {
+                stompClient.deactivate();
+            };
         };
 
-        initializeWebSocket()
+        if (idRoom) {
+            initializeWebSocket();
+        }
 
         return () => {
             if (client) {
                 client.deactivate();
             }
         };
-    }, [user, idRoom]);
+    }, [idRoom]);
 
     useEffect(() => {
         const item = chatBoxRef.current;
@@ -113,18 +103,25 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                             isAdmin={isAdmin || false}
                         />
                     ))
-                ) : (
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '100%',
-                        }}
-                    >
-                        <CircularProgress />
-                    </Box>
-                )}
+                )
+                    :
+                    idRoom !== ""
+                        ?
+                        (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '100%',
+                                }}
+                            >
+                                <CircularProgress />
+                            </Box>
+                        )
+                        :
+                        <></>
+                }
             </Box>
 
             <ChatInput

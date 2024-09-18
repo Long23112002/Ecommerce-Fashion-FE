@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-  createSize,
-  deleteSize,
-  fetchAllSizes,
-  getSizeById,
-  updateSize,
-} from "./sizeManagament.ts";
+  createMaterial,
+  deleteMaterial,
+  fetchAllMaterials,
+  getMaterialById,
+  updateMaterial,
+} from "./materialManagament.ts";
 import {
   Button,
   Form,
@@ -30,12 +30,12 @@ import {
 } from "@ant-design/icons";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 
-const ManagerSize = () => {
+const ManagerMaterial = () => {
   const [loading, setLoading] = useState(false);
-  const [sizes, setSizes] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [editingSize, setEditingSize] = useState(null);
+  const [editingMaterial, setEditingMaterial] = useState(null);
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
     pageSize: 5,
@@ -47,18 +47,22 @@ const ManagerSize = () => {
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
 
-  const mode = editingSize ? "update" : "add";
+  const mode = editingMaterial ? "update" : "add";
 
-  const fetchSizes = async (
+  const fetchMaterials = async (
     current: number,
     pageSize: number,
     filterName: string = ""
   ) => {
     try {
-      const response = await fetchAllSizes(filterName, pageSize, current - 1);
-      setSizes(response.data);
+      const response = await fetchAllMaterials(
+        filterName,
+        pageSize,
+        current - 1
+      );
+      setMaterials(response.data);
       setPagination({
         current: response.metaData.page + 1,
         pageSize: response.metaData.size,
@@ -66,26 +70,26 @@ const ManagerSize = () => {
         totalPage: response.metaData.totalPage,
       });
     } catch (error) {
-      console.error("Error fetching sizes:", error);
+      console.error("Error fetching materials:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const showModal = async (size = null) => {
-    if (size) {
+  const showModal = async (material = null) => {
+    if (material) {
       try {
-        const sizeDetails = await getSizeById(size.id);
-        form.setFieldsValue(sizeDetails);
-        setEditingSize(sizeDetails);
+        const materialDetails = await getMaterialById(material.id);
+        form.setFieldsValue(materialDetails);
+        setEditingMaterial(materialDetails);
       } catch (error) {
         toast.error(
-          error.response?.data?.message || "Failed to fetch size details"
+          error.response?.data?.message || "Failed to fetch material details"
         );
       }
     } else {
       form.resetFields();
-      setEditingSize(null);
+      setEditingMaterial(null);
     }
     setIsModalOpen(true);
   };
@@ -98,40 +102,40 @@ const ManagerSize = () => {
 
       if (token) {
         if (mode === "add") {
-          await createSize({ name }, token);
-          toast.success("Size added successfully");
-        } else if (mode === "update" && editingSize) {
-          await updateSize(editingSize.id, { name }, token);
-          toast.success("Size updated successfully");
+          await createMaterial({ name }, token);
+          toast.success("Material added successfully");
+        } else if (mode === "update" && editingMaterial) {
+          await updateMaterial(editingMaterial.id, { name }, token);
+          toast.success("Material updated successfully");
         }
         handleCancel();
-        fetchSizes(pagination.current, pagination.pageSize, filterName);
+        fetchMaterials(pagination.current, pagination.pageSize, filterName);
       } else {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save size");
+      toast.error(error.response?.data?.message || "Failed to save material");
     }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setSelectedSize(null);
+    setSelectedMaterial(null);
     setIsDetailModalOpen(false);
   };
 
-  const handleDelete = async (sizeId: number) => {
+  const handleDelete = async (materialId: number) => {
     try {
       const token = Cookies.get("accessToken");
       if (token) {
-        await deleteSize(sizeId, token);
-        toast.success("Size deleted successfully");
-        fetchSizes(pagination.current, pagination.pageSize, filterName);
+        await deleteMaterial(materialId, token);
+        toast.success("Material deleted successfully");
+        fetchMaterials(pagination.current, pagination.pageSize, filterName);
       } else {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete size");
+      toast.error(error.response?.data?.message || "Failed to delete material");
     }
   };
 
@@ -143,12 +147,12 @@ const ManagerSize = () => {
     const nameFilter = filters.name || "";
     setFilterName(nameFilter);
 
-    fetchSizes(pagination.current, pagination.pageSize, nameFilter);
+    fetchMaterials(pagination.current, pagination.pageSize, nameFilter);
   };
 
-  const showDetailModal = async (size) => {
-    const sizeDetails = await getSizeById(size.id);
-    setSelectedSize(sizeDetails);
+  const showDetailModal = async (material) => {
+    const materialDetails = await getMaterialById(material.id);
+    setSelectedMaterial(materialDetails);
     setIsDetailModalOpen(true); // Open detail modal
   };
 
@@ -157,18 +161,18 @@ const ManagerSize = () => {
     confirm: FilterDropdownProps["confirm"]
   ) => {
     setFilterName(selectedKeys[0] || "");
-    fetchSizes(1, pagination.pageSize, filterName);
+    fetchMaterials(1, pagination.pageSize, filterName);
     confirm();
   };
 
   const handleSearchReset = (clearFilters: () => void) => {
     clearFilters();
     setFilterName("");
-    fetchSizes(pagination.current, pagination.pageSize, filterName);
+    fetchMaterials(pagination.current, pagination.pageSize, filterName);
   };
 
   useEffect(() => {
-    fetchSizes(pagination.current, pagination.pageSize, filterName);
+    fetchMaterials(pagination.current, pagination.pageSize, filterName);
   }, [pagination.current, pagination.pageSize, filterName]);
 
   const columns = [
@@ -178,7 +182,7 @@ const ManagerSize = () => {
       key: "id",
     },
     {
-      title: "Size Name",
+      title: "Material Name",
       dataIndex: "name",
       key: "name",
       filterDropdown: ({
@@ -189,7 +193,7 @@ const ManagerSize = () => {
       }) => (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search size name"
+            placeholder="Search material name"
             value={selectedKeys[0]}
             onChange={(e) => {
               const value = e.target.value;
@@ -332,7 +336,7 @@ const ManagerSize = () => {
       className="text-center"
       style={{ height: "200vh", marginLeft: 20, marginRight: 20 }}
     >
-      <h1 className="text-danger">Manager Size</h1>
+      <h1 className="text-danger">Manager Material</h1>
 
       <Tooltip title="Thêm mới">
         <Button
@@ -345,7 +349,7 @@ const ManagerSize = () => {
         </Button>
       </Tooltip>
       <Modal
-        title={mode === "add" ? "Add Size" : "Update Size"}
+        title={mode === "add" ? "Add Material" : "Update Material"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -354,7 +358,9 @@ const ManagerSize = () => {
           <Form.Item
             name="name"
             label="Size Name"
-            rules={[{ required: true, message: "Please input the size name!" }]}
+            rules={[
+              { required: true, message: "Please input the material name!" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -366,7 +372,7 @@ const ManagerSize = () => {
         onOk={handleCancel}
         onCancel={handleCancel}
       >
-        {selectedSize && (
+        {selectedMaterial && (
           <div
             style={{
               display: "flex",
@@ -374,11 +380,11 @@ const ManagerSize = () => {
               alignItems: "center",
             }}
           >
-            <h3 className=" d-flex text-center mt-2 mb-4">Size Details</h3>
+            <h3 className=" d-flex text-center mt-2 mb-4">Material Details</h3>
 
             <div className="d-flex text-center mt-2 mb-4">
               <div>
-                <h2>{selectedSize.name}</h2>
+                <h2>{selectedMaterial.name}</h2>
               </div>
             </div>
 
@@ -392,12 +398,12 @@ const ManagerSize = () => {
             >
               <p>
                 <b>Created At:</b>{" "}
-                {new Date(selectedSize.createdAt).toLocaleDateString()}
+                {new Date(selectedMaterial.createdAt).toLocaleDateString()}
               </p>
               <p>
                 <b>Updated At:</b>{" "}
-                {selectedSize.updatedAt
-                  ? new Date(selectedSize.updatedAt).toLocaleDateString()
+                {selectedMaterial.updatedAt
+                  ? new Date(selectedMaterial.updatedAt).toLocaleDateString()
                   : "No updated available"}
               </p>
 
@@ -405,7 +411,7 @@ const ManagerSize = () => {
               <br />
               <p className="mt-3 mx-5">
                 <img
-                  src={selectedSize.createdBy.avatar}
+                  src={selectedMaterial.createdBy.avatar}
                   style={{
                     width: 30,
                     height: 30,
@@ -413,16 +419,16 @@ const ManagerSize = () => {
                     marginRight: 10,
                   }}
                 />
-                {selectedSize.createdBy.fullName}
+                {selectedMaterial.createdBy.fullName}
               </p>
 
               <b>Updated By:</b>
               <br />
               <p>
-                {selectedSize.updatedBy ? (
+                {selectedMaterial.updatedBy ? (
                   <p className="mt-3 mx-5">
                     <img
-                      src={selectedSize.updatedBy.avatar}
+                      src={selectedMaterial.updatedBy.avatar}
                       style={{
                         width: 30,
                         height: 30,
@@ -430,7 +436,7 @@ const ManagerSize = () => {
                         marginRight: 10,
                       }}
                     />
-                    {selectedSize.updatedBy.fullName}
+                    {selectedMaterial.updatedBy.fullName}
                   </p>
                 ) : (
                   "No updated available"
@@ -442,7 +448,7 @@ const ManagerSize = () => {
       </Modal>
 
       <Table
-        dataSource={sizes}
+        dataSource={materials}
         columns={columns}
         loading={loading}
         rowKey="id"
@@ -453,4 +459,4 @@ const ManagerSize = () => {
   );
 };
 
-export default ManagerSize;
+export default ManagerMaterial;
