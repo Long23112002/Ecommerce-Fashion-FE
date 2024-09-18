@@ -1,7 +1,7 @@
-import { Box, IconButton, Slide, Typography } from '@mui/material';
+import { Box, Button, IconButton, Slide, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { callFindIdChatRoomByUserId } from '../../api/ChatApi';
+import { callCreateChatRoom, callFindIdChatRoomByUserId } from '../../api/ChatApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatArea from './ChatArea';
 
@@ -14,17 +14,39 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
 
   const user = useSelector(userSelector)
   const [idRoom, setIdRoom] = useState<string>('')
+  const [isRoomExist, setIsRoomExist] = useState<boolean>(true)
 
   const fetchFindIdChatRoomByUserId = async () => {
     if (user.id != -1) {
-      const res = await callFindIdChatRoomByUserId(user.id)
-      setIdRoom(res)
+      try {
+        const res = await callFindIdChatRoomByUserId(user.id);
+        setIdRoom(res);
+      } catch (error: any) {
+        const code = error.response.data.messageCode;
+        if (code === "CHAT_ROOM_NOT_FOUND") {
+          setIsRoomExist(false)
+        } else {
+          console.error(error)
+        }
+      }
     }
   }
 
   useEffect(() => {
     fetchFindIdChatRoomByUserId()
   }, [user])
+
+  const createRoom = async () => {
+    if (user && user.id !== -1) {
+      try {
+        const res = await callCreateChatRoom({ idClient: user.id })
+        setIdRoom(res.id)
+        setIsRoomExist(true)
+      } catch (error) {
+
+      }
+    }
+  }
 
   return (
 
@@ -40,8 +62,8 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
           },
           width: '100%',
           height: '100%',
-          maxWidth: 600,
-          maxHeight: 700,
+          maxWidth: 400,
+          maxHeight: 500,
           bgcolor: 'white',
           border: '1px solid #ddd',
           borderRadius: '8px 8px 0 0',
@@ -74,9 +96,31 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
 
         </Box>
 
-        <ChatArea
-          idRoom={idRoom}
-        />
+        {
+          isRoomExist
+            ?
+            <ChatArea
+              idRoom={idRoom}
+            />
+            :
+            <Box
+              display='flex'
+              justifyContent='center'
+              alignItems='center'
+              height='100%'
+            >
+              <Button
+                variant='contained'
+                color='success'
+                size='large'
+                onClick={createRoom}
+              >
+                Tạo chat
+              </Button>
+            </Box>
+        }
+
+
 
       </Box>
     </Slide>

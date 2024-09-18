@@ -8,7 +8,7 @@ const ChatPage: React.FC = () => {
     const [idRoom, setIdRoom] = useState<string>('')
 
     return (
-        <Box sx={{ display: 'flex', height: '82vh' }}>
+        <Box sx={{ display: 'flex', height: '0px', flexDirection: 'column' }}>
             <Grid container justifyContent='space-between'>
                 <Grid item xs={2.5}>
                     <ChatRoomList
