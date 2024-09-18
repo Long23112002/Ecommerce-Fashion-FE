@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import {Button, Form, Input, Popconfirm, Select, Table} from 'antd';
-import createPaginationConfig, {PaginationState} from "../../../config/paginationConfig.ts";
-import {assignRoleToUser, createUser, deleteUser, getAllUsers, updateUser, UserParam} from "../../../api/UserApi.ts";
-import {UserData} from "../../../api/AuthApi.ts";
-import {UserRequest} from "../../../types/User.ts";
-import {toast} from "react-toastify";
-import {GenderEnum} from "../../../enum/GenderEnum.ts";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, Popconfirm, Select, Table } from 'antd';
+import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
+import { assignRoleToUser, createUser, deleteUser, getAllUsers, updateUser, UserParam } from "../../../api/UserApi.ts";
+import { UserData } from "../../../api/AuthApi.ts";
+import { UserRequest } from "../../../types/User.ts";
+import { toast } from "react-toastify";
+import { GenderEnum } from "../../../enum/GenderEnum.ts";
 import RolesCheckbox from "../../../components/User/RolesCheckboxProps.tsx";
 import UserModel from "../../../components/User/UserModel.tsx";
-import {makeSlug} from "../../../utils/slug.ts";
+import { makeSlug } from "../../../utils/slug.ts";
+import { Container } from '@mui/material';
 
 const ManagerUser = () => {
     const [users, setUsers] = useState<UserData[]>([]);
@@ -81,7 +82,7 @@ const ManagerUser = () => {
         try {
             const values = await form.validateFields();
             if (currentUser) {
-                await updateUser(currentUser.id, {...currentUser, ...values});
+                await updateUser(currentUser.id, { ...currentUser, ...values });
                 toast.success("User updated successfully.");
             } else {
                 await createUser(values);
@@ -98,10 +99,10 @@ const ManagerUser = () => {
         try {
             const user = users.find(u => u.id === userId);
             if (user) {
-                await assignRoleToUser({email: user.email, roleIds: selectedRoles});
+                await assignRoleToUser({ email: user.email, roleIds: selectedRoles });
                 setUsers(prevUsers =>
                     prevUsers.map(u =>
-                        u.id === userId ? {...u, roles: selectedRoles.map(roleId => ({id: roleId, name: ''}))} : u
+                        u.id === userId ? { ...u, roles: selectedRoles.map(roleId => ({ id: roleId, name: '' })) } : u
                     )
                 );
                 toast.success("Roles updated successfully.");
@@ -140,7 +141,7 @@ const ManagerUser = () => {
                 <img
                     src={avatar}
                     alt="avatar"
-                    style={{width: 40, height: 40, borderRadius: '50%'}}
+                    style={{ width: 40, height: 40, borderRadius: '50%' }}
                 />
             ),
         },
@@ -182,7 +183,7 @@ const ManagerUser = () => {
             key: 'actions',
             render: (_, record) => (
                 <div>
-                    <Button onClick={() => showModal(record)} style={{marginRight: 8}}>
+                    <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
                         Update
                     </Button>
                     <Popconfirm
@@ -199,11 +200,11 @@ const ManagerUser = () => {
     ];
 
     return (
-        <div className="text-center" style={{height: '200vh', marginLeft: 20, marginRight: 20}}>
-            <h1 className="text-danger">Manager User</h1>
+        <Container maxWidth='xl'>
+            <h1 className="text-danger text-center">Manager User</h1>
             <Button
                 className="mt-3 mb-3"
-                style={{display: "flex", backgroundColor: "black", color: "white"}}
+                style={{ display: "flex", backgroundColor: "black", color: "white" }}
                 type="default"
                 onClick={() => showModal(null)}
             >
@@ -212,17 +213,17 @@ const ManagerUser = () => {
             <Form
                 layout="inline"
                 onValuesChange={handleFilterChange}
-                style={{display: 'flex', justifyContent: 'flex-end'}}
+                style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
                 <Form.Item name="email" label="Email">
-                    <Input placeholder="Search by email"/>
+                    <Input placeholder="Search by email" />
                 </Form.Item>
                 <Form.Item name="phone" label="Phone Number">
-                    <Input placeholder="Search by phone number"/>
+                    <Input placeholder="Search by phone number" />
                 </Form.Item>
                 <Form.Item name="fullName" label="Full Name">
-                    <Input placeholder="Search by full name"/>
+                    <Input placeholder="Search by full name" />
                 </Form.Item>
                 <Form.Item name="gender" label="Gender">
                     <Select placeholder="Select gender">
@@ -234,26 +235,26 @@ const ManagerUser = () => {
                     </Select>
                 </Form.Item>
             </Form>
-            <Table
-                dataSource={users}
-                columns={columns}
-                loading={loading}
-                rowKey="id"
-                pagination={createPaginationConfig(pagination, setPagination)}
-                onChange={handleTableChange}
-            />
-            {isModalOpen && (
-                <UserModel
-                    isModalOpen={isModalOpen}
-                    handleOk={handleModalOk}
-                    handleCancel={() => setIsModalOpen(false)}
-                    form={form}
-                    refreshUsers={fetchUsers}
-                    mode={currentUser ? 'update' : 'add'}
-                    user={currentUser ? {...currentUser} : undefined}
+                <Table
+                    dataSource={users}
+                    columns={columns}
+                    loading={loading}
+                    rowKey="id"
+                    pagination={createPaginationConfig(pagination, setPagination)}
+                    onChange={handleTableChange}
                 />
-            )}
-        </div>
+                {isModalOpen && (
+                    <UserModel
+                        isModalOpen={isModalOpen}
+                        handleOk={handleModalOk}
+                        handleCancel={() => setIsModalOpen(false)}
+                        form={form}
+                        refreshUsers={fetchUsers}
+                        mode={currentUser ? 'update' : 'add'}
+                        user={currentUser ? { ...currentUser } : undefined}
+                    />
+                )}
+        </Container>
     );
 
 };

@@ -1,10 +1,10 @@
-import {Avatar, Box, Drawer, Grid, IconButton, Stack, Typography} from '@mui/material';
-import React, {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import { Avatar, Box, Drawer, Grid, IconButton, Stack, Typography } from '@mui/material';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import {useNavigate} from "react-router-dom";
-import {getUserData, handleLogout} from "../../api/AuthApi.ts";
-import {setUser, userSelector} from "../../redux/reducers/UserReducer.ts";
+import { useNavigate } from "react-router-dom";
+import { getUserData, handleLogout } from "../../api/AuthApi.ts";
+import { setUser, userSelector } from "../../redux/reducers/UserReducer.ts";
 import Button from "../Button.tsx";
 
 interface IProps {
@@ -12,7 +12,7 @@ interface IProps {
     toggleDrawer?: (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => void;
 }
 
-const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
+const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -25,15 +25,16 @@ const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
     useEffect(() => {
         const userData = getUserData();
         dispatch(setUser({
+            id: Number(userData.id),
+            isAdmin: userData.isAdmin === "true",
             fullName: userData.fullName,
             email: userData.email,
-            avatar: userData.avatar
+            avatar: userData.avatar,
         }));
     }, [dispatch]);
 
 
     const user = useSelector(userSelector);
-
 
     return (
         <Drawer
@@ -56,6 +57,7 @@ const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
                     onClick={toggleDrawer ? toggleDrawer(false) : undefined}
                 >
                     <i className="fa-solid fa-xmark" />
+
                 </IconButton>
                 <Grid
                     container
@@ -116,9 +118,9 @@ const AdminAvatarDrawer: React.FC<IProps> = ({open, toggleDrawer}) => {
                         Logout
                     </Button>
                 </Stack>
-            </Box>
-        </Drawer>
+            </Box >
+        </Drawer >
     );
 };
 
-export default AdminAvatarDrawer;
+export default AvatarDrawer;

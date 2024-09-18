@@ -191,7 +191,7 @@ const ManagerRole = () => {
     ];
 
     return (
-        <div className="text-center" style={{height: '200vh', marginLeft: 20, marginRight: 20}}>
+        <div className="text-center" style={{marginLeft: 20, marginRight: 20}}>
             <h1 className="text-danger">Manager Role</h1>
             <Button
                 className="mt-3 mb-3"
