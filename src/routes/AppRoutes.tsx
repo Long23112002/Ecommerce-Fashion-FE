@@ -17,10 +17,8 @@ import Home from "../pages/Customer/Home";
 import ChatPage from "../pages/Admin/Chat";
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
-
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
-import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
-import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
+
 
 
 
