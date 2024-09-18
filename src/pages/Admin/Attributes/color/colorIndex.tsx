@@ -22,12 +22,12 @@ import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
 import { SearchOutlined } from "@ant-design/icons";
-import { getColorCode } from "./color.js";
+import { getColorCode } from "./mapColor.ts";
 import {
   PlusSquareFilled,
   EditFilled,
   DeleteFilled,
-  BookFilled,
+  EyeFilled,
 } from "@ant-design/icons";
 
 import type { FilterDropdownProps } from "antd/es/table/interface";
@@ -164,7 +164,7 @@ const ManagerColor = () => {
     confirm: FilterDropdownProps["confirm"]
   ) => {
     setFilterName(selectedKeys[0] || "");
-    fetchColors(pagination.current, pagination.pageSize, filterName);
+    fetchColors(1, pagination.pageSize, filterName);
     confirm();
   };
 
@@ -220,7 +220,6 @@ const ManagerColor = () => {
             placeholder="Search color name"
             value={selectedKeys[0]}
             onChange={(e) => {
-
               const value = e.target.value;
               setSelectedKeys(value ? [value] : []);
             }}
@@ -232,7 +231,6 @@ const ManagerColor = () => {
           <Space>
             <Button
               type="primary"
-
               onClick={() => {
                 handleSearch(selectedKeys, confirm);
                 confirm({ closeDropdown: true });
@@ -243,9 +241,11 @@ const ManagerColor = () => {
             >
               Search
             </Button>
+            
             <Button
               onClick={() => {
                 handleSearchReset(clearFilters);
+                confirm({ closeDropdown: false});
               }}
               size="small"
               style={{ width: 90 }}
@@ -333,7 +333,7 @@ const ManagerColor = () => {
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-              <BookFilled />
+              <EyeFilled />
             </Button>
           </Tooltip>
           <Popconfirm
