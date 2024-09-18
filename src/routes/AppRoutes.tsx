@@ -15,6 +15,10 @@ import ChatPage from '../pages/Admin/Chat/index.tsx';
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
+import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
+import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
+
+
 
 
 const AppRoutes = () => {
@@ -28,8 +32,9 @@ const AppRoutes = () => {
                 <Route path='/' element={<Home />} />
             </Route>
 
-            <Route element={<AdminRoute />}>
-                <Route path="/login" element={<Login />} />
+
+            <Route element={<AdminRoute/>}>
+                <Route path="/login" element={<Login/>}/>
                 <Route element={<AdminLayout/>}>
                     <Route path="/admin/product/*" element={<ProductManager/>}/>
                     <Route path="/admin/user/role" element={<ManagerRole/>}/>
