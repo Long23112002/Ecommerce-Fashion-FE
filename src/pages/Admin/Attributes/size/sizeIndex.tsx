@@ -21,14 +21,7 @@ import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
-import { SearchOutlined } from "@ant-design/icons";
-import {
-  PlusSquareFilled,
-  EditFilled,
-  DeleteFilled,
-  EyeFilled,
-} from "@ant-design/icons";
-import type { FilterDropdownProps } from "antd/es/table/interface";
+import { debounce } from "lodash";
 
 const ManagerSize = () => {
   const [loading, setLoading] = useState(false);
@@ -56,9 +49,11 @@ const ManagerSize = () => {
     pageSize: number,
     filterName: string = ""
   ) => {
+    setLoading(true);
     try {
       const response = await fetchAllSizes(filterName, pageSize, current - 1);
-      setSizes(response.data);
+      const sizeData = response.data || [];
+      setSizes(sizeData);
       setPagination({
         current: response.metaData.page + 1,
         pageSize: response.metaData.size,
@@ -99,10 +94,10 @@ const ManagerSize = () => {
       if (token) {
         if (mode === "add") {
           await createSize({ name }, token);
-          toast.success("Size added successfully");
+          toast.success("Thêm size thành công");
         } else if (mode === "update" && editingSize) {
           await updateSize(editingSize.id, { name }, token);
-          toast.success("Size updated successfully");
+          toast.success("Cập nhật size thành công");
         }
         handleCancel();
         fetchSizes(pagination.current, pagination.pageSize, filterName);
@@ -110,7 +105,7 @@ const ManagerSize = () => {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save size");
+      toast.error(error.response?.data?.message || "Lưu size thất bại");
     }
   };
 
@@ -125,13 +120,13 @@ const ManagerSize = () => {
       const token = Cookies.get("accessToken");
       if (token) {
         await deleteSize(sizeId, token);
-        toast.success("Size deleted successfully");
+        toast.success("Xóa size thành công");
         fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete size");
+      toast.error(error.response?.data?.message || "Xóa size thất bại");
     }
   };
 
@@ -142,7 +137,6 @@ const ManagerSize = () => {
     });
     const nameFilter = filters.name || "";
     setFilterName(nameFilter);
-
     fetchSizes(pagination.current, pagination.pageSize, nameFilter);
   };
 
@@ -152,23 +146,27 @@ const ManagerSize = () => {
     setIsDetailModalOpen(true); // Open detail modal
   };
 
-  const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"]
-  ) => {
-    setFilterName(selectedKeys[0] || "");
-    fetchSizes(1, pagination.pageSize, filterName);
-    confirm();
+  const handleSearch = (e) => {
+    const search = e.target.value.trim();
+    setLoading(true);
+    debouncedSearch(search);
   };
 
-  const handleSearchReset = (clearFilters: () => void) => {
-    clearFilters();
-    setFilterName("");
-    fetchSizes(pagination.current, pagination.pageSize, filterName);
-  };
+  const debouncedSearch = debounce((value) => {
+    const search = value.trim();
+    if (search) {
+      setPagination((prev) => ({
+        ...prev,
+        current: 1,
+      }));
+    }
+    setFilterName(search);
+    fetchSizes(pagination.current, pagination.pageSize, search);
+  }, 100);
 
   useEffect(() => {
     fetchSizes(pagination.current, pagination.pageSize, filterName);
+    console.log(filterName);
   }, [pagination.current, pagination.pageSize, filterName]);
 
   const columns = [
@@ -181,55 +179,6 @@ const ManagerSize = () => {
       title: "Tên size",
       dataIndex: "name",
       key: "name",
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search size name"
-            value={selectedKeys[0]}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSelectedKeys(value ? [value] : []);
-            }}
-            onPressEnter={() =>
-              handleSearch(selectedKeys, confirm({ closeDropdown: true }))
-            }
-            style={{ marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => {
-                handleSearch(selectedKeys, confirm);
-                confirm({ closeDropdown: true });
-              }}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-
-            <Button
-              onClick={() => {
-                handleSearchReset(clearFilters);
-                confirm({ closeDropdown: false });
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
-      ),
     },
     {
       title: "Ngày tạo",
@@ -291,23 +240,23 @@ const ManagerSize = () => {
       key: "actions",
       render: (_, record) => (
         <div>
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              className="btn-outline-warning"
-              onClick={() => showModal(record)}
-              style={{ marginRight: 8 }}
-            >
-              <EditFilled />
-            </Button>
-          </Tooltip>
-
           <Tooltip title="Chi tiết">
             <Button
               className="btn-outline-info"
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-              <EyeFilled />
+              <i className="fa-solid fa-eye"></i>
+            </Button>
+          </Tooltip>
+
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              className="btn-outline-warning"
+              onClick={() => showModal(record)}
+              style={{ marginRight: 8 }}
+            >
+              <i className="fa-solid fa-pen-to-square"></i>
             </Button>
           </Tooltip>
 
@@ -319,7 +268,7 @@ const ManagerSize = () => {
           >
             <Tooltip title="Xóa size">
               <Button className="btn-outline-danger">
-                <DeleteFilled />
+                <i className="fa-solid fa-trash-can"></i>
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -329,22 +278,33 @@ const ManagerSize = () => {
   ];
 
   return (
-    <div
-      className="text-center"
-      style={{marginLeft: 20, marginRight: 20 }}
-    >
+    <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className="text-danger">Quản lý size</h1>
 
       <Tooltip title="Thêm mới">
         <Button
           className="mt-3 mb-3"
-          style={{ display: "flex", backgroundColor: "black", color: "white" }}
+          style={{
+            display: "flex",
+            backgroundColor: "black",
+            color: "white",
+          }}
           type="default"
           onClick={() => showModal(null)}
         >
-          <PlusSquareFilled />
+          <i className="fa-solid fa-circle-plus"></i>
         </Button>
       </Tooltip>
+
+      <div className="mb-5 d-flex justify-content-end">
+        <Input
+          placeholder="Nhập tên size..."
+          onChange={(e) => handleSearch(e)}
+          className="form-control"
+          style={{ width: 300 }}
+        />
+      </div>
+
       <Modal
         title={mode === "add" ? "Thêm size" : "Cập nhật size"}
         open={isModalOpen}
@@ -390,7 +350,7 @@ const ManagerSize = () => {
                 width: "100%",
               }}
             >
-              Size Details
+              Chi tiết size
             </h3>
 
             {/* Size Name */}
@@ -425,7 +385,7 @@ const ManagerSize = () => {
                     marginBottom: "5px",
                   }}
                 >
-                  Created At:
+                  Ngày tạo:
                 </label>
                 <input
                   className="form-control"
@@ -449,18 +409,9 @@ const ManagerSize = () => {
                     marginBottom: "5px",
                   }}
                 >
-                  Created By:
+                  Người tạo:
                 </label>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    background: "#f1f1f1",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-                  }}
-                >
+                <div style={{ padding: "10px" }}>
                   <img
                     src={selectedSize.createdBy.avatar}
                     alt="createdBy-avatar"
@@ -493,7 +444,7 @@ const ManagerSize = () => {
                     marginBottom: "5px",
                   }}
                 >
-                  Updated At:
+                  Ngày cập nhật:
                 </label>
                 <input
                   className="form-control"
@@ -501,7 +452,7 @@ const ManagerSize = () => {
                   value={
                     selectedSize.updatedAt
                       ? new Date(selectedSize.updatedAt).toLocaleDateString()
-                      : "No updates available"
+                      : "Chưa cập nhật"
                   }
                   readOnly
                   style={{
@@ -521,19 +472,10 @@ const ManagerSize = () => {
                     marginBottom: "5px",
                   }}
                 >
-                  Updated By:
+                  Người cập nhật:
                 </label>
                 {selectedSize.updatedBy ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      background: "#f1f1f1",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-                    }}
-                  >
+                  <div style={{ padding: "10px" }}>
                     <img
                       src={selectedSize.updatedBy.avatar}
                       alt="updatedBy-avatar"
@@ -559,7 +501,7 @@ const ManagerSize = () => {
                   <input
                     className="form-control"
                     type="text"
-                    value="No updates available"
+                    value="Chưa cập nhật"
                     readOnly
                     style={{
                       backgroundColor: "#f9f9f9",
