@@ -1,3 +1,4 @@
+import ChatRoom from "../types/ChatRoom"
 import axiosInstance from "./AxiosInstance"
 
 export const callFindAllChatRoom = async () => {
@@ -7,6 +8,11 @@ export const callFindAllChatRoom = async () => {
 
 export const callFindIdChatRoomByUserId = async (id: string | number) => {
     const { data } = await axiosInstance.get(`/api/v1/chat_room/user/${id}`)
+    return data
+}
+
+export const callCreateChatRoom = async (chatRoom: ChatRoom) => {
+    const { data } = await axiosInstance.post(`/api/v1/chat_room`, chatRoom)
     return data
 }
 

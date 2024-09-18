@@ -93,7 +93,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
         }
     }, [chats])
 
-    return (
+    const box = (
         <>
             <Box
                 ref={chatBoxRef}
@@ -102,37 +102,55 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                     overflowY: 'auto',
                     py: 3,
                     px: 4,
-                    height: '100%'
-                }}>
-                {
-                    !loading
-                        ?
-                        chats.map((chat, index) =>
-                            <ChatItem
-                                key={index}
-                                chat={chat}
-                                id={user.id}
-                                isAdmin={isAdmin || false}
-                            />
-                        )
-                        :
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '100%'
-                            }}
-                        >
-                            <CircularProgress />
-                        </Box>
-                }
+                }}
+            >
+                {!loading ? (
+                    chats.map((chat, index) => (
+                        <ChatItem
+                            key={index}
+                            chat={chat}
+                            id={user.id}
+                            isAdmin={isAdmin || false}
+                        />
+                    ))
+                ) : (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
+                        }}
+                    >
+                        <CircularProgress />
+                    </Box>
+                )}
             </Box>
 
             <ChatInput
                 client={client}
                 idRoom={idRoom}
             />
+        </>
+    )
+
+    return (
+        <>
+            {isAdmin
+                ?
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: 'calc(100vh - 100px)',
+                    }}
+                >
+                    {box}
+                </Box>
+                :
+                box
+            }
+
         </>
     )
 }

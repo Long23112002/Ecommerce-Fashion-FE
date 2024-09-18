@@ -37,10 +37,6 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
         setContent('');
     };
 
-
-
-
-
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Enter') {
             handleSend()
