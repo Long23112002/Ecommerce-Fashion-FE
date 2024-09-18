@@ -26,7 +26,7 @@ import {
   PlusSquareFilled,
   EditFilled,
   DeleteFilled,
-  BookFilled,
+  EyeFilled,
 } from "@ant-design/icons";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 
@@ -157,7 +157,7 @@ const ManagerSize = () => {
     confirm: FilterDropdownProps["confirm"]
   ) => {
     setFilterName(selectedKeys[0] || "");
-    fetchSizes(pagination.current, pagination.pageSize, filterName);
+    fetchSizes(1, pagination.pageSize, filterName);
     confirm();
   };
 
@@ -306,7 +306,7 @@ const ManagerSize = () => {
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-              <BookFilled />
+              <EyeFilled />
             </Button>
           </Tooltip>
 

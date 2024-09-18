@@ -27,7 +27,7 @@ import {
   PlusSquareFilled,
   EditFilled,
   DeleteFilled,
-  BookFilled,
+  EyeFilled,
 } from "@ant-design/icons";
 
 import type { FilterDropdownProps } from "antd/es/table/interface";
@@ -164,8 +164,7 @@ const ManagerColor = () => {
     confirm: FilterDropdownProps["confirm"]
   ) => {
     setFilterName(selectedKeys[0] || "");
-    setPagination();
-    fetchColors(pagination.current, pagination.pageSize, filterName);
+    fetchColors(1, pagination.pageSize, filterName);
     confirm();
   };
 
@@ -334,7 +333,7 @@ const ManagerColor = () => {
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-              <BookFilled />
+              <EyeFilled />
             </Button>
           </Tooltip>
           <Popconfirm
