@@ -330,7 +330,7 @@ const ManagerSize = () => {
   return (
     <div
       className="text-center"
-      style={{ height: "200vh", marginLeft: 20, marginRight: 20 }}
+      style={{marginLeft: 20, marginRight: 20 }}
     >
       <h1 className="text-danger">Manager Size</h1>
 
