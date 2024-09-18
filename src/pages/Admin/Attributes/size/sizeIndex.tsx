@@ -178,7 +178,7 @@ const ManagerSize = () => {
       key: "id",
     },
     {
-      title: "Size Name",
+      title: "Tên size",
       dataIndex: "name",
       key: "name",
       filterDropdown: ({
@@ -232,20 +232,13 @@ const ManagerSize = () => {
       ),
     },
     {
-      title: "Created At",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "No updated available",
-    },
-    {
-      title: "Created By",
+      title: "Người tạo",
       dataIndex: "createdBy",
       key: "createdBy",
       render: (createdBy) => (
@@ -264,7 +257,15 @@ const ManagerSize = () => {
       ),
     },
     {
-      title: "Updated By",
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      render: (date) =>
+        date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
+    },
+    
+    {
+      title: "Người cập nhật",
       dataIndex: "updatedBy",
       key: "updatedBy",
       render: (updatedBy) =>
@@ -282,11 +283,11 @@ const ManagerSize = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "No updated available"
+          "Chưa cập nhật"
         ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       render: (_, record) => (
         <div>
@@ -311,7 +312,7 @@ const ManagerSize = () => {
           </Tooltip>
 
           <Popconfirm
-            title="Are you sure you want to delete this size?"
+            title="Xác nhận xóa size này?"
             onConfirm={() => handleDelete(record.id)}
             okText="Yes"
             cancelText="No"
@@ -332,7 +333,7 @@ const ManagerSize = () => {
       className="text-center"
       style={{ height: "200vh", marginLeft: 20, marginRight: 20 }}
     >
-      <h1 className="text-danger">Manager Size</h1>
+      <h1 className="text-danger">Quản lý size</h1>
 
       <Tooltip title="Thêm mới">
         <Button
@@ -345,7 +346,7 @@ const ManagerSize = () => {
         </Button>
       </Tooltip>
       <Modal
-        title={mode === "add" ? "Add Size" : "Update Size"}
+        title={mode === "add" ? "Thêm size" : "Cập nhật size"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -353,8 +354,8 @@ const ManagerSize = () => {
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="Size Name"
-            rules={[{ required: true, message: "Please input the size name!" }]}
+            label="Tên size"
+            rules={[{ required: true, message: "Vui lòng nhập tên size!" }]}
           >
             <Input />
           </Form.Item>
@@ -374,68 +375,140 @@ const ManagerSize = () => {
               alignItems: "center",
             }}
           >
-            <h3 className=" d-flex text-center mt-2 mb-4">Size Details</h3>
+            <h3
+              className="text-center mt-2 mb-4"
+              style={{ fontWeight: "bold", color: "#333" }}
+            >
+              Chi tiết size
+            </h3>
 
-            <div className="d-flex text-center mt-2 mb-4">
-              <div>
-                <h2>{selectedSize.name}</h2>
-              </div>
+            <div className="text-center mb-4">
+              <h2 style={{ color: "#007BFF", fontWeight: "bold" }}>
+                {selectedSize.name}
+              </h2>
             </div>
 
             <div
               style={{
                 width: "100%",
-                padding: "10px",
-                background: "#f9f9f9",
+                padding: "15px",
+                background: "#f4f4f4",
                 borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
               }}
             >
-              <p>
-                <b>Created At:</b>{" "}
-                {new Date(selectedSize.createdAt).toLocaleDateString()}
-              </p>
-              <p>
-                <b>Updated At:</b>{" "}
-                {selectedSize.updatedAt
-                  ? new Date(selectedSize.updatedAt).toLocaleDateString()
-                  : "No updated available"}
-              </p>
 
-              <b>Created By:</b>
-              <br />
-              <p className="mt-3 mx-5">
-                <img
-                  src={selectedSize.createdBy.avatar}
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  <b>Ngày tạo:</b>
+                </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  value={new Date(selectedSize.createdAt).toLocaleDateString()}
+                  readOnly
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: "50%",
-                    marginRight: 10,
+                    width: "100%",
+                    background: "#f9f9f9",
+                    cursor: "default",
                   }}
                 />
-                {selectedSize.createdBy.fullName}
-              </p>
+              </div>
 
-              <b>Updated By:</b>
-              <br />
-              <p>
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  <b>Người tạo:</b>
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#f1f1f1",
+                    padding: "8px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  <img
+                    src={selectedSize.createdBy.avatar}
+                    alt="createdBy-avatar"
+                    style={{
+                      width: 45,
+                      height: 45,
+                      borderRadius: "50%",
+                      marginRight: 15,
+                      border: "2px solid #ddd",
+                    }}
+                  />
+                  <span style={{ fontWeight: "bold", color: "#333" }}>
+                    {selectedSize.createdBy.fullName}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  <b>Ngày cập nhật:</b>
+                </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  value={
+                    selectedSize.updatedAt
+                      ? new Date(selectedSize.updatedAt).toLocaleDateString()
+                      : "Chưa cập nhật"
+                  }
+                  readOnly
+                  style={{
+                    width: "100%",
+                    background: "#f9f9f9",
+                    cursor: "default",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  <b>Người cập nhật:</b>
+                </label>
                 {selectedSize.updatedBy ? (
-                  <p className="mt-3 mx-5">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      background: "#f1f1f1",
+                      padding: "8px",
+                      borderRadius: "5px",
+                    }}
+                  >
                     <img
                       src={selectedSize.updatedBy.avatar}
+                      alt="updatedBy-avatar"
                       style={{
-                        width: 30,
-                        height: 30,
+                        width: 45,
+                        height: 45,
                         borderRadius: "50%",
-                        marginRight: 10,
+                        marginRight: 15,
+                        border: "2px solid #ddd",
                       }}
                     />
-                    {selectedSize.updatedBy.fullName}
-                  </p>
+                    <span style={{ fontWeight: "bold", color: "#333" }}>
+                      {selectedSize.updatedBy.fullName}
+                    </span>
+                  </div>
                 ) : (
-                  "No updated available"
+                  <input
+                    className="form-control"
+                    type="text"
+                    value="Chưa cập nhật"
+                    readOnly
+                    style={{
+                      width: "100%",
+                      background: "#f9f9f9",
+                      cursor: "default",
+                    }}
+                  />
                 )}
-              </p>
+              </div>
             </div>
           </div>
         )}
