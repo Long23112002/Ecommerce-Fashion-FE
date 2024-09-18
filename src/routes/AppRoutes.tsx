@@ -12,6 +12,9 @@ import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import UserLayout from "../layouts/Customer";
 import Home from "../pages/Customer/Home";
 import ChatPage from '../pages/Admin/Chat/index.tsx';
+import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
+import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
+import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 
 
 const AppRoutes = () => {
@@ -27,15 +30,16 @@ const AppRoutes = () => {
 
             <Route element={<AdminRoute />}>
                 <Route path="/login" element={<Login />} />
-                <Route element={<AdminLayout />}>
-                    <Route path="/admin/product/*" element={<ProductManager />} />
-                    <Route path="/admin/user/role" element={<ManagerRole />} />
-                    <Route path="/admin/user" element={<ManagerUser />} />
-
-                    <Route path="/admin/color" element={<ManagerColor />} />
-                    <Route path="/admin/size" element={<ManagerSize />} />
-
-                    <Route path="/admin/chat" element={<ChatPage />} />
+                <Route element={<AdminLayout/>}>
+                    <Route path="/admin/product/*" element={<ProductManager/>}/>
+                    <Route path="/admin/user/role" element={<ManagerRole/>}/>
+                    <Route path="/admin/brand" element={<ManagerBrand/>}/>
+                    <Route path="/admin/origin" element={<ManaggerOrigin/>}/>
+                    <Route path="/admin/color" element={<ManagerColor/>}/>
+                    <Route path="/admin/size" element={<ManagerSize/>}/>
+                    <Route path="/admin/material" element={<ManagerMaterial/>}/>
+                    <Route path="/admin/chat" element={<ChatPage/>}/>
+                    <Route path="/admin/user" element={<ManagerUser/>}/>
                 </Route>
             </Route>
 
