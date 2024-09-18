@@ -263,7 +263,7 @@ const ManagerSize = () => {
       render: (date) =>
         date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
     },
-    
+
     {
       title: "Người cập nhật",
       dataIndex: "updatedBy",
@@ -366,6 +366,8 @@ const ManagerSize = () => {
         open={isDetailModalOpen}
         onOk={handleCancel}
         onCancel={handleCancel}
+        centered
+        footer={null}
       >
         {selectedSize && (
           <div
@@ -373,34 +375,57 @@ const ManagerSize = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              padding: "20px",
             }}
           >
+            {/* Header */}
             <h3
-              className="text-center mt-2 mb-4"
-              style={{ fontWeight: "bold", color: "#333" }}
+              style={{
+                fontWeight: "bold",
+                color: "#333",
+                textAlign: "center",
+                marginBottom: "20px",
+                borderBottom: "1px solid #ddd",
+                paddingBottom: "10px",
+                width: "100%",
+              }}
             >
-              Chi tiết size
+              Size Details
             </h3>
 
-            <div className="text-center mb-4">
-              <h2 style={{ color: "#007BFF", fontWeight: "bold" }}>
-                {selectedSize.name}
-              </h2>
+            {/* Size Name */}
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "20px",
+                fontSize: "24px",
+                fontWeight: "bold",
+                color: "#D2B48C",
+              }}
+            >
+              {selectedSize.name}
             </div>
 
             <div
               style={{
                 width: "100%",
                 padding: "15px",
-                background: "#f4f4f4",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                borderRadius: "10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
               }}
             >
-
-              <div style={{ marginBottom: "10px" }}>
-                <label>
-                  <b>Ngày tạo:</b>
+              {/* Created At */}
+              <div>
+                <label
+                  style={{
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Created At:
                 </label>
                 <input
                   className="form-control"
@@ -408,46 +433,67 @@ const ManagerSize = () => {
                   value={new Date(selectedSize.createdAt).toLocaleDateString()}
                   readOnly
                   style={{
-                    width: "100%",
-                    background: "#f9f9f9",
+                    backgroundColor: "#f9f9f9",
                     cursor: "default",
+                    border: "1px solid #ddd",
                   }}
                 />
               </div>
 
-              <div style={{ marginBottom: "10px" }}>
-                <label>
-                  <b>Người tạo:</b>
+              {/* Created By */}
+              <div>
+                <label
+                  style={{
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Created By:
                 </label>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     background: "#f1f1f1",
-                    padding: "8px",
-                    borderRadius: "5px",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
                   }}
                 >
                   <img
                     src={selectedSize.createdBy.avatar}
                     alt="createdBy-avatar"
                     style={{
-                      width: 45,
-                      height: 45,
+                      width: 50,
+                      height: 50,
                       borderRadius: "50%",
                       marginRight: 15,
                       border: "2px solid #ddd",
                     }}
                   />
-                  <span style={{ fontWeight: "bold", color: "#333" }}>
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      color: "#333",
+                    }}
+                  >
                     {selectedSize.createdBy.fullName}
                   </span>
                 </div>
               </div>
 
-              <div style={{ marginBottom: "10px" }}>
-                <label>
-                  <b>Ngày cập nhật:</b>
+              {/* Updated At */}
+              <div>
+                <label
+                  style={{
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Updated At:
                 </label>
                 <input
                   className="form-control"
@@ -455,20 +501,27 @@ const ManagerSize = () => {
                   value={
                     selectedSize.updatedAt
                       ? new Date(selectedSize.updatedAt).toLocaleDateString()
-                      : "Chưa cập nhật"
+                      : "No updates available"
                   }
                   readOnly
                   style={{
-                    width: "100%",
-                    background: "#f9f9f9",
+                    backgroundColor: "#f9f9f9",
                     cursor: "default",
+                    border: "1px solid #ddd",
                   }}
                 />
               </div>
 
-              <div style={{ marginBottom: "10px" }}>
-                <label>
-                  <b>Người cập nhật:</b>
+              {/* Updated By */}
+              <div>
+                <label
+                  style={{
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Updated By:
                 </label>
                 {selectedSize.updatedBy ? (
                   <div
@@ -476,22 +529,29 @@ const ManagerSize = () => {
                       display: "flex",
                       alignItems: "center",
                       background: "#f1f1f1",
-                      padding: "8px",
-                      borderRadius: "5px",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
                     }}
                   >
                     <img
                       src={selectedSize.updatedBy.avatar}
                       alt="updatedBy-avatar"
                       style={{
-                        width: 45,
-                        height: 45,
+                        width: 50,
+                        height: 50,
                         borderRadius: "50%",
                         marginRight: 15,
                         border: "2px solid #ddd",
                       }}
                     />
-                    <span style={{ fontWeight: "bold", color: "#333" }}>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "16px",
+                        color: "#333",
+                      }}
+                    >
                       {selectedSize.updatedBy.fullName}
                     </span>
                   </div>
@@ -499,12 +559,12 @@ const ManagerSize = () => {
                   <input
                     className="form-control"
                     type="text"
-                    value="Chưa cập nhật"
+                    value="No updates available"
                     readOnly
                     style={{
-                      width: "100%",
-                      background: "#f9f9f9",
+                      backgroundColor: "#f9f9f9",
                       cursor: "default",
+                      border: "1px solid #ddd",
                     }}
                   />
                 )}
