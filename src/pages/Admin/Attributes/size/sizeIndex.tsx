@@ -100,11 +100,13 @@ const ManagerSize = () => {
           toast.success("Cập nhật size thành công");
         }
         handleCancel();
-        fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
         toast.error("Authorization failed");
       }
     } catch (error) {
+      if (error.response?.data?.message?.name != null) {
+        toast.error(error.response?.data?.message?.name);
+      }
       toast.error(error.response?.data?.message || "Lưu size thất bại");
     }
   };
@@ -121,7 +123,7 @@ const ManagerSize = () => {
       if (token) {
         await deleteSize(sizeId, token);
         toast.success("Xóa size thành công");
-        fetchSizes(pagination.current, pagination.pageSize, filterName);
+        
       } else {
         toast.error("Authorization failed");
       }
@@ -135,21 +137,12 @@ const ManagerSize = () => {
       ...pagination,
       current: pagination.current,
     });
-    const nameFilter = filters.name || "";
-    setFilterName(nameFilter);
-    fetchSizes(pagination.current, pagination.pageSize, nameFilter);
   };
 
   const showDetailModal = async (size) => {
     const sizeDetails = await getSizeById(size.id);
     setSelectedSize(sizeDetails);
     setIsDetailModalOpen(true); // Open detail modal
-  };
-
-  const handleSearch = (e) => {
-    const search = e.target.value.trim();
-    setLoading(true);
-    debouncedSearch(search);
   };
 
   const debouncedSearch = debounce((value) => {
@@ -161,11 +154,16 @@ const ManagerSize = () => {
       }));
     }
     setFilterName(search);
-    fetchSizes(pagination.current, pagination.pageSize, search);
-  }, 100);
+  }, 1000);
+
+  const handleSearch = (e) => {
+    const search = e.target.value.trim();
+    setLoading(true);
+    debouncedSearch(search);
+  };
 
   useEffect(() => {
-    fetchSizes(pagination.current, pagination.pageSize, filterName);
+    fetchSizes(pagination.current, pagination.pageSize, filterName)
     console.log(filterName);
   }, [pagination.current, pagination.pageSize, filterName]);
 
