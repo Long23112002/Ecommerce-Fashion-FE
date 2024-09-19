@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
@@ -7,6 +7,7 @@ import BrandModel from "../../../../components/Brand/BrandModel.tsx";
 import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"; // New detail modal
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
 import { Brand } from "../../../../types/brand.ts";
+import { debounce } from "lodash";
 
 const ManagerBrand = () => {
     const [loading, setLoading] = useState(true);
@@ -26,10 +27,10 @@ const ManagerBrand = () => {
 
     const mode = editingBrand ? 'update' : 'add';
 
-    const fetchBrands = async (current: number, pageSize: number) => {
+    const fetchBrandsDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
         setLoading(true);
         try {
-            const response = await fetchAllBrands(pageSize, current - 1, searchParams.name);
+            const response = await fetchAllBrands(pageSize, current - 1, searchName);
             setBrands(response.data);
             setPagination({
                 current: response.metaData.page + 1,
@@ -42,6 +43,10 @@ const ManagerBrand = () => {
         } finally {
             setLoading(false);
         }
+    }, 500), []);
+
+    const fetchBrands = (current: number, pageSize: number) => {
+        fetchBrandsDebounced(current, pageSize, searchParams.name);
     };
 
     const showModal = async (brand: Brand | null = null) => {
@@ -114,11 +119,10 @@ const ManagerBrand = () => {
             toast.error(error.response?.data?.message || 'Failed to delete brand');
         }
     };
-
     const handleSearch = (changedValues: any) => {
         setSearchParams(prevParams => ({
             ...prevParams,
-            ...changedValues,
+            name: changedValues.name,
         }));
         setPagination(prevPagination => ({
             ...prevPagination,
@@ -238,7 +242,7 @@ const ManagerBrand = () => {
     ];
 
     return (
-        <div className="text-center" style={{ height: '200vh', marginLeft: 20, marginRight: 20 }}>
+        <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
             <h1 className="text-danger">Manager Brand</h1>
             <Button
                 className="mt-3 mb-3"

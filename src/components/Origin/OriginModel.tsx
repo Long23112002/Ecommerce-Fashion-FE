@@ -1,14 +1,15 @@
-import React from "react";
-import { Modal, Form, Input } from "antd";
+import React, { useState } from "react";
+import { Modal, Form, Input, message } from "antd";
 import { Origin } from "../../types/origin.ts";
 
 interface OriginModelProps {
   isModalOpen: boolean;
-  handleOk: () => void;
+  handleOk: (values: any) => void;
   handleCancel: () => void;
   form: any;
   mode: "add" | "update";
   origin?: Origin;
+  existingOrigins: Origin[]; // Mảng chứa các origin đã tồn tại
 }
 
 const OriginModel: React.FC<OriginModelProps> = ({
@@ -18,15 +19,39 @@ const OriginModel: React.FC<OriginModelProps> = ({
   form,
   mode,
   origin,
+  existingOrigins = [],
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const checkDuplicateName = (name: string, excludeName: string = "") => {
+    return existingOrigins.some((item) => item.name === name && item.name !== excludeName);
+  };
+
+  const onSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const excludeName = mode === "update" ? origin?.name : ""; // Loại trừ tên hiện tại trong chế độ cập nhật
+      if (checkDuplicateName(values.name, excludeName)) {
+        message.error("Tên đã tồn tại! Vui lòng chọn tên khác.");
+        return;
+      }
+      setIsSubmitting(true);
+      handleOk(values); // Thực hiện logic thêm hoặc cập nhật
+      setIsSubmitting(false);
+    } catch (error) {
+      console.error("Validation failed:", error);
+    }
+  };
+
   return (
     <Modal
       title={mode === "add" ? "Add New Origin" : "Update Origin"}
       open={isModalOpen}
-      onOk={handleOk}
+      onOk={onSubmit}
       onCancel={handleCancel}
       okText={mode === "add" ? "Add" : "Update"}
       cancelText="Cancel"
+      confirmLoading={isSubmitting}
     >
       <Form
         form={form}
@@ -37,8 +62,8 @@ const OriginModel: React.FC<OriginModelProps> = ({
           name="name"
           label="Origin Name"
           rules={[
-            { required: true, message: "Please input the origin name!" },
-            { max: 100, message: "Origin name must be less than 100 characters" },
+            { required: true, message: "Vui lòng nhập tên !" },
+            { max: 50, message: "Tên  phải ít hơn 50 ký tự" },
           ]}
         >
           <Input placeholder="Enter origin name" />

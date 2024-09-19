@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
@@ -7,6 +7,7 @@ import OriginModel from "../../../../components/Origin/OriginModel.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/origin/paginationConfig.ts";
 import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import { Origin } from "../../../../types/origin.ts";
+import { debounce } from "lodash";
 
 const ManaggerOrigin = () => {
     const [loading, setLoading] = useState(true);
@@ -28,10 +29,10 @@ const ManaggerOrigin = () => {
 
     const mode = editingOrigin ? 'update' : 'add';
 
-    const fetchOrigins = async (current: number, pageSize: number) => {
+    const fetchOriginsDebounced = useCallback(debounce( async (current: number, pageSize: number,searchName:string) => {
         setLoading(true);
         try {
-            const response = await fetchAllOrigins(pageSize, current - 1, searchParams.name);
+            const response = await fetchAllOrigins(pageSize, current - 1, searchName);
             setOrigins(response.data);
             setPagination({
                 current: response.metaData.page + 1,
@@ -44,8 +45,10 @@ const ManaggerOrigin = () => {
         } finally {
             setLoading(false);
         }
+    },500),[]);
+    const fetchOrigins = (current: number, pageSize: number) => {
+        fetchOriginsDebounced(current, pageSize, searchParams.name);
     };
-
     const showModal = async (origin: Origin | null = null) => {
         if (origin) {
             try {
@@ -116,11 +119,10 @@ const ManaggerOrigin = () => {
             toast.error(error.response?.data?.message || 'Failed to delete origin');
         }
     };
-
     const handleSearch = (changedValues: any) => {
         setSearchParams(prevParams => ({
             ...prevParams,
-            ...changedValues,
+            name : changedValues.name ,
         }));
         setPagination(prevPagination => ({
             ...prevPagination,
