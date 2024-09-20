@@ -244,7 +244,7 @@ const ManaggerOrigin = () => {
 
     return (
         <div className="text-center" style={{ height: '200vh', marginLeft: 20, marginRight: 20 }}>
-            <h1 className="text-danger">Quản Lỹ Xuất Xứ</h1>
+            <h1 className="text-danger">Quản Lý Xuất Xứ</h1>
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
