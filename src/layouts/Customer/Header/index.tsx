@@ -46,8 +46,6 @@ const UserHeader: React.FC = () => {
                     </Box>
                     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
 
-                        <Chat/>
-
                         <Notification />
 
                         <Box component='span' display='flex' alignItems='center'>
