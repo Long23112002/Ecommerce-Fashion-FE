@@ -51,7 +51,11 @@ const ManagerSize = () => {
   ) => {
     setLoading(true);
     try {
-      const response = await fetchAllSizes(filterName, pageSize, current - 1);
+      const response = await fetchAllSizes(
+        filterName, 
+        pageSize, 
+        current - 1
+      );
       const sizeData = response.data || [];
       setSizes(sizeData);
       setPagination({
@@ -88,20 +92,27 @@ const ManagerSize = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      const { name } = values;
+
+      const trimmedValues = {
+        ...values,
+        name: values.name.trim(),
+      };
+
+      const { name } = trimmedValues;
       const token = Cookies.get("accessToken");
 
       if (token) {
         if (mode === "add") {
           await createSize({ name }, token);
-          toast.success("Thêm size thành công");
+          toast.success("Thêm mới size thành công");
         } else if (mode === "update" && editingSize) {
           await updateSize(editingSize.id, { name }, token);
           toast.success("Cập nhật size thành công");
         }
         handleCancel();
+        fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
       if (error.response?.data?.message?.name != null) {
@@ -123,9 +134,9 @@ const ManagerSize = () => {
       if (token) {
         await deleteSize(sizeId, token);
         toast.success("Xóa size thành công");
-        
+        fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Xóa size thất bại");
@@ -137,12 +148,15 @@ const ManagerSize = () => {
       ...pagination,
       current: pagination.current,
     });
+    const nameFilter = filters.name || "";
+    setFilterName(nameFilter);
+    fetchSizes(pagination.current, pagination.pageSize, nameFilter);
   };
 
   const showDetailModal = async (size) => {
     const sizeDetails = await getSizeById(size.id);
     setSelectedSize(sizeDetails);
-    setIsDetailModalOpen(true); // Open detail modal
+    setIsDetailModalOpen(true);
   };
 
   const debouncedSearch = debounce((value) => {
@@ -156,10 +170,11 @@ const ManagerSize = () => {
     setFilterName(search);
   }, 1000);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
+    
   };
 
   useEffect(() => {
@@ -336,7 +351,7 @@ const ManagerSize = () => {
               padding: "20px",
             }}
           >
-            {/* Header */}
+        
             <h3
               style={{
                 fontWeight: "bold",
@@ -351,7 +366,6 @@ const ManagerSize = () => {
               Chi tiết size
             </h3>
 
-            {/* Size Name */}
             <div
               style={{
                 textAlign: "center",
@@ -374,7 +388,7 @@ const ManagerSize = () => {
                 gap: "15px",
               }}
             >
-              {/* Created At */}
+
               <div>
                 <label
                   style={{
@@ -398,7 +412,6 @@ const ManagerSize = () => {
                 />
               </div>
 
-              {/* Created By */}
               <div>
                 <label
                   style={{
@@ -433,7 +446,6 @@ const ManagerSize = () => {
                 </div>
               </div>
 
-              {/* Updated At */}
               <div>
                 <label
                   style={{
@@ -461,7 +473,6 @@ const ManagerSize = () => {
                 />
               </div>
 
-              {/* Updated By */}
               <div>
                 <label
                   style={{
