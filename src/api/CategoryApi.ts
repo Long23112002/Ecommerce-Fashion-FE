@@ -1,9 +1,14 @@
-import Cookies from 'js-cookie';
 import { BASE_API } from '../constants/BaseApi';
 import axiosInstance from './AxiosInstance';
 
 // Define the base URL for the API
 const API_BASE_URL = `${BASE_API}/api/v1/category`;
+
+// Define types for category data
+interface CategoryData {
+  name: string;
+  parentId?: number;
+}
 
 // Fetch all categories with pagination and optional search parameters
 export const fetchAllCategories = async (pageSize: number, pageIndex: number, searchName: string) => {
@@ -22,22 +27,24 @@ export const fetchAllCategories = async (pageSize: number, pageIndex: number, se
 };
 
 // Create a new category
-export const createCategory = async (categoryData: { name: string, parentId?: number }) => {
+export const createCategory = async (categoryData: CategoryData) => {
   try {
     const response = await axiosInstance.post(`${API_BASE_URL}`, categoryData);
     return response.data;
   } catch (error: any) {
-    throw new Error(`Error creating category: ${error.response?.data?.message || error.message}`);
+    console.error("Error creating Category", error);
+    throw error;
   }
 };
 
 // Update an existing category by ID
-export const updateCategory = async (categoryId: number, categoryData: { name: string }) => {
+export const updateCategory = async (categoryId: number, categoryData: CategoryData) => {
   try {
     const response = await axiosInstance.put(`${API_BASE_URL}/${categoryId}`, categoryData);
     return response.data;
   } catch (error: any) {
-    throw new Error(`Error updating category: ${error.response?.data?.message || error.message}`);
+    console.error("Error Update Category", error);
+    throw error;
   }
 };
 
@@ -60,7 +67,8 @@ export const getCategoryById = async (categoryId: number) => {
     throw new Error(`Error fetching category details: ${error.response?.data?.message || error.message}`);
   }
 };
-// select
+
+// Select
 export const getAllCategories = async (pageSize: number, pageIndex: number, searchName: string) => {
   const params = {
     size: pageSize,

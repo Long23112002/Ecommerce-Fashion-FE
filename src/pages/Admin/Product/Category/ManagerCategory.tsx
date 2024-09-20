@@ -107,14 +107,19 @@ const ManagerCategory = () => {
 
       if (token) {
         await createCategory({ name, parentId }, token);
-        toast.success('Category added successfully');
-        handleAddCancel();
-        refreshCategories();
+        toast.success('Thêm danh mục Thành Công !');
+        handleAddCancel(); // Đóng modal sau khi thành công
+        refreshCategories(); // Làm mới danh sách danh mục
       } else {
         toast.error("Authorization failed");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add category');
+    } catch (error: any) {
+      // Kiểm tra phản hồi lỗi từ backend
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message || 'Failed to add category');
+      } else {
+        toast.error('An unexpected error occurred'); // Thông báo lỗi chung
+      }
     }
   };
 
@@ -127,14 +132,18 @@ const ManagerCategory = () => {
 
       if (token && editingCategory) {
         await updateCategory(editingCategory.id, { name, parentId }, token);
-        toast.success('Category updated successfully');
+        toast.success('Cật Nhật danh mục Thành Công !');
         handleUpdateCancel();
         refreshCategories();
       } else {
         toast.error("Authorization failed");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update category');
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message || 'Failed to Update category');
+      } else {
+        toast.error('An unexpected error occurred'); // Thông báo lỗi chung
+      }
     }
   };
 
@@ -151,7 +160,7 @@ const ManagerCategory = () => {
       const token = Cookies.get("accessToken");
       if (token) {
         await deleteCategory(categoryId, token);
-        toast.success("Category deleted successfully");
+        toast.success("Xóa Danh mục Thành Công");
         refreshCategories();
       } else {
         toast.error("Authorization failed");
@@ -188,23 +197,23 @@ const ManagerCategory = () => {
       key: 'id',
     },
     {
-      title: 'Name',
+      title: 'Tên danh mục',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Lever',
+      title: 'Cấp độ',
       dataIndex: 'lever',
       key: 'lever',
     },
     {
-      title: 'Create at',
+      title: 'Thời gian tạo',
       dataIndex: 'createAt',
       key: 'createAt',
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
-      title: 'Update at',
+      title: 'Thời gian cập nhật',
       dataIndex: 'updateAt',
       key: 'updateAt',
       render: (date) => {
@@ -216,7 +225,7 @@ const ManagerCategory = () => {
       }
     },
     {
-      title: 'Create By',
+      title: 'Người tạo',
       dataIndex: 'createBy',
       key: 'createBy',
       render: (createBy) => (
@@ -235,7 +244,7 @@ const ManagerCategory = () => {
       ),
     },
     {
-      title: 'Update By',
+      title: 'Người cập nhật',
       dataIndex: 'updateBy',
       key: 'updateBy',
       render: (updateBy) => {
@@ -262,7 +271,7 @@ const ManagerCategory = () => {
 
     },
     {
-      title: 'Actions',
+      title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
         <div>
@@ -273,10 +282,10 @@ const ManagerCategory = () => {
             <i className="fa-solid fa-pen-to-square"></i>
           </Button>
           <Popconfirm
-            title="Are you sure you want to delete this category?"
+            title="Bạn chắc chắn muốn xóa Danh mục này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
             <Button className="btn-outline-danger">
               <i className="fa-solid fa-trash-can"></i>
@@ -289,7 +298,7 @@ const ManagerCategory = () => {
 
   return (
     <div className="text-center" style={{ height: '200vh', marginLeft: 20, marginRight: 20 }}>
-      <h1 className="text-danger">Manager Category</h1>
+      <h1 className="text-danger">Quản Lý Danh Mục</h1>
       <Button
         className="mt-3 mb-3"
         style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -304,8 +313,8 @@ const ManagerCategory = () => {
         style={{ display: 'flex', justifyContent: 'flex-end' }}
         className="mt-2 mb-2"
       >
-        <Form.Item name="name" label="Category Name">
-          <Input placeholder="Search by category name" />
+        <Form.Item name="name" label="Tên Danh Mục">
+          <Input placeholder="Tìm Kiếm Theo Tên Danh Mục" />
         </Form.Item>
       </Form>
       <AddCategoryModal
@@ -345,13 +354,13 @@ const ManagerCategory = () => {
               return 'sub-category-row-2';
             case 4:
               return 'sub-category-row-3';
-              case 5:
+            case 5:
               return 'sub-category-row-4';
-              case 6:
+            case 6:
               return 'sub-category-row-5';
-              case 7:
+            case 7:
               return 'sub-category-row-6';
-              case 8:
+            case 8:
               return 'sub-category-row-7';
             default:
               return 'sub-category-row';

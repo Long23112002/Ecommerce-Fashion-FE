@@ -145,18 +145,18 @@ const ManagerBrand = () => {
             key: 'id',
         },
         {
-            title: 'Brand Name',
+            title: 'Tên thương hiệu',
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Create at',
+            title: 'Thời gian tạo',
             dataIndex: 'createAt',
             key: 'createAt',
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Update at',
+            title: 'Thời Gian cập nhật',
             dataIndex: 'updateAt',
             key: 'updateAt',
             render: (date) => {
@@ -170,7 +170,7 @@ const ManagerBrand = () => {
             }
         },
         {
-            title: 'Create By',
+            title: 'Người tạo',
             dataIndex: 'createBy',
             key: 'createBy',
             render: (createBy) => (
@@ -189,7 +189,7 @@ const ManagerBrand = () => {
             ),
         },
         {
-            title: 'Update By',
+            title: 'Người cập nhật',
             dataIndex: 'updateBy',
             key: 'updateBy',
             render: (updateBy) => {
@@ -216,7 +216,7 @@ const ManagerBrand = () => {
 
         },
         {
-            title: 'Actions',
+            title: 'Hành động',
             key: 'actions',
             render: (_, record) => (
                 <div>
@@ -227,10 +227,10 @@ const ManagerBrand = () => {
                         <i className="fa-solid fa-pen-to-square"></i>
                     </Button>
                     <Popconfirm
-                        title="Are you sure you want to delete this brand?"
+                        title="Bạn chắc chắn muốn xóa Thương hiệu này?"
                         onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
+                        okText="Có"
+                        cancelText="Không"
                     >
                         <Button className="btn-outline-danger">
                             <i className="fa-solid fa-trash-can"></i>
@@ -243,7 +243,7 @@ const ManagerBrand = () => {
 
     return (
         <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
-            <h1 className="text-danger">Manager Brand</h1>
+            <h1 className="text-danger">Quán Lý Thương Hiệu</h1>
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -258,8 +258,8 @@ const ManagerBrand = () => {
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
-                <Form.Item name="name" label="Brand Name">
-                    <Input placeholder="Search by brand name" />
+                <Form.Item name="name" label="Tên Thương Hiệu">
+                    <Input placeholder="Tìm kiếm theo tên Thương hiệu" />
                 </Form.Item>
             </Form>
             <BrandModel

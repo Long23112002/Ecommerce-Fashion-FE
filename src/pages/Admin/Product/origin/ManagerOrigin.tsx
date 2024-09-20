@@ -29,7 +29,7 @@ const ManaggerOrigin = () => {
 
     const mode = editingOrigin ? 'update' : 'add';
 
-    const fetchOriginsDebounced = useCallback(debounce( async (current: number, pageSize: number,searchName:string) => {
+    const fetchOriginsDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
         setLoading(true);
         try {
             const response = await fetchAllOrigins(pageSize, current - 1, searchName);
@@ -45,7 +45,7 @@ const ManaggerOrigin = () => {
         } finally {
             setLoading(false);
         }
-    },500),[]);
+    }, 500), []);
     const fetchOrigins = (current: number, pageSize: number) => {
         fetchOriginsDebounced(current, pageSize, searchParams.name);
     };
@@ -122,7 +122,7 @@ const ManaggerOrigin = () => {
     const handleSearch = (changedValues: any) => {
         setSearchParams(prevParams => ({
             ...prevParams,
-            name : changedValues.name ,
+            name: changedValues.name,
         }));
         setPagination(prevPagination => ({
             ...prevPagination,
@@ -145,18 +145,18 @@ const ManaggerOrigin = () => {
             key: 'id',
         },
         {
-            title: 'Origin Name',
+            title: 'Tên xuất xứ',
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Create at',
+            title: 'Thời gian tạo',
             dataIndex: 'createAt',
             key: 'createAt',
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Update at',
+            title: 'Thời Gian cập nhật',
             dataIndex: 'updateAt',
             key: 'updateAt',
             render: (date) => {
@@ -170,7 +170,7 @@ const ManaggerOrigin = () => {
             }
         },
         {
-            title: 'Create By',
+            title: 'Người tạo',
             dataIndex: 'createBy',
             key: 'createBy',
             render: (createBy) => (
@@ -190,7 +190,7 @@ const ManaggerOrigin = () => {
 
         },
         {
-            title: 'Update By',
+            title: 'Người cập nhật',
             dataIndex: 'updateBy',
             key: 'updateBy',
             render: (updateBy) => {
@@ -217,7 +217,7 @@ const ManaggerOrigin = () => {
 
         },
         {
-            title: 'Actions',
+            title: 'Hành động',
             key: 'actions',
             render: (_, record) => (
                 <div>
@@ -228,10 +228,10 @@ const ManaggerOrigin = () => {
                         <i className="fa-solid fa-pen-to-square"></i>
                     </Button>
                     <Popconfirm
-                        title="Are you sure you want to delete this origin?"
+                        title="Bạn chắc chắn muốn xóa Xuất xứ này?"
                         onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
+                        okText="Có"
+                        cancelText="Không"
                     >
                         <Button className="btn-outline-danger">
                             <i className="fa-solid fa-trash-can"></i>
@@ -244,7 +244,7 @@ const ManaggerOrigin = () => {
 
     return (
         <div className="text-center" style={{ height: '200vh', marginLeft: 20, marginRight: 20 }}>
-            <h1 className="text-danger">Manager Origin</h1>
+            <h1 className="text-danger">Quản Lỹ Xuất Xứ</h1>
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -259,8 +259,8 @@ const ManaggerOrigin = () => {
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
-                <Form.Item name="name" label="Origin Name">
-                    <Input placeholder="Search by origin name" />
+                <Form.Item name="name" label="Tên Xuất Xứ">
+                    <Input placeholder="Tìm kiếm theo tên xuất xứ" />
                 </Form.Item>
             </Form>
             <OriginModel

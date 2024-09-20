@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, message } from "antd";
+import { Modal, Form, Input, message, FormInstance } from "antd";
 import { Origin } from "../../types/origin.ts";
 
 interface OriginModelProps {
   isModalOpen: boolean;
   handleOk: (values: any) => void;
   handleCancel: () => void;
-  form: any;
+  form: FormInstance;
   mode: "add" | "update";
   origin?: Origin;
   existingOrigins: Origin[]; // Mảng chứa các origin đã tồn tại
@@ -45,12 +45,12 @@ const OriginModel: React.FC<OriginModelProps> = ({
 
   return (
     <Modal
-      title={mode === "add" ? "Add New Origin" : "Update Origin"}
+      title={mode === "add" ? "Thêm Mới Xuất xứ" : "Cập Nhật Xuất xú"}
       open={isModalOpen}
       onOk={onSubmit}
       onCancel={handleCancel}
-      okText={mode === "add" ? "Add" : "Update"}
-      cancelText="Cancel"
+      okText={mode === "add" ? "Thêm" : "Cập Nhật"}
+      cancelText="Thoát"
       confirmLoading={isSubmitting}
     >
       <Form
@@ -60,7 +60,7 @@ const OriginModel: React.FC<OriginModelProps> = ({
       >
         <Form.Item
           name="name"
-          label="Origin Name"
+          label="Tên xuất xứ"
           rules={[
             { required: true, message: "Vui lòng nhập tên !" },
             { max: 50, message: "Tên  phải ít hơn 50 ký tự" },
