@@ -114,7 +114,10 @@ const ManagerMaterial = () => {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save material");
+      if(error.response?.data?.message?.name!=null){
+        toast.error(error.response?.data?.message?.name);
+      }
+      toast.error(error.response?.data?.message || "Lưu chất liệu thất bại");
     }
   };
 
