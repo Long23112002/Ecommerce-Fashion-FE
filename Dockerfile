@@ -9,6 +9,9 @@ ENV PORT=3000
 CMD ["npm", "start"]
 
 FROM development AS build
+# Cài đặt Rollup thủ công nếu cần
+RUN npm install @rollup/rollup-linux-x64-gnu --save-dev
+
 # Bỏ qua ESLint trong build
 RUN npm run build
 
