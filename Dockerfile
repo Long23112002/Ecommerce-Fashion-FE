@@ -10,6 +10,7 @@ ENV PORT=3000
 CMD ["npm", "run", "dev"]
 
 FROM node:lts AS build
+RUN npm cache clean --force
 RUN npm install @rollup/rollup-linux-x64-gnu --save-dev --unsafe-perm
 RUN npm run build:no-eslint
 FROM nginx:alpine AS deploy
