@@ -1,4 +1,4 @@
-version: '2'
+version: '3.8'  # Hoặc bỏ dòng này nếu không cần thiết
 
 services:
   app:
@@ -10,10 +10,15 @@ services:
     expose:
       - "3000"
     restart: always
-    command: ["npm", "run", "dev"]  
+    command: ["npm", "run", "build"] 
 
-  deploy:
-    image: ecm-fe  
+  nginx:
+    image: nginx:alpine
     volumes:
-      - /var/www/html:/app/dist 
-    command: ["sh", "-c", "cp -r /app/dist/* /var/www/html/"]  
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /var/www/html:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    restart: always
