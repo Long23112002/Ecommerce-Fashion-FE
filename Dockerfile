@@ -19,7 +19,9 @@ RUN ls -la /frontend/build
 
 # Bước 2: Cấu hình Nginx
 FROM nginx:latest
-RUN rm -f /etc/nginx/conf.d/default.conf
+
+# Xóa file hoặc thư mục `default.conf` nếu tồn tại
+RUN rm -rf /etc/nginx/conf.d/default.conf
 
 # Copy nội dung build ra Nginx
 COPY --from=build /frontend/build /usr/share/nginx/html
