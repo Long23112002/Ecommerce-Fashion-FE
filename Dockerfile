@@ -8,7 +8,8 @@ COPY . /app
 ENV CI=true
 ENV PORT=3000
 CMD ["npm", "run", "dev"]
-FROM development AS build
+
+FROM node:lts AS build
 RUN npm install @rollup/rollup-linux-x64-gnu --save-dev
 RUN npm run build:no-eslint
 FROM nginx:alpine AS deploy
