@@ -22,6 +22,7 @@ import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);
@@ -75,9 +76,7 @@ const ManagerColor = () => {
         form.setFieldsValue(colorDetails);
         setEditingColor(colorDetails);
       } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to fetch color details"
-        );
+        toast.error(getErrorMessage(error));
       }
     } else {
       form.resetFields();
@@ -112,10 +111,7 @@ const ManagerColor = () => {
         toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      if (error.response?.data?.message?.name != null) {
-        toast.error(error.response?.data?.message?.name);
-      }
-      toast.error(error.response?.data?.message || "Lưu màu thất bại");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -136,7 +132,7 @@ const ManagerColor = () => {
         toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Xóa màu thất bại");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -524,7 +520,7 @@ const ManagerColor = () => {
         columns={columns}
         loading={loading}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)}
+        pagination={createPaginationConfig(pagination, setPagination)??''}
         onChange={handleTableChange}
       />
     </div>
