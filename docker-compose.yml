@@ -10,8 +10,10 @@ services:
     expose:
       - "3000"
     restart: always
-    command: ["npm", "run", "dev"]
+    command: ["npm", "run", "dev"]  
 
-networks:
-  ecommerce-net:
-    driver: bridge
+  deploy:
+    image: ecm-fe  
+    volumes:
+      - /var/www/html:/app/dist 
+    command: ["sh", "-c", "cp -r /app/dist/* /var/www/html/"]  
