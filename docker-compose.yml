@@ -10,6 +10,7 @@ services:
     expose:
       - "3000"
     restart: always
+    command: ["npm", "run", "dev"]
 
 networks:
   ecommerce-net:
