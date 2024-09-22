@@ -48,7 +48,6 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                 connectHeaders: { Authorization: token },
                 debug: (str) => console.log(str),
             });
-
             stompClient.activate();
             setClient(stompClient);
 
@@ -59,10 +58,10 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
             };
         };
 
+
         if (idRoom) {
             initializeWebSocket();
         }
-
         return () => {
             if (client) {
                 client.deactivate();
@@ -74,12 +73,6 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
         const item = chatBoxRef.current;
         if (item) {
             item.scrollTop = item.scrollHeight
-        }
-        if (idRoom.length > 0 && user.isAdmin) {
-            const fetchSeenAllChatByIdChatRoom = async () => {
-                await callSeenAllChatByIdChatRoom(idRoom)
-            }
-            fetchSeenAllChatByIdChatRoom()
         }
     }, [chats])
 

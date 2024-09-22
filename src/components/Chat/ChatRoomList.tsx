@@ -77,7 +77,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   }
 
   return (
-    <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h5" align="center" sx={{ p: 2 }}>
         Danh sách chat
       </Typography>
@@ -102,6 +102,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   primary={room.nameClient}
                   secondary={room.lastChat}
                   sx={{
+                    width: 0,
                     overflow: 'hidden',
                     textWrap: 'nowrap'
                   }} />

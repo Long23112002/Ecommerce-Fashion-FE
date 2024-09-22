@@ -10,7 +10,7 @@ const UserLayout: React.FC = () => {
         <div className="d-flex">
             <div className='w-100'>
                 <UserHeader />
-                <main style={{ padding: '2em 0' }}>
+                <main style={{ padding: '2em 0 0 0' }}>
                     <Outlet />
                     <Box
                         component='span'
