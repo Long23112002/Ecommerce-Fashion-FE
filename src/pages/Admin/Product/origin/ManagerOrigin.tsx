@@ -80,14 +80,14 @@ const ManaggerOrigin = () => {
             const values = await form.validateFields();
             const { name } = values;
             const token = Cookies.get("accessToken");
-
+    
             if (token) {
                 if (mode === 'add') {
                     await createOrigin({ name }, token);
-                    toast.success('Origin added successfully');
+                    toast.success('Xuất Xứ Thêm Thành Công');
                 } else if (mode === 'update' && editingOrigin) {
                     await updateOrigin(editingOrigin.id, { name }, token);
-                    toast.success('Origin updated successfully');
+                    toast.success('Chỉnh Sửa Thành Công');
                 }
                 handleCancel();
                 refreshOrigins();
@@ -95,7 +95,20 @@ const ManaggerOrigin = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to save origin');
+            // Kiểm tra xem phản hồi có lỗi từ backend không và hiển thị thông báo chi tiết
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                // Nếu message là object, bạn có thể map nó thành chuỗi
+                if (typeof errorMessage === 'object') {
+                    const errorMessages = Object.values(errorMessage).join(', ');
+                    toast.error(errorMessages);
+                } else {
+                    toast.error(errorMessage);
+                }
+            } else {
+                // Thông báo lỗi chung nếu không có chi tiết lỗi
+                toast.error('Failed to save origin');
+            }
         }
     };
 
@@ -110,7 +123,7 @@ const ManaggerOrigin = () => {
             const token = Cookies.get("accessToken");
             if (token) {
                 await deleteOrigin(originId, token);
-                toast.success("Origin deleted successfully");
+                toast.success("Xóa Thành Công");
                 refreshOrigins();
             } else {
                 toast.error("Authorization failed");

@@ -86,10 +86,10 @@ const ManagerBrand = () => {
             if (token) {
                 if (mode === 'add') {
                     await createBrand({ name }, token);
-                    toast.success('Brand added successfully');
+                    toast.success('Thương Hiệu Thêm Thành Công');
                 } else if (mode === 'update' && editingBrand) {
                     await updateBrand(editingBrand.id, { name }, token);
-                    toast.success('Brand updated successfully');
+                    toast.success('Chỉnh Sửa Thành Công');
                 }
                 handleCancel();
                 refreshBrands();
@@ -97,7 +97,19 @@ const ManagerBrand = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to save brand');
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                // Nếu message là object, bạn có thể map nó thành chuỗi
+                if (typeof errorMessage === 'object') {
+                    const errorMessages = Object.values(errorMessage).join(', ');
+                    toast.error(errorMessages);
+                } else {
+                    toast.error(errorMessage);
+                }
+            } else {
+                // Thông báo lỗi chung nếu không có chi tiết lỗi
+                toast.error('Failed to save Brand');
+            }
         }
     };
 
@@ -110,7 +122,7 @@ const ManagerBrand = () => {
             const token = Cookies.get("accessToken");
             if (token) {
                 await deleteBrand(brandId, token);
-                toast.success("Brand deleted successfully");
+                toast.success("Xóa Thành Công");
                 refreshBrands();
             } else {
                 toast.error("Authorization failed");

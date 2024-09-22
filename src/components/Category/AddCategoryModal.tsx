@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal, Form, Input, Button, Select, FormInstance, message } from 'antd';
 import { Category } from '../../types/Category';
 
@@ -19,8 +19,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
     parentCategories,
     existingCategorys = [],
 }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
     const checkDuplicateName = (name: string, excludeName: string = "") => {
         return existingCategorys.some((item) => item.name === name && item.name !== excludeName);
     };
@@ -32,23 +30,23 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                 message.error("Tên đã tồn tại! Vui lòng chọn tên khác.");
                 return;
             }
-            setIsSubmitting(true);
-            
+
             // Gọi handleOk và đợi phản hồi từ backend
-            await handleOk(values); 
+            await handleOk(values);
 
             // Nếu thành công, reset form và đóng modal
             form.resetFields();
             handleCancel();
         } catch (error: any) {
             // Xử lý khi validation thất bại
-            if (error.response && error.response.data) {
+            if (error instanceof Error) {
+                message.error(error.message || "Đã có lỗi xảy ra.");
+            } else if (error.response && error.response.data) {
                 const errorMessage = error.response.data.message || "Đã có lỗi xảy ra.";
                 message.error(errorMessage);
             } else {
                 console.error("Validation failed:", error);
             }
-            setIsSubmitting(false);
         }
     };
 
@@ -65,7 +63,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                     key="submit"
                     type="primary"
                     onClick={onSubmit}
-                    loading={isSubmitting} // Vô hiệu hóa nút khi đang gửi
                 >
                     Thêm
                 </Button>
@@ -86,7 +83,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                     name="parentId"
                     label="Danh Mục Cha"
                 >
-                    <Select placeholder="Chọn danh mục cha">
+                    <Select placeholder="Chọn danh mục cha" allowClear>
                         {parentCategories.map(category => (
                             <Select.Option key={category.id} value={category.id}>
                                 {category.name}

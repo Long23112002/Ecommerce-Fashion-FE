@@ -107,7 +107,7 @@ const ManagerCategory = () => {
 
       if (token) {
         await createCategory({ name, parentId }, token);
-        toast.success('Thêm danh mục Thành Công !');
+        toast.success('Thêm danh mục Thành Công');
         handleAddCancel(); // Đóng modal sau khi thành công
         refreshCategories(); // Làm mới danh sách danh mục
       } else {
@@ -115,10 +115,18 @@ const ManagerCategory = () => {
       }
     } catch (error: any) {
       // Kiểm tra phản hồi lỗi từ backend
-      if (error.response && error.response.data) {
-        toast.error(error.response.data.message || 'Failed to add category');
+      if (error.response && error.response.data && error.response.data.message) {
+        const errorMessage = error.response.data.message;
+        // Nếu message là object, bạn có thể map nó thành chuỗi
+        if (typeof errorMessage === 'object') {
+          const errorMessages = Object.values(errorMessage).join(', ');
+          toast.error(errorMessages);
+        } else {
+          toast.error(errorMessage);
+        }
       } else {
-        toast.error('An unexpected error occurred'); // Thông báo lỗi chung
+        // Thông báo lỗi chung nếu không có chi tiết lỗi
+        toast.error('Failed to save Category');
       }
     }
   };
@@ -132,7 +140,7 @@ const ManagerCategory = () => {
 
       if (token && editingCategory) {
         await updateCategory(editingCategory.id, { name, parentId }, token);
-        toast.success('Cật Nhật danh mục Thành Công !');
+        toast.success('Cật Nhật Thành Công');
         handleUpdateCancel();
         refreshCategories();
       } else {
@@ -160,7 +168,7 @@ const ManagerCategory = () => {
       const token = Cookies.get("accessToken");
       if (token) {
         await deleteCategory(categoryId, token);
-        toast.success("Xóa Danh mục Thành Công");
+        toast.success("Xóa Thành Công");
         refreshCategories();
       } else {
         toast.error("Authorization failed");
