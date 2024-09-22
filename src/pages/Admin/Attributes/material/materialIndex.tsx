@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   createMaterial,
   deleteMaterial,
@@ -16,7 +16,7 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
@@ -170,7 +170,9 @@ const ManagerMaterial = () => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
-    
+    return () => {
+      debouncedSearch.cancel();
+    };
   };
 
   useEffect(() => {
@@ -218,7 +220,7 @@ const ManagerMaterial = () => {
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
+        date ? new Date(date).toLocaleDateString() : "N/A",
     },
     {
       title: "Người cập nhật",
@@ -239,7 +241,7 @@ const ManagerMaterial = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "Chưa cập nhật"
+          "N/A"
         ),
     },
     {
@@ -285,7 +287,7 @@ const ManagerMaterial = () => {
     },
   ];
 
-  return (
+  return <Fragment>
     <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className="text-danger">Quản lý chất liệu</h1>
 
@@ -439,44 +441,44 @@ const ManagerMaterial = () => {
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Ngày cập nhật:
-                </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={
-                    selectedMaterial.updatedAt
-                      ? new Date(selectedMaterial.updatedAt).toLocaleDateString()
-                      : "Chưa cập nhật"
-                  }
-                  readOnly
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    cursor: "default",
-                    border: "1px solid #ddd",
-                  }}
-                />
-              </div>
+              {selectedMaterial.updatedAt && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Ngày cập nhật:
+                  </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={new Date(
+                      selectedMaterial.updatedAt
+                    ).toLocaleDateString()}
+                    readOnly
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      cursor: "default",
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                </div>
+              )}
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Người cập nhật:
-                </label>
-                {selectedMaterial.updatedBy ? (
+              {selectedMaterial.updatedBy && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Người cập nhật:
+                  </label>
                   <div style={{ padding: "10px" }}>
                     <img
                       src={selectedMaterial.updatedBy.avatar}
@@ -499,20 +501,8 @@ const ManagerMaterial = () => {
                       {selectedMaterial.updatedBy.fullName}
                     </span>
                   </div>
-                ) : (
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="Chưa cập nhật"
-                    readOnly
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      cursor: "default",
-                      border: "1px solid #ddd",
-                    }}
-                  />
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -527,7 +517,8 @@ const ManagerMaterial = () => {
         onChange={handleTableChange}
       />
     </div>
-  );
+    <ToastContainer/>
+  </Fragment>
 };
 
 export default ManagerMaterial;

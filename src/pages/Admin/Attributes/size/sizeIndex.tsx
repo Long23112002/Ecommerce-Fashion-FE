@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   createSize,
   deleteSize,
@@ -16,7 +16,7 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
@@ -170,7 +170,9 @@ const ManagerSize = () => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
-    
+    return () => {
+      debouncedSearch.cancel();
+    };
   };
 
   useEffect(() => {
@@ -219,7 +221,7 @@ const ManagerSize = () => {
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
+        date ? new Date(date).toLocaleDateString() : "N/A",
     },
 
     {
@@ -241,7 +243,7 @@ const ManagerSize = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "Chưa cập nhật"
+          "N/A"
         ),
     },
     {
@@ -286,7 +288,7 @@ const ManagerSize = () => {
     },
   ];
 
-  return (
+  return <Fragment>
     <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className="text-danger">Quản lý size</h1>
 
@@ -442,44 +444,44 @@ const ManagerSize = () => {
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Ngày cập nhật:
-                </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={
-                    selectedSize.updatedAt
-                      ? new Date(selectedSize.updatedAt).toLocaleDateString()
-                      : "Chưa cập nhật"
-                  }
-                  readOnly
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    cursor: "default",
-                    border: "1px solid #ddd",
-                  }}
-                />
-              </div>
+              {selectedSize.updatedAt && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Ngày cập nhật:
+                  </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={new Date(
+                      selectedSize.updatedAt
+                    ).toLocaleDateString()}
+                    readOnly
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      cursor: "default",
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                </div>
+              )}
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Người cập nhật:
-                </label>
-                {selectedSize.updatedBy ? (
+              {selectedSize.updatedBy && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Người cập nhật:
+                  </label>
                   <div style={{ padding: "10px" }}>
                     <img
                       src={selectedSize.updatedBy.avatar}
@@ -502,20 +504,8 @@ const ManagerSize = () => {
                       {selectedSize.updatedBy.fullName}
                     </span>
                   </div>
-                ) : (
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="Chưa cập nhật"
-                    readOnly
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      cursor: "default",
-                      border: "1px solid #ddd",
-                    }}
-                  />
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -530,7 +520,8 @@ const ManagerSize = () => {
         onChange={handleTableChange}
       />
     </div>
-  );
+    <ToastContainer/>
+  </Fragment>
 };
 
 export default ManagerSize;

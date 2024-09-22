@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   createColor,
   deleteColor,
@@ -16,7 +16,7 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
@@ -153,7 +153,6 @@ const ManagerColor = () => {
     setIsDetailModalOpen(true);
   };
 
-
   const debouncedSearch = debounce((value) => {
     const search = value.trim();
     if (search) {
@@ -169,7 +168,9 @@ const ManagerColor = () => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
-    
+    return () => {
+      debouncedSearch.cancel();
+    };
   };
 
   useEffect(() => {
@@ -216,8 +217,7 @@ const ManagerColor = () => {
       title: "Ngày cập nhật",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "N/A"),
     },
     {
       title: "Người cập nhật",
@@ -238,7 +238,7 @@ const ManagerColor = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "Chưa cập nhật"
+          "N/A"
         ),
     },
     {
@@ -252,7 +252,7 @@ const ManagerColor = () => {
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-             <i className="fa-solid fa-eye"></i>
+              <i className="fa-solid fa-eye"></i>
             </Button>
           </Tooltip>
 
@@ -274,7 +274,7 @@ const ManagerColor = () => {
           >
             <Tooltip title="Xóa màu">
               <Button className="btn-outline-danger">
-              <i className="fa-solid fa-trash-can"></i>
+                <i className="fa-solid fa-trash-can"></i>
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -283,7 +283,7 @@ const ManagerColor = () => {
     },
   ];
 
-  return (
+  return <Fragment>
     <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className="text-danger">Quản lý màu sắc</h1>
       <Tooltip title="Thêm mới">
@@ -316,9 +316,7 @@ const ManagerColor = () => {
           <Form.Item
             name="name"
             label="Tên màu"
-            rules={[
-              { required: true, message: "Vui lòng nhập tên màu!" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập tên màu!" }]}
           >
             <Input />
           </Form.Item>
@@ -341,7 +339,6 @@ const ManagerColor = () => {
               padding: "20px",
             }}
           >
-
             <h3
               style={{
                 fontWeight: "bold",
@@ -378,7 +375,6 @@ const ManagerColor = () => {
                 gap: "15px",
               }}
             >
-
               <div>
                 <label
                   style={{
@@ -436,44 +432,44 @@ const ManagerColor = () => {
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Ngày cập nhật:
-                </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={
-                    selectedColor.updatedAt
-                      ? new Date(selectedColor.updatedAt).toLocaleDateString()
-                      : "Chưa cập nhật"
-                  }
-                  readOnly
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    cursor: "default",
-                    border: "1px solid #ddd",
-                  }}
-                />
-              </div>
+              {selectedColor.updatedAt && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Ngày cập nhật:
+                  </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={new Date(
+                      selectedColor.updatedAt
+                    ).toLocaleDateString()}
+                    readOnly
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      cursor: "default",
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                </div>
+              )}
 
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Người cập nhật:
-                </label>
-                {selectedColor.updatedBy ? (
+              {selectedColor.updatedBy && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Người cập nhật:
+                  </label>
                   <div style={{ padding: "10px" }}>
                     <img
                       src={selectedColor.updatedBy.avatar}
@@ -496,20 +492,8 @@ const ManagerColor = () => {
                       {selectedColor.updatedBy.fullName}
                     </span>
                   </div>
-                ) : (
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="Chưa cập nhật"
-                    readOnly
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      cursor: "default",
-                      border: "1px solid #ddd",
-                    }}
-                  />
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -520,11 +504,13 @@ const ManagerColor = () => {
         columns={columns}
         loading={loading}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)??''}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ""}
         onChange={handleTableChange}
       />
     </div>
-  );
+    <ToastContainer/>
+    </Fragment>
+  
 };
 
 export default ManagerColor;
