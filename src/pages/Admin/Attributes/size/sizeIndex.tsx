@@ -274,10 +274,10 @@ const ManagerSize = () => {
           <Popconfirm
             title="Xác nhận xóa size này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Xóa"
+            cancelText="Hủy"
           >
-            <Tooltip title="Xóa size">
+            <Tooltip title="Xóa size" placement="bottom">
               <Button className="btn-outline-danger">
                 <i className="fa-solid fa-trash-can"></i>
               </Button>
@@ -321,6 +321,8 @@ const ManagerSize = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        cancelText={"Hủy"}
+        okText={"Save"}
       >
         <Form form={form} layout="vertical">
           <Form.Item

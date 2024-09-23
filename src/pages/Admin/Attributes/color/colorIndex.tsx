@@ -269,10 +269,10 @@ const ManagerColor = () => {
           <Popconfirm
             title="Xác nhận xóa màu?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Xóa"
+            cancelText="Hủy"
           >
-            <Tooltip title="Xóa màu">
+            <Tooltip title="Xóa màu" placement="bottom">
               <Button className="btn-outline-danger">
                 <i className="fa-solid fa-trash-can"></i>
               </Button>
@@ -311,6 +311,8 @@ const ManagerColor = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        cancelText={"Hủy"}
+        okText={"Save"}
       >
         <Form form={form} layout="vertical">
           <Form.Item
