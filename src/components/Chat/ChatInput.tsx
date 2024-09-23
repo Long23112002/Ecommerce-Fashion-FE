@@ -22,7 +22,7 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
                 body: JSON.stringify({
                     idRoom: idRoom,
                     content: content,
-                    createBy: user.id,
+                    createBy: user.id
                 }),
                 headers: {
                     Authorization: token,

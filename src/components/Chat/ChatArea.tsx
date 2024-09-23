@@ -31,6 +31,10 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
         }
     }
 
+    const shouldShowChat = (chat: Chat, prevChat: Chat) => {
+        return !prevChat || prevChat.createBy !== chat.createBy
+    }
+
     useEffect(() => {
         setLoading(true)
         const initializeWebSocket = async () => {
@@ -42,7 +46,6 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                     stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
                         setChats(prevChats => [...prevChats, JSON.parse(chat.body)]);
                     }, { Authorization: token });
-
                     fetchFindAllChatByIdChatRoom();
                 },
                 connectHeaders: { Authorization: token },
@@ -88,14 +91,18 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                 }}
             >
                 {!loading ? (
-                    chats.map((chat, index) => (
-                        <ChatItem
-                            key={index}
-                            chat={chat}
-                            id={user.id}
-                            isAdmin={isAdmin || false}
-                        />
-                    ))
+                    chats.map((chat, index) => {
+                        const show = shouldShowChat(chat, chats[index - 1])
+                        return (
+                            <ChatItem
+                                key={index}
+                                chat={chat}
+                                show={show}
+                                id={user.id}
+                                isAdmin={isAdmin || false}
+                            />
+                        )
+                    })
                 )
                     :
                     idRoom !== ""
