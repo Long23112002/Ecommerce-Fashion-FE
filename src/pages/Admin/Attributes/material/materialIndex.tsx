@@ -317,7 +317,7 @@ const ManagerMaterial = () => {
         onOk={handleOk}
         onCancel={handleCancel}
         cancelText={"Hủy"}
-        okText={"Save"}
+        okText={"Lưu"}
       >
         <Form form={form} layout="vertical">
           <Form.Item
