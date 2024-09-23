@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
@@ -7,6 +7,7 @@ import BrandModel from "../../../../components/Brand/BrandModel.tsx";
 import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"; // New detail modal
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
 import { Brand } from "../../../../types/brand.ts";
+import { debounce } from "lodash";
 
 const ManagerBrand = () => {
     const [loading, setLoading] = useState(true);
@@ -26,10 +27,10 @@ const ManagerBrand = () => {
 
     const mode = editingBrand ? 'update' : 'add';
 
-    const fetchBrands = async (current: number, pageSize: number) => {
+    const fetchBrandsDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
         setLoading(true);
         try {
-            const response = await fetchAllBrands(pageSize, current - 1, searchParams.name);
+            const response = await fetchAllBrands(pageSize, current - 1, searchName);
             setBrands(response.data);
             setPagination({
                 current: response.metaData.page + 1,
@@ -42,6 +43,10 @@ const ManagerBrand = () => {
         } finally {
             setLoading(false);
         }
+    }, 500), []);
+
+    const fetchBrands = (current: number, pageSize: number) => {
+        fetchBrandsDebounced(current, pageSize, searchParams.name);
     };
 
     const showModal = async (brand: Brand | null = null) => {
@@ -81,10 +86,10 @@ const ManagerBrand = () => {
             if (token) {
                 if (mode === 'add') {
                     await createBrand({ name }, token);
-                    toast.success('Brand added successfully');
+                    toast.success('Thương Hiệu Thêm Thành Công');
                 } else if (mode === 'update' && editingBrand) {
                     await updateBrand(editingBrand.id, { name }, token);
-                    toast.success('Brand updated successfully');
+                    toast.success('Chỉnh Sửa Thành Công');
                 }
                 handleCancel();
                 refreshBrands();
@@ -92,7 +97,19 @@ const ManagerBrand = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to save brand');
+            if (error.response && error.response.data && error.response.data.message) {
+                const errorMessage = error.response.data.message;
+                // Nếu message là object, bạn có thể map nó thành chuỗi
+                if (typeof errorMessage === 'object') {
+                    const errorMessages = Object.values(errorMessage).join(', ');
+                    toast.error(errorMessages);
+                } else {
+                    toast.error(errorMessage);
+                }
+            } else {
+                // Thông báo lỗi chung nếu không có chi tiết lỗi
+                toast.error('Failed to save Brand');
+            }
         }
     };
 
@@ -105,7 +122,7 @@ const ManagerBrand = () => {
             const token = Cookies.get("accessToken");
             if (token) {
                 await deleteBrand(brandId, token);
-                toast.success("Brand deleted successfully");
+                toast.success("Xóa Thành Công");
                 refreshBrands();
             } else {
                 toast.error("Authorization failed");
@@ -114,11 +131,10 @@ const ManagerBrand = () => {
             toast.error(error.response?.data?.message || 'Failed to delete brand');
         }
     };
-
     const handleSearch = (changedValues: any) => {
         setSearchParams(prevParams => ({
             ...prevParams,
-            ...changedValues,
+            name: changedValues.name,
         }));
         setPagination(prevPagination => ({
             ...prevPagination,
@@ -141,18 +157,18 @@ const ManagerBrand = () => {
             key: 'id',
         },
         {
-            title: 'Brand Name',
+            title: 'Tên thương hiệu',
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Create at',
+            title: 'Thời gian tạo',
             dataIndex: 'createAt',
             key: 'createAt',
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Update at',
+            title: 'Thời Gian cập nhật',
             dataIndex: 'updateAt',
             key: 'updateAt',
             render: (date) => {
@@ -166,7 +182,7 @@ const ManagerBrand = () => {
             }
         },
         {
-            title: 'Create By',
+            title: 'Người tạo',
             dataIndex: 'createBy',
             key: 'createBy',
             render: (createBy) => (
@@ -185,7 +201,7 @@ const ManagerBrand = () => {
             ),
         },
         {
-            title: 'Update By',
+            title: 'Người cập nhật',
             dataIndex: 'updateBy',
             key: 'updateBy',
             render: (updateBy) => {
@@ -212,7 +228,7 @@ const ManagerBrand = () => {
 
         },
         {
-            title: 'Actions',
+            title: 'Hành động',
             key: 'actions',
             render: (_, record) => (
                 <div>
@@ -223,10 +239,10 @@ const ManagerBrand = () => {
                         <i className="fa-solid fa-pen-to-square"></i>
                     </Button>
                     <Popconfirm
-                        title="Are you sure you want to delete this brand?"
+                        title="Bạn chắc chắn muốn xóa Thương hiệu này?"
                         onConfirm={() => handleDelete(record.id)}
-                        okText="Yes"
-                        cancelText="No"
+                        okText="Có"
+                        cancelText="Không"
                     >
                         <Button className="btn-outline-danger">
                             <i className="fa-solid fa-trash-can"></i>
@@ -239,7 +255,7 @@ const ManagerBrand = () => {
 
     return (
         <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
-            <h1 className="text-danger">Manager Brand</h1>
+            <h1 className="text-danger">Quán Lý Thương Hiệu</h1>
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -254,8 +270,8 @@ const ManagerBrand = () => {
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
-                <Form.Item name="name" label="Brand Name">
-                    <Input placeholder="Search by brand name" />
+                <Form.Item name="name" label="Tên Thương Hiệu">
+                    <Input placeholder="Tìm kiếm theo tên Thương hiệu" />
                 </Form.Item>
             </Form>
             <BrandModel

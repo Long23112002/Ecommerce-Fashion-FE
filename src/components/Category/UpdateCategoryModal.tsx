@@ -49,10 +49,10 @@ const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({
             onCancel={handleCancel}
             footer={[
                 <Button key="cancel" onClick={handleCancel}>
-                    Cancel
+                    Thoát
                 </Button>,
                 <Button key="submit" type="primary" onClick={onOk}>
-                    Update
+                    Cập Nhật
                 </Button>
             ]}
         >

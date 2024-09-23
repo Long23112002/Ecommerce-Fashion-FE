@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Descriptions } from 'antd';
+import { Modal, Form, Input, Avatar, Typography } from 'antd';
 import { Category } from "../../types/Category";
 
 interface CategoryDetailModalProps {
@@ -8,84 +8,82 @@ interface CategoryDetailModalProps {
     category: Category | null;
 }
 
+const { Text } = Typography;
+
 const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({
     visible,
     onCancel,
     category,
 }) => {
     if (!category) {
-        return null; // If no category is selected, return nothing.
+        return null;
     }
 
     return (
         <Modal
-            title={`Category Details: ${category.name}`}
+            title={
+                <div style={{ textAlign: 'center' }}>
+                    <Text strong style={{ fontSize: '18px' }}>Chi tiết danh mục</Text>
+                    <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>{category.name}</div>
+                </div>
+            }
             visible={visible}
             onCancel={onCancel}
-            footer={null}  // No footer buttons
-            width={700}
+            footer={null}
+            width={600}
+            bodyStyle={{ padding: '24px', fontSize: '16px' }}
         >
-            <Descriptions bordered column={2}>
-                <Descriptions.Item label="Category ID"span={2}>{category.id}</Descriptions.Item>
-                <Descriptions.Item label="Category Name">{category.name}</Descriptions.Item>
-                <Descriptions.Item label="Level">{category.lever}</Descriptions.Item>
-                {/* <Descriptions.Item></Descriptions.Item> */}
-                <Descriptions.Item label="Created At">
-                    {new Date(category.createAt).toLocaleString()}
-                </Descriptions.Item>
-                <Descriptions.Item label="Updated At" >
-                    {category.updateAt ? new Date(category.updateAt).toLocaleString() : "N/A"}
-                </Descriptions.Item>
-                
-                <Descriptions.Item label="Created By" span={2}>
-                    {category.createBy?.avatar ? (
-                        <img
-                            src={category.createBy.avatar}
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                marginRight: 10,
-                            }}
-                            alt="Avatar"
-                        />
-                    ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#ccc", marginRight: 10 }} />
-                    )}
-                    {category.createBy?.fullName || 'Unknown'}
-                </Descriptions.Item>
-                <Descriptions.Item label="Updated By" span={2}>
-                    {category.updateBy?.avatar ? (
-                        <img
-                            src={category.updateBy.avatar}
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                marginRight: 10,
-                            }}
-                            alt="Avatar"
-                        />
-                    ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#ccc", marginRight: 10 }} />
-                    )}
-                    {category.updateBy?.fullName || "Not Updated"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Parent Category">
-                    {category.parentCategory ? category.parentCategory.name : "None"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Subcategories">
-                    {category.subCategories.length > 0 ? (
-                        <ul>
-                            {category.subCategories.map((sub) => (
-                                <li key={sub.id}>{sub.name}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        "No Subcategories"
-                    )}
-                </Descriptions.Item>
-            </Descriptions>
+            <Form
+                layout="vertical"
+                initialValues={{
+                    createAt: new Date(category.createAt).toLocaleDateString(),
+                    updateAt: category.updateAt ? new Date(category.updateAt).toLocaleDateString() : "Không có",
+                    createBy: category.createBy?.fullName || "Không rõ",
+                    updateBy: category.updateBy?.fullName || "Chưa cập nhật",
+                    parentCategory: category.parentCategory ? category.parentCategory.name : "Không có",
+                    subCategories: category.subCategories.length > 0
+                        ? category.subCategories.map(sub => sub.name).join(", ")
+                        : "Không có danh mục con",
+                }}
+            >
+                <Form.Item label={<Text strong>Ngày tạo :</Text>} name="createAt">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Người tạo :</Text>} name="createBy">
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {category.createBy?.avatar ? (
+                            <Avatar src={category.createBy.avatar} size={40} style={{ marginRight: 10 }} />
+                        ) : (
+                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                        )}
+                        {<Text strong>{category.createBy?.fullName || 'Không rõ'}</Text>}
+                    </div>
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Ngày cập nhật :</Text>} name="updateAt">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Người cập nhật :</Text>} name="updateBy">
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {category.updateBy?.avatar ? (
+                            <Avatar src={category.updateBy.avatar} size={40} style={{ marginRight: 10 }} />
+                        ) : (
+                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                        )}
+                        {<Text strong>{category.updateBy?.fullName || 'Chưa có'}</Text>}
+                    </div>
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Danh mục cha</Text>} name="parentCategory">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Danh mục con</Text>} name="subCategories">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+            </Form>
         </Modal>
     );
 };

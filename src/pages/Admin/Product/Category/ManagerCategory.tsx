@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
@@ -8,6 +8,7 @@ import UpdateCategoryModal from '../../../../components/Category/UpdateCategoryM
 import createPaginationConfig, { PaginationState } from '../../../../config/paginationConfig.ts';
 import CategoryDetailModal from '../../../../components/Category/CategoryDetailModal.tsx';
 import { Category } from '../../../../types/Category.ts';
+import { debounce } from "lodash";
 
 const ManagerCategory = () => {
   const [loading, setLoading] = useState(true);
@@ -35,10 +36,10 @@ const ManagerCategory = () => {
     }));
   };
 
-  const fetchCategories = async (current: number, pageSize: number) => {
+  const fetchCategoriesDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
     setLoading(true);
     try {
-      const response = await fetchAllCategories(pageSize, current - 1, searchParams.name);
+      const response = await fetchAllCategories(pageSize, current - 1, searchName);
       const categoryTree = buildCategoryTree(response.data); // Xây dựng cây danh mục
       setCategories(categoryTree); // Lưu cây danh mục
       // setCategories(response.data);
@@ -53,8 +54,11 @@ const ManagerCategory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, 500), []);
 
+  const fetchCategories = (current: number, pageSize: number) => {
+    fetchCategoriesDebounced(current, pageSize, searchParams.name);
+  };
   const fetchParentCategories = async () => {
     try {
       const response = await getAllCategories(); // Assuming this fetches all categories
@@ -103,14 +107,27 @@ const ManagerCategory = () => {
 
       if (token) {
         await createCategory({ name, parentId }, token);
-        toast.success('Category added successfully');
-        handleAddCancel();
-        refreshCategories();
+        toast.success('Thêm danh mục Thành Công');
+        handleAddCancel(); // Đóng modal sau khi thành công
+        refreshCategories(); // Làm mới danh sách danh mục
       } else {
         toast.error("Authorization failed");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add category');
+    } catch (error: any) {
+      // Kiểm tra phản hồi lỗi từ backend
+      if (error.response && error.response.data && error.response.data.message) {
+        const errorMessage = error.response.data.message;
+        // Nếu message là object, bạn có thể map nó thành chuỗi
+        if (typeof errorMessage === 'object') {
+          const errorMessages = Object.values(errorMessage).join(', ');
+          toast.error(errorMessages);
+        } else {
+          toast.error(errorMessage);
+        }
+      } else {
+        // Thông báo lỗi chung nếu không có chi tiết lỗi
+        toast.error('Failed to save Category');
+      }
     }
   };
 
@@ -123,14 +140,18 @@ const ManagerCategory = () => {
 
       if (token && editingCategory) {
         await updateCategory(editingCategory.id, { name, parentId }, token);
-        toast.success('Category updated successfully');
+        toast.success('Cật Nhật Thành Công');
         handleUpdateCancel();
         refreshCategories();
       } else {
         toast.error("Authorization failed");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update category');
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message || 'Failed to Update category');
+      } else {
+        toast.error('An unexpected error occurred'); // Thông báo lỗi chung
+      }
     }
   };
 
@@ -147,7 +168,7 @@ const ManagerCategory = () => {
       const token = Cookies.get("accessToken");
       if (token) {
         await deleteCategory(categoryId, token);
-        toast.success("Category deleted successfully");
+        toast.success("Xóa Thành Công");
         refreshCategories();
       } else {
         toast.error("Authorization failed");
@@ -160,7 +181,7 @@ const ManagerCategory = () => {
   const handleSearch = (changedValues: any) => {
     setSearchParams(prevParams => ({
       ...prevParams,
-      ...changedValues,
+      name: changedValues.name,
     }));
     setPagination(prevPagination => ({
       ...prevPagination,
@@ -184,23 +205,23 @@ const ManagerCategory = () => {
       key: 'id',
     },
     {
-      title: 'Name',
+      title: 'Tên danh mục',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Lever',
+      title: 'Cấp độ',
       dataIndex: 'lever',
       key: 'lever',
     },
     {
-      title: 'Create at',
+      title: 'Thời gian tạo',
       dataIndex: 'createAt',
       key: 'createAt',
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
-      title: 'Update at',
+      title: 'Thời gian cập nhật',
       dataIndex: 'updateAt',
       key: 'updateAt',
       render: (date) => {
@@ -212,7 +233,7 @@ const ManagerCategory = () => {
       }
     },
     {
-      title: 'Create By',
+      title: 'Người tạo',
       dataIndex: 'createBy',
       key: 'createBy',
       render: (createBy) => (
@@ -231,7 +252,7 @@ const ManagerCategory = () => {
       ),
     },
     {
-      title: 'Update By',
+      title: 'Người cập nhật',
       dataIndex: 'updateBy',
       key: 'updateBy',
       render: (updateBy) => {
@@ -258,24 +279,24 @@ const ManagerCategory = () => {
 
     },
     {
-      title: 'Actions',
+      title: 'Hành động',
       key: 'actions',
       render: (_, record) => (
         <div>
           <Button onClick={() => handleViewDetails(record)} className="btn-outline-warning">
-          <i className="fa-solid fa-eye"></i>
+            <i className="fa-solid fa-eye"></i>
           </Button>
           <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
-          <i className="fa-solid fa-pen-to-square"></i>
+            <i className="fa-solid fa-pen-to-square"></i>
           </Button>
           <Popconfirm
-            title="Are you sure you want to delete this category?"
+            title="Bạn chắc chắn muốn xóa Danh mục này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
             <Button className="btn-outline-danger">
-            <i className="fa-solid fa-trash-can"></i>
+              <i className="fa-solid fa-trash-can"></i>
             </Button>
           </Popconfirm>
         </div>
@@ -284,8 +305,8 @@ const ManagerCategory = () => {
   ];
 
   return (
-    <div className="text-center" style={{marginLeft: 20, marginRight: 20 }}>
-      <h1 className="text-danger">Manager Category</h1>
+    <div className="text-center" style={{ height: '200vh', marginLeft: 20, marginRight: 20 }}>
+      <h1 className="text-danger">Quản Lý Danh Mục</h1>
       <Button
         className="mt-3 mb-3"
         style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -300,8 +321,8 @@ const ManagerCategory = () => {
         style={{ display: 'flex', justifyContent: 'flex-end' }}
         className="mt-2 mb-2"
       >
-        <Form.Item name="name" label="Category Name">
-          <Input placeholder="Search by category name" />
+        <Form.Item name="name" label="Tên Danh Mục">
+          <Input placeholder="Tìm Kiếm Theo Tên Danh Mục" />
         </Form.Item>
       </Form>
       <AddCategoryModal
@@ -330,8 +351,53 @@ const ManagerCategory = () => {
         loading={loading}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination)}
-        expandable={{ childrenColumnName: 'children' }} // Cấu hình expandable cho bảng
+        expandable={{ childrenColumnName: 'children' }}
+        rowClassName={(record) => {
+          switch (record.lever) {
+            case 1:
+              return 'parent-category-row';
+            case 2:
+              return 'sub-category-row-1';
+            case 3:
+              return 'sub-category-row-2';
+            case 4:
+              return 'sub-category-row-3';
+            case 5:
+              return 'sub-category-row-4';
+            case 6:
+              return 'sub-category-row-5';
+            case 7:
+              return 'sub-category-row-6';
+            case 8:
+              return 'sub-category-row-7';
+            default:
+              return 'sub-category-row';
+          }
+        }}
       />
+      <style jsx>{`
+        .sub-category-row-1 {
+          background-color: #C4DFE6; /* 2 */
+        }
+        .sub-category-row-2 {
+          background-color: #66CCCC; /* 3 */
+        }
+        .sub-category-row-3 {
+          background-color: #66A5AD; /* 3 */
+        }
+          .sub-category-row-4 {
+          background-color: #BCD2EE; /* 3 */
+        }
+          .sub-category-row-5 {
+          background-color: #BFEFFF; /* 3 */
+        }
+          .sub-category-row-6 {
+          background-color: #D1EEEE; /* 3 */
+        }
+           .sub-category-row-6 {
+          background-color: #AEEEEE; /* 3 */
+        }
+      `}</style>
     </div>
   );
 };
