@@ -1,0 +1,11 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /frontend
+    volumes:
+      - .:/frontend
+    ports:
+      - "3000:3000"

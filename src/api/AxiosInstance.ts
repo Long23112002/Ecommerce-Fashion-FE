@@ -1,9 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
-import { BASE_API } from "../constants/BaseApi";
 
 const refreshAxiosInstance = axios.create({
-    baseURL: BASE_API,
+    baseURL: 'http://localhost:8080',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -22,7 +21,7 @@ export const refreshToken = async (): Promise<string> => {
 };
 
 const axiosInstance = axios.create({
-    baseURL: BASE_API,
+    baseURL: 'http://localhost:8080',
     headers: {
         'Content-Type': 'application/json',
     },
