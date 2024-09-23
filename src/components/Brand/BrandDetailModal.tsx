@@ -1,72 +1,72 @@
 import React from "react";
-import { Modal, Descriptions } from 'antd';
+import { Modal, Form, Input, Avatar, Typography } from 'antd';
 import { Brand } from '../../types/brand.ts';
+
+
 
 interface BrandDetailModalProps {
     visible: boolean;
     onCancel: () => void;
     brand: Brand | null;
 }
+const { Text } = Typography;
 
 const BrandDetailModal: React.FC<BrandDetailModalProps> = ({ visible, onCancel, brand }) => {
     if (!brand) return null;
 
     return (
         <Modal
-            title="Brand Details"
+            title={
+                <div style={{ textAlign: 'center' }}>
+                    <Text strong style={{ fontSize: '18px' }}>Chi tiết Thương Hiệu</Text>
+                    <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>{brand.name}</div>
+                </div>
+            }
             visible={visible}
             onCancel={onCancel}
             footer={null}
-            width={600} // Set a width that works well with your design
+            width={600}
+            bodyStyle={{ padding: '24px', fontSize: '16px' }}
         >
-            <Descriptions
-                bordered
-                size="small" // You can adjust size to "middle" or "small" for a more compact design
-                column={2} // Adjust columns for a clean look
-                labelStyle={{ fontWeight: 'bold' }} // Make labels bold for clarity
-                contentStyle={{ wordBreak: 'break-word' }} // Ensure text wraps properly
+            <Form
+                layout="vertical"
+                initialValues={{
+                    createAt: new Date(brand.createAt).toLocaleDateString(),
+                    updateAt: brand.updateAt ? new Date(brand.updateAt).toLocaleDateString() : "Không có",
+                    createBy: brand.createBy?.fullName || "Không rõ",
+                    updateBy: brand.updateBy?.fullName || "Chưa cập nhật",
+                }}
             >
-                <Descriptions.Item label="ID">{brand.id}</Descriptions.Item>
-                <Descriptions.Item label="Brand Name" span={2}>{brand.name}</Descriptions.Item>
-                <Descriptions.Item label="Created At">{new Date(brand.createAt).toLocaleDateString()}</Descriptions.Item>
-                <Descriptions.Item label="Updated At">
-                    {brand.updateAt ? new Date(brand.updateAt).toLocaleDateString() : "Not Updated"}
-                </Descriptions.Item>
-                <Descriptions.Item label="Created By" span={2}>
-                    {brand.createBy?.avatar ? (
-                        <img
-                            src={brand.createBy.avatar}
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                marginRight: 10,
-                            }}
-                            alt="Avatar"
-                        />
-                    ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#ccc", marginRight: 10 }} />
-                    )}
-                    {brand.createBy?.fullName || 'Unknown'}
-                </Descriptions.Item>
-                <Descriptions.Item label="Updated By" span={2}>
-                    {brand.updateBy?.avatar ? (
-                        <img
-                            src={brand.updateBy.avatar}
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                marginRight: 10,
-                            }}
-                            alt="Avatar"
-                        />
-                    ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#ccc", marginRight: 10 }} />
-                    )}
-                    {brand.updateBy?.fullName || "Not Updated"}
-                </Descriptions.Item>
-            </Descriptions>
+                <Form.Item label={<Text strong>Ngày tạo :</Text>} name="createAt">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Người tạo :</Text>} name="createBy">
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {brand.createBy?.avatar ? (
+                            <Avatar src={brand.createBy.avatar} size={40} style={{ marginRight: 10 }} />
+                        ) : (
+                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                        )}
+                        {<Text strong>{brand.createBy?.fullName || 'Không rõ'}</Text>}
+                    </div>
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Ngày cập nhật :</Text>} name="updateAt">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Người cập nhật :</Text>} name="updateBy">
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {brand.updateBy?.avatar ? (
+                            <Avatar src={brand.updateBy.avatar} size={40} style={{ marginRight: 10 }} />
+                        ) : (
+                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                        )}
+                        {<Text strong>{brand.updateBy?.fullName || 'Chưa có'}</Text>}
+                    </div>
+                </Form.Item>
+            </Form>
         </Modal>
     );
 };
