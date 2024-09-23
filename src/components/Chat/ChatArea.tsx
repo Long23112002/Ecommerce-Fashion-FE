@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ChatInput from './ChatInput'
-import { Box, CircularProgress } from '@mui/material'
+import { Box, CircularProgress, Button } from '@mui/material'
 import ChatItem from './ChatItem'
 import Chat from '../../types/Chat'
-import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi'
+import { callFindAllChatByIdChatRoom } from '../../api/ChatApi'
 import { useSelector } from 'react-redux'
 import { userSelector } from '../../redux/reducers/UserReducer'
 import { refreshToken } from '../../api/AxiosInstance'
 import SockJS from 'sockjs-client'
 import { SOCKET_API } from '../../constants/BaseApi'
-import { Client, IMessage } from '@stomp/stompjs'
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 
 interface IProps {
     idRoom: string,
@@ -21,59 +21,79 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
     const user = useSelector(userSelector)
     const chatBoxRef = useRef<HTMLElement | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
-    const [client, setClient] = useState<Client | null>(null)
     const [chats, setChats] = useState<Chat[]>([])
+    const clientRef = useRef<Client | null>(null)
+    const subscriptionRef = useRef<StompSubscription | null>(null)
 
     const fetchFindAllChatByIdChatRoom = async () => {
-        if (user.id != -1 && idRoom) {
+        if (user.id !== -1 && idRoom) {
             const res = await callFindAllChatByIdChatRoom(idRoom)
             setChats([...res])
         }
     }
 
-    const shouldShowChat = (chat: Chat, prevChat: Chat) => {
+    const shouldShowChat = (chat: Chat, prevChat: Chat | undefined) => {
         return !prevChat || prevChat.createBy !== chat.createBy
     }
 
     useEffect(() => {
         setLoading(true)
-        const initializeWebSocket = async () => {
-            const token = await refreshToken();
-            const sock = new SockJS(SOCKET_API);
-            const stompClient = new Client({
-                webSocketFactory: () => sock as WebSocket,
-                onConnect: () => {
-                    stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
-                        setChats(prevChats => [...prevChats, JSON.parse(chat.body)]);
-                    }, { Authorization: token });
-                    fetchFindAllChatByIdChatRoom();
-                },
-                connectHeaders: { Authorization: token },
-                debug: (str) => console.log(str),
-            });
-            stompClient.activate();
-            setClient(stompClient);
 
-            setLoading(false);
-
-            return () => {
-                stompClient.deactivate();
-            };
-        };
-
-
-        if (idRoom) {
-            initializeWebSocket();
+        if (clientRef.current) {
+            clientRef.current.deactivate()
+            clientRef.current = null
+            subscriptionRef.current = null
         }
-        return () => {
-            if (client) {
-                client.deactivate();
+
+        const initializeWebSocket = async () => {
+            try {
+                const token = await refreshToken();
+                const sock = new SockJS(SOCKET_API);
+                const stompClient = new Client({
+                    webSocketFactory: () => sock as WebSocket,
+                    connectHeaders: { Authorization: token },
+                    onConnect: () => {
+
+                        const subscription = stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
+                            const newChat: Chat = JSON.parse(chat.body);
+                            if (newChat.idRoom === idRoom) {
+                                setChats(prevChats => [...prevChats, newChat]);
+                            }
+                        }, { Authorization: token });
+
+                        subscriptionRef.current = subscription;
+
+                        fetchFindAllChatByIdChatRoom();
+                        setLoading(false)
+                    },
+                    debug: (str) => console.log(str),
+                });
+                stompClient.activate()
+                clientRef.current = stompClient
+            } catch (error) {
+                console.error('Error initializing WebSocket:', error)
+                setLoading(false)
             }
         };
-    }, [idRoom]);
+
+        if (idRoom) {
+            initializeWebSocket()
+        }
+
+        return () => {
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe()
+                subscriptionRef.current = null
+            }
+            if (clientRef.current) {
+                clientRef.current.deactivate()
+                clientRef.current = null
+            }
+        }
+    }, [idRoom])
 
     useEffect(() => {
-        const item = chatBoxRef.current;
+        const item = chatBoxRef.current
         if (item) {
             item.scrollTop = item.scrollHeight
         }
@@ -125,7 +145,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
             </Box>
 
             <ChatInput
-                client={client}
+                client={clientRef.current}
                 idRoom={idRoom}
             />
         </>
@@ -145,7 +165,9 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                     {box}
                 </Box>
                 :
-                box
+                <>
+                    {box}
+                </>
             }
 
         </>
