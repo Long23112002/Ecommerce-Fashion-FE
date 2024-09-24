@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   createSize,
   deleteSize,
@@ -16,12 +16,13 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManagerSize = () => {
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,11 @@ const ManagerSize = () => {
   ) => {
     setLoading(true);
     try {
-      const response = await fetchAllSizes(filterName, pageSize, current - 1);
+      const response = await fetchAllSizes(
+        filterName, 
+        pageSize, 
+        current - 1
+      );
       const sizeData = response.data || [];
       setSizes(sizeData);
       setPagination({
@@ -74,9 +79,7 @@ const ManagerSize = () => {
         form.setFieldsValue(sizeDetails);
         setEditingSize(sizeDetails);
       } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to fetch size details"
-        );
+        toast.error(getErrorMessage(error));
       }
     } else {
       form.resetFields();
@@ -88,26 +91,30 @@ const ManagerSize = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      const { name } = values;
+
+      const trimmedValues = {
+        ...values,
+        name: values.name.trim(),
+      };
+
+      const { name } = trimmedValues;
       const token = Cookies.get("accessToken");
 
       if (token) {
         if (mode === "add") {
           await createSize({ name }, token);
-          toast.success("Thêm size thành công");
+          toast.success("Thêm mới size thành công");
         } else if (mode === "update" && editingSize) {
           await updateSize(editingSize.id, { name }, token);
           toast.success("Cập nhật size thành công");
         }
         handleCancel();
+        fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      if (error.response?.data?.message?.name != null) {
-        toast.error(error.response?.data?.message?.name);
-      }
-      toast.error(error.response?.data?.message || "Lưu size thất bại");
+     toast.error(getErrorMessage(error));
     }
   };
 
@@ -123,12 +130,12 @@ const ManagerSize = () => {
       if (token) {
         await deleteSize(sizeId, token);
         toast.success("Xóa size thành công");
-        
+        fetchSizes(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Xóa size thất bại");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -137,12 +144,15 @@ const ManagerSize = () => {
       ...pagination,
       current: pagination.current,
     });
+    const nameFilter = filters.name || "";
+    setFilterName(nameFilter);
+    fetchSizes(pagination.current, pagination.pageSize, nameFilter);
   };
 
   const showDetailModal = async (size) => {
     const sizeDetails = await getSizeById(size.id);
     setSelectedSize(sizeDetails);
-    setIsDetailModalOpen(true); // Open detail modal
+    setIsDetailModalOpen(true);
   };
 
   const debouncedSearch = debounce((value) => {
@@ -156,10 +166,13 @@ const ManagerSize = () => {
     setFilterName(search);
   }, 1000);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
+    return () => {
+      debouncedSearch.cancel();
+    };
   };
 
   useEffect(() => {
@@ -208,7 +221,7 @@ const ManagerSize = () => {
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "Chưa cập nhật",
+        date ? new Date(date).toLocaleDateString() : "N/A",
     },
 
     {
@@ -230,7 +243,7 @@ const ManagerSize = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "Chưa cập nhật"
+          "N/A"
         ),
     },
     {
@@ -261,10 +274,10 @@ const ManagerSize = () => {
           <Popconfirm
             title="Xác nhận xóa size này?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Xóa"
+            cancelText="Hủy"
           >
-            <Tooltip title="Xóa size">
+            <Tooltip title="Xóa size" placement="bottom">
               <Button className="btn-outline-danger">
                 <i className="fa-solid fa-trash-can"></i>
               </Button>
@@ -275,7 +288,7 @@ const ManagerSize = () => {
     },
   ];
 
-  return (
+  return <Fragment>
     <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className="text-danger">Quản lý size</h1>
 
@@ -308,6 +321,8 @@ const ManagerSize = () => {
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        cancelText={"Hủy"}
+        okText={"Lưu"}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -336,7 +351,7 @@ const ManagerSize = () => {
               padding: "20px",
             }}
           >
-            {/* Header */}
+        
             <h3
               style={{
                 fontWeight: "bold",
@@ -351,7 +366,6 @@ const ManagerSize = () => {
               Chi tiết size
             </h3>
 
-            {/* Size Name */}
             <div
               style={{
                 textAlign: "center",
@@ -374,7 +388,7 @@ const ManagerSize = () => {
                 gap: "15px",
               }}
             >
-              {/* Created At */}
+
               <div>
                 <label
                   style={{
@@ -398,7 +412,6 @@ const ManagerSize = () => {
                 />
               </div>
 
-              {/* Created By */}
               <div>
                 <label
                   style={{
@@ -433,46 +446,44 @@ const ManagerSize = () => {
                 </div>
               </div>
 
-              {/* Updated At */}
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Ngày cập nhật:
-                </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={
-                    selectedSize.updatedAt
-                      ? new Date(selectedSize.updatedAt).toLocaleDateString()
-                      : "Chưa cập nhật"
-                  }
-                  readOnly
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    cursor: "default",
-                    border: "1px solid #ddd",
-                  }}
-                />
-              </div>
+              {selectedSize.updatedAt && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Ngày cập nhật:
+                  </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={new Date(
+                      selectedSize.updatedAt
+                    ).toLocaleDateString()}
+                    readOnly
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      cursor: "default",
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                </div>
+              )}
 
-              {/* Updated By */}
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Người cập nhật:
-                </label>
-                {selectedSize.updatedBy ? (
+              {selectedSize.updatedBy && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Người cập nhật:
+                  </label>
                   <div style={{ padding: "10px" }}>
                     <img
                       src={selectedSize.updatedBy.avatar}
@@ -495,20 +506,8 @@ const ManagerSize = () => {
                       {selectedSize.updatedBy.fullName}
                     </span>
                   </div>
-                ) : (
-                  <input
-                    className="form-control"
-                    type="text"
-                    value="Chưa cập nhật"
-                    readOnly
-                    style={{
-                      backgroundColor: "#f9f9f9",
-                      cursor: "default",
-                      border: "1px solid #ddd",
-                    }}
-                  />
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -519,11 +518,12 @@ const ManagerSize = () => {
         columns={columns}
         loading={loading}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)}
+        pagination={createPaginationConfig(pagination, setPagination)??''}
         onChange={handleTableChange}
       />
     </div>
-  );
+    <ToastContainer/>
+  </Fragment>
 };
 
 export default ManagerSize;

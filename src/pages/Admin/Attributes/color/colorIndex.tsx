@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   createColor,
   deleteColor,
@@ -16,21 +16,13 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
-import { SearchOutlined } from "@ant-design/icons";
-import { getColorCode } from "./mapColor.ts";
-import {
-  PlusSquareFilled,
-  EditFilled,
-  DeleteFilled,
-  EyeFilled,
-} from "@ant-design/icons";
-
-import type { FilterDropdownProps } from "antd/es/table/interface";
+import { debounce } from "lodash";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);
@@ -59,7 +51,6 @@ const ManagerColor = () => {
     pageSize: number,
     filterName: string = ""
   ) => {
-
     setLoading(true);
 
     try {
@@ -85,9 +76,7 @@ const ManagerColor = () => {
         form.setFieldsValue(colorDetails);
         setEditingColor(colorDetails);
       } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to fetch color details"
-        );
+        toast.error(getErrorMessage(error));
       }
     } else {
       form.resetFields();
@@ -99,27 +88,30 @@ const ManagerColor = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      const { name } = values;
+
+      const trimmedValues = {
+        ...values,
+        name: values.name.trim(),
+      };
+
+      const { name } = trimmedValues;
       const token = Cookies.get("accessToken");
 
       if (token) {
         if (mode === "add") {
           await createColor({ name }, token);
-          toast.success("Color added successfully");
+          toast.success("Thêm màu thành công");
         } else if (mode === "update" && editingColor) {
           await updateColor(editingColor.id, { name }, token);
-          toast.success("Color updated successfully");
+          toast.success("Cập nhật màu thành công");
         }
         handleCancel();
         fetchColors(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      if(error.response?.data?.message?.name!=null){
-        toast.error(error.response?.data?.message?.name);
-      }
-      toast.error(error.response?.data?.message || "Lưu màu thất bại");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -134,13 +126,13 @@ const ManagerColor = () => {
       const token = Cookies.get("accessToken");
       if (token) {
         await deleteColor(colorId, token);
-        toast.success("Color deleted successfully");
+        toast.success("Xóa màu thành công");
         fetchColors(pagination.current, pagination.pageSize, filterName);
       } else {
-        toast.error("Authorization failed");
+        toast.error("Lỗi xác thực");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete color");
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -158,25 +150,28 @@ const ManagerColor = () => {
   const showDetailModal = async (color) => {
     const colorDetails = await getColorById(color.id);
     setSelectedColor(colorDetails);
-    setIsDetailModalOpen(true); // Open detail modal
+    setIsDetailModalOpen(true);
   };
 
+  const debouncedSearch = debounce((value) => {
+    const search = value.trim();
+    if (search) {
+      setPagination((prev) => ({
+        ...prev,
+        current: 1,
+      }));
+    }
+    setFilterName(search);
+  }, 1000);
 
-  const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"]
-  ) => {
-    setFilterName(selectedKeys[0] || "");
-    fetchColors(1, pagination.pageSize, filterName);
-    confirm();
+  const handleSearch = async (e) => {
+    const search = e.target.value.trim();
+    setLoading(true);
+    debouncedSearch(search);
+    return () => {
+      debouncedSearch.cancel();
+    };
   };
-
-  const handleSearchReset = (clearFilters: () => void) => {
-    clearFilters();
-    setFilterName("");
-    fetchColors(pagination.current, pagination.pageSize, filterName);
-  };
-
 
   useEffect(() => {
     fetchColors(pagination.current, pagination.pageSize, filterName);
@@ -189,94 +184,18 @@ const ManagerColor = () => {
       key: "id",
     },
     {
-      title: "Color Name",
+      title: "Tên màu",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => {
-        const colorName = text; // Tên màu từ dữ liệu
-        const colorCode = getColorCode(colorName); // Tìm mã màu tương ứng với tên màu hoặc từ khóa
-
-        return (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                backgroundColor: colorCode, // Sử dụng mã màu từ ánh xạ
-                marginRight: 10,
-                borderRadius: 4,
-                border: "0.1px solid gray",
-              }}
-            />
-            {colorName}
-          </div>
-        );
-      },
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search color name"
-            value={selectedKeys[0]}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSelectedKeys(value ? [value] : []);
-            }}
-            onPressEnter={() =>
-              handleSearch(selectedKeys, confirm({ closeDropdown: true }))
-            }
-            style={{ marginBottom: 8, display: "block" }}
-          />
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => {
-                handleSearch(selectedKeys, confirm);
-                confirm({ closeDropdown: true });
-              }}
-              icon={<SearchOutlined />}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Search
-            </Button>
-            
-            <Button
-              onClick={() => {
-                handleSearchReset(clearFilters);
-                confirm({ closeDropdown: false});
-              }}
-              size="small"
-              style={{ width: 90 }}
-            >
-              Reset
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
-      ),
     },
     {
-      title: "Created At",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "No updated available",
-    },
-    {
-      title: "Created By",
+      title: "Người tạo",
       dataIndex: "createdBy",
       key: "createdBy",
       render: (createdBy) => (
@@ -295,7 +214,13 @@ const ManagerColor = () => {
       ),
     },
     {
-      title: "Updated By",
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "N/A"),
+    },
+    {
+      title: "Người cập nhật",
       dataIndex: "updatedBy",
       key: "updatedBy",
       render: (updatedBy) =>
@@ -313,41 +238,43 @@ const ManagerColor = () => {
             {updatedBy.fullName}
           </div>
         ) : (
-          "No updated available"
+          "N/A"
         ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       render: (_, record) => (
         <div>
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              className="btn-outline-warning"
-              onClick={() => showModal(record)}
-              style={{ marginRight: 8 }}
-            >
-              <EditFilled />
-            </Button>
-          </Tooltip>
           <Tooltip title="Chi tiết">
             <Button
               className="btn-outline-info"
               onClick={() => showDetailModal(record)}
               style={{ marginRight: 8 }}
             >
-              <EyeFilled />
+              <i className="fa-solid fa-eye"></i>
             </Button>
           </Tooltip>
+
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              className="btn-outline-warning"
+              onClick={() => showModal(record)}
+              style={{ marginRight: 8 }}
+            >
+              <i className="fa-solid fa-pen-to-square"></i>
+            </Button>
+          </Tooltip>
+
           <Popconfirm
-            title="Are you sure you want to delete this color?"
+            title="Xác nhận xóa màu?"
             onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
+            okText="Xóa"
+            cancelText="Hủy"
           >
-            <Tooltip title="Xóa màu">
+            <Tooltip title="Xóa màu" placement="bottom">
               <Button className="btn-outline-danger">
-                <DeleteFilled />
+                <i className="fa-solid fa-trash-can"></i>
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -356,12 +283,9 @@ const ManagerColor = () => {
     },
   ];
 
-  return (
-    <div
-      className="text-center"
-      style={{marginLeft: 20, marginRight: 20 }}
-    >
-      <h1 className="text-danger">Manager Color</h1>
+  return <Fragment>
+    <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
+      <h1 className="text-danger">Quản lý màu sắc</h1>
       <Tooltip title="Thêm mới">
         <Button
           className="mt-3 mb-3"
@@ -369,22 +293,32 @@ const ManagerColor = () => {
           type="default"
           onClick={() => showModal(null)}
         >
-          <PlusSquareFilled />
+          <i className="fa-solid fa-circle-plus"></i>
         </Button>
       </Tooltip>
+
+      <div className="mb-5 d-flex justify-content-end">
+        <Input
+          placeholder="Nhập tên màu..."
+          onChange={(e) => handleSearch(e)}
+          className="form-control"
+          style={{ width: 300 }}
+        />
+      </div>
+
       <Modal
-        title={mode === "add" ? "Add Color" : "Update Color"}
+        title={mode === "add" ? "Thêm màu" : "Cập nhật màu"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        cancelText={"Hủy"}
+        okText={"Lưu"}
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="Color Name"
-            rules={[
-              { required: true, message: "Please input the color name!" },
-            ]}
+            label="Tên màu"
+            rules={[{ required: true, message: "Vui lòng nhập tên màu!" }]}
           >
             <Input />
           </Form.Item>
@@ -395,6 +329,8 @@ const ManagerColor = () => {
         open={isDetailModalOpen}
         onOk={handleCancel}
         onCancel={handleCancel}
+        centered
+        footer={null}
       >
         {selectedColor && (
           <div
@@ -402,83 +338,164 @@ const ManagerColor = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              padding: "20px",
             }}
           >
-            <h3 className=" d-flex text-center mt-2 mb-4">Color Details</h3>
+            <h3
+              style={{
+                fontWeight: "bold",
+                color: "#333",
+                textAlign: "center",
+                marginBottom: "20px",
+                borderBottom: "1px solid #ddd",
+                paddingBottom: "10px",
+                width: "100%",
+              }}
+            >
+              Chi tiết màu sắc
+            </h3>
 
-            <div className="d-flex text-center mt-2 mb-4">
-              <div
-                style={{
-                  height: "50px",
-                  width: "50px",
-                  backgroundColor: getColorCode(selectedColor.name),
-                  borderRadius: "10%",
-                  border: "0.1px solid #ccc",
-                  marginRight: "20px",
-                }}
-              />
-              <div>
-                <h2>{selectedColor.name}</h2>
-              </div>
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "20px",
+                fontSize: "24px",
+                fontWeight: "bold",
+                color: "#D2B48C",
+              }}
+            >
+              {selectedColor.name}
             </div>
 
             <div
               style={{
                 width: "100%",
-                padding: "10px",
-                background: "#f9f9f9",
-                borderRadius: "8px",
+                padding: "15px",
+                borderRadius: "10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
               }}
             >
-              <p>
-                <b>Created At:</b>{" "}
-                {new Date(selectedColor.createdAt).toLocaleDateString()}
-              </p>
-              <p>
-                <b>Updated At:</b>{" "}
-                {selectedColor.updatedAt
-                  ? new Date(selectedColor.updatedAt).toLocaleDateString()
-                  : "No updated available"}
-              </p>
-
-              <b>Created By:</b>
-              <br />
-
-              <p className="mt-3 mx-5">
-                <img
-                  src={selectedColor.createdBy.avatar}
+              <div>
+                <label
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: "50%",
-                    marginRight: 10,
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Ngày tạo:
+                </label>
+                <input
+                  className="form-control"
+                  type="text"
+                  value={new Date(selectedColor.createdAt).toLocaleDateString()}
+                  readOnly
+                  style={{
+                    backgroundColor: "#f9f9f9",
+                    cursor: "default",
+                    border: "1px solid #ddd",
                   }}
                 />
-                {selectedColor.createdBy.fullName}
-              </p>
+              </div>
 
-              <b>Updated By:</b>
-              <br />
-              <p>
-                {selectedColor.updatedBy ? (
-                  <p className="mt-3 mx-5">
+              <div>
+                <label
+                  style={{
+                    color: "#555",
+                    fontWeight: "bold",
+                    marginBottom: "5px",
+                  }}
+                >
+                  Người tạo:
+                </label>
+                <div style={{ padding: "10px" }}>
+                  <img
+                    src={selectedColor.createdBy.avatar}
+                    alt="createdBy-avatar"
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      marginRight: 15,
+                      border: "2px solid #ddd",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      color: "#333",
+                    }}
+                  >
+                    {selectedColor.createdBy.fullName}
+                  </span>
+                </div>
+              </div>
 
+              {selectedColor.updatedAt && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Ngày cập nhật:
+                  </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={new Date(
+                      selectedColor.updatedAt
+                    ).toLocaleDateString()}
+                    readOnly
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      cursor: "default",
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                </div>
+              )}
+
+              {selectedColor.updatedBy && (
+                <div>
+                  <label
+                    style={{
+                      color: "#555",
+                      fontWeight: "bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Người cập nhật:
+                  </label>
+                  <div style={{ padding: "10px" }}>
                     <img
                       src={selectedColor.updatedBy.avatar}
+                      alt="updatedBy-avatar"
                       style={{
-                        width: 30,
-                        height: 30,
+                        width: 50,
+                        height: 50,
                         borderRadius: "50%",
-                        marginRight: 10,
+                        marginRight: 15,
+                        border: "2px solid #ddd",
                       }}
                     />
-                    {selectedColor.updatedBy.fullName}
-                  </p>
-                ) : (
-                  "No updated available"
-                )}
-
-              </p>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "16px",
+                        color: "#333",
+                      }}
+                    >
+                      {selectedColor.updatedBy.fullName}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -489,11 +506,13 @@ const ManagerColor = () => {
         columns={columns}
         loading={loading}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ""}
         onChange={handleTableChange}
       />
     </div>
-  );
+    <ToastContainer/>
+    </Fragment>
+  
 };
 
 export default ManagerColor;
