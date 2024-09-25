@@ -3,6 +3,7 @@ import {LoginRequest} from "../types/login/request/loginRequest.ts";
 import axios from 'axios';
 import {BASE_API} from "../constants/BaseApi.ts";
 import Cookies from "js-cookie";
+import {toast} from "react-toastify";
 
 
 export interface UserData {
@@ -27,7 +28,7 @@ export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResp
         const response = await axios.post(url, loginRequest);
         return response.data as LoginResponse;
     } catch (error) {
-        console.error("Error fetching roles:", error);
+        toast.error("Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!")
     }
 }
 
@@ -53,6 +54,7 @@ export const clearUserData = () => {
     localStorage.removeItem('gender');
     localStorage.removeItem('avatar');
     localStorage.removeItem('roles');
+    localStorage.removeItem('isAdmin');
 
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');

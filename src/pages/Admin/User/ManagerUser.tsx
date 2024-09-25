@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Select, Table } from 'antd';
-import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
-import { assignRoleToUser, createUser, deleteUser, getAllUsers, updateUser, UserParam } from "../../../api/UserApi.ts";
-import { UserData } from "../../../api/AuthApi.ts";
-import { UserRequest } from "../../../types/User.ts";
-import { toast } from "react-toastify";
-import { GenderEnum } from "../../../enum/GenderEnum.ts";
+import {useEffect, useState} from 'react';
+import {Button, Form, Input, Popconfirm, Select, Table, Tooltip} from 'antd';
+import createPaginationConfig, {PaginationState} from "../../../config/paginationConfig.ts";
+import {assignRoleToUser, createUser, deleteUser, getAllUsers, updateUser, UserParam} from "../../../api/UserApi.ts";
+import {UserData} from "../../../api/AuthApi.ts";
+import {UserRequest} from "../../../types/User.ts";
+import {toast} from "react-toastify";
+import {GenderEnum} from "../../../enum/GenderEnum.ts";
 import RolesCheckbox from "../../../components/User/RolesCheckboxProps.tsx";
 import UserModel from "../../../components/User/UserModel.tsx";
-import { makeSlug } from "../../../utils/slug.ts";
-import { Container } from '@mui/material';
+import {makeSlug} from "../../../utils/slug.ts";
+import {Container} from '@mui/material';
+import {getErrorMessage} from "../../Error/getErrorMessage.ts";
+import {Role} from "../../../types/role.ts";
 
 const ManagerUser = () => {
     const [users, setUsers] = useState<UserData[]>([]);
@@ -82,16 +84,16 @@ const ManagerUser = () => {
         try {
             const values = await form.validateFields();
             if (currentUser) {
-                await updateUser(currentUser.id, { ...currentUser, ...values });
-                toast.success("User updated successfully.");
+                await updateUser(currentUser.id, {...currentUser, ...values});
+                toast.success("Cập nhập người dùng thành công.");
             } else {
                 await createUser(values);
-                toast.success("User added successfully.");
+                toast.success("Thêm mới người dùng thành công.");
             }
             setIsModalOpen(false);
             fetchUsers();
         } catch (error) {
-            toast.error(error.response?.data?.message || error.message);
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -99,16 +101,16 @@ const ManagerUser = () => {
         try {
             const user = users.find(u => u.id === userId);
             if (user) {
-                await assignRoleToUser({ email: user.email, roleIds: selectedRoles });
+                await assignRoleToUser({email: user.email, roleIds: selectedRoles});
                 setUsers(prevUsers =>
                     prevUsers.map(u =>
-                        u.id === userId ? { ...u, roles: selectedRoles.map(roleId => ({ id: roleId, name: '' })) } : u
+                        u.id === userId ? {...u, roles: selectedRoles.map(roleId => ({id: roleId, name: ''}))} : u
                     )
                 );
-                toast.success("Roles updated successfully.");
+                toast.success("Cập nhập vai trò thành công .");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message);
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -116,9 +118,10 @@ const ManagerUser = () => {
         try {
             await deleteUser(id);
             fetchUsers();
-            toast.success("User deleted successfully.");
+            toast.success("Xóa người dùng thành công.");
         } catch (error) {
-            toast.error(error.response?.data?.message);
+            console.log(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -134,19 +137,19 @@ const ManagerUser = () => {
             key: 'id',
         },
         {
-            title: 'Avatar',
+            title: 'Ảnh đại diện',
             dataIndex: 'avatar',
             key: 'avatar',
-            render: (avatar) => (
+            render: (avatar: any) => (
                 <img
                     src={avatar}
                     alt="avatar"
-                    style={{ width: 40, height: 40, borderRadius: '50%' }}
+                    style={{width: 40, height: 40, borderRadius: '50%'}}
                 />
             ),
         },
         {
-            title: 'Full Name',
+            title: 'Họ và tên',
             dataIndex: 'fullName',
             key: 'fullName',
         },
@@ -156,20 +159,20 @@ const ManagerUser = () => {
             key: 'email',
         },
         {
-            title: 'Phone Number',
+            title: 'Số điện thoại',
             dataIndex: 'phoneNumber',
             key: 'phoneNumber',
         },
         {
-            title: 'Gender',
+            title: 'Giới tính',
             dataIndex: "gender",
             key: 'gender'
         },
         {
-            title: 'Roles',
+            title: 'Vai trò',
             dataIndex: 'roles',
             key: 'roles',
-            render: (roles, record) => (
+            render: (roles: Role[], record: { email: string; id: number; }) => (
                 <RolesCheckbox
                     email={record.email}
                     userId={record.id}
@@ -179,20 +182,30 @@ const ManagerUser = () => {
             ),
         },
         {
-            title: 'Actions',
+            title: 'Thao tác',
             key: 'actions',
-            render: (_, record) => (
+            render: (_: any, record) => (
                 <div>
-                    <Button onClick={() => showModal(record)} style={{ marginRight: 8 }}>
-                        Update
-                    </Button>
+                    <Tooltip title="Chỉnh sửa">
+                        <Button
+                            className="btn-outline-warning"
+                            onClick={() => showModal(record)}
+                            style={{marginRight: 8}}
+                        >
+                            <i className="fa-solid fa-pen-to-square"></i>
+                        </Button>
+                    </Tooltip>
                     <Popconfirm
-                        title="Are you sure you want to delete this user?"
+                        title="Bạn có chắc chắn muốn xóa người dùng này ?"
                         onConfirm={() => handleDelete(record.id)}
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="btn-outline-danger">Delete</Button>
+                        <Tooltip title="Xóa" placement="bottom">
+                            <Button className="btn-outline-danger">
+                                <i className="fa-solid fa-trash-can"></i>
+                            </Button>
+                        </Tooltip>
                     </Popconfirm>
                 </div>
             ),
@@ -201,32 +214,32 @@ const ManagerUser = () => {
 
     return (
         <Container maxWidth='xl'>
-            <h1 className="text-danger text-center">Manager User</h1>
+            <h1 className="text-danger text-center">Quản lí người dùng</h1>
             <Button
                 className="mt-3 mb-3"
-                style={{ display: "flex", backgroundColor: "black", color: "white" }}
+                style={{display: "flex", backgroundColor: "black", color: "white"}}
                 type="default"
                 onClick={() => showModal(null)}
             >
-                Add User
+                Thêm mới
             </Button>
             <Form
                 layout="inline"
                 onValuesChange={handleFilterChange}
-                style={{ display: 'flex', justifyContent: 'flex-end' }}
+                style={{display: 'flex', justifyContent: 'flex-end'}}
                 className="mt-2 mb-2"
             >
                 <Form.Item name="email" label="Email">
-                    <Input placeholder="Search by email" />
+                    <Input placeholder="Search by email"/>
                 </Form.Item>
-                <Form.Item name="phone" label="Phone Number">
-                    <Input placeholder="Search by phone number" />
+                <Form.Item name="phone" label="Số điện thoại">
+                    <Input placeholder="Tìm kiếm theo số điện thoại"/>
                 </Form.Item>
-                <Form.Item name="fullName" label="Full Name">
-                    <Input placeholder="Search by full name" />
+                <Form.Item name="fullName" label="Họ và tên">
+                    <Input placeholder="Tìm kiếm theo tên"/>
                 </Form.Item>
-                <Form.Item name="gender" label="Gender">
-                    <Select placeholder="Select gender">
+                <Form.Item name="gender" label="Giới tính ">
+                    <Select placeholder="Tìm kiếm theo giới tính">
                         {Object.entries(GenderEnum).map(([key, value]) => (
                             <Select.Option key={value} value={value}>
                                 {key}
@@ -235,25 +248,25 @@ const ManagerUser = () => {
                     </Select>
                 </Form.Item>
             </Form>
-                <Table
-                    dataSource={users}
-                    columns={columns}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={createPaginationConfig(pagination, setPagination)}
-                    onChange={handleTableChange}
+            <Table
+                dataSource={users}
+                columns={columns}
+                loading={loading}
+                rowKey="id"
+                pagination={createPaginationConfig(pagination, setPagination)}
+                onChange={handleTableChange}
+            />
+            {isModalOpen && (
+                <UserModel
+                    isModalOpen={isModalOpen}
+                    handleOk={handleModalOk}
+                    handleCancel={() => setIsModalOpen(false)}
+                    form={form}
+                    refreshUsers={fetchUsers}
+                    mode={currentUser ? 'update' : 'add'}
+                    user={currentUser ? {...currentUser} : undefined}
                 />
-                {isModalOpen && (
-                    <UserModel
-                        isModalOpen={isModalOpen}
-                        handleOk={handleModalOk}
-                        handleCancel={() => setIsModalOpen(false)}
-                        form={form}
-                        refreshUsers={fetchUsers}
-                        mode={currentUser ? 'update' : 'add'}
-                        user={currentUser ? { ...currentUser } : undefined}
-                    />
-                )}
+            )}
         </Container>
     );
 

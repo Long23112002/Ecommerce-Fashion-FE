@@ -19,7 +19,7 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
 
     const logout = () => {
         handleLogout();
-        navigate('/login');
+        navigate('/');
     }
 
     useEffect(() => {

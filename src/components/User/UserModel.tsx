@@ -1,3 +1,4 @@
+
 import React, {useEffect, useState} from 'react';
 import {Button, DatePicker, Form, Input, Modal, Select} from 'antd';
 import {GenderEnum} from "../../enum/GenderEnum.ts";
@@ -69,7 +70,7 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
 
     return (
         <Modal
-            title={mode === 'update' ? 'Update User' : 'Add User'}
+            title={mode === 'update' ? 'Cập nhật' : 'Thêm mới'}
             visible={isModalOpen}
             onOk={() => form.submit()}
             onCancel={handleCancel}
@@ -78,7 +79,7 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
                     Cancel
                 </Button>,
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {mode === 'update' ? 'Update' : 'Add'}
+                    {mode === 'update' ? 'Cập nhật' : 'Thêm mới'}
                 </Button>,
             ]}
         >
@@ -92,29 +93,29 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
                 <Form.Item
                     name="email"
                     label="Email"
-                    rules={[{required: true, message: 'Please input the email!'}]}
+                    rules={[{required: true, message: 'Email không được để trống!'}]}
                 >
                     <Input/>
                 </Form.Item>
                 <Form.Item
                     name="password"
-                    label="Password"
-                    rules={[{required: mode === 'add', message: 'Please input the password!'}]}
+                    label="Mật khẩu"
+                    rules={[{required: mode === 'add', message: 'Mật khẩu không được để trống!'}]}
                 >
                     <Input.Password/>
                 </Form.Item>
                 <Form.Item
                     name="confirmPassword"
-                    label="Confirm Password"
-                    dependencies={['password']}
+                    label="Xác nhận mật khẩu"
+                    dependencies={['password'] as any}
                     rules={[
-                        {required: mode === 'add', message: 'Please confirm the password!'},
+                        {required: mode === 'add', message: 'Xác nhận mật khẩu không được để trống!'},
                         ({getFieldValue}) => ({
                             validator(_, value) {
-                                if (!value || getFieldValue('password') === value) {
+                                if (!value || getFieldValue('password' as any) === value) {
                                     return Promise.resolve();
                                 }
-                                return Promise.reject(new Error('Passwords do not match!'));
+                                return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
                             },
                         }),
                     ]}
@@ -123,27 +124,27 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
                 </Form.Item>
                 <Form.Item
                     name="fullName"
-                    label="Full Name"
-                    rules={[{required: true, message: 'Please input the full name!'}]}
+                    label="Họ và tên"
+                    rules={[{required: true, message: 'Họ và tên không được để trống!'}]}
                 >
                     <Input/>
                 </Form.Item>
                 <Form.Item
                     name="phoneNumber"
-                    label="Phone Number"
-                    rules={[{required: true, message: 'Please input the phone number!'}]}
+                    label="Số điện thoại"
+                    rules={[{required: true, message: 'Số điện thoại không được để trống!'}]}
                 >
                     <Input/>
                 </Form.Item>
                 <Form.Item
                     name="birth"
-                    label="Date of Birth"
+                    label="Ngày sinh"
                 >
                     <DatePicker format="YYYY-MM-DD"/>
                 </Form.Item>
                 <Form.Item
                     name="gender"
-                    label="Gender"
+                    label="Giới tính"
                 >
                     <Select>
                         {Object.entries(GenderEnum).map(([key, value]) => (
