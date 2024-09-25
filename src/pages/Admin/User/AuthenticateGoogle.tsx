@@ -51,7 +51,7 @@ export default function AuthenticateGoogle() {
                 }}
             >
                 <Spin tip={"loading"} size="large"></Spin>
-                <Typography>Authenticating...</Typography>
+                <Typography>Đang xác minh...</Typography>
             </Box>
         </>
     );

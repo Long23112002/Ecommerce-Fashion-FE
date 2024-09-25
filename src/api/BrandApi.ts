@@ -2,9 +2,8 @@ import Cookies from 'js-cookie';
 import { BASE_API } from '../constants/BaseApi';
 import axiosInstance from './AxiosInstance';
 
-const API_BASE_URL = `${BASE_API}/api/v1/brand`; // Adjust the base URL based on your backend
+const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
-// Fetch all brands with pagination and optional search parameter
 export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
     const token = Cookies.get("accessToken");
     const config = {

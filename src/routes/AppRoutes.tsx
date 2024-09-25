@@ -30,24 +30,18 @@ const AppRoutes = () => {
                 <Route path='/' element={<Home />} />
             </Route>
 
-            <Route element={<AdminRoute />}>
-                <Route path="/login" element={<Login />} />
-                <Route element={<AdminLayout />}>
-                    <Route path="/admin/product/*" element={<ProductManager />} />
-                    <Route path="/admin/user/role" element={<ManagerRole />} />
-                    <Route path="/admin/brand" element={<ManagerBrand />} />
-                    <Route path="/admin/origin" element={<ManaggerOrigin />} />
-                    <Route path="/admin/color" element={<ManagerColor />} />
-                    <Route path="/admin/size" element={<ManagerSize />} />
-                    <Route path="/admin/material" element={<ManagerMaterial />} />
-                    <Route path="/admin/chat" element={<ChatPage />} />
-                    <Route path="/admin/user" element={<ManagerUser />} />
-                    <Route path="/admin/category" element={<ManagerCategory />} />
-                </Route>
+            <Route element={<AdminLayout />}>
+                <Route path="/admin/product/*" element={<ProductManager />} />
+                <Route path="/admin/user/role" element={<ManagerRole />} />
+                <Route path="/admin/brand" element={<ManagerBrand />} />
+                <Route path="/admin/origin" element={<ManaggerOrigin />} />
+                <Route path="/admin/color" element={<ManagerColor />} />
+                <Route path="/admin/size" element={<ManagerSize />} />
+                <Route path="/admin/material" element={<ManagerMaterial />} />
+                <Route path="/admin/chat" element={<ChatPage />} />
+                <Route path="/admin/user" element={<ManagerUser />} />
+                <Route path="/admin/category" element={<ManagerCategory />} />
             </Route>
-
-
-
 
             {/* Route xử lý lỗi */}
             <Route path="/403" element={<ForbiddenPage />} />
