@@ -16,8 +16,13 @@ export const callCreateChatRoom = async (chatRoom: ChatRoom) => {
     return data
 }
 
-export const callFindAllChatByIdChatRoom = async (id: string) => {
-    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`)
+export const callFindAllChatByIdChatRoom = async (id: string, page: number) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`,
+        {
+            params: {
+                "p": page
+            }
+        })
     return data
 }
 

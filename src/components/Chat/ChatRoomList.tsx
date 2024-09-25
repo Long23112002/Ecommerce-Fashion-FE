@@ -1,13 +1,14 @@
-import { List, ListItem, ListItemText, CircularProgress, Typography, Box, Divider, Avatar } from '@mui/material';
-import React, { useEffect, useState } from 'react'
-import ChatRoom from '../../types/ChatRoom'
-import { useSelector } from 'react-redux'
-import { userSelector } from '../../redux/reducers/UserReducer'
-import { callFindAllChatRoom } from '../../api/ChatApi'
-import { refreshToken } from '../../api/AxiosInstance';
-import SockJS from 'sockjs-client';
+import { Avatar, Box, Divider, List, ListItem, ListItemText, Typography } from '@mui/material';
 import { Client, IMessage } from '@stomp/stompjs';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import SockJS from 'sockjs-client';
+import { refreshToken } from '../../api/AxiosInstance';
+import { callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import ChatRoom from '../../types/ChatRoom';
+import MuiLoading from '../MuiLoading';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -45,7 +46,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
           connectHeaders: {
             Authorization: token,
           },
-          debug: function (str) {
+          debug: (str) => {
             console.log(str);
           }
         });
@@ -83,9 +84,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
       </Typography>
       <Divider />
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-          <CircularProgress />
-        </Box>
+        <MuiLoading />
       ) : (
         <List>
           {
