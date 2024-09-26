@@ -3,6 +3,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
+import Cookies from "js-cookie";
 import { refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
@@ -15,9 +16,11 @@ import ChatItem from './ChatItem';
 interface IProps {
     idRoom: string;
     isAdmin?: boolean;
+    py?: number,
+    px?: number
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
     const user = useSelector(userSelector);
     const chatBoxRef = useRef<HTMLElement | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -29,7 +32,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
     const scroll = useRef<boolean>(false);
 
     const fetchFindAllChatByIdChatRoom = async () => {
-        if (user.id !== -1 && idRoom) {
+        if (user.id > 0 && idRoom) {
             setMoreLoading(true);
             const res = await callFindAllChatByIdChatRoom(idRoom, page.current);
             setChats(prevChats => [...res, ...prevChats]);
@@ -39,7 +42,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
     };
 
     const fetchSeenAllByIdChatRoom = async () => {
-        if (idRoom) {
+        if (idRoom && user.isAdmin) {
             await callSeenAllChatByIdChatRoom(idRoom);
         }
     };
@@ -63,7 +66,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
 
         const initializeWebSocket = async () => {
             try {
-                const token = await refreshToken();
+                await refreshToken();
+                const token = Cookies.get("accessToken") + ''
                 const sock = new SockJS(SOCKET_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
@@ -139,8 +143,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                 sx={{
                     flex: 1,
                     overflowY: 'auto',
-                    py: 3,
-                    px: 4,
+                    py: py || 3,
+                    px: px || 4,
                     position: 'relative'
                 }}
                 onScroll={handleLoadmore}
@@ -180,7 +184,21 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                             <MuiLoading />
                         )
                         :
-                        <></>
+                        <Box
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            height='calc(100% - 100px)'
+                        >
+                            <img src="/logo.png"
+                                alt="logo"
+                                width='40%'
+                                style={{
+                                    borderRadius: '10%',
+                                    opacity: 0.4,
+                                    rotate: '8deg'
+                                }} />
+                        </Box>
                 }
             </Box>
 

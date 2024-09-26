@@ -3,6 +3,7 @@ import { Client, IMessage } from '@stomp/stompjs';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
+import Cookies from 'js-cookie';
 import { refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
@@ -30,7 +31,8 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   useEffect(() => {
     const initializeWebSocket = async () => {
       if (user.id) {
-        const token = await refreshToken();
+        await refreshToken();
+        const token = Cookies.get("accessToken") + ''
         const sock = new SockJS(SOCKET_API);
         const stompClient = new Client({
           webSocketFactory: () => sock as WebSocket,
@@ -90,6 +92,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
           {
             chatRooms.map((room) => (
               <ListItem button key={room.id}
+              sx={{pr: 3}}
                 onClick={() => handleChangeRoom(room.id + '')}
               >
                 <Avatar
@@ -110,15 +113,15 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   <Box
                     sx={{
                       position: 'absolute',
-                      right: -20,
+                      right: 5,
                       top: '50%',
                       transform: 'translate(0,-50%)',
                       backgroundColor: '#00B8D9',
                       color: 'white',
                       borderRadius: '50%',
                       fontSize: '14px',
-                      width: 20,
-                      height: 20,
+                      width: 15,
+                      height: 15,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'

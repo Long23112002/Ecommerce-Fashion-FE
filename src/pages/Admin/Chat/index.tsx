@@ -18,7 +18,7 @@ const ChatPage: React.FC = () => {
                         setIdRoom={setIdRoom}
                     />
                 </Grid>
-                <Grid item xs={8.5}>
+                <Grid item xs={9}>
                     <ChatArea
                         idRoom={idRoom}
                         isAdmin={true}
