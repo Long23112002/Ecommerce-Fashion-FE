@@ -9,8 +9,9 @@ import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
 import {getUserData} from '../../../api/AuthApi'
 import Cookies from "js-cookie";
 import {Button} from "antd";
-import LoginUserModel from "../../../components/User/LoginModelUser.tsx";
+
 import { UserOutlined } from '@ant-design/icons';
+import {LoginUserModel} from "../../../components/User/LoginModelUser.tsx";
 
 const UserHeader: React.FC = () => {
     const user = useSelector(userSelector)

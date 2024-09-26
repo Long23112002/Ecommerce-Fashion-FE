@@ -16,6 +16,7 @@
     "@mui/material": "^5.16.7",
     "@reduxjs/toolkit": "^2.2.7",
     "@stomp/stompjs": "^7.0.0",
+    "@types/styled-components": "^5.1.34",
     "antd": "^5.20.3",
     "axios": "^1.7.4",
     "color": "^4.2.3",
