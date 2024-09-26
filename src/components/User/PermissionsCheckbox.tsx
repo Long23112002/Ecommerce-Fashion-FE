@@ -30,15 +30,21 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({permissions, s
                 size: 5,
             };
             const response = await fetchAllPermission(params);
-            if (response.length < 5) setHasMore(false);
-            setVisiblePermissions(prev => [...prev, ...response]);
-            setPage(prev => prev + 1);
+
+            if (Array.isArray(response)) {
+                if (response.length < 5) setHasMore(false);
+                setVisiblePermissions(prev => [...prev, ...response]);
+                setPage(prev => prev + 1);
+            } else {
+                console.error("Unexpected response format:", response);
+            }
         } catch (error) {
             console.error("Error fetching permissions:", error);
         } finally {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         setVisiblePermissions(permissions);
@@ -72,8 +78,8 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({permissions, s
     );
 
     return (
-        <Popover content={content} title="Select Permissions" trigger="click" placement="bottomLeft">
-            <Button>{selectedPermissions.length ? 'Edit Permissions' : 'Choose Permissions'}</Button>
+        <Popover content={content} title="Danh sách quyền" trigger="click" placement="bottomLeft">
+            <Button>{selectedPermissions.length ? 'Chỉnh sửa quyền' : 'Chọn quyền'}</Button>
         </Popover>
     );
 };

@@ -17,7 +17,6 @@ export const refreshToken = async (): Promise<string> => {
     });
     Cookies.set('accessToken', response.data.accessToken);
     Cookies.set('refreshToken', response.data.refreshToken);
-    return response.data.accessToken;
 };
 
 const axiosInstance = axios.create({

@@ -1,4 +1,3 @@
-import React from 'react';
 import {Button, Divider, Form, Input, Typography} from 'antd';
 import {
     EyeInvisibleOutlined,
@@ -25,15 +24,14 @@ export default function Login() {
         try {
             const response = await handleLogin(values);
             if (response) {
-                toast.success('Login successfully!');
+                toast.success('Đăng nhập thành công!');
                 storeUserData(response);
                 setTimeout(() => {
                     navigate('/admin/user/role');
                 }, 1000);
             }
         } catch (error) {
-            toast.error('Login failed!');
-            console.error('Login failed:', error);
+            toast.error('Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!');
         }
     };
 
