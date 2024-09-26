@@ -29,3 +29,7 @@ export const callFindAllChatByIdChatRoom = async (id: string, page: number) => {
 export const callSeenAllChatByIdChatRoom = async (id: string) => {
     await axiosInstance.patch(`/api/v1/chat_room/chats/${id}`)
 }
+
+export const callDeleteRoomById = async (id: string) => {
+    await axiosInstance.delete(`/api/v1/chat_room/${id}`)
+}
