@@ -131,7 +131,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
     const handleLoadmore = () => {
         const chatBox = chatBoxRef.current
         if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
-            chatBox.scrollTop = 10
+            chatBox.scrollTop = 20
             fetchFindAllChatByIdChatRoom()
         }
     }
