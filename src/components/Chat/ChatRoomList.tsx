@@ -58,8 +58,6 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
         stompClient.activate();
         setClient(stompClient);
 
-        setLoading(false)
-
         return () => {
           stompClient.deactivate();
         };
@@ -86,13 +84,13 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', height: '100%' }}>
       <Typography variant="h5" align="center" sx={{ p: 2 }}>
         Danh sách chat
       </Typography>
       <Divider />
       {loading ? (
-        <MuiLoading />
+        <MuiLoading height='75%'/>
       ) : (
         <List>
           {
