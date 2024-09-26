@@ -5,10 +5,11 @@ import Chat from '../../types/Chat'
 interface IProps {
   chat: Chat,
   id: number,
-  isAdmin: boolean
+  isAdmin: boolean,
+  show: boolean
 }
 
-const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin }) => {
+const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show }) => {
   return (
     <Box
       display="flex"
@@ -18,6 +19,9 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin }) => {
       {!(chat.createBy == id) &&
         <Avatar
           src={isAdmin ? chat.avatar : "logo.png"}
+          sx={{
+            opacity: show ? 1 : 0
+          }}
         />
       }
       <Paper
@@ -26,7 +30,7 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin }) => {
           m: 1,
           backgroundColor: chat.createBy == id ? '#3A99D9' : '#C9E0F7',
           color: chat.createBy == id ? '#fff' : '#000',
-          maxWidth: 350,
+          maxWidth: '70%',
           wordBreak: 'break-word',
         }}
       >
