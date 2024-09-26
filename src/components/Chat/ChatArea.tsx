@@ -1,62 +1,103 @@
-import React, { useEffect, useRef, useState } from 'react'
-import ChatInput from './ChatInput'
-import { Box, CircularProgress } from '@mui/material'
-import ChatItem from './ChatItem'
-import Chat from '../../types/Chat'
-import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi'
-import { useSelector } from 'react-redux'
-import { userSelector } from '../../redux/reducers/UserReducer'
-import { refreshToken } from '../../api/AxiosInstance'
-import SockJS from 'sockjs-client'
-import { SOCKET_API } from '../../constants/BaseApi'
-import { Client, IMessage } from '@stomp/stompjs'
+import { Box } from '@mui/material';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import SockJS from 'sockjs-client';
+import Cookies from "js-cookie";
+import { refreshToken } from '../../api/AxiosInstance';
+import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
+import { SOCKET_API } from '../../constants/BaseApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import Chat from '../../types/Chat';
+import MuiLoading from '../MuiLoading';
+import ChatInput from './ChatInput';
+import ChatItem from './ChatItem';
 
 interface IProps {
-    idRoom: string,
-    isAdmin?: boolean
+    idRoom: string;
+    isAdmin?: boolean;
+    py?: number,
+    px?: number
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
-
-    const user = useSelector(userSelector)
-    const chatBoxRef = useRef<HTMLElement | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
-    const [client, setClient] = useState<Client | null>(null)
-    const [chats, setChats] = useState<Chat[]>([])
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
+    const user = useSelector(userSelector);
+    const chatBoxRef = useRef<HTMLElement | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [moreLoading, setMoreLoading] = useState<boolean>(false);
+    const [chats, setChats] = useState<Chat[]>([]);
+    const clientRef = useRef<Client | null>(null);
+    const subscriptionRef = useRef<StompSubscription | null>(null);
+    const page = useRef<number>(0);
+    const scroll = useRef<boolean>(false);
 
     const fetchFindAllChatByIdChatRoom = async () => {
-        if (user.id != -1 && idRoom) {
-            const res = await callFindAllChatByIdChatRoom(idRoom)
-            setChats([...res])
+        if (user.id > 0 && idRoom) {
+            setMoreLoading(true);
+            const res = await callFindAllChatByIdChatRoom(idRoom, page.current);
+            setChats(prevChats => [...res, ...prevChats]);
+            page.current++;
+            setMoreLoading(false);
         }
-    }
+    };
+
+    const fetchSeenAllByIdChatRoom = async () => {
+        if (idRoom && user.isAdmin) {
+            await callSeenAllChatByIdChatRoom(idRoom);
+        }
+    };
+
+    const shouldShowChat = (chat: Chat, prevChat?: Chat) => {
+        return !prevChat || prevChat.createBy !== chat.createBy;
+    };
+
+    const scrollDown = () => {
+        const item = chatBoxRef.current;
+        if (item) {
+            item.scrollTop = item.scrollHeight;
+            scroll.current = false
+        }
+    };
 
     useEffect(() => {
-        setLoading(true)
+        setLoading(true);
+        setChats([]);
+        page.current = 0;
+
         const initializeWebSocket = async () => {
-            const token = await refreshToken();
-            const sock = new SockJS(SOCKET_API);
-            const stompClient = new Client({
-                webSocketFactory: () => sock as WebSocket,
-                onConnect: () => {
-                    stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
-                        setChats(prevChats => [...prevChats, JSON.parse(chat.body)]);
-                    }, { Authorization: token });
+            try {
+                await refreshToken();
+                const token = Cookies.get("accessToken") + ''
+                const sock = new SockJS(SOCKET_API);
+                const stompClient = new Client({
+                    webSocketFactory: () => sock as WebSocket,
+                    connectHeaders: { Authorization: token },
+                    onConnect: async () => {
+                        const subscription = stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
+                            const newChat: Chat = JSON.parse(chat.body);
+                            if (newChat.idRoom === idRoom) {
+                                setChats(prevChats => [...prevChats, newChat]);
+                            }
+                            scroll.current = true;
+                        }, { Authorization: token });
 
-                    fetchFindAllChatByIdChatRoom();
-                },
-                connectHeaders: { Authorization: token },
-                debug: (str) => console.log(str),
-            });
+                        subscriptionRef.current = subscription;
 
-            stompClient.activate();
-            setClient(stompClient);
+                        await fetchFindAllChatByIdChatRoom();
+                        await fetchSeenAllByIdChatRoom();
+                        setLoading(false);
+                    },
+                    debug: (str) => {
+                        console.log(str);
+                    }
+                });
 
-            setLoading(false);
-
-            return () => {
-                stompClient.deactivate();
-            };
+                stompClient.activate();
+                clientRef.current = stompClient;
+            } catch (error) {
+                console.error('Error initializing WebSocket:', error);
+                setLoading(false);
+            }
         };
 
         if (idRoom) {
@@ -64,24 +105,36 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
         }
 
         return () => {
-            if (client) {
-                client.deactivate();
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+                subscriptionRef.current = null;
+            }
+            if (clientRef.current) {
+                clientRef.current.deactivate();
+                clientRef.current = null;
             }
         };
     }, [idRoom]);
 
     useEffect(() => {
-        const item = chatBoxRef.current;
-        if (item) {
-            item.scrollTop = item.scrollHeight
+        if (scroll.current) {
+            scrollDown();
         }
-        if (idRoom.length > 0 && user.isAdmin) {
-            const fetchSeenAllChatByIdChatRoom = async () => {
-                await callSeenAllChatByIdChatRoom(idRoom)
-            }
-            fetchSeenAllChatByIdChatRoom()
+    }, [chats]);
+
+    useEffect(() => {
+        if (!loading) {
+            scrollDown()
         }
-    }, [chats])
+    }, [loading])
+
+    const handleLoadmore = () => {
+        const chatBox = chatBoxRef.current
+        if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
+            chatBox.scrollTop = 10
+            fetchFindAllChatByIdChatRoom()
+        }
+    }
 
     const box = (
         <>
@@ -90,42 +143,67 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                 sx={{
                     flex: 1,
                     overflowY: 'auto',
-                    py: 3,
-                    px: 4,
+                    py: py || 3,
+                    px: px || 4,
+                    position: 'relative'
                 }}
+                onScroll={handleLoadmore}
             >
+                {(moreLoading && !loading) &&
+                    (
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: 15,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                zIndex: 99
+                            }}
+                        >
+                            <MuiLoading height='70px' />
+                        </Box>
+                    )}
                 {!loading ? (
-                    chats.map((chat, index) => (
-                        <ChatItem
-                            key={index}
-                            chat={chat}
-                            id={user.id}
-                            isAdmin={isAdmin || false}
-                        />
-                    ))
+                    chats.map((chat, index) => {
+                        const show = shouldShowChat(chat, chats[index - 1])
+                        return (
+                            <ChatItem
+                                key={index}
+                                chat={chat}
+                                show={show}
+                                id={user.id}
+                                isAdmin={isAdmin || false}
+                            />
+                        )
+                    })
                 )
                     :
                     idRoom !== ""
                         ?
                         (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: '100%',
-                                }}
-                            >
-                                <CircularProgress />
-                            </Box>
+                            <MuiLoading />
                         )
                         :
-                        <></>
+                        <Box
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            height='calc(100% - 100px)'
+                        >
+                            <img src="/logo.png"
+                                alt="logo"
+                                width='40%'
+                                style={{
+                                    borderRadius: '10%',
+                                    opacity: 0.4,
+                                    rotate: '8deg'
+                                }} />
+                        </Box>
                 }
             </Box>
 
             <ChatInput
-                client={client}
+                client={clientRef.current}
                 idRoom={idRoom}
             />
         </>
@@ -145,11 +223,13 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin }) => {
                     {box}
                 </Box>
                 :
-                box
+                <>
+                    {box}
+                </>
             }
 
         </>
     )
 }
 
-export default ChatArea
+export default ChatArea;

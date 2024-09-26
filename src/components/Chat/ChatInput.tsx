@@ -2,6 +2,7 @@ import { Box, Button, TextField } from '@mui/material'
 import { Client } from '@stomp/stompjs'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
+import Cookies from "js-cookie"
 import { refreshToken } from '../../api/AxiosInstance'
 import { userSelector } from '../../redux/reducers/UserReducer'
 
@@ -22,7 +23,7 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
                 body: JSON.stringify({
                     idRoom: idRoom,
                     content: content,
-                    createBy: user.id,
+                    createBy: user.id
                 }),
                 headers: {
                     Authorization: token,
@@ -32,7 +33,8 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
     };
 
     const handleSend = async () => {
-        const token: string = await refreshToken() + '';
+        await refreshToken() + '';
+        const token = Cookies.get("accessToken") + ''
         sendMessage(token);
         setContent('');
     };

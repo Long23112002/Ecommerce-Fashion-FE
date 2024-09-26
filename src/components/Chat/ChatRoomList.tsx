@@ -1,13 +1,16 @@
-import { List, ListItem, ListItemText, CircularProgress, Typography, Box, Divider, Avatar } from '@mui/material';
-import React, { useEffect, useState } from 'react'
-import ChatRoom from '../../types/ChatRoom'
-import { useSelector } from 'react-redux'
-import { userSelector } from '../../redux/reducers/UserReducer'
-import { callFindAllChatRoom } from '../../api/ChatApi'
-import { refreshToken } from '../../api/AxiosInstance';
-import SockJS from 'sockjs-client';
+import { Avatar, Box, Divider, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
 import { Client, IMessage } from '@stomp/stompjs';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import SockJS from 'sockjs-client';
+import Cookies from 'js-cookie';
+import { refreshToken } from '../../api/AxiosInstance';
+import { callDeleteRoomById, callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import ChatRoom from '../../types/ChatRoom';
+import MuiLoading from '../MuiLoading';
+import { Button, Popconfirm, Tooltip } from 'antd';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -19,6 +22,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [client, setClient] = useState<Client | null>(null)
+  const [hoverRoom, setHoverRoom] = useState<string | null>(null)
 
   const fetchFindAllChatRoom = async () => {
     const data = await callFindAllChatRoom()
@@ -29,7 +33,8 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   useEffect(() => {
     const initializeWebSocket = async () => {
       if (user.id) {
-        const token = await refreshToken();
+        await refreshToken();
+        const token = Cookies.get("accessToken") + ''
         const sock = new SockJS(SOCKET_API);
         const stompClient = new Client({
           webSocketFactory: () => sock as WebSocket,
@@ -45,15 +50,13 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
           connectHeaders: {
             Authorization: token,
           },
-          debug: function (str) {
+          debug: (str) => {
             console.log(str);
           }
         });
 
         stompClient.activate();
         setClient(stompClient);
-
-        setLoading(false)
 
         return () => {
           stompClient.deactivate();
@@ -76,22 +79,27 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
     setIdRoom(id)
   }
 
+  const handleDelete = async (id: string) => {
+    await callDeleteRoomById(id)
+  }
+
   return (
-    <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+    <Box sx={{ width: '100%', height: '100%' }}>
       <Typography variant="h5" align="center" sx={{ p: 2 }}>
         Danh sách chat
       </Typography>
       <Divider />
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-          <CircularProgress />
-        </Box>
+        <MuiLoading height='75%'/>
       ) : (
         <List>
           {
             chatRooms.map((room) => (
               <ListItem button key={room.id}
+                sx={{ pr: 3 }}
                 onClick={() => handleChangeRoom(room.id + '')}
+                onMouseOver={() => setHoverRoom(room.id + '')}
+                onMouseLeave={() => setHoverRoom(null)}
               >
                 <Avatar
                   src={room.avatar}
@@ -102,6 +110,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   primary={room.nameClient}
                   secondary={room.lastChat}
                   sx={{
+                    width: 0,
                     overflow: 'hidden',
                     textWrap: 'nowrap'
                   }} />
@@ -110,20 +119,39 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   <Box
                     sx={{
                       position: 'absolute',
-                      right: -20,
+                      right: 5,
                       top: '50%',
                       transform: 'translate(0,-50%)',
                       backgroundColor: '#00B8D9',
                       color: 'white',
                       borderRadius: '50%',
                       fontSize: '14px',
-                      width: 20,
-                      height: 20,
+                      width: 15,
+                      height: 15,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   />
+                }
+                {
+                  (hoverRoom && hoverRoom === room.id) &&
+                  <Popconfirm
+                    title="Xác nhận xóa room này?"
+                    onConfirm={() => handleDelete(room.id + '')}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                  >
+                    <Tooltip title="Xóa room" placement="bottom">
+                      <IconButton
+                        sx={{
+                          ":hover": { color: 'red' }
+                        }}
+                      >
+                        <i className="fa-solid fa-trash-can fs-6"></i>
+                      </IconButton>
+                    </Tooltip>
+                  </Popconfirm>
                 }
               </ListItem>
             ))

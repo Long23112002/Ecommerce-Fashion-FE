@@ -59,9 +59,10 @@ const UserHeader: React.FC = () => {
                     >
                         <img src="/logo.png" alt="" width='100%'/>
                     </Box>
-                    <Box sx={{display: 'flex', flexGrow: 1, justifyContent: 'end'}}>
-                        <Chat/>
-                        <Notification/>
+                    <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
+
+                        <Notification />
+
                         <Box component='span' display='flex' alignItems='center'>
                             {isLogin ? (
                                 <>
