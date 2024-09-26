@@ -81,7 +81,7 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
 
 
                 <SubMenu
-                    label="User manager"
+                    label="Quản lí người dùng"
                     icon={<i className='fa-solid fa-file-signature fs-5'/>}
                 >
 
@@ -89,22 +89,14 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                         to='/admin/user/role'
                         collapse={collapse}
                     >
-                        Manager roles
+                        Vai trò
                     </MenuItem>
 
                     <MenuItem
                         to='/admin/user'
                         collapse={collapse}
                     >
-                        Manager user
-                    </MenuItem>
-
-
-                    <MenuItem
-                        to='/admin/special-attributes'
-                        collapse={collapse}
-                    >
-                        Manager permission
+                        Người dùng
                     </MenuItem>
 
 
@@ -114,56 +106,55 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                     to='/admin/product'
                     icon={<i className='fa-solid fa-shirt fs-5'/>}
                 >
-                    Product
+                    Quản lí sản phẩm
                 </MenuItem>
                 <SubMenu
-                    label="Attributes"
+                    label="Quản lí thuộc tính"
                     icon={<i className='fa-solid fa-file-signature fs-5'/>}
                 >
                     <MenuItem
                         to='/admin/color'
                         collapse={collapse}
                     >
-                        Color
+                        Màu sắc
                     </MenuItem>
                     <MenuItem
                         to='/admin/size'
                         collapse={collapse}
                     >
-                        Size
+                        Kích thước
                     </MenuItem>
                     <MenuItem
                         to='/admin/brand'
                         collapse={collapse}
                     >
-                        Brand
+                        Thương hiệu
                     </MenuItem>
                     <MenuItem
                         to='/admin/origin'
                         collapse={collapse}
                     >
-                        Origin
+                        Xuất xứ
                     </MenuItem>
                     <MenuItem
                         to='/admin/material'
                         collapse={collapse}
                     >
-                        Material
+                        Chất liệu
                     </MenuItem>
                     <MenuItem
                         to='/admin/category'
                         collapse={collapse}
                     >
-                        Category
+                        Danh mục
                     </MenuItem>
                     <MenuItem
                         to='/admin/special-attributes'
                         collapse={collapse}
                     >
-                        Special attributes
+                        Thuộc tính đặc biệt
                     </MenuItem>
                 </SubMenu>
-
 
 
             </Menu>

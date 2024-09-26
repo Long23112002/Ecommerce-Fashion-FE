@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {Box, CircularProgress, Typography} from "@mui/material"
+import {Box, Typography} from "@mui/material"
 import {storeUserData} from "../../../api/AuthApi.ts";
 import Cookie from "js-cookie";
 import {Spin} from "antd";
@@ -57,7 +57,7 @@ export default function AuthenticateFacebook() {
                 }}
             >
                 <Spin tip={"loading"} size="large"></Spin>
-                <Typography>Authenticating...</Typography>
+                <Typography>Đang xác minh...</Typography>
             </Box>
         </>
     );

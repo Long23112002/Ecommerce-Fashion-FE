@@ -1,7 +1,7 @@
-import { IconButton } from '@mui/material';
+import { Avatar as Avt } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { userSelector } from '../redux/reducers/UserReducer';
+import { userSelector } from '../../redux/reducers/UserReducer';
 
 interface IProps {
     draw: ReactElement;
@@ -10,20 +10,17 @@ interface IProps {
 const Avatar: React.FC<IProps> = ({ draw }) => {
 
     const user = useSelector(userSelector)
-
+    
     const [open, setOpen] = useState(false);
 
     const toggleDrawer = (open: boolean) => () => {
         setOpen(open);
     };
-
     return (
         <>
-            <IconButton
-                size="large"
-                aria-label="account of current user"
+            <Avt 
+                src={user?.avatar+''}
                 sx={{
-                    color: '#1A2023',
                     ml: {
                         xs: 0,
                         sm: 3
@@ -35,9 +32,7 @@ const Avatar: React.FC<IProps> = ({ draw }) => {
                     overflow: 'hidden',
                 }}
                 onClick={() => setOpen(true)}
-            >
-                <img src={user?.avatar} alt="avatar" height='100%' />
-            </IconButton>
+            />
             {React.cloneElement(draw, { open, toggleDrawer })}
         </>
     );

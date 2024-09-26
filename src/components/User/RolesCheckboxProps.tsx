@@ -4,6 +4,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import {fetchAllRole} from "../../api/RoleApi";
 import {assignRoleToUser} from "../../api/UserApi";
 import {debounce} from 'lodash';
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../../pages/Error/getErrorMessage.ts";
 
 interface Role {
     id: number;
@@ -17,7 +19,7 @@ interface RolesCheckboxProps {
     onChange: (selected: number[]) => void;
 }
 
-const RolesCheckbox: React.FC<RolesCheckboxProps> = ({userId, email, selectedRoles, onChange}) => {
+const RolesCheckbox: React.FC<RolesCheckboxProps> = ({email, selectedRoles, onChange}) => {
     const [visibleRoles, setVisibleRoles] = useState<Role[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -29,9 +31,11 @@ const RolesCheckbox: React.FC<RolesCheckboxProps> = ({userId, email, selectedRol
         setLoading(true);
         try {
             const response = await fetchAllRole('', 5, page);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             const {data: roles, total} = response;
             if (roles.length < 5 || visibleRoles.length + roles.length >= total) setHasMore(false);
-            const newRoles = roles.filter(role => !visibleRoles.some(vRole => vRole.id === role.id));
+            const newRoles = roles.filter((role: { id: number; }) => !visibleRoles.some(vRole => vRole.id === role.id));
             setVisibleRoles(prev => {
                 const combined = [...prev, ...newRoles];
                 return Array.from(new Map(combined.map(role => [role.id, role])).values());
@@ -53,7 +57,7 @@ const RolesCheckbox: React.FC<RolesCheckboxProps> = ({userId, email, selectedRol
             await assignRoleToUser({email, roleIds: checkedValues});
             onChange(checkedValues);
         } catch (error) {
-            console.error("Failed to update roles.");
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -80,8 +84,8 @@ const RolesCheckbox: React.FC<RolesCheckboxProps> = ({userId, email, selectedRol
     );
 
     return (
-        <Popover content={content} title="Select Roles" trigger="click" placement="bottomLeft">
-            <Button>{selectedRoles.length ? 'Edit Roles' : 'Choose Roles'}</Button>
+        <Popover content={content} title="Danh sách vai trò" trigger="click" placement="bottomLeft">
+            <Button>{selectedRoles.length ? 'Chỉnh sửa vai trò' : 'Chọn vai trò'}</Button>
         </Popover>
     );
 };
