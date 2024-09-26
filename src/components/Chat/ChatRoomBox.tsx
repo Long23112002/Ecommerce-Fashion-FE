@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 import { callCreateChatRoom, callFindIdChatRoomByUserId } from '../../api/ChatApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatArea from './ChatArea';
-import LoginUserModel from '../User/LoginModelUser';
 import { UserOutlined } from '@ant-design/icons';
+import {LoginUserModel} from "../User/LoginModelUser.tsx";
 
 interface IProps {
   closeChat: () => void
