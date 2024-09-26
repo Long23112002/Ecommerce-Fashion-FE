@@ -1,15 +1,16 @@
-import { Avatar, Box, Divider, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Avatar, Box, Divider, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
 import { Client, IMessage } from '@stomp/stompjs';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import Cookies from 'js-cookie';
 import { refreshToken } from '../../api/AxiosInstance';
-import { callFindAllChatRoom } from '../../api/ChatApi';
+import { callDeleteRoomById, callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatRoom from '../../types/ChatRoom';
 import MuiLoading from '../MuiLoading';
+import { Button, Popconfirm, Tooltip } from 'antd';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -21,6 +22,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [client, setClient] = useState<Client | null>(null)
+  const [hoverRoom, setHoverRoom] = useState<string | null>(null)
 
   const fetchFindAllChatRoom = async () => {
     const data = await callFindAllChatRoom()
@@ -56,8 +58,6 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
         stompClient.activate();
         setClient(stompClient);
 
-        setLoading(false)
-
         return () => {
           stompClient.deactivate();
         };
@@ -79,21 +79,27 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
     setIdRoom(id)
   }
 
+  const handleDelete = async (id: string) => {
+    await callDeleteRoomById(id)
+  }
+
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', height: '100%' }}>
       <Typography variant="h5" align="center" sx={{ p: 2 }}>
         Danh sách chat
       </Typography>
       <Divider />
       {loading ? (
-        <MuiLoading />
+        <MuiLoading height='75%'/>
       ) : (
         <List>
           {
             chatRooms.map((room) => (
               <ListItem button key={room.id}
-              sx={{pr: 3}}
+                sx={{ pr: 3 }}
                 onClick={() => handleChangeRoom(room.id + '')}
+                onMouseOver={() => setHoverRoom(room.id + '')}
+                onMouseLeave={() => setHoverRoom(null)}
               >
                 <Avatar
                   src={room.avatar}
@@ -127,6 +133,25 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                       justifyContent: 'center'
                     }}
                   />
+                }
+                {
+                  (hoverRoom && hoverRoom === room.id) &&
+                  <Popconfirm
+                    title="Xác nhận xóa room này?"
+                    onConfirm={() => handleDelete(room.id + '')}
+                    okText="Xóa"
+                    cancelText="Hủy"
+                  >
+                    <Tooltip title="Xóa room" placement="bottom">
+                      <IconButton
+                        sx={{
+                          ":hover": { color: 'red' }
+                        }}
+                      >
+                        <i className="fa-solid fa-trash-can fs-6"></i>
+                      </IconButton>
+                    </Tooltip>
+                  </Popconfirm>
                 }
               </ListItem>
             ))
