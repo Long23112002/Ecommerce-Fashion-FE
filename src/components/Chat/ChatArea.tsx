@@ -2,11 +2,12 @@ import { Box } from '@mui/material';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
+import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
 import MuiLoading from '../MuiLoading';
@@ -22,6 +23,7 @@ interface IProps {
 
 const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
     const user = useSelector(userSelector);
+    const dispatch = useDispatch()
     const chatBoxRef = useRef<HTMLElement | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [moreLoading, setMoreLoading] = useState<boolean>(false);
@@ -43,7 +45,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
 
     const fetchSeenAllByIdChatRoom = async () => {
         if (idRoom && user.isAdmin) {
-            await callSeenAllChatByIdChatRoom(idRoom);
+            await callSeenAllChatByIdChatRoom(idRoom, user.id);
         }
     };
 
@@ -126,6 +128,11 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
         if (scroll.current) {
             scrollDown();
         }
+        chats.forEach(chat => {
+            if(!chat.seen && chat.createBy!== user.id){
+                dispatch(setNewChat(true))
+            }
+        })
     }, [chats]);
 
     useEffect(() => {

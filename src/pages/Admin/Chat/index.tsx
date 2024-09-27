@@ -10,7 +10,7 @@ const ChatPage: React.FC = () => {
     return (
         <Box sx={{ display: 'flex', py: 0, flexDirection: 'column' }}>
             <Grid container justifyContent='space-between'>
-                <Grid item xs={2.5}
+                <Grid item xs={2.8}
                 sx={{
                     borderRight: '1px solid #C6C7C8',
                     maxWidth: '73px'

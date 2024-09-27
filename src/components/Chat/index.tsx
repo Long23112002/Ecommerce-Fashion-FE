@@ -1,9 +1,12 @@
 import { Box, IconButton } from '@mui/material'
 import React, { useState } from 'react'
 import ChatRoomBox from './ChatRoomBox';
+import { chatSelector } from '../../redux/reducers/ChatReducer';
+import { useSelector } from 'react-redux';
 
 const Chat: React.FC = () => {
 
+    const seen = useSelector(chatSelector)
     const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
     const toggleChat = () => {
@@ -28,23 +31,26 @@ const Chat: React.FC = () => {
                 onClick={toggleChat}
             >
                 <i className="fa-solid fa-message fs-2" />
-                <Box
-                    component='span'
-                    sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        width: 20,
-                        height: 20,
-                        backgroundColor: 'red',
-                        color: 'white',
-                        borderRadius: '50%',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        fontSize: 15,
-                    }}
-                >
-                </Box>
+                {
+                    seen &&
+                    <Box
+                        component='span'
+                        sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            width: 20,
+                            height: 20,
+                            backgroundColor: 'red',
+                            color: 'white',
+                            borderRadius: '50%',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            fontSize: 15,
+                        }}
+                    >
+                    </Box>
+                }
             </IconButton>
             <ChatRoomBox
                 isChatOpen={isChatOpen}

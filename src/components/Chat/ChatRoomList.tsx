@@ -75,6 +75,8 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
     };
   }, [user]);
 
+  useEffect(()=>{console.log(chatRooms)},[chatRooms])
+
   const handleChangeRoom = (id: string) => {
     setIdRoom(id)
   }
