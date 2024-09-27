@@ -5,7 +5,7 @@ import {LoginRequest} from "../../types/login/request/loginRequest.ts";
 import {handleLogin, storeUserData} from "../../api/AuthApi.ts";
 import {toast} from "react-toastify";
 import {getErrorMessage} from "../../pages/Error/getErrorMessage.ts";
-import {OAuth2Config, OAuth2ConfigFB} from "../../config/auth2Config.ts";
+import {handleContinueWithFacebook, handleContinueWithGoogle} from "../../api/Oauth2.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -20,31 +20,6 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
     const [loading, setLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-    const handleContinueWithGoogle = () => {
-        const callbackUrl = OAuth2Config.redirectUri;
-        const authUrl = OAuth2Config.authUri;
-        const googleClientId = OAuth2Config.clientId;
-
-        const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
-            callbackUrl
-        )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
-
-        window.location.href = targetUrl;
-    };
-
-    const handleContinueWithFacebook = () => {
-        const callbackUrl = OAuth2ConfigFB.redirectUri;
-        const authUrl = OAuth2ConfigFB.authUri;
-        const facebookClientId = OAuth2ConfigFB.clientId;
-
-        const targetUrl = `${authUrl}?client_id=${facebookClientId}&redirect_uri=${encodeURIComponent(
-            callbackUrl
-        )}&state=${encodeURIComponent(
-            JSON.stringify({callbackUrl})
-        )}&response_type=code&scope=email,public_profile`;
-
-        window.location.href = targetUrl;
-    };
 
     const validateInputs = () => {
         const newErrors: { email?: string; password?: string } = {};
@@ -99,7 +74,7 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
 
     return (
         <div className="container-fluid p-0">
-            <div className="row" style={{margin:"29px 0"}}>
+            <div className="row" style={{margin: "29px 0"}}>
                 <div className="col-md-8">
                     <h2 className="mb-2" style={{minHeight: '2.5rem'}}>
                         <span className="text_typing">Xin chào</span>

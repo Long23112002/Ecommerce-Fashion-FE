@@ -4,7 +4,7 @@ import {ArrowLeftOutlined} from '@ant-design/icons';
 
 export default function PasswordReset({onBack}: { onBack: () => void }) {
     return (
-        <div className=" d-flex align-items-center justify-content-center ">
+        <div className=" d-flex align-items-center justify-content-center" >
             <div className="" style={{maxWidth: '900px', width: '100%', margin: "30px 0"}}>
                 <div className="row g-0">
                     <div className="col-md-6 p-4">

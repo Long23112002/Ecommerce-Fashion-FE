@@ -3,16 +3,23 @@ import {Button, Col, Divider, Form, Input, message, Row, Typography} from 'antd'
 import {ArrowLeftOutlined, FacebookFilled, GoogleOutlined} from '@ant-design/icons';
 import './../../styles/email-registration-form.css';
 import OtpForm from './OtpForm';
+import {BASE_API} from "../../constants/BaseApi.ts";
+import {getErrorMessage} from "../../pages/Error/getErrorMessage.ts";
+import AccountCreationForm from './AccountCreationForm';
+import {handleContinueWithFacebook, handleContinueWithGoogle} from "../../api/Oauth2.ts";
 
 const {Title, Text, Link} = Typography;
 
 export default function EmailRegistrationForm({onBack}: { onBack: () => void }) {
     const [isOtpSent, setIsOtpSent] = useState(false);
     const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
 
     const onFinish = async (values: any) => {
+        setLoading(true);
         try {
-            const response = await fetch('/api/verify-email', {
+            const response = await fetch(`${BASE_API + "/api/v1/auth/send-otp"}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -20,15 +27,18 @@ export default function EmailRegistrationForm({onBack}: { onBack: () => void }) 
                 body: JSON.stringify({email: values.email}),
             });
 
-            if (true) {
+            if (response.ok) {
                 message.success('Mã xác minh đã được gửi!');
                 setEmail(values.email);
                 setIsOtpSent(true);
             } else {
-                message.error('Có lỗi xảy ra khi gửi mã xác minh.');
+                const errorData = await response.json();
+                message.error(errorData.message);
             }
         } catch (error) {
-            message.error('Không thể kết nối tới server.');
+            message.error(getErrorMessage(error))
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -37,11 +47,19 @@ export default function EmailRegistrationForm({onBack}: { onBack: () => void }) 
             <Col span={12}>
                 <div className="header-section">
                     <ArrowLeftOutlined onClick={onBack} style={{fontSize: '18px', color: '#999', cursor: 'pointer'}}/>
-                    <Title level={4} className="styled-title">{isOtpSent ? "Nhập mã xác minh" : "Tạo tài khoản"}</Title>
+                    <Title level={4} className="styled-title">
+                        {isVerified ? "Tạo tài khoản" : isOtpSent ? "Nhập mã xác minh" : "Tạo tài khoản"}
+                    </Title>
                 </div>
 
-                {isOtpSent ? (
-                    <OtpForm email={email} onBack={() => setIsOtpSent(false)}/>
+                {isVerified ? (
+                    <AccountCreationForm email={email} onBack={() => setIsVerified(false)}/>
+                ) : isOtpSent ? (
+                    <OtpForm
+                        email={email}
+                        onBack={() => setIsOtpSent(false)}
+                        onSuccess={() => setIsVerified(true)}
+                    />
                 ) : (
                     <div className="form-section">
                         <Form name="email_registration" onFinish={onFinish} layout="vertical">
@@ -57,17 +75,26 @@ export default function EmailRegistrationForm({onBack}: { onBack: () => void }) 
                             </Form.Item>
 
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" block className="styled-button">
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    block
+                                    className="styled-button"
+                                    loading={loading}
+                                    disabled={loading}
+                                >
                                     Tiếp Tục
                                 </Button>
                             </Form.Item>
                         </Form>
                         <Divider plain>Hoặc tiếp tục bằng</Divider>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                            <Button icon={<FacebookFilled/>} className="social-button facebook">
+                            <Button onClick={handleContinueWithFacebook} icon={<FacebookFilled/>}
+                                    className="social-button facebook">
                                 Facebook
                             </Button>
-                            <Button icon={<GoogleOutlined/>} className="social-button">Google</Button>
+                            <Button onClick={handleContinueWithGoogle} icon={<GoogleOutlined/>}
+                                    className="social-button">Google</Button>
                         </div>
                         <div style={{marginTop: '20px', fontSize: '12px', textAlign: 'center'}}>
                             <Text type="secondary">

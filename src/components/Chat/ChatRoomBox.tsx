@@ -1,11 +1,11 @@
-import { Box, Button, IconButton, Slide, Typography } from '@mui/material';
-import { Button as AntdButton } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { callCreateChatRoom, callFindIdChatRoomByUserId } from '../../api/ChatApi';
-import { userSelector } from '../../redux/reducers/UserReducer';
+import {Box, Button, IconButton, Slide, Typography} from '@mui/material';
+import {Button as AntdButton} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {callCreateChatRoom, callFindIdChatRoomByUserId} from '../../api/ChatApi';
+import {userSelector} from '../../redux/reducers/UserReducer';
 import ChatArea from './ChatArea';
-import { UserOutlined } from '@ant-design/icons';
+import {UserOutlined} from '@ant-design/icons';
 import {LoginUserModel} from "../User/LoginModelUser.tsx";
 
 interface IProps {

@@ -25,6 +25,7 @@ export const LoginUserModel: React.FC<LoginUserModelProps> = ({isModalVisible, h
             onCancel={handleCancel}
             footer={null}
             width={700}
+            className="custom-modal"
         >
             {isResetPassword ? (
                 <PasswordReset onBack={handleBack}/>
