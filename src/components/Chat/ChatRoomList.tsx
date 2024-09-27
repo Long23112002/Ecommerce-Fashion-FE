@@ -85,12 +85,21 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
 
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
-      <Typography variant="h5" align="center" sx={{ p: 2 }}>
-        Danh sách chat
-      </Typography>
-      <Divider />
+      <Box
+        sx={{
+          display: {
+            xs: 'none',
+            md: 'block'
+          }
+        }}
+      >
+        <Typography variant="h5" align="center" sx={{ p: 2 }}>
+          Danh sách chat
+        </Typography>
+        <Divider />
+      </Box>
       {loading ? (
-        <MuiLoading height='75%'/>
+        <MuiLoading height='75%' />
       ) : (
         <List>
           {
@@ -99,7 +108,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                 sx={{ pr: 3 }}
                 onClick={() => handleChangeRoom(room.id + '')}
                 onMouseOver={() => setHoverRoom(room.id + '')}
-                onMouseLeave={() => setHoverRoom(null)}
+                onMouseOut={() => setHoverRoom(null)}
               >
                 <Avatar
                   src={room.avatar}
@@ -120,7 +129,10 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                     sx={{
                       position: 'absolute',
                       right: 5,
-                      top: '50%',
+                      top: {
+                        xs: 20,
+                        sm: '50%'
+                      },
                       transform: 'translate(0,-50%)',
                       backgroundColor: '#00B8D9',
                       color: 'white',
