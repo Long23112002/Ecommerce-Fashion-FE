@@ -75,8 +75,6 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
     };
   }, [user]);
 
-  useEffect(()=>{console.log(chatRooms)},[chatRooms])
-
   const handleChangeRoom = (id: string) => {
     setIdRoom(id)
   }
@@ -119,14 +117,18 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                   }} />
                 <ListItemText
                   primary={room.nameClient}
-                  secondary={room.lastChat}
+                  secondary={room.lastChatContent}
                   sx={{
                     width: 0,
                     overflow: 'hidden',
                     textWrap: 'nowrap'
                   }} />
                 {
-                  (room.seen !== null && room.seen === false) &&
+                  (
+                    room.seen !== null &&
+                    room.seen === false &&
+                    room.lastChatSendBy != user.id
+                  ) &&
                   <Box
                     sx={{
                       position: 'absolute',

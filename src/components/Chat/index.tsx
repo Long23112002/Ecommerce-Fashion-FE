@@ -1,12 +1,13 @@
 import { Box, IconButton } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ChatRoomBox from './ChatRoomBox';
-import { chatSelector } from '../../redux/reducers/ChatReducer';
-import { useSelector } from 'react-redux';
+import { chatSelector, setNewChat } from '../../redux/reducers/ChatReducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Chat: React.FC = () => {
 
     const seen = useSelector(chatSelector)
+    const dispatch = useDispatch()
     const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
     const toggleChat = () => {
@@ -16,6 +17,12 @@ const Chat: React.FC = () => {
     const closeChat = () => {
         setIsChatOpen(false)
     }
+
+    useEffect(()=>{
+        if(isChatOpen){
+            dispatch(setNewChat(false))
+        }
+    },[isChatOpen])
 
     return (
         <>
@@ -39,8 +46,8 @@ const Chat: React.FC = () => {
                             position: 'absolute',
                             top: 8,
                             right: 8,
-                            width: 20,
-                            height: 20,
+                            width: 18,
+                            height: 18,
                             backgroundColor: 'red',
                             color: 'white',
                             borderRadius: '50%',

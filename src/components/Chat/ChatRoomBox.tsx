@@ -114,6 +114,7 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
               <ChatArea
                 idRoom={idRoom}
                 px={1.5}
+                isChatOpen={isChatOpen}
               />
               :
               <Box

@@ -7,11 +7,12 @@ const ChatReducer = createSlice({
     name: 'Chat',
     reducers: {
         setNewChat: (_, action: PayloadAction<boolean>) => {
+            console.log(action.payload)
             return action.payload;
         }
     }
 });
 
 export const { setNewChat } = ChatReducer.actions;
-export const chatSelector = (state: { Chat: boolean }) => state.Chat;
+export const chatSelector = (state: { chat: boolean }) =>  state.chat;
 export default ChatReducer.reducer;

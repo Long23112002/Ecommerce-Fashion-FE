@@ -18,10 +18,11 @@ interface IProps {
     idRoom: string;
     isAdmin?: boolean;
     py?: number,
-    px?: number
+    px?: number,
+    isChatOpen?: boolean
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     const user = useSelector(userSelector);
     const dispatch = useDispatch()
     const chatBoxRef = useRef<HTMLElement | null>(null);
@@ -128,11 +129,12 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
         if (scroll.current) {
             scrollDown();
         }
-        chats.forEach(chat => {
-            if(!chat.seen && chat.createBy!== user.id){
+        if (!isAdmin && chats.length > 0) {
+            const chat = chats[chats.length - 1]
+            if (!chat.seen && chat.createBy != user.id && !isChatOpen) {
                 dispatch(setNewChat(true))
             }
-        })
+        }
     }, [chats]);
 
     useEffect(() => {
