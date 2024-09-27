@@ -1,12 +1,12 @@
-import {Box, Button, IconButton, Slide, Typography} from '@mui/material';
-import {Button as AntdButton} from 'antd';
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {callCreateChatRoom, callFindIdChatRoomByUserId} from '../../api/ChatApi';
-import {userSelector} from '../../redux/reducers/UserReducer';
+import { Box, Button, IconButton, Slide, Typography } from '@mui/material';
+import { Button as AntdButton } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { callCreateChatRoom, callFindIdChatRoomByUserId } from '../../api/ChatApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatArea from './ChatArea';
-import {UserOutlined} from '@ant-design/icons';
-import {LoginUserModel} from "../User/LoginModelUser.tsx";
+import LoginUserModel from '../User/LoginModelUser';
+import { UserOutlined } from '@ant-design/icons';
 
 interface IProps {
   closeChat: () => void
@@ -114,6 +114,7 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
               <ChatArea
                 idRoom={idRoom}
                 px={1.5}
+                isChatOpen={isChatOpen}
               />
               :
               <Box

@@ -26,8 +26,12 @@ export const callFindAllChatByIdChatRoom = async (id: string, page: number) => {
     return data
 }
 
-export const callSeenAllChatByIdChatRoom = async (id: string) => {
-    await axiosInstance.patch(`/api/v1/chat_room/chats/${id}`)
+export const callSeenAllChatByIdChatRoom = async (idRoom: string, idUser: number) => {
+    await axiosInstance.patch(`/api/v1/chat_room/chats/${idRoom}/${idUser}`)
+}
+
+export const callDeleteRoomById = async (id: string) => {
+    await axiosInstance.delete(`/api/v1/chat_room/${id}`)
 }
 
 export const callDeleteRoomById = async (id: string) => {

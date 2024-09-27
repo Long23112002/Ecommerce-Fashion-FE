@@ -1,12 +1,13 @@
 import { Box } from '@mui/material';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
-import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import SockJS from 'sockjs-client';
 import Cookies from "js-cookie";
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import SockJS from 'sockjs-client';
 import { refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
+import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
 import MuiLoading from '../MuiLoading';
@@ -17,11 +18,13 @@ interface IProps {
     idRoom: string;
     isAdmin?: boolean;
     py?: number,
-    px?: number
+    px?: number,
+    isChatOpen?: boolean
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     const user = useSelector(userSelector);
+    const dispatch = useDispatch()
     const chatBoxRef = useRef<HTMLElement | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [moreLoading, setMoreLoading] = useState<boolean>(false);
@@ -43,7 +46,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
 
     const fetchSeenAllByIdChatRoom = async () => {
         if (idRoom && user.isAdmin) {
-            await callSeenAllChatByIdChatRoom(idRoom);
+            await callSeenAllChatByIdChatRoom(idRoom, user.id);
         }
     };
 
@@ -89,7 +92,13 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
                     },
                     debug: (str) => {
                         console.log(str);
+                    },
+                    onStompError: async (error) => {
+                        if (error.headers['message'].includes('JWT expired ')) {
+                            await initializeWebSocket()
+                        }
                     }
+
                 });
 
                 stompClient.activate();
@@ -120,6 +129,12 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
         if (scroll.current) {
             scrollDown();
         }
+        if (!isAdmin && chats.length > 0) {
+            const chat = chats[chats.length - 1]
+            if (!chat.seen && chat.createBy != user.id && !isChatOpen) {
+                dispatch(setNewChat(true))
+            }
+        }
     }, [chats]);
 
     useEffect(() => {
@@ -131,7 +146,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
     const handleLoadmore = () => {
         const chatBox = chatBoxRef.current
         if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
-            chatBox.scrollTop = 10
+            chatBox.scrollTop = 20
             fetchFindAllChatByIdChatRoom()
         }
     }
@@ -144,7 +159,10 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
                     flex: 1,
                     overflowY: 'auto',
                     py: py || 3,
-                    px: px || 4,
+                    px: px || {
+                        xs: 1,
+                        md: 4
+                    },
                     position: 'relative'
                 }}
                 onScroll={handleLoadmore}
@@ -217,7 +235,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        height: 'calc(100vh - 100px)',
+                        height: 'calc(100vh - 65px)',
                     }}
                 >
                     {box}
