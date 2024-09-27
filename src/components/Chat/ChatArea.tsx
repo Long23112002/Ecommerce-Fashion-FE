@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
-import Cookies from "js-cookie";
 import { refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
@@ -89,7 +89,13 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px }) => {
                     },
                     debug: (str) => {
                         console.log(str);
+                    },
+                    onStompError: async (error) => {
+                        if(error.headers['message'].includes('JWT expired ')){
+                            await initializeWebSocket()
+                        }
                     }
+                    
                 });
 
                 stompClient.activate();
