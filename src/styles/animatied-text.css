@@ -21,6 +21,10 @@
     cursor: pointer;
     font-size: 13px;
 }
+.custom-modal .ant-modal-content {
+    border-radius: 20px;
+}
+
 
 /*@keyframes mouse {*/
 /*    from, to {*/

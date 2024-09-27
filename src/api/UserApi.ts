@@ -65,7 +65,15 @@ export const getUserById = async (userId: number): Promise<any> => {
     }
 }
 
-export const createUser = async (user: UserRequest): Promise<ResponseData> => {
+export const createUser = async (user: {
+    password: any;
+    phoneNumber: any;
+    gender: GenderEnum;
+    fullName: any;
+    birth: Date;
+    avatar: null;
+    email: string
+}): Promise<ResponseData> => {
     try {
         const url = `${BASE_API}/api/v1/user`;
         const response = await axiosInstance.post(url, user);
