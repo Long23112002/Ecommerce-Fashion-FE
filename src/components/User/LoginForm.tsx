@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
-import {Button, Input} from 'antd';
-import {FacebookFilled, GoogleOutlined} from '@ant-design/icons';
-import {LoginRequest} from "../../types/login/request/loginRequest.ts";
-import {handleLogin, storeUserData} from "../../api/AuthApi.ts";
-import {toast} from "react-toastify";
-import {getErrorMessage} from "../../pages/Error/getErrorMessage.ts";
-import {handleContinueWithFacebook, handleContinueWithGoogle} from "../../api/Oauth2.ts";
+import React, { useState } from 'react';
+import { Button, Input } from 'antd';
+import { FacebookFilled, GoogleOutlined } from '@ant-design/icons';
+import { LoginRequest } from "../../types/login/request/loginRequest.ts";
+import { handleLogin, storeUserData } from "../../api/AuthApi.ts";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../api/Oauth2.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -13,7 +13,7 @@ interface LoginFormProps {
     onRegister: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, onRegister}) => {
+const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, onRegister }) => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -44,7 +44,7 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
     const handleLoginClick = async () => {
         if (!validateInputs()) return;
 
-        const loginRequest: LoginRequest = {email, password};
+        const loginRequest: LoginRequest = { email, password };
         setLoading(true);
 
         try {
@@ -63,23 +63,23 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
         setEmail(e.target.value);
         setShowPassword(e.target.value.length > 0);
         validateInputs();
-        setErrors({...errors, email: undefined});
+        setErrors({ ...errors, email: undefined });
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value);
         validateInputs();
-        setErrors({...errors, password: undefined});
+        setErrors({ ...errors, password: undefined });
     };
 
     return (
         <div className="container-fluid p-0">
-            <div className="row" style={{margin: "29px 0"}}>
+            <div className="row" style={{ margin: "29px 0" }}>
                 <div className="col-md-8">
-                    <h2 className="mb-2" style={{minHeight: '2.5rem'}}>
+                    <h2 className="mb-2" style={{ minHeight: '2.5rem' }}>
                         <span className="text_typing">Xin chào</span>
                     </h2>
-                    <p className="text-muted mb-4" style={{minHeight: '1.5rem'}}>
+                    <p className="text-muted mb-4" style={{ minHeight: '1.5rem' }}>
                         <span className="text_typing">Đăng nhập hoặc Tạo tài khoản</span>
                     </p>
 
@@ -105,7 +105,7 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
                         onClick={handleLoginClick}
                         type="primary"
                         className="w-100 mb-4"
-                        style={{backgroundColor: '#ff424e', borderColor: '#ff424e'}}
+                        style={{ backgroundColor: '#ff424e', borderColor: '#ff424e' }}
                         loading={loading}
                         disabled={loading}
                     >
@@ -117,25 +117,22 @@ const LoginForm: React.FC<LoginFormProps> = ({handleCancel, onForgotPassword, on
                     </div>
 
                     <div className="d-flex justify-content-center mb-4">
-                        <Button onClick={handleContinueWithFacebook} icon={<FacebookFilled/>} shape="circle"
-                                className="me-3"/>
-                        <Button onClick={handleContinueWithGoogle} icon={<GoogleOutlined/>} shape="circle"/>
+                        <Button onClick={handleContinueWithFacebook} icon={<FacebookFilled />} shape="circle"
+                            className="me-3" />
+                        <Button onClick={handleContinueWithGoogle} icon={<GoogleOutlined />} shape="circle" />
                     </div>
 
                     <p className="text-muted small text-center">
                         <a className="text_href" onClick={onForgotPassword}>Quên mật khẩu?</a>
-                        <p style={{fontSize: '13px'}}>Chưa có tài khoản? <a className="text_href" onClick={onRegister}>Tạo
-                            tài
-                            khoản</a></p>
+                        <span style={{ fontSize: '13px' }}>Chưa có tài khoản? <a className="text_href" onClick={onRegister}>Tạo tài khoản</a></span>
                         Bằng việc tiếp tục, bạn đã đọc và đồng ý với{' '}
                         <a href="#" className="text_href">điều khoản sử dụng</a> và{' '}
-                        <a href="#" className="text_href">chính sách bảo mật thông tin cá nhân</a> của
-                        Ecommerce fashion
+                        <a href="#" className="text_href">chính sách bảo mật thông tin cá nhân</a> của Ecommerce fashion
                     </p>
                 </div>
-                <div className="col-md-4 d-none d-md-block" style={{backgroundColor: '#f2f6fe'}}>
-                    <div style={{background: "linear-gradient(136deg, rgb(240, 248, 255) -1%, rgb(219, 238, 255) 85%)"}}
-                         className="position-relative h-100">
+                <div className="col-md-4 d-none d-md-block" style={{ backgroundColor: '#f2f6fe' }}>
+                    <div style={{ background: "linear-gradient(136deg, rgb(240, 248, 255) -1%, rgb(219, 238, 255) 85%)" }}
+                        className="position-relative h-100">
                         <img
                             src="http://ecommerce-fashion.site:9099/lNFf1ycSXW-imageLogoLogin.png"
                             alt="Ecommerce fashion Character"
