@@ -1,21 +1,20 @@
 import { Route, Routes } from 'react-router-dom';
-import ProductManager from '../pages/Admin/Product';
 import AdminLayout from '../layouts/Admin';
-import Login from '../pages/Admin/User/Login';
-import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
-import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
-import AdminRoute from "../hook/AdminRoute.tsx";
-import { ManagerRole, ManagerUser } from "../pages/Admin/User";
-import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
-import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import UserLayout from "../layouts/Customer";
-import Home from "../pages/Customer/Home";
-import ChatPage from '../pages/Admin/Chat/index.tsx';
-import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
-import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
+import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
+import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
+import ChatPage from '../pages/Admin/Chat/index.tsx';
+import ProductManager from '../pages/Admin/Product';
+import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
+import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
+import { ManagerRole, ManagerUser } from "../pages/Admin/User";
+import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
+import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
+import Login from '../pages/Admin/User/Login';
+import Home from "../pages/Customer/Home";
+import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 
 
 

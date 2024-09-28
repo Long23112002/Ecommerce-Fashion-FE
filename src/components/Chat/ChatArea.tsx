@@ -33,6 +33,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const page = useRef<number>(0);
     const scroll = useRef<boolean>(false);
+    const [reply, setReply] = useState<Chat|null>(null)
 
     const fetchFindAllChatByIdChatRoom = async () => {
         if (user.id > 0 && idRoom) {
@@ -50,7 +51,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
         }
     };
 
-    const shouldShowChat = (chat: Chat, prevChat?: Chat) => {
+    const shouldShowAvatar = (chat: Chat, prevChat?: Chat) => {
         return !prevChat || prevChat.createBy !== chat.createBy;
     };
 
@@ -65,6 +66,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     useEffect(() => {
         setLoading(true);
         setChats([]);
+        setReply(null)
         page.current = 0;
 
         const initializeWebSocket = async () => {
@@ -183,14 +185,15 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                     )}
                 {!loading ? (
                     chats.map((chat, index) => {
-                        const show = shouldShowChat(chat, chats[index - 1])
+                        const show = shouldShowAvatar(chat, chats[index - 1])
                         return (
                             <ChatItem
-                                key={index}
+                                key={chat.id}
                                 chat={chat}
                                 show={show}
                                 id={user.id}
                                 isAdmin={isAdmin || false}
+                                setReply={setReply}
                             />
                         )
                     })
@@ -223,6 +226,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
             <ChatInput
                 client={clientRef.current}
                 idRoom={idRoom}
+                reply={reply}
+                setReply={setReply}
             />
         </>
     )
