@@ -11,6 +11,7 @@ import { SOCKET_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatRoom from '../../types/ChatRoom';
 import MuiLoading from '../MuiLoading';
+import { toast } from 'react-toastify';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -23,6 +24,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [client, setClient] = useState<Client | null>(null)
   const [hoverRoom, setHoverRoom] = useState<string | null>(null)
+  const [isPermissionDenied, setIsPermissionDenied] = useState<boolean>(false)
 
   const fetchFindAllChatRoom = async () => {
     const data = await callFindAllChatRoom()
@@ -45,18 +47,25 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
               {
                 Authorization: token
               });
-            fetchFindAllChatRoom();
           },
           connectHeaders: {
             Authorization: token,
           },
           // debug: (str) => {
           //   console.log(str);
-          // }
+          // },
+          onStompError: (err) => {
+            const message = err.headers.message
+            if (message.includes('Người dùng không có quyền yêu cầu này')) {
+              setIsPermissionDenied(true)
+              return
+            }
+          }
         });
 
         stompClient.activate();
         setClient(stompClient);
+        fetchFindAllChatRoom()
 
         return () => {
           stompClient.deactivate();
@@ -83,6 +92,12 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
     await callDeleteRoomById(id)
   }
 
+  useEffect(() => {
+    if (isPermissionDenied) {
+      toast.error('Người dùng không có quyền yêu cầu này');
+    }
+  }, [isPermissionDenied])
+
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
       <Box
@@ -98,82 +113,89 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
         </Typography>
         <Divider />
       </Box>
-      {loading ? (
+      {loading
+        ?
         <MuiLoading height='75%' />
-      ) : (
-        <List>
-          {
-            chatRooms.map((room) => (
-              <ListItem button key={room.id}
-                sx={{ pr: 3 }}
-                onClick={() => handleChangeRoom(room.id + '')}
-                onMouseOver={() => setHoverRoom(room.id + '')}
-                onMouseOut={() => setHoverRoom(null)}
-              >
-                <Avatar
-                  src={room.avatar}
-                  sx={{
-                    mr: 1
-                  }} />
-                <ListItemText
-                  primary={room.nameClient}
-                  secondary={room.lastChatContent}
-                  sx={{
-                    width: 0,
-                    overflow: 'hidden',
-                    textWrap: 'nowrap'
-                  }} />
-                {
-                  (
-                    room.seen !== null &&
-                    room.seen === false &&
-                    room.lastChatSendBy != user.id
-                  ) &&
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      right: 5,
-                      top: {
-                        xs: 20,
-                        sm: '50%'
-                      },
-                      transform: 'translate(0,-50%)',
-                      backgroundColor: '#00B8D9',
-                      color: 'white',
-                      borderRadius: '50%',
-                      fontSize: '14px',
-                      width: 15,
-                      height: 15,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  />
-                }
-                {
-                  (hoverRoom && hoverRoom === room.id) &&
-                  <Popconfirm
-                    title="Xác nhận xóa room này?"
-                    onConfirm={() => handleDelete(room.id + '')}
-                    okText="Xóa"
-                    cancelText="Hủy"
+        :
+        !isPermissionDenied
+          ?
+          (
+            <List>
+              {
+                chatRooms.map((room) => (
+                  <ListItem button key={room.id}
+                    sx={{ pr: 3 }}
+                    onClick={() => handleChangeRoom(room.id + '')}
+                    onMouseOver={() => setHoverRoom(room.id + '')}
+                    onMouseOut={() => setHoverRoom(null)}
                   >
-                    <Tooltip title="Xóa room" placement="bottom">
-                      <IconButton
+                    <Avatar
+                      src={room.avatar}
+                      sx={{
+                        mr: 1
+                      }} />
+                    <ListItemText
+                      primary={room.nameClient}
+                      secondary={room.lastChatContent}
+                      sx={{
+                        width: 0,
+                        overflow: 'hidden',
+                        textWrap: 'nowrap'
+                      }} />
+                    {
+                      (
+                        room.seen !== null &&
+                        room.seen === false &&
+                        room.lastChatSendBy != user.id
+                      ) &&
+                      <Box
                         sx={{
-                          ":hover": { color: 'red' }
+                          position: 'absolute',
+                          right: 5,
+                          top: {
+                            xs: 20,
+                            sm: '50%'
+                          },
+                          transform: 'translate(0,-50%)',
+                          backgroundColor: '#00B8D9',
+                          color: 'white',
+                          borderRadius: '50%',
+                          fontSize: '14px',
+                          width: 15,
+                          height: 15,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
+                      />
+                    }
+                    {
+                      (hoverRoom && hoverRoom === room.id) &&
+                      <Popconfirm
+                        title="Xác nhận xóa room này?"
+                        onConfirm={() => handleDelete(room.id + '')}
+                        okText="Xóa"
+                        cancelText="Hủy"
                       >
-                        <i className="fa-solid fa-trash-can fs-6"></i>
-                      </IconButton>
-                    </Tooltip>
-                  </Popconfirm>
-                }
-              </ListItem>
-            ))
-          }
-        </List>
-      )}
+                        <Tooltip title="Xóa room" placement="bottom">
+                          <IconButton
+                            sx={{
+                              ":hover": { color: 'red' }
+                            }}
+                          >
+                            <i className="fa-solid fa-trash-can fs-6"></i>
+                          </IconButton>
+                        </Tooltip>
+                      </Popconfirm>
+                    }
+                  </ListItem>
+                ))
+              }
+            </List>
+          )
+          :
+          <></>
+      }
     </Box>
   )
 }

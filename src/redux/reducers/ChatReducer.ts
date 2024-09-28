@@ -7,7 +7,6 @@ const ChatReducer = createSlice({
     name: 'Chat',
     reducers: {
         setNewChat: (_, action: PayloadAction<boolean>) => {
-            console.log(action.payload)
             return action.payload;
         }
     }
