@@ -50,9 +50,9 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
           connectHeaders: {
             Authorization: token,
           },
-          debug: (str) => {
-            console.log(str);
-          }
+          // debug: (str) => {
+          //   console.log(str);
+          // }
         });
 
         stompClient.activate();

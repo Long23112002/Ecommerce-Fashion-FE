@@ -26,10 +26,14 @@ const UserReducer = createSlice({
             state.email = action.payload.email;
             state.avatar = action.payload.avatar;
             state.isAdmin = action.payload.isAdmin;
+        },
+        clearUser: () => {
+            return initState;
         }
     }
 });
 
 export const {setUser} = UserReducer.actions;
+export const {clearUser} = UserReducer.actions;
 export const userSelector = (state: { user: UserState }) => state.user;
 export default UserReducer.reducer;

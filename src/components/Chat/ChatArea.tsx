@@ -90,9 +90,9 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                         await fetchSeenAllByIdChatRoom();
                         setLoading(false);
                     },
-                    debug: (str) => {
-                        console.log(str);
-                    },
+                    // debug: (str) => {
+                    //     console.log(str);
+                    // },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
                             await initializeWebSocket()
