@@ -1,18 +1,23 @@
-import { Avatar, Box, IconButton, Paper, Typography } from '@mui/material'
-import React, { useState } from 'react'
-import Chat from '../../types/Chat'
+import { Avatar, Box, IconButton, Paper, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import Chat from '../../types/Chat';
+import { ChatWithFocus } from './ChatArea';
+import '../../styles/animatied-chat.css'
 
 interface IProps {
-  chat: Chat,
+  chat: ChatWithFocus,
   id: number,
   isAdmin: boolean,
   show: boolean,
-  setReply: React.Dispatch<React.SetStateAction<Chat | null>>
+  setReply: React.Dispatch<React.SetStateAction<Chat | null>>,
+  fetchFindChatsUntilTarget: (id: string) => void,
+  setChatInChats: (newChat: ChatWithFocus) => void
 }
 
-const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
+const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply, fetchFindChatsUntilTarget, setChatInChats }) => {
 
   const [isHover, setIsHover] = useState<boolean>(false);
+  const focusChatRef = useRef<HTMLDivElement | null>(null);
 
   const replyIcon = (
     (isHover) &&
@@ -21,7 +26,18 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
     >
       <i className="fa-solid fa-reply fs-5"></i>
     </IconButton>
-  )
+  );
+
+  useEffect(() => {
+    if (chat.focus) {
+      const item = focusChatRef.current;
+      item?.scrollIntoView();
+      const newChat = { ...chat, focus: false };
+      setTimeout(()=>{
+        setChatInChats(newChat);
+      },500)
+    }
+  }, [chat]);
 
   return (
     <Box
@@ -33,19 +49,19 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
       onMouseOut={() => setIsHover(false)}
     >
 
-      {chat.createBy == id &&
-        replyIcon
-      }
+      {chat.createBy == id && replyIcon}
 
-      {!(chat.createBy == id) &&
+      {!(chat.createBy == id) && (
         <Avatar
           src={isAdmin ? chat.avatar : "logo.png"}
           sx={{
             opacity: show ? 1 : 0
           }}
         />
-      }
+      )}
       <Paper
+        ref={focusChatRef}
+        className={chat.focus ? 'focused' : ''}
         sx={{
           p: 1.5,
           m: 1,
@@ -54,10 +70,11 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
           maxWidth: '70%',
           wordBreak: 'break-word',
           position: 'relative',
-          borderRadius: 2
+          borderRadius: 2,
+          animation: chat.focus ? chat.createBy == id ? 'chat__focus--slideLeft 0.5s forwards' : 'chat__focus--slideRight 0.5s forwards' : 'none',
         }}
       >
-        {chat.reply &&
+        {chat.reply && (
           <Paper
             sx={{
               p: 0.5,
@@ -66,13 +83,15 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
               boxShadow: 'none',
               color: chat.createBy === id ? '#fff' : '#000',
               maxWidth: '100%',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              cursor: 'pointer'
             }}
+            onClick={() => fetchFindChatsUntilTarget(chat.reply?.id + '')}
           >
             <Typography variant='subtitle2'
-            sx={{
-              fontSize: 13
-            }}>
+              sx={{
+                fontSize: 13
+              }}>
               {chat.reply.nameCreateBy}
             </Typography>
             <Typography variant="body2"
@@ -87,20 +106,15 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply }) => {
               {chat.reply.content}
             </Typography>
           </Paper>
-
-
-        }
+        )}
         <Typography variant="body2">
           {chat.content}
         </Typography>
       </Paper>
 
-      {chat.createBy != id &&
-        replyIcon
-      }
-
+      {chat.createBy != id && replyIcon}
     </Box>
-  )
+  );
 }
 
-export default ChatItem
+export default ChatItem;

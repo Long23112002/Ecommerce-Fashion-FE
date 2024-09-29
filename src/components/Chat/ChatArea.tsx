@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { refreshToken } from '../../api/AxiosInstance';
-import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
+import { callFindAllChatByIdChatRoom, callFindChatsUntilTarget, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
@@ -22,18 +22,22 @@ interface IProps {
     isChatOpen?: boolean
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
+export interface ChatWithFocus extends Chat {
+    focus?: boolean;
+}
+
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => {
     const user = useSelector(userSelector);
     const dispatch = useDispatch()
     const chatBoxRef = useRef<HTMLElement | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [moreLoading, setMoreLoading] = useState<boolean>(false);
-    const [chats, setChats] = useState<Chat[]>([]);
+    const [chats, setChats] = useState<ChatWithFocus[]>([]);
     const clientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const page = useRef<number>(0);
-    const scroll = useRef<boolean>(false);
-    const [reply, setReply] = useState<Chat|null>(null)
+    const [reply, setReply] = useState<Chat | null>(null)
+    const shouldScroll = useRef<boolean>(false);
 
     const fetchFindAllChatByIdChatRoom = async () => {
         if (user.id > 0 && idRoom) {
@@ -59,9 +63,46 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
         const item = chatBoxRef.current;
         if (item) {
             item.scrollTop = item.scrollHeight;
-            scroll.current = false
         }
     };
+
+    const scrollUp = () => {
+        const item = chatBoxRef.current;
+        if (item) {
+            item.scrollTop = 20
+        }
+    }
+
+    const setChatInChats = (newChat: ChatWithFocus) => {
+        setChats((prevChats) =>
+            prevChats.map(chat =>
+                chat.id === newChat.id ? { ...newChat } : chat
+            )
+        )
+    }
+
+    const fetchFindChatsUntilTarget = async (id: string) => {
+        if (!chats.map(c => c.id).includes(id)) {
+            setLoading(true);
+            const res = await callFindChatsUntilTarget(id);
+            setChats([...res.map((chat: ChatWithFocus) => {
+                if (chat.id === id) {
+                    chat.focus = true
+                }
+                return chat
+            })])
+            scrollUp()
+            setLoading(false);
+        }
+        else {
+            const focusChat = { ...chats.filter(c => c.id === id)[0], focus: true }
+            setChatInChats(focusChat)
+        }
+    }
+
+    const uniqueChats: Chat[] = chats.filter((chat, index, self) =>
+        index === self.findIndex((c) => c.id === chat.id)
+    );
 
     useEffect(() => {
         setLoading(true);
@@ -82,13 +123,14 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                             const newChat: Chat = JSON.parse(chat.body);
                             if (newChat.idRoom === idRoom) {
                                 setChats(prevChats => [...prevChats, newChat]);
+                                shouldScroll.current = true
                             }
-                            scroll.current = true;
                         }, { Authorization: token });
 
                         subscriptionRef.current = subscription;
 
                         await fetchFindAllChatByIdChatRoom();
+                        shouldScroll.current = true
                         await fetchSeenAllByIdChatRoom();
                         setLoading(false);
                     },
@@ -128,9 +170,6 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     }, [idRoom]);
 
     useEffect(() => {
-        if (scroll.current) {
-            scrollDown();
-        }
         if (!isAdmin && chats.length > 0) {
             const chat = chats[chats.length - 1]
             if (!chat.seen && chat.createBy != user.id && !isChatOpen) {
@@ -140,16 +179,23 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     }, [chats]);
 
     useEffect(() => {
-        if (!loading) {
+        if (!loading && shouldScroll.current) {
             scrollDown()
+            shouldScroll.current = false
         }
     }, [loading])
 
-    const handleLoadmore = () => {
+    useEffect(() => {
+        if (!moreLoading) {
+            scrollUp()
+        }
+    }, [moreLoading])
+
+    const handleLoadmore = async () => {
         const chatBox = chatBoxRef.current
         if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
+            await fetchFindAllChatByIdChatRoom()
             chatBox.scrollTop = 20
-            fetchFindAllChatByIdChatRoom()
         }
     }
 
@@ -184,8 +230,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                         </Box>
                     )}
                 {!loading ? (
-                    chats.map((chat, index) => {
-                        const show = shouldShowAvatar(chat, chats[index - 1])
+                    uniqueChats.map((chat, index) => {
+                        const show = shouldShowAvatar(chat, uniqueChats[index - 1]);
                         return (
                             <ChatItem
                                 key={chat.id}
@@ -194,8 +240,10 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                                 id={user.id}
                                 isAdmin={isAdmin || false}
                                 setReply={setReply}
+                                fetchFindChatsUntilTarget={fetchFindChatsUntilTarget}
+                                setChatInChats={setChatInChats}
                             />
-                        )
+                        );
                     })
                 )
                     :

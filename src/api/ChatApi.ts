@@ -33,3 +33,8 @@ export const callSeenAllChatByIdChatRoom = async (idRoom: string, idUser: number
 export const callDeleteRoomById = async (id: string) => {
     await axiosInstance.delete(`/api/v1/chat_room/${id}`)
 }
+
+export const callFindChatsUntilTarget = async (id: string) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/before-target/${id}`)
+    return data
+}
