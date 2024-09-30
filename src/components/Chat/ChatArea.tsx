@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
-import { refreshToken } from '../../api/AxiosInstance';
+import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callFindChatsUntilTarget, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
@@ -35,19 +35,24 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
     const [chats, setChats] = useState<ChatWithFocus[]>([]);
     const clientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<StompSubscription | null>(null);
-    const page = useRef<number>(0);
+    const nextUrl = useRef<string | null>(null);
     const [reply, setReply] = useState<Chat | null>(null)
     const shouldScroll = useRef<boolean>(false);
 
     const fetchFindAllChatByIdChatRoom = async () => {
         if (user.id > 0 && idRoom) {
-            setMoreLoading(true);
-            const res = await callFindAllChatByIdChatRoom(idRoom, page.current);
-            setChats(prevChats => [...res, ...prevChats]);
-            page.current++;
-            setMoreLoading(false);
+            const { results, next } = await callFindAllChatByIdChatRoom(idRoom)
+            const newChat = uniqueChats(results)
+            setChats(prevChats => [...newChat, ...prevChats]);
+            nextUrl.current = next
         }
     };
+
+    const uniqueChats = (res: ChatWithFocus[]) => {
+        const idChats = chats.map(c => c.id)
+        const newChat = res.filter(c => !idChats.includes(c.id))
+        return newChat
+    }
 
     const fetchSeenAllByIdChatRoom = async () => {
         if (idRoom && user.isAdmin) {
@@ -84,14 +89,16 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
     const fetchFindChatsUntilTarget = async (id: string) => {
         if (!chats.map(c => c.id).includes(id)) {
             setLoading(true);
-            const res = await callFindChatsUntilTarget(id);
-            setChats([...res.map((chat: ChatWithFocus) => {
+            scrollUp()
+            const {results, next} = await callFindChatsUntilTarget(id);
+            setChats([...results.map((chat: ChatWithFocus) => {
                 if (chat.id === id) {
                     chat.focus = true
                 }
                 return chat
             })])
-            scrollUp()
+            nextUrl.current = next
+            console.log(next)
             setLoading(false);
         }
         else {
@@ -100,15 +107,25 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
         }
     }
 
-    const uniqueChats: Chat[] = chats.filter((chat, index, self) =>
-        index === self.findIndex((c) => c.id === chat.id)
-    );
+    const handleLoadmore = async () => {
+        const chatBox = chatBoxRef.current
+        const nextApi = nextUrl.current
+        if (chatBox && chatBox.scrollTop === 0 && !moreLoading && nextApi) {
+            setMoreLoading(true);
+            const { results, next } = await callGetInstance(nextApi)
+            const newChat = uniqueChats(results)
+            setChats(prevChats => [...newChat, ...prevChats]);
+            nextUrl.current = next
+            setMoreLoading(false);
+            scrollUp()
+        }
+    }
 
     useEffect(() => {
         setLoading(true);
         setChats([]);
         setReply(null)
-        page.current = 0;
+        nextUrl.current = null;
 
         const initializeWebSocket = async () => {
             try {
@@ -170,6 +187,9 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
     }, [idRoom]);
 
     useEffect(() => {
+        if (shouldScroll.current) {
+            scrollDown();
+        }
         if (!isAdmin && chats.length > 0) {
             const chat = chats[chats.length - 1]
             if (!chat.seen && chat.createBy != user.id && !isChatOpen) {
@@ -184,20 +204,6 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
             shouldScroll.current = false
         }
     }, [loading])
-
-    useEffect(() => {
-        if (!moreLoading) {
-            scrollUp()
-        }
-    }, [moreLoading])
-
-    const handleLoadmore = async () => {
-        const chatBox = chatBoxRef.current
-        if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
-            await fetchFindAllChatByIdChatRoom()
-            chatBox.scrollTop = 20
-        }
-    }
 
     const box = (
         <>
@@ -230,8 +236,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
                         </Box>
                     )}
                 {!loading ? (
-                    uniqueChats.map((chat, index) => {
-                        const show = shouldShowAvatar(chat, uniqueChats[index - 1]);
+                    chats.map((chat, index) => {
+                        const show = shouldShowAvatar(chat, chats[index - 1]);
                         return (
                             <ChatItem
                                 key={chat.id}
