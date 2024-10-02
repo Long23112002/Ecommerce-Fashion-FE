@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigate } from "react-router-dom";
 import { getUserData, handleLogout } from "../../api/AuthApi.ts";
-import { setUser, userSelector } from "../../redux/reducers/UserReducer.ts";
+import { clearUser, setUser, userSelector } from "../../redux/reducers/UserReducer.ts";
 import Button from "../Button.tsx";
 
 interface IProps {
@@ -17,8 +17,9 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const logout = () => {
-        handleLogout();
+    const logout = async () => {
+        await handleLogout();
+        dispatch(clearUser())
         navigate('/');
     }
 

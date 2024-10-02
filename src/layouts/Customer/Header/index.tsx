@@ -1,16 +1,16 @@
-import {AppBar, Box, Toolbar, Typography} from '@mui/material'
-import React, {useEffect, useState} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
-import Chat from '../../../components/Chat'
-import Notification from '../../../components/Notification'
-import {setUser, userSelector} from '../../../redux/reducers/UserReducer'
+import { AppBar, Box, Toolbar, Typography } from '@mui/material'
+import { Button } from "antd"
+import Cookies from "js-cookie"
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { getUserData } from '../../../api/AuthApi'
 import Avatar from '../../../components/Avatar'
 import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
-import {getUserData} from '../../../api/AuthApi'
-import Cookies from "js-cookie";
-import {Button} from "antd";
-import LoginUserModel from "../../../components/User/LoginModelUser.tsx";
-import { UserOutlined } from '@ant-design/icons';
+import Notification from '../../../components/Notification'
+import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
+
+import { UserOutlined } from '@ant-design/icons'
+import { LoginUserModel } from "../../../components/User/LoginModelUser.tsx"
 
 const UserHeader: React.FC = () => {
     const user = useSelector(userSelector)
@@ -58,9 +58,10 @@ const UserHeader: React.FC = () => {
                     >
                         <img src="/logo.png" alt="" width='100%'/>
                     </Box>
-                    <Box sx={{display: 'flex', flexGrow: 1, justifyContent: 'end'}}>
-                        <Chat/>
-                        <Notification/>
+                    <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
+
+                        <Notification />
+
                         <Box component='span' display='flex' alignItems='center'>
                             {isLogin ? (
                                 <>

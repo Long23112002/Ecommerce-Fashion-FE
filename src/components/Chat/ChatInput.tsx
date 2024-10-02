@@ -2,12 +2,11 @@ import { Box, Button, TextField } from '@mui/material'
 import { Client } from '@stomp/stompjs'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { refreshToken } from '../../api/AxiosInstance'
 import { userSelector } from '../../redux/reducers/UserReducer'
 
 interface IProps {
     client: Client | null,
-    idRoom: string
+    idRoom: string,
 }
 
 const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
@@ -15,25 +14,21 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom }) => {
     const user = useSelector(userSelector)
     const [content, setContent] = useState<string>('')
 
-    const sendMessage = (token: string) => {
+    const sendMessage = (content: string) => {
         if (client && client.connected && content.trim().length > 0) {
             client.publish({
                 destination: `/app/chat.sendMessage/${idRoom}`,
                 body: JSON.stringify({
                     idRoom: idRoom,
                     content: content,
-                    createBy: user.id,
-                }),
-                headers: {
-                    Authorization: token,
-                },
+                    createBy: user.id
+                })
             });
         }
     };
 
     const handleSend = async () => {
-        const token: string = await refreshToken() + '';
-        sendMessage(token);
+        sendMessage(content);
         setContent('');
     };
 

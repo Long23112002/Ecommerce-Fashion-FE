@@ -4,7 +4,8 @@ type ChatRoom = {
     nameClient?: string,
     avatar?: string,
     seen?: boolean,
-    lastChat?: string
+    lastChatContent?: string,
+    lastChatSendBy?: number
 }
 
 export default ChatRoom
