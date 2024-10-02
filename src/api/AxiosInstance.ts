@@ -63,4 +63,9 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+export const callGetInstance = async (url: string) => {
+    const {data} = await axiosInstance.get(url);
+    return data;
+}
+
 export default axiosInstance;

@@ -18,7 +18,6 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom, reply, setReply }) => {
     const [content, setContent] = useState<string>('')
 
     const sendMessage = (content: string) => {
-        console.log(reply)
         if (client && client.connected && content.trim().length > 0) {
             client.publish({
                 destination: `/app/chat.sendMessage/${idRoom}`,
