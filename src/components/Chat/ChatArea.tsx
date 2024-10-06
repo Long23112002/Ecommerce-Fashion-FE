@@ -4,8 +4,8 @@ import Cookies from "js-cookie";
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
-import { refreshToken } from '../../api/AxiosInstance';
-import { callFindAllChatByIdChatRoom, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
+import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
+import { callFindAllChatByIdChatRoom, callFindChatsUntilTarget, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
@@ -22,27 +22,37 @@ interface IProps {
     isChatOpen?: boolean
 }
 
-const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
+export interface ChatWithFocus extends Chat {
+    focus?: boolean;
+}
+
+const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => {
     const user = useSelector(userSelector);
     const dispatch = useDispatch()
     const chatBoxRef = useRef<HTMLElement | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [moreLoading, setMoreLoading] = useState<boolean>(false);
-    const [chats, setChats] = useState<Chat[]>([]);
+    const [chats, setChats] = useState<ChatWithFocus[]>([]);
     const clientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<StompSubscription | null>(null);
-    const page = useRef<number>(0);
-    const scroll = useRef<boolean>(false);
+    const nextUrl = useRef<string | null>(null);
+    const [reply, setReply] = useState<Chat | null>(null)
+    const shouldScroll = useRef<boolean>(false);
 
     const fetchFindAllChatByIdChatRoom = async () => {
         if (user.id > 0 && idRoom) {
-            setMoreLoading(true);
-            const res = await callFindAllChatByIdChatRoom(idRoom, page.current);
-            setChats(prevChats => [...res, ...prevChats]);
-            page.current++;
-            setMoreLoading(false);
+            const { results, next } = await callFindAllChatByIdChatRoom(idRoom)
+            const newChat = uniqueChats(results)
+            setChats(prevChats => [...newChat, ...prevChats]);
+            nextUrl.current = next
         }
     };
+
+    const uniqueChats = (res: ChatWithFocus[]) => {
+        const idChats = chats.map(c => c.id)
+        const newChat = res.filter(c => !idChats.includes(c.id))
+        return newChat
+    }
 
     const fetchSeenAllByIdChatRoom = async () => {
         if (idRoom && user.isAdmin) {
@@ -50,7 +60,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
         }
     };
 
-    const shouldShowChat = (chat: Chat, prevChat?: Chat) => {
+    const shouldShowAvatar = (chat: Chat, prevChat?: Chat) => {
         return !prevChat || prevChat.createBy !== chat.createBy;
     };
 
@@ -58,14 +68,63 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
         const item = chatBoxRef.current;
         if (item) {
             item.scrollTop = item.scrollHeight;
-            scroll.current = false
         }
     };
+
+    const scrollUp = () => {
+        const item = chatBoxRef.current;
+        if (item) {
+            item.scrollTop = 20
+        }
+    }
+
+    const setChatInChats = (newChat: ChatWithFocus) => {
+        setChats((prevChats) =>
+            prevChats.map(chat =>
+                chat.id === newChat.id ? { ...newChat } : chat
+            )
+        )
+    }
+
+    const fetchFindChatsUntilTarget = async (id: string) => {
+        if (!chats.map(c => c.id).includes(id)) {
+            setLoading(true);
+            scrollUp()
+            const {results, next} = await callFindChatsUntilTarget(id);
+            setChats([...results.map((chat: ChatWithFocus) => {
+                if (chat.id === id) {
+                    chat.focus = true
+                }
+                return chat
+            })])
+            nextUrl.current = next
+            setLoading(false);
+        }
+        else {
+            const focusChat = { ...chats.filter(c => c.id === id)[0], focus: true }
+            setChatInChats(focusChat)
+        }
+    }
+
+    const handleLoadmore = async () => {
+        const chatBox = chatBoxRef.current
+        const nextApi = nextUrl.current
+        if (chatBox && chatBox.scrollTop === 0 && !moreLoading && nextApi) {
+            setMoreLoading(true);
+            const { results, next } = await callGetInstance(nextApi)
+            const newChat = uniqueChats(results)
+            setChats(prevChats => [...newChat, ...prevChats]);
+            nextUrl.current = next
+            setMoreLoading(false);
+            scrollUp()
+        }
+    }
 
     useEffect(() => {
         setLoading(true);
         setChats([]);
-        page.current = 0;
+        setReply(null)
+        nextUrl.current = null;
 
         const initializeWebSocket = async () => {
             try {
@@ -80,13 +139,14 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                             const newChat: Chat = JSON.parse(chat.body);
                             if (newChat.idRoom === idRoom) {
                                 setChats(prevChats => [...prevChats, newChat]);
+                                shouldScroll.current = true
                             }
-                            scroll.current = true;
                         }, { Authorization: token });
 
                         subscriptionRef.current = subscription;
 
                         await fetchFindAllChatByIdChatRoom();
+                        shouldScroll.current = true
                         await fetchSeenAllByIdChatRoom();
                         setLoading(false);
                     },
@@ -126,7 +186,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     }, [idRoom]);
 
     useEffect(() => {
-        if (scroll.current) {
+        if (shouldScroll.current) {
             scrollDown();
         }
         if (!isAdmin && chats.length > 0) {
@@ -138,18 +198,11 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
     }, [chats]);
 
     useEffect(() => {
-        if (!loading) {
+        if (!loading && shouldScroll.current) {
             scrollDown()
+            shouldScroll.current = false
         }
     }, [loading])
-
-    const handleLoadmore = () => {
-        const chatBox = chatBoxRef.current
-        if (chatBox && chatBox.scrollTop === 0 && !moreLoading) {
-            chatBox.scrollTop = 20
-            fetchFindAllChatByIdChatRoom()
-        }
-    }
 
     const box = (
         <>
@@ -183,16 +236,19 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
                     )}
                 {!loading ? (
                     chats.map((chat, index) => {
-                        const show = shouldShowChat(chat, chats[index - 1])
+                        const show = shouldShowAvatar(chat, chats[index - 1]);
                         return (
                             <ChatItem
-                                key={index}
+                                key={chat.id}
                                 chat={chat}
                                 show={show}
                                 id={user.id}
                                 isAdmin={isAdmin || false}
+                                setReply={setReply}
+                                fetchFindChatsUntilTarget={fetchFindChatsUntilTarget}
+                                setChatInChats={setChatInChats}
                             />
-                        )
+                        );
                     })
                 )
                     :
@@ -223,6 +279,8 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen}) => {
             <ChatInput
                 client={clientRef.current}
                 idRoom={idRoom}
+                reply={reply}
+                setReply={setReply}
             />
         </>
     )

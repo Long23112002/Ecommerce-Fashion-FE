@@ -6,9 +6,6 @@ import ChatRoomList from '../../../components/Chat/ChatRoomList'
 const ChatPage: React.FC = () => {
 
     const [idRoom, setIdRoom] = useState<string>('')
-    useEffect(()=>{
-        console.log(idRoom)
-    },[idRoom])
 
     return (
         <Box sx={{ display: 'flex', py: 0, flexDirection: 'column' }}>
