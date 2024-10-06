@@ -1,7 +1,7 @@
 import React from 'react';
-import {Menu, Sidebar as SidebarPro, SubMenu} from 'react-pro-sidebar';
+import { Menu, Sidebar as SidebarPro, SubMenu } from 'react-pro-sidebar';
 import MenuItem from './MenuItem';
-import {Box, IconButton, useMediaQuery} from '@mui/material';
+import { Box, IconButton, useMediaQuery } from '@mui/material';
 
 interface IProps {
     collapse: boolean,
@@ -11,7 +11,7 @@ interface IProps {
     setBroken: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroken, broken}) => {
+const AdminSidebar: React.FC<IProps> = ({ collapse, toggled, setToggled, setBroken, broken }) => {
 
     const xs = useMediaQuery('(max-width: 356px)');
 
@@ -46,7 +46,7 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                         marginTop: 3
                     }}
                 >
-                    <img src="/logo.png" alt="" width='100%'/>
+                    <img src="/logo.png" alt="" width='100%' />
                 </Box>
                 <IconButton
                     sx={{
@@ -54,7 +54,7 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                     }}
                     onClick={() => setToggled(false)}
                 >
-                    <i className="fa-solid fa-xmark text-white m-2"/>
+                    <i className="fa-solid fa-xmark text-white m-2" />
                 </IconButton>
             </Box>
             <Menu
@@ -82,7 +82,7 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
 
                 <SubMenu
                     label="Quản lí người dùng"
-                    icon={<i className='fa-solid fa-file-signature fs-5'/>}
+                    icon={<i className='fa-solid fa-file-signature fs-5' />}
                 >
 
                     <MenuItem
@@ -104,13 +104,13 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
 
                 <MenuItem
                     to='/admin/product'
-                    icon={<i className='fa-solid fa-shirt fs-5'/>}
+                    icon={<i className='fa-solid fa-shirt fs-5' />}
                 >
                     Quản lí sản phẩm
                 </MenuItem>
                 <SubMenu
                     label="Quản lí thuộc tính"
-                    icon={<i className='fa-solid fa-file-signature fs-5'/>}
+                    icon={<i className='fa-solid fa-file-signature fs-5' />}
                 >
                     <MenuItem
                         to='/admin/color'
@@ -155,6 +155,12 @@ const AdminSidebar: React.FC<IProps> = ({collapse, toggled, setToggled, setBroke
                         Thuộc tính đặc biệt
                     </MenuItem>
                 </SubMenu>
+                <MenuItem
+                    to='/admin/chat'
+                    icon={<i className='fa-solid fa-message fs-5' />}
+                >
+                    Nhắn tin
+                </MenuItem>
 
 
             </Menu>

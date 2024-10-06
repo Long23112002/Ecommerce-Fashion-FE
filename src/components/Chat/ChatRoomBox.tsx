@@ -22,16 +22,11 @@ const ChatRoomBox: React.FC<IProps> = ({ closeChat, isChatOpen }) => {
 
   const fetchFindIdChatRoomByUserId = async () => {
     if (user.id > 0) {
-      try {
-        const res = await callFindIdChatRoomByUserId(user.id);
+      const res = await callFindIdChatRoomByUserId(user.id);
+      if (res) {
         setIdRoom(res);
-      } catch (error: any) {
-        const code = error.response.data.messageCode;
-        if (code === "CHAT_ROOM_NOT_FOUND") {
-          setIsRoomExist(false)
-        } else {
-          console.error(error)
-        }
+      } else {
+        setIsRoomExist(false)
       }
     }
   }
