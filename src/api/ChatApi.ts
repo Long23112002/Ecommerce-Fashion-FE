@@ -16,20 +16,20 @@ export const callCreateChatRoom = async (chatRoom: ChatRoom) => {
     return data
 }
 
-export const callFindAllChatByIdChatRoom = async (id: string, page: number) => {
-    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`,
-        {
-            params: {
-                "p": page
-            }
-        })
+export const callFindAllChatByIdChatRoom = async (id: string) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/${id}`)
     return data
 }
 
-export const callSeenAllChatByIdChatRoom = async (id: string) => {
-    await axiosInstance.patch(`/api/v1/chat_room/chats/${id}`)
+export const callSeenAllChatByIdChatRoom = async (idRoom: string, idUser: number) => {
+    await axiosInstance.patch(`/api/v1/chat_room/chats/${idRoom}/${idUser}`)
 }
 
 export const callDeleteRoomById = async (id: string) => {
     await axiosInstance.delete(`/api/v1/chat_room/${id}`)
+}
+
+export const callFindChatsUntilTarget = async (id: string) => {
+    const { data } = await axiosInstance.get(`/api/v1/chat_room/chats/before-target/${id}`)
+    return data
 }

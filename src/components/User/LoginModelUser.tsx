@@ -21,7 +21,7 @@ export const LoginUserModel: React.FC<LoginUserModelProps> = ({isModalVisible, h
 
     return (
         <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             onCancel={handleCancel}
             footer={null}
             width={700}

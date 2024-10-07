@@ -6,14 +6,15 @@ import ChatRoomList from '../../../components/Chat/ChatRoomList'
 const ChatPage: React.FC = () => {
 
     const [idRoom, setIdRoom] = useState<string>('')
-    useEffect(()=>{
-        console.log(idRoom)
-    },[idRoom])
 
     return (
         <Box sx={{ display: 'flex', py: 0, flexDirection: 'column' }}>
             <Grid container justifyContent='space-between'>
-                <Grid item xs={2.5}>
+                <Grid item xs={2.8}
+                sx={{
+                    borderRight: '1px solid #C6C7C8',
+                    maxWidth: '73px'
+                }}>
                     <ChatRoomList
                         setIdRoom={setIdRoom}
                     />
