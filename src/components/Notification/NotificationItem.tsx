@@ -19,8 +19,8 @@ const NotificationItem: React.FC<IProps> = ({ notification }) => {
             }}
         >
             <Avatar
-                alt={notification.sender.name}
-                src={notification.sender.avatar}
+                alt={notification.nameCreateBy}
+                src={notification.avatar}
                 sx={{ mr: 2 }}
             />
             <Stack spacing={0.5}>
@@ -32,19 +32,19 @@ const NotificationItem: React.FC<IProps> = ({ notification }) => {
                             marginRight: 5
                         }}
                     >
-                        {notification.sender.name}
+                        {notification.nameCreateBy}
                     </strong>
-                    {notification.message}
+                    {notification.content}
                 </Typography>
                 <Typography
                     variant="caption"
                     color="textSecondary"
                 >
-                    {notification.createAt.toLocaleString()}
+                    {notification.createAt?.toLocaleString()}
                 </Typography>
             </Stack>
 
-            {!notification.viewed && (
+            {!notification.seen && (
                 <Box
                     sx={{
                         width: 10,

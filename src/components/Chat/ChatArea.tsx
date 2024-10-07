@@ -135,7 +135,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },
                     onConnect: async () => {
-                        const subscription = stompClient.subscribe(`/room/${idRoom}`, (chat: IMessage) => {
+                        const subscription = stompClient.subscribe(`/chat/room/${idRoom}`, (chat: IMessage) => {
                             const newChat: Chat = JSON.parse(chat.body);
                             if (newChat.idRoom === idRoom) {
                                 setChats(prevChats => [...prevChats, newChat]);
