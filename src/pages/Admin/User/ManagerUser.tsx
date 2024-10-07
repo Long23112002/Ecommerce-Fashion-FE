@@ -12,6 +12,7 @@ import {makeSlug} from "../../../utils/slug.ts";
 import {Container} from '@mui/material';
 import {getErrorMessage} from "../../Error/getErrorMessage.ts";
 import {Role} from "../../../types/role.ts";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerUser = () => {
     const [users, setUsers] = useState<UserData[]>([]);
@@ -251,7 +252,10 @@ const ManagerUser = () => {
             <Table
                 dataSource={users}
                 columns={columns}
-                loading={loading}
+                loading={{
+                    spinning: loading,
+                    indicator: <LoadingCustom />,
+                }}
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
                 onChange={handleTableChange}

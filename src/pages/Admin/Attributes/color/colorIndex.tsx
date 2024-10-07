@@ -23,6 +23,7 @@ import createPaginationConfig, {
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);
@@ -504,7 +505,10 @@ const ManagerColor = () => {
       <Table
         dataSource={colors}
         columns={columns}
-        loading={loading}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingCustoa />,
+        }}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination) ?? ""}
         onChange={handleTableChange}

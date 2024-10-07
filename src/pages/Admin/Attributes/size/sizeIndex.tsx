@@ -23,6 +23,7 @@ import createPaginationConfig, {
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerSize = () => {
   const [loading, setLoading] = useState(false);
@@ -516,7 +517,10 @@ const ManagerSize = () => {
       <Table
         dataSource={sizes}
         columns={columns}
-        loading={loading}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingCustom />,
+        }}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination)??''}
         onChange={handleTableChange}

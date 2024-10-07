@@ -8,6 +8,7 @@ import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
 import { Brand } from "../../../../types/brand.ts";
 import { debounce } from "lodash";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerBrand = () => {
     const [loading, setLoading] = useState(true);
@@ -290,7 +291,10 @@ const ManagerBrand = () => {
             <Table
                 dataSource={brands}
                 columns={columns}
-                loading={loading}
+                loading={{
+                    spinning: loading,
+                    indicator: <LoadingCustom />,
+                }}
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
