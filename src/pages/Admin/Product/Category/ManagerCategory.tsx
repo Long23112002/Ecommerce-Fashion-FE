@@ -9,6 +9,7 @@ import createPaginationConfig, { PaginationState } from '../../../../config/pagi
 import CategoryDetailModal from '../../../../components/Category/CategoryDetailModal.tsx';
 import { Category } from '../../../../types/Category.ts';
 import { debounce } from "lodash";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerCategory = () => {
   const [loading, setLoading] = useState(true);
@@ -348,7 +349,10 @@ const ManagerCategory = () => {
       <Table
         dataSource={categories}
         columns={columns}
-        loading={loading}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingCustom />,
+        }}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination)}
         expandable={{ childrenColumnName: 'children' }}

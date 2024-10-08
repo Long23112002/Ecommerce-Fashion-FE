@@ -10,6 +10,7 @@ import {toast} from "react-toastify";
 import Cookies from "js-cookie";
 import {getErrorMessage} from "../../Error/getErrorMessage.ts";
 import {Container} from "@mui/material";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.tsx";
 
 
 interface Permission {
@@ -235,7 +236,10 @@ const ManagerRole = () => {
                 <Table
                     dataSource={roles}
                     columns={columns}
-                    loading={loading}
+                    loading={{
+                        spinning: loading,
+                        indicator: <LoadingCustom />,
+                    }}
                     rowKey="id"
                     pagination={createPaginationConfig(pagination, setPagination)}
                 />

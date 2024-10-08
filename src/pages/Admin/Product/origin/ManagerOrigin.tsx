@@ -8,6 +8,7 @@ import createPaginationConfig, { PaginationState } from "../../../../config/orig
 import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import { Origin } from "../../../../types/origin.ts";
 import { debounce } from "lodash";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManaggerOrigin = () => {
     const [loading, setLoading] = useState(true);
@@ -292,7 +293,10 @@ const ManaggerOrigin = () => {
             <Table
                 dataSource={origins}
                 columns={columns}
-                loading={loading}
+                loading={{
+                    spinning: loading,
+                    indicator: <LoadingCustom />,
+                }}
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
