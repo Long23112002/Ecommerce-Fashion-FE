@@ -18,22 +18,32 @@ const NotificationItem: React.FC<IProps> = ({ notification }) => {
                 borderRadius: 2,
             }}
         >
-            <Avatar
-                alt={notification.nameCreateBy}
-                src={notification.avatar}
-                sx={{ mr: 2 }}
-            />
+            {
+                notification.avatar &&
+                (
+                    <Avatar
+                        alt={notification?.nameCreateBy}
+                        src={notification.avatar}
+                        sx={{ mr: 2 }}
+                    />
+                )
+            }
             <Stack spacing={0.5}>
                 <Typography
                     variant="body2"
                 >
-                    <strong
-                        style={{
-                            marginRight: 5
-                        }}
-                    >
-                        {notification.nameCreateBy}
-                    </strong>
+                    {
+                        notification.nameCreateBy &&
+                        (
+                            <strong
+                                style={{
+                                    marginRight: 5
+                                }}
+                            >
+                                {notification.nameCreateBy}
+                            </strong>
+                        )
+                    }
                     {notification.content}
                 </Typography>
                 <Typography
