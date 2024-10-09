@@ -507,7 +507,7 @@ const ManagerColor = () => {
         columns={columns}
         loading={{
           spinning: loading,
-          indicator: <LoadingCustoa />,
+          indicator: <LoadingCustom />,
         }}
         rowKey="id"
         pagination={createPaginationConfig(pagination, setPagination) ?? ""}

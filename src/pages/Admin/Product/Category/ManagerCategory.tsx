@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { getAllCategories, fetchAllCategories, createCategory, updateCategory, deleteCategory, getCategoryById } from '../../../../api/CategoryApi.ts';
 import AddCategoryModal from '../../../../components/Category/AddCategoryModal.tsx';
@@ -10,6 +10,7 @@ import CategoryDetailModal from '../../../../components/Category/CategoryDetailM
 import { Category } from '../../../../types/Category.ts';
 import { debounce } from "lodash";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import { getErrorMessage } from '../../../Error/getErrorMessage.ts';
 
 const ManagerCategory = () => {
   const [loading, setLoading] = useState(true);
@@ -116,19 +117,7 @@ const ManagerCategory = () => {
       }
     } catch (error: any) {
       // Kiểm tra phản hồi lỗi từ backend
-      if (error.response && error.response.data && error.response.data.message) {
-        const errorMessage = error.response.data.message;
-        // Nếu message là object, bạn có thể map nó thành chuỗi
-        if (typeof errorMessage === 'object') {
-          const errorMessages = Object.values(errorMessage).join(', ');
-          toast.error(errorMessages);
-        } else {
-          toast.error(errorMessage);
-        }
-      } else {
-        // Thông báo lỗi chung nếu không có chi tiết lỗi
-        toast.error('Failed to save Category');
-      }
+      toast.error(getErrorMessage(error))
     }
   };
 
@@ -148,11 +137,7 @@ const ManagerCategory = () => {
         toast.error("Authorization failed");
       }
     } catch (error: any) {
-      if (error.response && error.response.data) {
-        toast.error(error.response.data.message || 'Failed to Update category');
-      } else {
-        toast.error('An unexpected error occurred'); // Thông báo lỗi chung
-      }
+      toast.error(getErrorMessage(error))
     }
   };
 
@@ -175,7 +160,7 @@ const ManagerCategory = () => {
         toast.error("Authorization failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete category');
+      toast.error(getErrorMessage(error))
     }
   };
 
@@ -222,18 +207,6 @@ const ManagerCategory = () => {
       render: (date) => new Date(date).toLocaleDateString(),
     },
     {
-      title: 'Thời gian cập nhật',
-      dataIndex: 'updateAt',
-      key: 'updateAt',
-      render: (date) => {
-        if (date) {
-          return (new Date(date).toLocaleDateString());
-        } else {
-          return <span>Chưa có</span>;
-        }
-      }
-    },
-    {
       title: 'Người tạo',
       dataIndex: 'createBy',
       key: 'createBy',
@@ -251,33 +224,6 @@ const ManagerCategory = () => {
           {createBy.fullName}
         </div>
       ),
-    },
-    {
-      title: 'Người cập nhật',
-      dataIndex: 'updateBy',
-      key: 'updateBy',
-      render: (updateBy) => {
-        if (updateBy) {
-          return (
-            <div>
-              <img
-                src={updateBy.avatar}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  marginRight: 10,
-                }}
-                alt="Avatar"
-              />
-              {updateBy.fullName}
-            </div>
-          );
-        } else {
-          return <span>Chưa có</span>;
-        }
-      },
-
     },
     {
       title: 'Hành động',
@@ -402,6 +348,7 @@ const ManagerCategory = () => {
           background-color: #AEEEEE; /* 3 */
         }
       `}</style>
+      <ToastContainer/>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { fetchAllBrands, createBrand, updateBrand, deleteBrand, getBrandById } from "../../../../api/BrandApi.ts";
 import BrandModel from "../../../../components/Brand/BrandModel.tsx";
@@ -9,6 +9,7 @@ import createPaginationConfig, { PaginationState } from "../../../../config/bran
 import { Brand } from "../../../../types/brand.ts";
 import { debounce } from "lodash";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManagerBrand = () => {
     const [loading, setLoading] = useState(true);
@@ -87,10 +88,10 @@ const ManagerBrand = () => {
             if (token) {
                 if (mode === 'add') {
                     await createBrand({ name }, token);
-                    toast.success('Thương Hiệu Thêm Thành Công');
+                    toast.success('Thêm thương hiệu Thành Công');
                 } else if (mode === 'update' && editingBrand) {
                     await updateBrand(editingBrand.id, { name }, token);
-                    toast.success('Chỉnh Sửa Thành Công');
+                    toast.success('Cập nhật Thành Công');
                 }
                 handleCancel();
                 refreshBrands();
@@ -98,19 +99,7 @@ const ManagerBrand = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                const errorMessage = error.response.data.message;
-                // Nếu message là object, bạn có thể map nó thành chuỗi
-                if (typeof errorMessage === 'object') {
-                    const errorMessages = Object.values(errorMessage).join(', ');
-                    toast.error(errorMessages);
-                } else {
-                    toast.error(errorMessage);
-                }
-            } else {
-                // Thông báo lỗi chung nếu không có chi tiết lỗi
-                toast.error('Failed to save Brand');
-            }
+            toast.error(getErrorMessage(error))
         }
     };
 
@@ -129,7 +118,7 @@ const ManagerBrand = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete brand');
+            toast.error(getErrorMessage(error))
         }
     };
     const handleSearch = (changedValues: any) => {
@@ -169,20 +158,6 @@ const ManagerBrand = () => {
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Thời Gian cập nhật',
-            dataIndex: 'updateAt',
-            key: 'updateAt',
-            render: (date) => {
-                if (date) {
-                    return (new Date(date).toLocaleDateString())
-
-                } else {
-                    return <span>Chưa có</span>;
-                }
-
-            }
-        },
-        {
             title: 'Người tạo',
             dataIndex: 'createBy',
             key: 'createBy',
@@ -200,33 +175,6 @@ const ManagerBrand = () => {
                     {createBy.fullName}
                 </div>
             ),
-        },
-        {
-            title: 'Người cập nhật',
-            dataIndex: 'updateBy',
-            key: 'updateBy',
-            render: (updateBy) => {
-                if (updateBy) {
-                    return (
-                        <div>
-                            <img
-                                src={updateBy.avatar}
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: "50%",
-                                    marginRight: 10,
-                                }}
-                                alt="Avatar"
-                            />
-                            {updateBy.fullName}
-                        </div>
-                    );
-                } else {
-                    return <span>Chưa có</span>;
-                }
-            },
-
         },
         {
             title: 'Hành động',
@@ -298,6 +246,7 @@ const ManagerBrand = () => {
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
+            <ToastContainer />
         </div>
     );
 };
