@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { fetchAllOrigins, createOrigin, updateOrigin, deleteOrigin, getOriginById } from "../../../../api/OriginApi.ts";
 import OriginModel from "../../../../components/Origin/OriginModel.tsx";
@@ -8,6 +8,8 @@ import createPaginationConfig, { PaginationState } from "../../../../config/orig
 import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import { Origin } from "../../../../types/origin.ts";
 import { debounce } from "lodash";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManaggerOrigin = () => {
     const [loading, setLoading] = useState(true);
@@ -84,10 +86,10 @@ const ManaggerOrigin = () => {
             if (token) {
                 if (mode === 'add') {
                     await createOrigin({ name }, token);
-                    toast.success('Xuất Xứ Thêm Thành Công');
+                    toast.success('Thêm Xuất Xứ Thành Công');
                 } else if (mode === 'update' && editingOrigin) {
                     await updateOrigin(editingOrigin.id, { name }, token);
-                    toast.success('Chỉnh Sửa Thành Công');
+                    toast.success('Cập nhật Xuất Xứ Thành Công');
                 }
                 handleCancel();
                 refreshOrigins();
@@ -95,20 +97,7 @@ const ManaggerOrigin = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            // Kiểm tra xem phản hồi có lỗi từ backend không và hiển thị thông báo chi tiết
-            if (error.response && error.response.data && error.response.data.message) {
-                const errorMessage = error.response.data.message;
-                // Nếu message là object, bạn có thể map nó thành chuỗi
-                if (typeof errorMessage === 'object') {
-                    const errorMessages = Object.values(errorMessage).join(', ');
-                    toast.error(errorMessages);
-                } else {
-                    toast.error(errorMessage);
-                }
-            } else {
-                // Thông báo lỗi chung nếu không có chi tiết lỗi
-                toast.error('Failed to save origin');
-            }
+            toast.error(getErrorMessage(error))
         }
     };
 
@@ -129,7 +118,7 @@ const ManaggerOrigin = () => {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete origin');
+            toast.error(getErrorMessage(error))
         }
     };
     const handleSearch = (changedValues: any) => {
@@ -169,20 +158,6 @@ const ManaggerOrigin = () => {
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Thời Gian cập nhật',
-            dataIndex: 'updateAt',
-            key: 'updateAt',
-            render: (date) => {
-                if (date) {
-                    return (new Date(date).toLocaleDateString())
-
-                } else {
-                    return <span>Chưa có</span>;
-                }
-
-            }
-        },
-        {
             title: 'Người tạo',
             dataIndex: 'createBy',
             key: 'createBy',
@@ -200,33 +175,6 @@ const ManaggerOrigin = () => {
                     {createBy.fullName}
                 </div>
             ),
-
-        },
-        {
-            title: 'Người cập nhật',
-            dataIndex: 'updateBy',
-            key: 'updateBy',
-            render: (updateBy) => {
-                if (updateBy) {
-                    return (
-                        <div>
-                            <img
-                                src={updateBy.avatar}
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: "50%",
-                                    marginRight: 10,
-                                }}
-                                alt="Avatar"
-                            />
-                            {updateBy.fullName}
-                        </div>
-                    );
-                } else {
-                    return <span>Chưa có</span>;
-                }
-            },
 
         },
         {
@@ -292,10 +240,14 @@ const ManaggerOrigin = () => {
             <Table
                 dataSource={origins}
                 columns={columns}
-                loading={loading}
+                loading={{
+                    spinning: loading,
+                    indicator: <LoadingCustom />,
+                }}
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
+            <ToastContainer/>
         </div>
     );
 };
