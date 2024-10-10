@@ -1,12 +1,22 @@
-import {Box, Divider, Drawer, IconButton, Stack, Tooltip, Typography} from '@mui/material'
-import React, {SetStateAction, useEffect, useState} from 'react'
-import Button from '../Button'
-import Notification from '../../types/Notification'
-import NotificationItem from './NotificationItem'
+import { Box, Divider, Drawer, IconButton, Popover, Stack, Tooltip, Typography } from '@mui/material';
+import React, { SetStateAction, useEffect, useRef, useState } from 'react';
+import Cookies from 'js-cookie';
+import Button from '../Button';
+import Notification from '../../types/Notification';
+import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
+import SockJS from 'sockjs-client';
+import { SOCKET_API } from '../../constants/BaseApi';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { useSelector } from 'react-redux';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import MuiLoading from '../MuiLoading';
+import { toast } from 'react-toastify';
+import NotificationItem from './NotificationItem';
+import { callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
 
 interface IProps {
-    open: boolean,
-    toggleDrawer: (open: boolean) => () => void,
+    anchorEl: HTMLButtonElement | null,
+    handleClose: () => void,
     setTotalNotifications: React.Dispatch<SetStateAction<number>>
 }
 
@@ -15,184 +25,275 @@ const actionStyle = {
     backgroundColor: '#DFE8F2'
 }
 
-const NotificationBox: React.FC<IProps> = ({open, toggleDrawer, setTotalNotifications}) => {
+const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNotifications }) => {
 
-    const [notifications, setNotifications] = useState<Notification[]>([])
-    const [actionButton, setActionButton] = useState<number>(0)
+    const user = useSelector(userSelector);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [actionButton, setActionButton] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
+    const subscriptionRef = useRef<StompSubscription | null>(null);
+    const clientRef = useRef<Client | null>(null);
+    const nextUrl = useRef<string | null>(null);
+    const boxRef = useRef<HTMLElement | null>(null);
+
+    const fetchFindAllNotiByUserId = async () => {
+        if (user.id > 0) {
+            const { results, next } = await callFindAllNotiByUserId(user.id);
+            nextUrl.current = next;
+            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+        }
+    }
+
+    const fetchFindAllUnSeenNotiByUserId = async () => {
+        if (user.id > 0) {
+            const { results, next } = await callFindAllUnSeenNotiByUserId(user.id);
+            console.log(results);
+            nextUrl.current = next;
+            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+        }
+    }
+
+    const uniqueNotis = (res: Notification[], prevChats: Notification[]) => {
+        const idNotis = prevChats.map(n => n.id);
+        const newNoti = res.filter(n => !idNotis.includes(n.id));
+        return newNoti;
+    }
+
+
+    const updateNotifications = (updatedNotis: Notification[]) => {
+        const resMap = new Map<string, Notification>();
+        updatedNotis.forEach(noti => {
+            resMap.set(noti.id, noti);
+        });
+
+        const newNotis = notifications.map(noti => {
+            const id = noti.id;
+            return resMap.get(id) || noti;
+        });
+
+        setNotifications(newNotis);
+    };
+
+    const handleMarkSeenAllByIdUser = async () => {
+        if (user.id > 0) {
+            const res: Notification[] = await callMarkSeenAllByIdUser(user.id);
+            updateNotifications(res);
+        }
+    };
+
+    const handleMarkSeenByIdNoti = async (id: string) => {
+        if (id) {
+            const res: Notification[] = await callMarkSeenByIdNoti(id);
+            updateNotifications(res);
+        }
+    };
+
+    const handleLoadMore = async () => {
+        const nextApi = nextUrl.current;
+        if (nextApi) {
+            const { results, next } = await callGetInstance(nextApi);
+            setNotifications(prev => [...prev, ...results]);
+            nextUrl.current = next;
+        }
+    }
+
+    const handleScroll = () => {
+        const box = boxRef.current;
+        if (box) {
+            if (box.scrollTop + box.clientHeight >= box.scrollHeight - 20) {
+                handleLoadMore();
+            }
+        }
+    };
+
+    const handleAllNoti = async () => {
+        if (actionButton != 0) {
+            setLoading(true)
+            setNotifications([])
+            setActionButton(0)
+            await fetchFindAllNotiByUserId()
+            setLoading(false)
+        }
+    }
+
+    const handleUnSeenNoti = async () => {
+        if (actionButton != 1 && user.id > 0) {
+            setLoading(true)
+            setNotifications([])
+            setActionButton(1)
+            await fetchFindAllUnSeenNotiByUserId()
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => console.log(notifications), [notifications])
 
     useEffect(() => {
-        handleAllNotification()
-    }, [])
+        setLoading(true);
+        setNotifications([]);
+
+        const initializeWebSocket = async () => {
+            try {
+                await refreshToken();
+                const token = Cookies.get("accessToken") + '';
+                const sock = new SockJS(SOCKET_API);
+                const stompClient = new Client({
+                    webSocketFactory: () => sock as WebSocket,
+                    connectHeaders: { Authorization: token },
+                    onConnect: async () => {
+                        const subscription = stompClient.subscribe(`/notification/user/${user.id}`, (noti: IMessage) => {
+                            const newNoti: Notification = JSON.parse(noti.body);
+                            toast.info(newNoti.title);
+                            setNotifications(prevNotis => [newNoti, ...prevNotis]);
+                        }, { Authorization: token });
+
+                        subscriptionRef.current = subscription;
+
+                        await fetchFindAllNotiByUserId();
+                        setLoading(false);
+                    },
+                    onStompError: async (error) => {
+                        if (error.headers['message'].includes('JWT expired ')) {
+                            await initializeWebSocket();
+                        }
+                    }
+                });
+
+                stompClient.activate();
+                clientRef.current = stompClient;
+            } catch (error) {
+                console.error('Error initializing WebSocket:', error);
+                setLoading(false);
+            }
+        };
+
+        if (user.id > 0) {
+            initializeWebSocket();
+        }
+
+        return () => {
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+                subscriptionRef.current = null;
+            }
+            if (clientRef.current) {
+                clientRef.current.deactivate();
+                clientRef.current = null;
+            }
+        };
+    }, [user.id]);
 
     useEffect(() => {
-
         const count = notifications.reduce((total, current) => {
-            if (!current.viewed && !current.deleted) {
-                return total + 1
+            if (!current.seen) {
+                return total + 1;
             }
-            return total
-        }, 0)
+            return total;
+        }, 0);
 
-        setTotalNotifications(count)
-    }, [notifications])
-
-    const handleAllNotification = () => {
-        setNotifications([
-            {
-                id: 1,
-                message: "ăn cứt",
-                sender: {
-                    name: 'Mai Nghiệp Quật',
-                    avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpflPOek8jpaaDWt3iC6CcmonrgrAqRTx74w&s'
-                },
-                viewed: true,
-                deleted: false,
-                createAt: new Date()
-            },
-            {
-                id: 2,
-                message: "đã bố thí bạn 1 tỷ",
-                sender: {
-                    name: 'Thaideptraibodoiqua',
-                    avatar: 'https://hoang-phuc.com/media/magefan_blog/2021/12/meme-cheems-1.jpg'
-                },
-                viewed: false,
-                deleted: false,
-                createAt: new Date()
-            },
-            {
-                id: 3,
-                message: "đặt đơn hàng",
-                sender: {
-                    name: 'BeXuanMaiLonTon',
-                    avatar: 'https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQP-OqBydsr8MWjV-dRe6I5s-0Myl_0XyS62PicRKrMURYvVmzA'
-                },
-                viewed: false,
-                deleted: false,
-                createAt: new Date()
-            },
-            {
-                id: 4,
-                message: "đã gửi cho bạn 1 yêu cầu",
-                sender: {
-                    name: 'Thaideptraibodoiqua',
-                    avatar: 'https://hoang-phuc.com/media/magefan_blog/2021/12/meme-cheems-1.jpg'
-                },
-                viewed: true,
-                deleted: true,
-                createAt: new Date()
-            },
-        ])
-        setActionButton(0)
-    }
-
-    const handleUnreadNotification = () => {
-        setNotifications([
-            {
-                id: 2,
-                message: "đã bố thí bạn 1 tỷ",
-                sender: {
-                    name: 'Thaideptraibodoiqua',
-                    avatar: 'https://hoang-phuc.com/media/magefan_blog/2021/12/meme-cheems-1.jpg'
-                },
-                viewed: false,
-                deleted: false,
-                createAt: new Date()
-            },
-            {
-                id: 3,
-                message: "đặt đơn hàng",
-                sender: {
-                    name: 'BeXuanMaiLonTon',
-                    avatar: 'https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQP-OqBydsr8MWjV-dRe6I5s-0Myl_0XyS62PicRKrMURYvVmzA'
-                },
-                viewed: false,
-                deleted: false,
-                createAt: new Date()
-            }
-        ])
-        setActionButton(1)
-    }
+        setTotalNotifications(count);
+    }, [notifications]);
 
     return (
-        <Drawer
-            anchor='right'
-            open={open}
-            onClose={toggleDrawer ? toggleDrawer(false) : undefined}
+        <Popover
+            open={Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            disableScrollLock={true}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+            }}
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+            }}
         >
             <Box
+                ref={boxRef}
+                onScroll={handleScroll}
                 sx={{
-                    width: {
-                        xs: '100vw',
-                        md: 330
-                    },
                     padding: 2,
-                    height: '100%',
-                    backgroundColor: '#f5f5f5'
+                    maxHeight: 800,
+                    width: {
+                        md: 350,
+                        xs: '100%'
+                    },
+                    backgroundColor: '#f5f5f5',
+                    overflowY: 'auto'
                 }}
             >
-                <Stack
-                    direction='row'
-                    alignItems='center'
-                    justifyContent='space-between'
-                >
-                    <Stack
-                        direction='row'
-                        alignItems='center'
-                    >
-                        <IconButton
-                            onClick={toggleDrawer ? toggleDrawer(false) : undefined}
-                        >
-                            <i className="fa-solid fa-xmark"/>
-                        </IconButton>
-                        <Typography variant='h6'>Thông báo</Typography>
-                    </Stack>
-                    <Tooltip title="Đánh dấu đã đọc hết">
-                        <IconButton
-                        >
-                            <i className="fa-solid fa-check"></i>
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
-                <Stack
-                    direction='row'
-                    alignItems='center'
-                >
-                    <Button
-                        sx={{
-                            p: 2,
-                            py: 0.5,
-                            borderRadius: 100,
-                            ...actionButton == 0 ? {...actionStyle} : {}
-                        }}
-                        onClick={handleAllNotification}
-                    >
-                        Tất cả
-                    </Button>
-                    <Button
-                        sx={{
-                            p: 1.5,
-                            py: 0.5,
-                            borderRadius: 100,
-                            ...actionButton == 1 ? {...actionStyle} : {}
-                        }}
-                        onClick={handleUnreadNotification}
-                    >
-                        Chưa đọc
-                    </Button>
-                </Stack>
-                <Divider sx={{my: 2}}/>
-                <Stack>
-                    {notifications.map(n =>
-                        <NotificationItem
-                            key={n.id}
-                            notification={n}
-                        />
-                    )}
-                </Stack>
+                {
+                    loading
+                        ? <MuiLoading />
+                        : (
+                            <>
+                                <Stack
+                                    direction='row'
+                                    alignItems='center'
+                                    justifyContent='space-between'
+                                >
+                                    <Stack
+                                        direction='row'
+                                        alignItems='center'
+                                    >
+                                        <IconButton
+                                            onClick={handleClose}
+                                        >
+                                            <i className="fa-solid fa-xmark" />
+                                        </IconButton>
+                                        <Typography variant='h6'>Thông báo</Typography>
+                                    </Stack>
+                                    <Tooltip title="Đánh dấu đã đọc hết">
+                                        <IconButton
+                                            onClick={handleMarkSeenAllByIdUser}
+                                        >
+                                            <i className="fa-solid fa-check"></i>
+                                        </IconButton>
+                                    </Tooltip>
+                                </Stack>
+                                <Stack
+                                    direction='row'
+                                    alignItems='center'
+                                >
+                                    <Button
+                                        sx={{
+                                            p: 2,
+                                            py: 0.5,
+                                            borderRadius: 100,
+                                            ...actionButton === 0 ? { ...actionStyle } : {}
+                                        }}
+                                        onClick={() => handleAllNoti()}
+                                    >
+                                        Tất cả
+                                    </Button>
+                                    <Button
+                                        sx={{
+                                            p: 1.5,
+                                            py: 0.5,
+                                            borderRadius: 100,
+                                            ...actionButton === 1 ? { ...actionStyle } : {}
+                                        }}
+                                        onClick={() => handleUnSeenNoti()}
+                                    >
+                                        Chưa đọc
+                                    </Button>
+                                </Stack>
+                                <Divider sx={{ my: 2 }} />
+                                <Stack>
+                                    {notifications.map(n =>
+                                        <NotificationItem
+                                            key={n.id}
+                                            notification={n}
+                                        />
+                                    )}
+                                </Stack>
+                            </>
+                        )
+                }
             </Box>
-        </Drawer>
+        </Popover>
     )
 }
 
-export default NotificationBox
+export default NotificationBox;

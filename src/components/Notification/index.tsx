@@ -4,18 +4,21 @@ import NotificationBox from './NotificationBox'
 
 const Notification: React.FC = () => {
 
-    const [open, setOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     const [totalNotifications, setTotalNotifications] = useState<number>(0)
 
-    const toggleDrawer = (open: boolean) => () => {
-        setOpen(open);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
     };
 
     return (
         <>
             <IconButton
                 size="large"
-                aria-label="account of current notification"
                 sx={{
                     color: '#A6B0B8',
                     mr: {
@@ -24,7 +27,7 @@ const Notification: React.FC = () => {
                     },
                     position: 'relative'
                 }}
-                onClick={toggleDrawer(true)}
+                onClick={handleClick}
             >
                 <i className='fa-solid fa-bell fs-2' />
                 <Box
@@ -44,13 +47,13 @@ const Notification: React.FC = () => {
                         fontSize: 15,
                     }}
                 >
-                    {totalNotifications}
+                    {totalNotifications<10?totalNotifications:'9+'}
                 </Box>
             </IconButton>
 
             <NotificationBox
-                open={open}
-                toggleDrawer={toggleDrawer}
+                anchorEl={anchorEl}
+                handleClose={handleClose}
                 setTotalNotifications={setTotalNotifications}
             />
         </>
