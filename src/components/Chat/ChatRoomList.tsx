@@ -10,7 +10,7 @@ import { callDeleteRoomById, callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatRoom from '../../types/ChatRoom';
-import MuiLoading from '../MuiLoading';
+import MuiLoading from '../Loading/MuiLoading';
 import { toast } from 'react-toastify';
 
 interface IProps {

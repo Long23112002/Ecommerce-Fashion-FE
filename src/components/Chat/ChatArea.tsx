@@ -10,7 +10,7 @@ import { SOCKET_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
-import MuiLoading from '../MuiLoading';
+import MuiLoading from '../Loading/MuiLoading';
 import ChatInput from './ChatInput';
 import ChatItem from './ChatItem';
 
@@ -150,9 +150,9 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
                         await fetchSeenAllByIdChatRoom();
                         setLoading(false);
                     },
-                    // debug: (str) => {
-                    //     console.log(str);
-                    // },
+                    debug: (str) => {
+                        console.log(str);
+                    },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
                             await initializeWebSocket()
