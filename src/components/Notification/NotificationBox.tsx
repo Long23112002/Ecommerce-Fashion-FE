@@ -1,17 +1,18 @@
-import { Box, Divider, Drawer, IconButton, Popover, Stack, Tooltip, Typography } from '@mui/material'
-import React, { SetStateAction, useEffect, useRef, useState } from 'react'
-import Cookies from 'js-cookie'
-import Button from '../Button'
-import Notification from '../../types/Notification'
-import NotificationItem from './NotificationItem'
-import { refreshToken } from '../../api/AxiosInstance'
-import SockJS from 'sockjs-client'
-import { SOCKET_API } from '../../constants/BaseApi'
-import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
-import { useSelector } from 'react-redux'
-import { userSelector } from '../../redux/reducers/UserReducer'
-import MuiLoading from '../MuiLoading'
-import { toast } from 'react-toastify'
+import { Box, Divider, Drawer, IconButton, Popover, Stack, Tooltip, Typography } from '@mui/material';
+import React, { SetStateAction, useEffect, useRef, useState } from 'react';
+import Cookies from 'js-cookie';
+import Button from '../Button';
+import Notification from '../../types/Notification';
+import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
+import SockJS from 'sockjs-client';
+import { SOCKET_API } from '../../constants/BaseApi';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { useSelector } from 'react-redux';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import MuiLoading from '../MuiLoading';
+import { toast } from 'react-toastify';
+import NotificationItem from './NotificationItem';
+import { callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
 
 interface IProps {
     anchorEl: HTMLButtonElement | null,
@@ -26,12 +27,106 @@ const actionStyle = {
 
 const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNotifications }) => {
 
-    const user = useSelector(userSelector)
-    const [notifications, setNotifications] = useState<Notification[]>([])
-    const [actionButton, setActionButton] = useState<number>(0)
-    const [loading, setLoading] = useState<boolean>(true)
-    const subscriptionRef = useRef<StompSubscription | null>(null)
-    const clientRef = useRef<Client | null>(null)
+    const user = useSelector(userSelector);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [actionButton, setActionButton] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
+    const subscriptionRef = useRef<StompSubscription | null>(null);
+    const clientRef = useRef<Client | null>(null);
+    const nextUrl = useRef<string | null>(null);
+    const boxRef = useRef<HTMLElement | null>(null);
+
+    const fetchFindAllNotiByUserId = async () => {
+        if (user.id > 0) {
+            const { results, next } = await callFindAllNotiByUserId(user.id);
+            nextUrl.current = next;
+            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+        }
+    }
+
+    const fetchFindAllUnSeenNotiByUserId = async () => {
+        if (user.id > 0) {
+            const { results, next } = await callFindAllUnSeenNotiByUserId(user.id);
+            console.log(results);
+            nextUrl.current = next;
+            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+        }
+    }
+
+    const uniqueNotis = (res: Notification[], prevChats: Notification[]) => {
+        const idNotis = prevChats.map(n => n.id);
+        const newNoti = res.filter(n => !idNotis.includes(n.id));
+        return newNoti;
+    }
+
+
+    const updateNotifications = (updatedNotis: Notification[]) => {
+        const resMap = new Map<string, Notification>();
+        updatedNotis.forEach(noti => {
+            resMap.set(noti.id, noti);
+        });
+
+        const newNotis = notifications.map(noti => {
+            const id = noti.id;
+            return resMap.get(id) || noti;
+        });
+
+        setNotifications(newNotis);
+    };
+
+    const handleMarkSeenAllByIdUser = async () => {
+        if (user.id > 0) {
+            const res: Notification[] = await callMarkSeenAllByIdUser(user.id);
+            updateNotifications(res);
+        }
+    };
+
+    const handleMarkSeenByIdNoti = async (id: string) => {
+        if (id) {
+            const res: Notification[] = await callMarkSeenByIdNoti(id);
+            updateNotifications(res);
+        }
+    };
+
+    const handleLoadMore = async () => {
+        const nextApi = nextUrl.current;
+        if (nextApi) {
+            const { results, next } = await callGetInstance(nextApi);
+            setNotifications(prev => [...prev, ...results]);
+            nextUrl.current = next;
+        }
+    }
+
+    const handleScroll = () => {
+        const box = boxRef.current;
+        if (box) {
+            if (box.scrollTop + box.clientHeight >= box.scrollHeight - 20) {
+                handleLoadMore();
+            }
+        }
+    };
+
+    const handleAllNoti = async () => {
+        if (actionButton != 0) {
+            setLoading(true)
+            setNotifications([])
+            setActionButton(0)
+            await fetchFindAllNotiByUserId()
+            setLoading(false)
+        }
+    }
+
+    const handleUnSeenNoti = async () => {
+        if (actionButton != 1 && user.id > 0) {
+            setLoading(true)
+            setNotifications([])
+            setActionButton(1)
+            await fetchFindAllUnSeenNotiByUserId()
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => console.log(notifications), [notifications])
 
     useEffect(() => {
         setLoading(true);
@@ -40,33 +135,28 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
         const initializeWebSocket = async () => {
             try {
                 await refreshToken();
-                const token = Cookies.get("accessToken") + ''
+                const token = Cookies.get("accessToken") + '';
                 const sock = new SockJS(SOCKET_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },
                     onConnect: async () => {
                         const subscription = stompClient.subscribe(`/notification/user/${user.id}`, (noti: IMessage) => {
-                            const newNoti: Notification = JSON.parse(noti.body)
-                            toast.info(newNoti.title)
-                            setNotifications(prevNotis => [...prevNotis, newNoti]);
+                            const newNoti: Notification = JSON.parse(noti.body);
+                            toast.info(newNoti.title);
+                            setNotifications(prevNotis => [newNoti, ...prevNotis]);
                         }, { Authorization: token });
 
                         subscriptionRef.current = subscription;
 
-                        // await fetchFindAllChatByIdChatRoom();
-
+                        await fetchFindAllNotiByUserId();
                         setLoading(false);
-                    },
-                    debug: (str) => {
-                        console.log(str);
                     },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
-                            await initializeWebSocket()
+                            await initializeWebSocket();
                         }
                     }
-
                 });
 
                 stompClient.activate();
@@ -81,7 +171,6 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             initializeWebSocket();
         }
 
-
         return () => {
             if (subscriptionRef.current) {
                 subscriptionRef.current.unsubscribe();
@@ -92,18 +181,18 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                 clientRef.current = null;
             }
         };
-    }, [user.id])
+    }, [user.id]);
 
     useEffect(() => {
         const count = notifications.reduce((total, current) => {
             if (!current.seen) {
-                return total + 1
+                return total + 1;
             }
-            return total
-        }, 0)
+            return total;
+        }, 0);
 
-        setTotalNotifications(count)
-    }, [notifications])
+        setTotalNotifications(count);
+    }, [notifications]);
 
     return (
         <Popover
@@ -121,22 +210,23 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             }}
         >
             <Box
+                ref={boxRef}
+                onScroll={handleScroll}
                 sx={{
-                    width: {
-                        xs: '100%',
-                        md: 330
-                    },
                     padding: 2,
-                    height: '100%',
-                    backgroundColor: '#f5f5f5'
+                    maxHeight: 800,
+                    width: {
+                        md: 350,
+                        xs: '100%'
+                    },
+                    backgroundColor: '#f5f5f5',
+                    overflowY: 'auto'
                 }}
             >
                 {
                     loading
-                        ?
-                        <MuiLoading />
-                        :
-                        (
+                        ? <MuiLoading />
+                        : (
                             <>
                                 <Stack
                                     direction='row'
@@ -156,6 +246,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                                     </Stack>
                                     <Tooltip title="Đánh dấu đã đọc hết">
                                         <IconButton
+                                            onClick={handleMarkSeenAllByIdUser}
                                         >
                                             <i className="fa-solid fa-check"></i>
                                         </IconButton>
@@ -170,9 +261,9 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                                             p: 2,
                                             py: 0.5,
                                             borderRadius: 100,
-                                            ...actionButton == 0 ? { ...actionStyle } : {}
+                                            ...actionButton === 0 ? { ...actionStyle } : {}
                                         }}
-                                    // onClick={handleAllNotification}
+                                        onClick={() => handleAllNoti()}
                                     >
                                         Tất cả
                                     </Button>
@@ -181,9 +272,9 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                                             p: 1.5,
                                             py: 0.5,
                                             borderRadius: 100,
-                                            ...actionButton == 1 ? { ...actionStyle } : {}
+                                            ...actionButton === 1 ? { ...actionStyle } : {}
                                         }}
-                                    // onClick={handleUnreadNotification}
+                                        onClick={() => handleUnSeenNoti()}
                                     >
                                         Chưa đọc
                                     </Button>
@@ -205,4 +296,4 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
     )
 }
 
-export default NotificationBox
+export default NotificationBox;

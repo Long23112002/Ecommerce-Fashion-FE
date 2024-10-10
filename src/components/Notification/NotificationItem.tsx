@@ -1,12 +1,18 @@
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 import Notification from '../../types/Notification'
+import { formatDateTime } from '../../utils/timeUtils'
+import {Parser} from 'html-to-react'
 
 interface IProps {
     notification: Notification
 }
 
 const NotificationItem: React.FC<IProps> = ({ notification }) => {
+
+    const parser = Parser();
+    const content = parser.parse(notification.content);
+
     return (
         <Box
             sx={{
@@ -44,13 +50,13 @@ const NotificationItem: React.FC<IProps> = ({ notification }) => {
                             </strong>
                         )
                     }
-                    {notification.content}
+                    {content}
                 </Typography>
                 <Typography
                     variant="caption"
                     color="textSecondary"
                 >
-                    {notification.createAt?.toLocaleString()}
+                    {formatDateTime(notification.createAt)}
                 </Typography>
             </Stack>
 

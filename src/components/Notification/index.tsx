@@ -47,7 +47,7 @@ const Notification: React.FC = () => {
                         fontSize: 15,
                     }}
                 >
-                    {totalNotifications}
+                    {totalNotifications<10?totalNotifications:'9+'}
                 </Box>
             </IconButton>
 
