@@ -41,7 +41,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
         const stompClient = new Client({
           webSocketFactory: () => sock as WebSocket,
           onConnect: () => {
-            stompClient.subscribe(`/admin`, (chatRoom: IMessage) => {
+            stompClient.subscribe(`/chat/admin`, (chatRoom: IMessage) => {
               setChatRooms([...JSON.parse(chatRoom.body)]);
             },
               {

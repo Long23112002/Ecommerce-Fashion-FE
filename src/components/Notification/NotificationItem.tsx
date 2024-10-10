@@ -1,12 +1,18 @@
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 import Notification from '../../types/Notification'
+import { formatDateTime } from '../../utils/timeUtils'
+import {Parser} from 'html-to-react'
 
 interface IProps {
     notification: Notification
 }
 
 const NotificationItem: React.FC<IProps> = ({ notification }) => {
+
+    const parser = Parser();
+    const content = parser.parse(notification.content);
+
     return (
         <Box
             sx={{
@@ -18,33 +24,43 @@ const NotificationItem: React.FC<IProps> = ({ notification }) => {
                 borderRadius: 2,
             }}
         >
-            <Avatar
-                alt={notification.sender.name}
-                src={notification.sender.avatar}
-                sx={{ mr: 2 }}
-            />
+            {
+                notification.avatar &&
+                (
+                    <Avatar
+                        alt={notification?.nameCreateBy}
+                        src={notification.avatar}
+                        sx={{ mr: 2 }}
+                    />
+                )
+            }
             <Stack spacing={0.5}>
                 <Typography
                     variant="body2"
                 >
-                    <strong
-                        style={{
-                            marginRight: 5
-                        }}
-                    >
-                        {notification.sender.name}
-                    </strong>
-                    {notification.message}
+                    {
+                        notification.nameCreateBy &&
+                        (
+                            <strong
+                                style={{
+                                    marginRight: 5
+                                }}
+                            >
+                                {notification.nameCreateBy}
+                            </strong>
+                        )
+                    }
+                    {content}
                 </Typography>
                 <Typography
                     variant="caption"
                     color="textSecondary"
                 >
-                    {notification.createAt.toLocaleString()}
+                    {formatDateTime(notification.createAt)}
                 </Typography>
             </Stack>
 
-            {!notification.viewed && (
+            {!notification.seen && (
                 <Box
                     sx={{
                         width: 10,
