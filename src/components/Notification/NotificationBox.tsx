@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callDeleteByIdNoti, callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
-import { SOCKET_API } from '../../constants/BaseApi';
+import { SOCKET_NOTIFICATION_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Notification from '../../types/Notification';
 import Button from '../Button';
@@ -140,7 +140,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             try {
                 await refreshToken();
                 const token = Cookies.get("accessToken") + '';
-                const sock = new SockJS(SOCKET_API);
+                const sock = new SockJS(SOCKET_NOTIFICATION_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },

@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { refreshToken } from '../../api/AxiosInstance';
 import { callDeleteRoomById, callFindAllChatRoom } from '../../api/ChatApi';
-import { SOCKET_API } from '../../constants/BaseApi';
+import { SOCKET_CHAT_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import ChatRoom from '../../types/ChatRoom';
 import MuiLoading from '../Loading/MuiLoading';
@@ -37,7 +37,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
       if (user.id) {
         await refreshToken();
         const token = Cookies.get("accessToken") + ''
-        const sock = new SockJS(SOCKET_API);
+        const sock = new SockJS(SOCKET_CHAT_API);
         const stompClient = new Client({
           webSocketFactory: () => sock as WebSocket,
           onConnect: () => {

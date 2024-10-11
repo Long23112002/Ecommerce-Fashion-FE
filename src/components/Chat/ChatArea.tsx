@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callFindChatsUntilTarget, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
-import { SOCKET_API } from '../../constants/BaseApi';
+import { SOCKET_CHAT_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
@@ -130,7 +130,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
             try {
                 await refreshToken();
                 const token = Cookies.get("accessToken") + ''
-                const sock = new SockJS(SOCKET_API);
+                const sock = new SockJS(SOCKET_CHAT_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },
