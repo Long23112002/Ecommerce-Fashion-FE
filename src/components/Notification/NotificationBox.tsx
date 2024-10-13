@@ -1,18 +1,18 @@
-import { Box, Divider, Drawer, IconButton, Popover, Stack, Tooltip, Typography } from '@mui/material';
-import React, { SetStateAction, useEffect, useRef, useState } from 'react';
-import Cookies from 'js-cookie';
-import Button from '../Button';
-import Notification from '../../types/Notification';
-import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
-import SockJS from 'sockjs-client';
-import { SOCKET_API } from '../../constants/BaseApi';
+import { Box, Divider, IconButton, Popover, Stack, Tooltip, Typography } from '@mui/material';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import Cookies from 'js-cookie';
+import React, { SetStateAction, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { userSelector } from '../../redux/reducers/UserReducer';
-import MuiLoading from '../MuiLoading';
 import { toast } from 'react-toastify';
+import SockJS from 'sockjs-client';
+import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
+import { callDeleteByIdNoti, callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
+import { SOCKET_NOTIFICATION_API } from '../../constants/BaseApi';
+import { userSelector } from '../../redux/reducers/UserReducer';
+import Notification from '../../types/Notification';
+import Button from '../Button';
+import MuiLoading from '../Loading/MuiLoading';
 import NotificationItem from './NotificationItem';
-import { callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
 
 interface IProps {
     anchorEl: HTMLButtonElement | null,
@@ -40,21 +40,20 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
         if (user.id > 0) {
             const { results, next } = await callFindAllNotiByUserId(user.id);
             nextUrl.current = next;
-            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+            setNotifications(prevs => [...uniqueNotis(results, prevs), ...prevs]);
         }
     }
 
     const fetchFindAllUnSeenNotiByUserId = async () => {
         if (user.id > 0) {
             const { results, next } = await callFindAllUnSeenNotiByUserId(user.id);
-            console.log(results);
             nextUrl.current = next;
-            setNotifications(prevChats => [...uniqueNotis(results, prevChats), ...prevChats]);
+            setNotifications(prevs => [...uniqueNotis(results, prevs), ...prevs]);
         }
     }
 
-    const uniqueNotis = (res: Notification[], prevChats: Notification[]) => {
-        const idNotis = prevChats.map(n => n.id);
+    const uniqueNotis = (res: Notification[], prevs: Notification[]) => {
+        const idNotis = prevs.map(n => n.id);
         const newNoti = res.filter(n => !idNotis.includes(n.id));
         return newNoti;
     }
@@ -88,11 +87,18 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
         }
     };
 
+    const handleDeleteByIdNoti = async (id: string) => {
+        if (id) {
+            const res: Notification = await callDeleteByIdNoti(id);
+            setNotifications(prev => prev.filter(noti => noti.id !== res.id))
+        }
+    };
+
     const handleLoadMore = async () => {
         const nextApi = nextUrl.current;
         if (nextApi) {
             const { results, next } = await callGetInstance(nextApi);
-            setNotifications(prev => [...prev, ...results]);
+            setNotifications(prev => [...prev, ...uniqueNotis(results, prev)]);
             nextUrl.current = next;
         }
     }
@@ -126,8 +132,6 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
         }
     }
 
-    useEffect(() => console.log(notifications), [notifications])
-
     useEffect(() => {
         setLoading(true);
         setNotifications([]);
@@ -136,7 +140,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             try {
                 await refreshToken();
                 const token = Cookies.get("accessToken") + '';
-                const sock = new SockJS(SOCKET_API);
+                const sock = new SockJS(SOCKET_NOTIFICATION_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },
@@ -151,6 +155,9 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
 
                         await fetchFindAllNotiByUserId();
                         setLoading(false);
+                    },
+                    debug: (str) => {
+                        console.log(str);
                     },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
@@ -223,74 +230,76 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                     overflowY: 'auto'
                 }}
             >
+                <Stack
+                    direction='row'
+                    alignItems='center'
+                    justifyContent='space-between'
+                >
+                    <Stack
+                        direction='row'
+                        alignItems='center'
+                    >
+                        <IconButton
+                            onClick={handleClose}
+                        >
+                            <i className="fa-solid fa-xmark" />
+                        </IconButton>
+                        <Typography variant='h6'>Thông báo</Typography>
+                    </Stack>
+                    <Tooltip title="Đánh dấu đã đọc hết">
+                        <IconButton
+                            onClick={handleMarkSeenAllByIdUser}
+                        >
+                            <i className="fa-solid fa-check"></i>
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
+                <Stack
+                    direction='row'
+                    alignItems='center'
+                >
+                    <Button
+                        sx={{
+                            p: 2,
+                            py: 0.5,
+                            borderRadius: 100,
+                            ...actionButton === 0 ? { ...actionStyle } : {}
+                        }}
+                        onClick={() => handleAllNoti()}
+                    >
+                        Tất cả
+                    </Button>
+                    <Button
+                        sx={{
+                            p: 1.5,
+                            py: 0.5,
+                            borderRadius: 100,
+                            ...actionButton === 1 ? { ...actionStyle } : {}
+                        }}
+                        onClick={() => handleUnSeenNoti()}
+                    >
+                        Chưa đọc
+                    </Button>
+                </Stack>
+                <Divider sx={{ my: 2 }} />
+
                 {
                     loading
-                        ? <MuiLoading />
-                        : (
-                            <>
-                                <Stack
-                                    direction='row'
-                                    alignItems='center'
-                                    justifyContent='space-between'
-                                >
-                                    <Stack
-                                        direction='row'
-                                        alignItems='center'
-                                    >
-                                        <IconButton
-                                            onClick={handleClose}
-                                        >
-                                            <i className="fa-solid fa-xmark" />
-                                        </IconButton>
-                                        <Typography variant='h6'>Thông báo</Typography>
-                                    </Stack>
-                                    <Tooltip title="Đánh dấu đã đọc hết">
-                                        <IconButton
-                                            onClick={handleMarkSeenAllByIdUser}
-                                        >
-                                            <i className="fa-solid fa-check"></i>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Stack>
-                                <Stack
-                                    direction='row'
-                                    alignItems='center'
-                                >
-                                    <Button
-                                        sx={{
-                                            p: 2,
-                                            py: 0.5,
-                                            borderRadius: 100,
-                                            ...actionButton === 0 ? { ...actionStyle } : {}
-                                        }}
-                                        onClick={() => handleAllNoti()}
-                                    >
-                                        Tất cả
-                                    </Button>
-                                    <Button
-                                        sx={{
-                                            p: 1.5,
-                                            py: 0.5,
-                                            borderRadius: 100,
-                                            ...actionButton === 1 ? { ...actionStyle } : {}
-                                        }}
-                                        onClick={() => handleUnSeenNoti()}
-                                    >
-                                        Chưa đọc
-                                    </Button>
-                                </Stack>
-                                <Divider sx={{ my: 2 }} />
-                                <Stack>
-                                    {notifications.map(n =>
-                                        <NotificationItem
-                                            key={n.id}
-                                            notification={n}
-                                        />
-                                    )}
-                                </Stack>
-                            </>
-                        )
+                        ?
+                        <MuiLoading />
+                        :
+                        <Stack>
+                            {notifications.map((n, i) =>
+                                <NotificationItem
+                                    key={i}
+                                    notification={n}
+                                    handleMarkSeenByIdNoti={handleMarkSeenByIdNoti}
+                                    handleDeleteByIdNoti={handleDeleteByIdNoti}
+                                />
+                            )}
+                        </Stack>
                 }
+
             </Box>
         </Popover>
     )

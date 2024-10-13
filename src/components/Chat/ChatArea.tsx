@@ -6,11 +6,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
 import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callFindAllChatByIdChatRoom, callFindChatsUntilTarget, callSeenAllChatByIdChatRoom } from '../../api/ChatApi';
-import { SOCKET_API } from '../../constants/BaseApi';
+import { SOCKET_CHAT_API } from '../../constants/BaseApi';
 import { setNewChat } from '../../redux/reducers/ChatReducer';
 import { userSelector } from '../../redux/reducers/UserReducer';
 import Chat from '../../types/Chat';
-import MuiLoading from '../MuiLoading';
+import MuiLoading from '../Loading/MuiLoading';
 import ChatInput from './ChatInput';
 import ChatItem from './ChatItem';
 
@@ -130,7 +130,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
             try {
                 await refreshToken();
                 const token = Cookies.get("accessToken") + ''
-                const sock = new SockJS(SOCKET_API);
+                const sock = new SockJS(SOCKET_CHAT_API);
                 const stompClient = new Client({
                     webSocketFactory: () => sock as WebSocket,
                     connectHeaders: { Authorization: token },
@@ -150,9 +150,9 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
                         await fetchSeenAllByIdChatRoom();
                         setLoading(false);
                     },
-                    // debug: (str) => {
-                    //     console.log(str);
-                    // },
+                    debug: (str) => {
+                        console.log(str);
+                    },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
                             await initializeWebSocket()
