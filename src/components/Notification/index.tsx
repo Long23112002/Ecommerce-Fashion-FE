@@ -1,6 +1,6 @@
-import { Box, IconButton } from '@mui/material'
-import React, { useState } from 'react'
-import NotificationBox from './NotificationBox'
+import { Box, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import NotificationBox from './NotificationBox';
 
 const Notification: React.FC = () => {
 

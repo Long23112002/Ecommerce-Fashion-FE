@@ -54,8 +54,8 @@ const ManagerSize = () => {
     setLoading(true);
     try {
       const response = await fetchAllSizes(
-        filterName, 
-        pageSize, 
+        filterName,
+        pageSize,
         current - 1
       );
       const sizeData = response.data || [];
@@ -115,7 +115,7 @@ const ManagerSize = () => {
         toast.error("Lỗi xác thực");
       }
     } catch (error) {
-     toast.error(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -352,7 +352,7 @@ const ManagerSize = () => {
               padding: "20px",
             }}
           >
-        
+
             <h3
               style={{
                 fontWeight: "bold",
@@ -522,11 +522,10 @@ const ManagerSize = () => {
           indicator: <LoadingCustom />,
         }}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)??''}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ''}
         onChange={handleTableChange}
       />
     </div>
-    <ToastContainer/>
   </Fragment>
 };
 

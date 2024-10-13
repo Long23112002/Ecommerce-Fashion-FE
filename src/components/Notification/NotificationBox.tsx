@@ -3,7 +3,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import Cookies from 'js-cookie';
 import React, { SetStateAction, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callDeleteByIdNoti, callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
@@ -147,8 +147,10 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                     onConnect: async () => {
                         const subscription = stompClient.subscribe(`/notification/user/${user.id}`, (noti: IMessage) => {
                             const newNoti: Notification = JSON.parse(noti.body);
-                            toast.info(newNoti.title);
-                            setNotifications(prevNotis => [newNoti, ...prevNotis]);
+                            if (!notifications.includes(newNoti)) {
+                                toast.info(newNoti.title);
+                                setNotifications(prevNotis => [newNoti, ...prevNotis]);
+                            }
                         }, { Authorization: token });
 
                         subscriptionRef.current = subscription;
@@ -156,9 +158,9 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                         await fetchFindAllNotiByUserId();
                         setLoading(false);
                     },
-                    debug: (str) => {
-                        console.log(str);
-                    },
+                    // debug: (str) => {
+                    //     console.log(str);
+                    // },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
                             await initializeWebSocket();
@@ -286,7 +288,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                     onScroll={handleScroll}
                     sx={{
                         maxHeight: 600,
-                        overflowY: 'auto',
+                        overflowY: 'auto'
                     }}
                 >
                     {

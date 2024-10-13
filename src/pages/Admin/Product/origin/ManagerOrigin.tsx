@@ -82,7 +82,7 @@ const ManaggerOrigin = () => {
             const values = await form.validateFields();
             const { name } = values;
             const token = Cookies.get("accessToken");
-    
+
             if (token) {
                 if (mode === 'add') {
                     await createOrigin({ name }, token);
@@ -247,7 +247,6 @@ const ManaggerOrigin = () => {
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
-            <ToastContainer/>
         </div>
     );
 };

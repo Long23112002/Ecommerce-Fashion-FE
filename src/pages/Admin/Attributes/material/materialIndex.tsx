@@ -279,7 +279,7 @@ const ManagerMaterial = () => {
           >
             <Tooltip title="Xóa chất liệu" placement="bottom">
               <Button className="btn-outline-danger">
-              <i className="fa-solid fa-trash-can"></i>
+                <i className="fa-solid fa-trash-can"></i>
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -299,7 +299,7 @@ const ManagerMaterial = () => {
           type="default"
           onClick={() => showModal(null)}
         >
-           <i className="fa-solid fa-circle-plus"></i>
+          <i className="fa-solid fa-circle-plus"></i>
         </Button>
       </Tooltip>
 
@@ -519,11 +519,10 @@ const ManagerMaterial = () => {
           indicator: <LoadingCustom />,
         }}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)??''}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ''}
         onChange={handleTableChange}
       />
     </div>
-    <ToastContainer/>
   </Fragment>
 };
 

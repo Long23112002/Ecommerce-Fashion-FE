@@ -246,7 +246,6 @@ const ManagerBrand = () => {
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
-            <ToastContainer />
         </div>
     );
 };

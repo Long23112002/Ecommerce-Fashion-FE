@@ -514,9 +514,8 @@ const ManagerColor = () => {
         onChange={handleTableChange}
       />
     </div>
-    <ToastContainer/>
-    </Fragment>
-  
+  </Fragment>
+
 };
 
 export default ManagerColor;

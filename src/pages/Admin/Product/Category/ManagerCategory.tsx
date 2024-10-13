@@ -348,7 +348,6 @@ const ManagerCategory = () => {
           background-color: #AEEEEE; /* 3 */
         }
       `}</style>
-      <ToastContainer/>
     </div>
   );
 };
