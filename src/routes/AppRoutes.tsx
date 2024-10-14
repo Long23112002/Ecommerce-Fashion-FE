@@ -15,6 +15,7 @@ import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
 import Login from '../pages/Admin/User/Login';
 import Home from "../pages/Customer/Home";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 
 
 
@@ -40,6 +41,7 @@ const AppRoutes = () => {
                 <Route path="/admin/chat" element={<ChatPage />} />
                 <Route path="/admin/user" element={<ManagerUser />} />
                 <Route path="/admin/category" element={<ManagerCategory />} />
+                <Route path="/admin/promotion" element={<ManagerPromotion />} />
             </Route>
 
             {/* Route xử lý lỗi */}
