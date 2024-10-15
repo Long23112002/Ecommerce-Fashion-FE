@@ -19,8 +19,11 @@ const PromotionModal: React.FC<PromotionModalProps> = ({ isModalOpen, handleOk, 
     const [valueSuffix, setValueSuffix] = useState<string>('');
     useEffect(() => {
         if (mode ==="update" && promotion) {
+            const cleanValue = promotion.value ? promotion.value.toString().replace(',', '') : promotion.value;
+
             form.setFieldsValue({
                 ...promotion,
+                value: cleanValue,
                 startDate: promotion.startDate ? dayjs(promotion.startDate) : null,
                 endDate: promotion.endDate ? dayjs(promotion.endDate) : null,
             });
@@ -29,6 +32,21 @@ const PromotionModal: React.FC<PromotionModalProps> = ({ isModalOpen, handleOk, 
             form.resetFields();
         }
     }, [mode,promotion, form]);
+
+    useEffect(() => {
+        if (promotion) {
+            switch (promotion.typePromotionEnum) {
+                case TypePromotionEnum.PERCENTAGE_DISCOUNT:
+                    setValueSuffix('%');
+                    break;
+                case TypePromotionEnum.AMOUNT_DISCOUNT:
+                    setValueSuffix('VNĐ');
+                    break;
+                default:
+                    setValueSuffix('');
+            }
+        }
+    }, [promotion]);
 
 
     const handleValuesChange = (changedValues: any) => {
@@ -62,7 +80,7 @@ const PromotionModal: React.FC<PromotionModalProps> = ({ isModalOpen, handleOk, 
                     label="Kiểu khuyến mãi"
                     rules={[{ required: true, message: 'Vui lòng chọn kiểu khuyến mãi' }]}
                 >
-                    <Select placeholder="Chọn kiểu khuyến mãi">
+                    <Select placeholder="Chọn kiểu khuyến mãi" value={promotion?.typePromotionEnum}>
                         {Object.entries(TypePromotionEnum).map(([key, value]) => (
                             <Select.Option key={value} value={value}>
                                 {TypePromotionLabel[value]}
