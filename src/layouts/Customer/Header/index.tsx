@@ -138,7 +138,7 @@ const UserHeader: React.FC = () => {
                                         style={{
                                             width: '100%',
                                         }}
-                                        prefix={<i className="fa-solid fa-magnifying-glass" />}
+                                        prefix={<i className="fa-solid fa-magnifying-glass mx-2" />}
                                         enterButton={'Tìm kiếm'}
                                     />
                                 </Container>
