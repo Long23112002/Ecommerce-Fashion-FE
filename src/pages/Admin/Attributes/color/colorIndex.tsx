@@ -1,4 +1,21 @@
-import React, { Fragment, useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Table,
+  Tooltip
+} from "antd";
+import Cookies from "js-cookie";
+import { debounce } from "lodash";
+import { Fragment, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import createPaginationConfig, {
+  PaginationState,
+} from "../../../../config/paginationConfig.ts";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import {
   createColor,
   deleteColor,
@@ -6,24 +23,6 @@ import {
   getColorById,
   updateColor,
 } from "./colorManagament.ts";
-import {
-  Button,
-  Form,
-  Popconfirm,
-  Table,
-  Input,
-  Modal,
-  Space,
-  Tooltip,
-} from "antd";
-import { toast, ToastContainer } from "react-toastify";
-import Cookies from "js-cookie";
-import createPaginationConfig, {
-  PaginationState,
-} from "../../../../config/paginationConfig.ts";
-import { debounce } from "lodash";
-import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);

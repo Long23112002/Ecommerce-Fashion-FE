@@ -54,7 +54,7 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
 
                     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
 
-                        <Notification />
+                        <Notification mr />
 
                         <Box component='span' display='flex' alignItems='center'>
 
@@ -64,6 +64,10 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                                     display: {
                                         xs: "none",
                                         md: "block"
+                                    },
+                                    mr: {
+                                        xs: 0,
+                                        sm: 3
                                     },
                                     textAlign: 'end',
                                     maxWidth: 220,

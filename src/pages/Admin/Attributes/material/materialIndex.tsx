@@ -16,7 +16,7 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,

@@ -1,4 +1,3 @@
-import { Button, Divider, Form, Input, Typography } from 'antd';
 import {
     EyeInvisibleOutlined,
     EyeTwoTone,
@@ -7,13 +6,13 @@ import {
     LockOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import { LoginRequest } from "../../../types/login/request/loginRequest.ts";
-import { toast, ToastContainer } from 'react-toastify';
+import { Button, Divider, Form, Input, Typography } from 'antd';
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { handleLogin, storeUserData } from "../../../api/AuthApi.ts";
-import { useNavigate } from "react-router-dom";
-import { OAuth2Config, OAuth2ConfigFB } from "../../../config/auth2Config.ts";
 import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../../api/Oauth2.ts";
+import { LoginRequest } from "../../../types/login/request/loginRequest.ts";
 
 const { Title } = Typography;
 

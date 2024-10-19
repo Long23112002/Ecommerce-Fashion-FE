@@ -3,7 +3,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import Cookies from 'js-cookie';
 import React, { SetStateAction, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import SockJS from 'sockjs-client';
 import { callGetInstance, refreshToken } from '../../api/AxiosInstance';
 import { callDeleteByIdNoti, callFindAllNotiByUserId, callFindAllUnSeenNotiByUserId, callMarkSeenAllByIdUser, callMarkSeenByIdNoti } from '../../api/NotificationApi';
@@ -149,7 +149,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                             const newNoti: Notification = JSON.parse(noti.body);
                             if (!notifications.includes(newNoti)) {
                                 toast.info(newNoti.title);
-                                setNotifications(prevNotis => [newNoti, ...prevNotis]);
+                                setNotifications(prevNotis => [{ ...newNoti }, ...prevNotis]);
                             }
                         }, { Authorization: token });
 

@@ -31,7 +31,7 @@ const AdminSidebar: React.FC<IProps> = ({
         height: "100vh",
         position: "sticky",
         top: 0,
-        zIndex: 1,
+        zIndex: 100,
       }}
       customBreakPoint="1000px"
       toggled={toggled}

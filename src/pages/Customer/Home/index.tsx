@@ -3,8 +3,7 @@ import React from 'react'
 
 const Home: React.FC = () => {
   return (
-    <Box sx={{height: '200vh'}}>
-      <TextField></TextField>
+    <Box>
     </Box>
   )
 }
