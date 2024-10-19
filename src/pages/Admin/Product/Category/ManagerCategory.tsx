@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast, ToastContainer } from 'react-toastify';
+import { Button, Form, Input, Popconfirm, Table } from 'antd';
 import Cookies from 'js-cookie';
-import { getAllCategories, fetchAllCategories, createCategory, updateCategory, deleteCategory, getCategoryById } from '../../../../api/CategoryApi.ts';
-import AddCategoryModal from '../../../../components/Category/AddCategoryModal.tsx';
-import UpdateCategoryModal from '../../../../components/Category/UpdateCategoryModal.tsx';
-import createPaginationConfig, { PaginationState } from '../../../../config/paginationConfig.ts';
-import CategoryDetailModal from '../../../../components/Category/CategoryDetailModal.tsx';
-import { Category } from '../../../../types/Category.ts';
 import { debounce } from "lodash";
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { createCategory, deleteCategory, fetchAllCategories, getAllCategories, getCategoryById, updateCategory } from '../../../../api/CategoryApi.ts';
+import AddCategoryModal from '../../../../components/Category/AddCategoryModal.tsx';
+import CategoryDetailModal from '../../../../components/Category/CategoryDetailModal.tsx';
+import UpdateCategoryModal from '../../../../components/Category/UpdateCategoryModal.tsx';
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import createPaginationConfig, { PaginationState } from '../../../../config/paginationConfig.ts';
+import { Category } from '../../../../types/Category.ts';
 import { getErrorMessage } from '../../../Error/getErrorMessage.ts';
 
 const ManagerCategory = () => {
@@ -348,7 +348,6 @@ const ManagerCategory = () => {
           background-color: #AEEEEE; /* 3 */
         }
       `}</style>
-      <ToastContainer/>
     </div>
   );
 };

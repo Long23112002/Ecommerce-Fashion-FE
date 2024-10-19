@@ -93,7 +93,7 @@ export const getUserData = (): {
     email: string;
     refreshToken: string | undefined
 } => {
-    const id = localStorage.getItem('userId') || '';
+    const id = localStorage.getItem('userId') || '-1';
     const email = localStorage.getItem('email') || '';
     const fullName = localStorage.getItem('fullName') || '';
     const phoneNumber = localStorage.getItem('phoneNumber') || '';

@@ -37,6 +37,7 @@ const NotificationItem: React.FC<IProps> = ({ notification, handleMarkSeenByIdNo
                 alignItems: 'center',
                 mb: 1,
                 p: 2,
+                pr: 2.5,
                 position: 'relative',
                 borderRadius: 2,
             }}
@@ -110,7 +111,7 @@ const NotificationItem: React.FC<IProps> = ({ notification, handleMarkSeenByIdNo
                         height: 10,
                         position: 'absolute',
                         top: '50%',
-                        right: 0,
+                        right: 5,
                         backgroundColor: '#00B8D9',
                         borderRadius: '50%',
                     }}

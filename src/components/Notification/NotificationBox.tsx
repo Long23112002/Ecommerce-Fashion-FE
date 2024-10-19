@@ -147,8 +147,10 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                     onConnect: async () => {
                         const subscription = stompClient.subscribe(`/notification/user/${user.id}`, (noti: IMessage) => {
                             const newNoti: Notification = JSON.parse(noti.body);
-                            toast.info(newNoti.title);
-                            setNotifications(prevNotis => [newNoti, ...prevNotis]);
+                            if (!notifications.includes(newNoti)) {
+                                toast.info(newNoti.title);
+                                setNotifications(prevNotis => [{ ...newNoti }, ...prevNotis]);
+                            }
                         }, { Authorization: token });
 
                         subscriptionRef.current = subscription;
@@ -156,9 +158,9 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
                         await fetchFindAllNotiByUserId();
                         setLoading(false);
                     },
-                    debug: (str) => {
-                        console.log(str);
-                    },
+                    // debug: (str) => {
+                    //     console.log(str);
+                    // },
                     onStompError: async (error) => {
                         if (error.headers['message'].includes('JWT expired ')) {
                             await initializeWebSocket();
@@ -217,89 +219,96 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             }}
         >
             <Box
-                ref={boxRef}
-                onScroll={handleScroll}
                 sx={{
-                    padding: 2,
-                    maxHeight: 800,
-                    width: {
-                        md: 350,
-                        xs: '100%'
-                    },
                     backgroundColor: '#f5f5f5',
-                    overflowY: 'auto'
+                    width: { xs: '90vw', sm: 350 },
+                    maxWidth: 350,
                 }}
             >
-                <Stack
-                    direction='row'
-                    alignItems='center'
-                    justifyContent='space-between'
+                <Box
+                    sx={{
+                        p: 2
+                    }}
                 >
                     <Stack
                         direction='row'
                         alignItems='center'
+                        justifyContent='space-between'
                     >
-                        <IconButton
-                            onClick={handleClose}
+                        <Stack
+                            direction='row'
+                            alignItems='center'
                         >
-                            <i className="fa-solid fa-xmark" />
-                        </IconButton>
-                        <Typography variant='h6'>Thông báo</Typography>
-                    </Stack>
-                    <Tooltip title="Đánh dấu đã đọc hết">
-                        <IconButton
-                            onClick={handleMarkSeenAllByIdUser}
-                        >
-                            <i className="fa-solid fa-check"></i>
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
-                <Stack
-                    direction='row'
-                    alignItems='center'
-                >
-                    <Button
-                        sx={{
-                            p: 2,
-                            py: 0.5,
-                            borderRadius: 100,
-                            ...actionButton === 0 ? { ...actionStyle } : {}
-                        }}
-                        onClick={() => handleAllNoti()}
-                    >
-                        Tất cả
-                    </Button>
-                    <Button
-                        sx={{
-                            p: 1.5,
-                            py: 0.5,
-                            borderRadius: 100,
-                            ...actionButton === 1 ? { ...actionStyle } : {}
-                        }}
-                        onClick={() => handleUnSeenNoti()}
-                    >
-                        Chưa đọc
-                    </Button>
-                </Stack>
-                <Divider sx={{ my: 2 }} />
-
-                {
-                    loading
-                        ?
-                        <MuiLoading />
-                        :
-                        <Stack>
-                            {notifications.map((n, i) =>
-                                <NotificationItem
-                                    key={i}
-                                    notification={n}
-                                    handleMarkSeenByIdNoti={handleMarkSeenByIdNoti}
-                                    handleDeleteByIdNoti={handleDeleteByIdNoti}
-                                />
-                            )}
+                            <IconButton
+                                onClick={handleClose}
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </IconButton>
+                            <Typography variant='h6'>Thông báo</Typography>
                         </Stack>
-                }
+                        <Tooltip title="Đánh dấu đã đọc hết">
+                            <IconButton
+                                onClick={handleMarkSeenAllByIdUser}
+                            >
+                                <i className="fa-solid fa-check"></i>
+                            </IconButton>
+                        </Tooltip>
+                    </Stack>
+                    <Stack
+                        direction='row'
+                        alignItems='center'
+                    >
+                        <Button
+                            sx={{
+                                p: 2,
+                                py: 0.5,
+                                borderRadius: 100,
+                                ...actionButton === 0 ? { ...actionStyle } : {}
+                            }}
+                            onClick={() => handleAllNoti()}
+                        >
+                            Tất cả
+                        </Button>
+                        <Button
+                            sx={{
+                                p: 1.5,
+                                py: 0.5,
+                                borderRadius: 100,
+                                ...actionButton === 1 ? { ...actionStyle } : {}
+                            }}
+                            onClick={() => handleUnSeenNoti()}
+                        >
+                            Chưa đọc
+                        </Button>
+                    </Stack>
+                </Box>
+                <Divider />
+                <Box
+                    ref={boxRef}
+                    onScroll={handleScroll}
+                    sx={{
+                        maxHeight: 600,
+                        overflowY: 'auto'
+                    }}
+                >
+                    {
+                        loading
+                            ?
+                            <MuiLoading />
+                            :
 
+                            <Stack>
+                                {notifications.map((n, i) =>
+                                    <NotificationItem
+                                        key={i}
+                                        notification={n}
+                                        handleMarkSeenByIdNoti={handleMarkSeenByIdNoti}
+                                        handleDeleteByIdNoti={handleDeleteByIdNoti}
+                                    />
+                                )}
+                            </Stack>
+                    }
+                </Box>
             </Box>
         </Popover>
     )

@@ -6,6 +6,8 @@ import { handleLogin, storeUserData } from "../../api/AuthApi.ts";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
 import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../api/Oauth2.ts";
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../redux/reducers/UserReducer.ts';
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -14,6 +16,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, onRegister }) => {
+    const dispatch = useDispatch();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -50,6 +53,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
         try {
             const loginResponse = await handleLogin(loginRequest);
             storeUserData(loginResponse);
+            const userData = loginResponse.userResponse
+            dispatch(setUser({
+                id: Number(userData.id),
+                fullName: userData.fullName,
+                email: userData.email,
+                avatar: userData.avatar,
+                isAdmin: userData.isAdmin
+            }));
             toast.success("Đăng nhập thành công!");
             handleCancel();
         } catch (error) {
