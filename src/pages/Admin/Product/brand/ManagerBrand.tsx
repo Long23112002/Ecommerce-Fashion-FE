@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast, ToastContainer } from "react-toastify";
+import { Button, Form, Input, Popconfirm, Table } from 'antd';
 import Cookies from "js-cookie";
-import { fetchAllBrands, createBrand, updateBrand, deleteBrand, getBrandById } from "../../../../api/BrandApi.ts";
-import BrandModel from "../../../../components/Brand/BrandModel.tsx";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { createBrand, deleteBrand, fetchAllBrands, getBrandById, updateBrand } from "../../../../api/BrandApi.ts";
 import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"; // New detail modal
+import BrandModel from "../../../../components/Brand/BrandModel.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
 import { Brand } from "../../../../types/brand.ts";
-import { debounce } from "lodash";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManagerBrand = () => {
@@ -246,7 +246,6 @@ const ManagerBrand = () => {
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
-            <ToastContainer />
         </div>
     );
 };

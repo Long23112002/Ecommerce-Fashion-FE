@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Input, Button, Form, Popconfirm, Table } from 'antd';
-import { toast, ToastContainer } from "react-toastify";
+import { Button, Form, Input, Popconfirm, Table } from 'antd';
 import Cookies from "js-cookie";
-import { fetchAllOrigins, createOrigin, updateOrigin, deleteOrigin, getOriginById } from "../../../../api/OriginApi.ts";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { createOrigin, deleteOrigin, fetchAllOrigins, getOriginById, updateOrigin } from "../../../../api/OriginApi.ts";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import OriginModel from "../../../../components/Origin/OriginModel.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/origin/paginationConfig.ts";
-import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import { Origin } from "../../../../types/origin.ts";
-import { debounce } from "lodash";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 
 const ManaggerOrigin = () => {
@@ -82,7 +82,7 @@ const ManaggerOrigin = () => {
             const values = await form.validateFields();
             const { name } = values;
             const token = Cookies.get("accessToken");
-    
+
             if (token) {
                 if (mode === 'add') {
                     await createOrigin({ name }, token);
@@ -247,7 +247,6 @@ const ManaggerOrigin = () => {
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
             />
-            <ToastContainer/>
         </div>
     );
 };
