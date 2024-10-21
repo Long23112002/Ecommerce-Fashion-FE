@@ -94,7 +94,7 @@ const UserHeader: React.FC = () => {
                 </div>
             </a>
 
-            <Box position='sticky' top={0} zIndex={10}>
+            <Box position='sticky' top={-1} zIndex={10}>
                 <AppBar
                     position='static'
                     sx={{
@@ -146,7 +146,7 @@ const UserHeader: React.FC = () => {
                                 <Box component='span' display='flex' alignItems='center'>
                                     {isLogin ? (
                                         <>
-                                            <Dropdown menu={{ items }} trigger={['hover']}>
+                                            <Dropdown menu={{ items }} trigger={['hover','click']}>
                                                 <Box
                                                     // className="btn-custom"
                                                     onClick={(e) => e.preventDefault()}
