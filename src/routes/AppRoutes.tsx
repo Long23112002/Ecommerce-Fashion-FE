@@ -5,7 +5,7 @@ import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import ChatPage from '../pages/Admin/Chat/index.tsx';
-import ProductManager from '../pages/Admin/Product';
+import ProductManager from '../pages/Admin/Product/ManageProduct';
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
