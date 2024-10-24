@@ -18,8 +18,6 @@ import { LoginUserModel } from '../../../components/User/LoginModelUser';
 import { setUser, userSelector } from '../../../redux/reducers/UserReducer';
 import '../../../styles/style.css';
 
-const headerHeight = 50;
-
 const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
 
 const items: MenuProps['items'] = [
@@ -56,6 +54,8 @@ const items: MenuProps['items'] = [
         ),
     },
 ];
+
+const headerHeight = 50;
 
 const UserHeader: React.FC = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
