@@ -13,9 +13,10 @@ import { ManagerRole, ManagerUser } from "../pages/Admin/User";
 import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
 import Login from '../pages/Admin/User/Login';
-import Home from "../pages/Customer/Home";
+import Home from "../pages/Customer/Home.tsx";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
+import ProductDetail from '../pages/Customer/ProductDetail.tsx';
 
 
 
@@ -28,6 +29,7 @@ const AppRoutes = () => {
 
             <Route element={<UserLayout />}>
                 <Route path='/' element={<Home />} />
+                <Route path='/product/:id' element={<ProductDetail />} />
             </Route>
 
             <Route element={<AdminLayout />}>
