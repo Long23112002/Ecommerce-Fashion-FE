@@ -35,7 +35,7 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
                     paddingTop: '120%',
                     position: 'relative',
                 }}
-                image={product.image}
+                image={product.images?.[0]}
             >
                 <IconButton
                     onClick={handleAddToCart}
@@ -74,14 +74,14 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
                     {product.name}
                 </Typography>
                 <Typography
+                    color='primary'
                     sx={{
                         fontWeight: 700,
                         fontSize: !isMobile ? '1.1rem' : '1rem',
-                        color: '#d32f2f',
                         pb: !isMobile ? '0.8rem' : 0
                     }}
                 >
-                    {product.price.toLocaleString('vi-VN')} VND
+                    {product.price?.toLocaleString('vi-VN')} VND
                 </Typography>
             </CardContent>
         </Card>

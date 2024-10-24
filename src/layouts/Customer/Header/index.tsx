@@ -88,7 +88,13 @@ const UserHeader: React.FC = () => {
 
     return (
         <>
-            <AppBar position="sticky" sx={{ backgroundColor: 'white', boxShadow: 'none', borderBottom: '1px solid #eee' }}>
+            <AppBar position="sticky"
+                sx={{
+                    top: -1,
+                    backgroundColor: 'white',
+                    boxShadow: 'none',
+                    borderBottom: '1px solid #eee'
+                }}>
                 <Container maxWidth="xl">
                     <Toolbar sx={{
                         display: 'flex',
@@ -113,8 +119,15 @@ const UserHeader: React.FC = () => {
                                 <Typography
                                     key={category}
                                     variant="button"
-                                    onClick={() => navigate(`/category/${category.toLowerCase()}`)}
-                                    sx={{ cursor: 'pointer', color: 'black', position: 'relative' }}
+                                    onClick={() => navigate(`/filter/${category.toLowerCase()}`)}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        color: 'black',
+                                        position: 'relative',
+                                        ":hover": {
+                                            color: '#1E90FF'
+                                        }
+                                    }}
                                 >
                                     {category}
                                 </Typography>
@@ -217,45 +230,70 @@ const UserHeader: React.FC = () => {
                 anchor="right"
                 open={isDrawerOpen}
                 onClose={toggleDrawer(false)}
+                sx={{
+                    color: '#f4f4f4',
+                }}
             >
-                <Box sx={{
-                    width: '85vw',
-                    maxWidth: '500px',
-                    p: 2,
-                    pt: 4
-                }}>
+                <Box
+                    sx={{
+                        width: '85vw',
+                        maxWidth: '400px',
+                        p: 3,
+                        pt: 4,
+                    }}
+                >
                     <Box
                         sx={{
-                            border: '1px solid #9b9b9b',
-                            backgroundColor: '#fafafa',
-                            borderRadius: '20px',
+                            border: '1px solid #e0e0e0',
+                            backgroundColor: '#fff',
+                            borderRadius: '25px',
+                            display: 'flex',
                             alignItems: 'center',
-                            padding: '0 0 0 8px',
-                            display: { xs: 'flex', lg: 'none' },
-                            height: '40px',
+                            padding: '5px 0 5px 12px',
+                            height: '45px',
+                            mb: 3,
                         }}
                     >
                         <InputBase
                             placeholder="Bạn tìm gì..."
-                            sx={{ ml: 1, flex: 1 }}
+                            sx={{ ml: 1, flex: 1, fontSize: '16px' }}
                         />
                         <IconButton
                             sx={{
-                                marginLeft: 1,
+                                p: 1,
+                                color: '#616161',
                             }}
                         >
-                            <SearchOutlined />
+                            <SearchOutlined sx={{ fontSize: 28 }} />
                         </IconButton>
                     </Box>
+
                     <List>
                         {categories.map((category, index) => (
-                            <ListItem key={index} onClick={() => navigate(`/category/${category.toLowerCase()}`)}>
-                                <ListItemText primary={category} />
+                            <ListItem
+                                key={index}
+                                onClick={() => navigate(`/category/${category.toLowerCase()}`)}
+                                sx={{
+                                    borderRadius: '12px',
+                                    '&:hover': {
+                                        backgroundColor: '#e0f7fa',
+                                    },
+                                    mb: 1,
+                                }}
+                            >
+                                <ListItemText
+                                    primary={category}
+                                    primaryTypographyProps={{
+                                        fontSize: '18px',
+                                        fontWeight: 500,
+                                    }}
+                                />
                             </ListItem>
                         ))}
                     </List>
                 </Box>
             </Drawer>
+
 
             <LoginUserModel isModalVisible={isLoginModalVisible} handleCancel={closeLoginModal} />
         </>
