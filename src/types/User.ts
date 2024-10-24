@@ -1,11 +1,11 @@
 import { GenderEnum } from "../enum/GenderEnum.ts";
 
 export type User = {
-    id: number,
-    username: string,
-    name: string,
-    avatar: string,
-    isAdmin: boolean
+    id?: number,
+    username?: string,
+    name?: string,
+    avatar?: string,
+    isAdmin?: boolean
 }
 
 export interface UserRequest {

@@ -33,7 +33,9 @@ const Chat: React.FC = () => {
                     color: '#A6B0B8',
                     position: 'relative',
                     p: 1.5,
-                    border: '1px solid #7d7d7d'
+                    border: '1px solid #7d7d7d',
+                    backdropFilter: 'blur(2px)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)'
                 }}
                 onClick={toggleChat}
             >

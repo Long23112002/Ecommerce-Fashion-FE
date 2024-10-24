@@ -14,14 +14,14 @@ export interface SubCategory {
 }
 
 export interface Category {
-  id: number;
-  name: string;
-  lever: number;  // Category level (e.g., main or subcategory)
-  createAt: string | number;  // ISO date string or timestamp
-  updateAt: string | number;  // ISO date string or timestamp
-  createBy: UserData;
-  updateBy: UserData | null;  // Can be null if no updates
-  deleted: boolean;
-  parentCategory: Category | null;  // Nullable, points to parent category if exists
-  subCategories: SubCategory[];  // List of subcategories under this category
+  id?: number;
+  name?: string;
+  lever?: number;  // Category level (e.g., main or subcategory)
+  createAt?: string | number;  // ISO date string or timestamp
+  updateAt?: string | number;  // ISO date string or timestamp
+  createBy?: UserData;
+  updateBy?: UserData | null;  // Can be null if no updates
+  deleted?: boolean;
+  parentCategory?: Category | null;  // Nullable, points to parent category if exists
+  subCategories?: SubCategory[];  // List of subcategories under this category
 }
