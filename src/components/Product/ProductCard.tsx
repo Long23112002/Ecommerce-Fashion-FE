@@ -1,7 +1,7 @@
 import { Card, CardContent, CardMedia, IconButton, Typography } from '@mui/material'
 import React from 'react'
 import Product from '../../types/Product'
-import { useNavigate } from 'react-router-dom'
+import useNavigate from '../../hook/useNavigateCustom';
 
 interface IProps {
     product: Product,
