@@ -32,13 +32,13 @@ const PromotionDetailModal: React.FC<{ promotion: Promotion | null; isOpen: bool
         >
             <Form 
             layout="vertical" 
-            initialValues={promotion} 
+            initialValues={promotion}
             disabled
             >
                 <Form.Item 
                 name="typePromotionEnum" 
                 label="Kiểu khuyến mãi">
-                    <Select placeholder="Chọn kiểu khuyến mãi" value={promotion?.typePromotionEnum}>
+                    <Select placeholder="Chọn kiểu khuyến mãi" value={promotion?.typePromotionEnum} readOnly>
                         {Object.entries(TypePromotionEnum).map(([key, value]) => (
                             <Select.Option key={value} value={value}>
                                 {TypePromotionLabel[value]}
