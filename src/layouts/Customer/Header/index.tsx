@@ -102,10 +102,14 @@ const UserHeader: React.FC = () => {
                         height: headerHeight
                     }}
                     >
-                        <Box sx={{ cursor: 'pointer' }}
+                        <Box sx={{
+                            cursor: 'pointer',
+                            overflow: "hidden",
+                            borderRadius: 2,
+                        }}
                             onClick={() => navigate('/')}
                         >
-                            <img src="/logo.png" alt="Logo" height="40" />
+                            <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
                         </Box>
 
                         <Box sx={{

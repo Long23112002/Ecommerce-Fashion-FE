@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Button,
-  Container,
-  useMediaQuery,
-} from '@mui/material';
-import ProductCard from '../../components/Product/ProductCard';
+import HeroBanner from '../../components/HeroBanner';
+import ProductShowcase from '../../components/Product/ProductShowcase';
 import Product from '../../types/Product';
+import { Box } from '@mui/material';
 
 const Home: React.FC = () => {
-  const isMobile = useMediaQuery('(max-width:600px)');
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -41,93 +34,22 @@ const Home: React.FC = () => {
 
   return (
     <>
+      <HeroBanner />
 
       <Box
-        sx={{
-          backgroundImage: `url(${"https://t4.ftcdn.net/jpg/04/15/97/33/360_F_415973312_5yg3MrkRdi2SMHyVKbB4h7GgE5HrgUlb.jpg"})`,
-          backgroundSize: 'cover',
-          height: '60vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          textAlign: 'center',
-        }}
+        sx={{ my: 4 }}
       >
-        <Container maxWidth="lg">
-          <Typography sx={{ fontWeight: 700, fontSize: isMobile ? '30px' : '45px' }}>
-            Ecommerce Fashion
-          </Typography>
-          <Typography sx={{ mb: 2, fontSize: isMobile ? '20px' : '30px' }}>
-            Thời trang Việt cho người Việt
-          </Typography>
-        </Container>
+        <ProductShowcase
+          title='Sản phẩm mới'
+          products={products}
+        />
+
+        <ProductShowcase
+          title='Sản phẩm hot'
+          products={products}
+        />
+
       </Box>
-
-      <Container
-        maxWidth="xl"
-        sx={{
-          py: 4,
-          px: 2,
-        }}>
-        <Typography variant="h4" align="center" gutterBottom sx={{
-          fontWeight: 700,
-          color: '#333',
-          mb: 4,
-        }}>
-          Sản Phẩm Mới
-        </Typography>
-
-        <Grid container spacing={2} justifyContent="center">
-          {products.map((product) => (
-            <Grid item key={product.id} xs={6} sm={4} md={3}>
-              <ProductCard
-                product={product}
-                isMobile={isMobile}
-              />
-            </Grid>
-          ))}
-        </Grid>
-
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button variant="outlined" size="large">
-            Xem Tất Cả Sản Phẩm
-          </Button>
-        </Box>
-      </Container>
-
-
-      <Container
-        maxWidth="xl"
-        sx={{
-          py: 4,
-          px: 2,
-        }}>
-        <Typography variant="h4" align="center" gutterBottom sx={{
-          fontWeight: 700,
-          color: '#333',
-          mb: 4,
-        }}>
-          Sản Phẩm Nổi Bật
-        </Typography>
-
-        <Grid container spacing={2} justifyContent="center">
-          {products.map((product) => (
-            <Grid item key={product.id} xs={6} sm={4} md={3}>
-              <ProductCard
-                product={product}
-                isMobile={isMobile}
-              />
-            </Grid>
-          ))}
-        </Grid>
-
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button variant="outlined" size="large">
-            Xem Tất Cả Sản Phẩm
-          </Button>
-        </Box>
-      </Container>
     </>
   );
 }

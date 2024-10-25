@@ -16,7 +16,7 @@ import Login from '../pages/Admin/User/Login';
 import Home from "../pages/Customer/Home.tsx";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
-import ProductDetail from '../pages/Customer/ProductDetail.tsx';
+import ProductDetail from '../pages/Customer/product-detail/page.tsx';
 
 
 

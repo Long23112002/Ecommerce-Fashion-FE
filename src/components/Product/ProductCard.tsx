@@ -2,6 +2,7 @@ import { Card, CardContent, CardMedia, IconButton, Typography } from '@mui/mater
 import React from 'react'
 import Product from '../../types/Product'
 import useNavigate from '../../hook/useNavigateCustom';
+// import { useNavigate } from 'react-router-dom';
 
 interface IProps {
     product: Product,
@@ -13,7 +14,7 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
 
     const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();
-        // Xử lý sự kiện thêm sản phẩm vào giỏ h
+        // TODO: Xử lý sự kiện thêm sản phẩm vào giỏ hàng
     };
 
     return (
@@ -23,6 +24,7 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'all 0.3s ease-in-out',
+                borderRadius: 4,
                 '&:hover': {
                     transform: 'translateY(-5px)',
                     boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
