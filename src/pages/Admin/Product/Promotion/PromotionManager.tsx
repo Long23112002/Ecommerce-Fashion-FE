@@ -7,6 +7,7 @@ import {
   Popconfirm,
   Select,
   Table,
+  Tag,
   Tooltip,
 } from "antd";
 import { Container } from "@mui/material";
@@ -234,7 +235,29 @@ const ManagerPromotion = () => {
       title: "Trạng thái",
       dataIndex: "statusPromotionEnum",
       key: "statusPromotionEnum",
-      render: (status: StatusPromotionEnum) => StatusPromotionLable[status],
+      render: (status: StatusPromotionEnum) => {
+        let color = 'default'; // Mặc định
+  
+        switch (status) {
+          case StatusPromotionEnum.ACTIVE:
+            color = 'green';
+            break;
+          case StatusPromotionEnum.ENDED:
+            color = 'red';
+            break;
+          case StatusPromotionEnum.UPCOMING:
+            color = 'gold';
+            break;
+          default:
+            color = 'grey';
+        }
+  
+        return (
+          <Tag color={color}>
+            {StatusPromotionLable[status]}
+          </Tag>
+        );
+      },
     },
     {
       title: "Thao tác",
