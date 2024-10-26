@@ -1,82 +1,52 @@
-import {
-    Avatar,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Rating,
-    TextField,
-    Typography
-} from '@mui/material'
-import React from 'react'
-import Product from '../../types/Product'
+import { Box, Button, Rating, TextField, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import Product from '../../types/Product';
 
 interface IProps {
     product: Product
 }
 
 const ProductComment: React.FC<IProps> = ({ product }) => {
+
+    const [comment, setComment] = useState<string>('');
+    const [rating, setRating] = useState<number | null>(null);
+
+    const handleChangeComment = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setComment(e.target.value)
+    }
+
+    const handleChangeRating = (_: any, value: number | null) => {
+        setRating(value)
+    }
+
     return (
-        <>
-            <Box
-                className='shadow-section'
-                sx={{
-                    backgroundColor: 'white',
-                    p: {
-                        xs: 2,
-                        md: 5
-                    },
-                    my: 2,
-                    mt: 4,
-                    borderRadius: {
-                        xs: 4,
-                        md: 7
-                    }
-                }}
-            >
-                <Box>
-                    <Typography variant="h4" gutterBottom>
-                        Bình luận
-                    </Typography>
+        <Box sx={{ mb: 4 }}>
+            <Typography variant="h5">
+                Bình luận
+            </Typography>
 
-                    <TextField
-                        fullWidth
-                        multiline
-                        minRows={3}
-                        placeholder="Viết bình luận của bạn..."
-                        variant="outlined"
-                        margin="normal"
-                        sx={{ backgroundColor: 'white' }}
-                    />
-                    <Button variant="contained" color="primary" className="mt-2">
-                        Gửi bình luận
-                    </Button>
-                </Box>
-
-                <Box sx={{ mt: 4 }}>
-                    <Typography variant="h5">Đánh giá từ khách hàng</Typography>
-                    {product.reviews?.map((review) => (
-                        <Card key={review.id} sx={{ mt: 2 }}>
-                            <CardContent>
-                                <Box display='flex'
-                                    alignItems='center'
-                                    gap={1}
-                                >
-                                    <Avatar src='' />
-                                    <Typography variant="body1">{review.user?.name}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', mt: 1 }}>
-                                    <Rating value={review.rating} precision={0.5} readOnly />
-                                </Box>
-                                <Typography variant="body2" sx={{ mt: 1 }}>
-                                    {review.comment}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </Box>
+            <TextField
+                fullWidth
+                multiline
+                minRows={3}
+                placeholder="Viết bình luận của bạn..."
+                value={comment}
+                variant="outlined"
+                margin="normal"
+                sx={{ backgroundColor: 'white' }}
+                onChange={handleChangeComment}
+            />
+            <Box>
+                <Rating
+                    value={rating}
+                    size='large'
+                    onChange={handleChangeRating}
+                />
             </Box>
-        </>
+            <Button variant="contained" color="primary" className="mt-2">
+                Gửi bình luận
+            </Button>
+        </Box>
     )
 }
 

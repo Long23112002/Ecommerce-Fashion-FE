@@ -171,9 +171,9 @@ const UserHeader: React.FC = () => {
                             <Notification invisible={false} />
 
                             {isLogin ? (
-                                <Dropdown menu={{ items }} trigger={['hover', 'click']}>
+                                <Dropdown menu={{ items }} trigger={['hover', 'click']} >
                                     <Box
-                                        // className="btn-custom"
+                                        className="btn-custom"
                                         onClick={(e) => e.preventDefault()}
                                         sx={{
                                             cursor: 'pointer',

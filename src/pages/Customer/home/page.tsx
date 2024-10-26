@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import HeroBanner from '../../components/HeroBanner';
-import ProductShowcase from '../../components/Product/ProductShowcase';
-import Product from '../../types/Product';
+import HeroBanner from '../../../components/HeroBanner';
+import ProductShowcase from '../../../components/Product/ProductShowcase';
+import Product from '../../../types/Product';
 import { Box } from '@mui/material';
 
 const Home: React.FC = () => {

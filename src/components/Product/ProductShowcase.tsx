@@ -7,7 +7,6 @@ import {
 import React from 'react';
 import Link from '../Link';
 import ProductCard from '../../components/Product/ProductCard';
-import { useIsMobile } from '../../hook/useWindowSize';
 import Product from '../../types/Product';
 
 interface IProps {
@@ -16,8 +15,6 @@ interface IProps {
 }
 
 const ProductShowcase: React.FC<IProps> = ({ title, products }) => {
-
-    const isMobile = useIsMobile();
 
     return (
         <Container
@@ -64,10 +61,7 @@ const ProductShowcase: React.FC<IProps> = ({ title, products }) => {
                 <Grid container spacing={2} justifyContent="center">
                     {products.map((product) => (
                         <Grid item key={product.id} xs={6} sm={4} md={3}>
-                            <ProductCard
-                                product={product}
-                                isMobile={isMobile}
-                            />
+                            <ProductCard product={product} />
                         </Grid>
                     ))}
                 </Grid>

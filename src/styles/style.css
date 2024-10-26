@@ -18,11 +18,11 @@
 }
 
 .btn-custom {
-    background: #f2f8ff;
+    /* background: #f2f8ff; */
     border-radius: 12px;
     height: 59px;
-    min-width: 256px;
-    padding: 0 16px;
+    /* min-width: 256px; */
+    /* padding: 0 16px; */
     width: auto
 }
 
