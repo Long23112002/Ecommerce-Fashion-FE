@@ -1,35 +1,59 @@
-import { Stack, Typography } from '@mui/material'
-import React from 'react'
+import { Stack, SxProps, Typography } from '@mui/material'
+import React, { CSSProperties } from 'react'
 import { MenuItem as Item } from 'react-pro-sidebar'
 import { useNavigate } from 'react-router-dom'
 
 interface IProps {
     icon?: React.ReactNode,
-    to: string,
+    to?: string,
     collapse?: boolean,
-    children: string,
+    children: React.ReactNode,
+    onClick?: () => any,
+    styleItem?: CSSProperties,
+    sxTypo?: SxProps,
+    noTypo?: boolean
 }
 
-const MenuItem: React.FC<IProps> = ({ icon, to, collapse, children }) => {
+const MenuItem: React.FC<IProps> = ({ icon, to, collapse, children, onClick, styleItem, sxTypo, noTypo }) => {
 
     const navigate = useNavigate()
 
+    const navigateTo = () => {
+        if (to) {
+            navigate(to)
+        }
+        if (onClick) {
+            onClick()
+        }
+    }
+
     return (
         <Item
-            onClick={() => navigate(to)}
-            style={{ paddingLeft: collapse === undefined ? 25 : collapse ? 25 : 65 }}
+            onClick={navigateTo}
+            style={{
+                paddingLeft: collapse === undefined ? 25 : collapse ? 25 : 65,
+                ...styleItem
+            }}
         >
             <Stack
                 direction='row'
             >
                 {icon}
-                <Typography
-                    sx={{
-                        ml: icon ? 1.8 : 0
-                    }}
-                >
-                    {children}
-                </Typography>
+                {
+                    noTypo
+                        ?
+                        children
+                        :
+                        <Typography
+                            sx={{
+                                ml: icon ? 1.8 : 0,
+                                ...sxTypo
+                            }}
+                        >
+                            {children}
+                        </Typography>
+                }
+
             </Stack>
         </Item>
     )

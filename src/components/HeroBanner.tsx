@@ -1,6 +1,6 @@
 import { Box, Container, Typography } from '@mui/material'
 import React from 'react'
-import { useIsMobile } from '../hook/useWindowSize';
+import { useIsMobile } from '../hook/useSize';
 
 interface IProps {
     image?: string

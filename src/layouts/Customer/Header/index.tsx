@@ -91,6 +91,7 @@ const UserHeader: React.FC = () => {
     return (
         <>
             <AppBar position="sticky"
+                id='user-header'
                 sx={{
                     top: -1,
                     backgroundColor: 'white',

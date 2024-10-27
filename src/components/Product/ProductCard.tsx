@@ -1,7 +1,7 @@
 import { Card, CardContent, CardMedia, Typography } from '@mui/material';
 import React from 'react';
 import useNavigate from '../../hook/useNavigateCustom';
-import { useIsMobile } from '../../hook/useWindowSize';
+import { useIsMobile } from '../../hook/useSize';
 import Product from '../../types/Product';
 // import { useNavigate } from 'react-router-dom';
 

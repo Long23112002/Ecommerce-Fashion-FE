@@ -17,6 +17,7 @@ import Home from "../pages/Customer/home/page.tsx";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import ProductDetail from '../pages/Customer/product-detail/page.tsx';
+import ProductFilterPage from '../pages/Customer/filter/page.tsx';
 
 
 
@@ -30,6 +31,7 @@ const AppRoutes = () => {
             <Route element={<UserLayout />}>
                 <Route path='/' element={<Home />} />
                 <Route path='/product/:id' element={<ProductDetail />} />
+                <Route path='/filter' element={<ProductFilterPage />} />
             </Route>
 
             <Route element={<AdminLayout />}>
