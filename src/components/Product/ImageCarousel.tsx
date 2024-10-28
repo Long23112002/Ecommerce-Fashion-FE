@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Product from '../../types/Product'
 
 interface IProps {
     images: string[]

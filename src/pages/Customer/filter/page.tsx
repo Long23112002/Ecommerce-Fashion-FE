@@ -1,6 +1,6 @@
 import { Box, Container, Grid, Typography } from '@mui/material'
 import React, { useState } from 'react'
-import ProductCard from '../../../components/Product/ProductCard'
+import ProductCard from '../../../components/product/ProductCard'
 import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'

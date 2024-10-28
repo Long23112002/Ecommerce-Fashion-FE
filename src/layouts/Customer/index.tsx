@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import UserHeader from './Header';
 import { Box } from '@mui/material';
-import Chat from '../../components/Chat';
+import Chat from '../../components/chat';
 
 const UserLayout: React.FC = () => {
 

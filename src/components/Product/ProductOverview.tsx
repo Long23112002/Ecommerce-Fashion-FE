@@ -10,9 +10,12 @@ import {
     TextField,
     Typography
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImageCarousel from './ImageCarousel'
 import Product from '../../types/Product'
+import ProductDetail from '../../types/ProductDetail'
+import { Color } from '../../pages/Admin/Attributes/color/color'
+import { Size } from '../../pages/Admin/Attributes/size/size'
 
 interface IProps {
     product: Product
@@ -20,9 +23,32 @@ interface IProps {
 
 const ProductOverview: React.FC<IProps> = ({ product }) => {
 
-    const [selectedColor, setSelectedColor] = useState<string>(product.colors?.[0]?.name ?? "")
-    const [selectedSize, setSelectedSize] = useState(product.sizes?.[0].name + "")
     const [quantity, setQuantity] = useState(1)
+    const [productDetail, setProductDetail] = useState<ProductDetail | undefined>(product.productDetails?.[0])
+    const [colors, setColors] = useState<Color[]>([])
+    const [sizes, setSizes] = useState<Size[]>([])
+    const [selectedColor, setSelectedColor] = useState<number>(product.productDetails?.[0].color?.id || -1)
+    const [selectedSize, setSelectedSize] = useState<number>(product.productDetails?.[0].size?.id || -1)
+
+    useEffect(() => {
+        const arrayColor: Color[] = product.productDetails?.reduce((acc: Color[], pd) => {
+            if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
+                acc.push(pd.color);
+            }
+            return acc;
+        }, []) || [];
+
+        setColors(arrayColor);
+
+        const arraySize: Size[] = product.productDetails?.reduce((acc: Size[], pd) => {
+            if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
+                acc.push(pd.size);
+            }
+            return acc;
+        }, []) || [];
+
+        setSizes(arraySize);
+    }, [product.productDetails]);
 
     return (
         <Box
@@ -43,7 +69,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={product.images || []}
+                        images={productDetail?.images || []}
                     />
                 </Grid>
 
@@ -80,13 +106,13 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
 
                     <Box sx={{ mt: 3 }}>
                         <Typography variant="body2">Màu sắc</Typography>
-                        <RadioGroup row value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
-                            {product.colors?.map((color) => (
+                        <RadioGroup row value={selectedColor} onChange={(e) => setSelectedColor(Number(e.target.value))}>
+                            {colors.map((c) => (
                                 <FormControlLabel
-                                    key={color.name}
-                                    value={color.name}
+                                    key={c.id}
+                                    value={c.id}
                                     control={<Radio />}
-                                    label={color.name}
+                                    label={c.name}
                                     sx={{
                                         mr: 4
                                     }}
@@ -99,13 +125,14 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                         <Typography variant="body2">Kích thước</Typography>
                         <RadioGroup row
                             value={selectedSize}
-                            onChange={(e) => setSelectedSize(e.target.value)}>
-                            {product.sizes?.map((size) => (
+                            onChange={(e) => setSelectedSize(Number(e.target.value))}>
+                            {sizes.map((s) => (
                                 <FormControlLabel
-                                    key={size.name}
-                                    value={size.name}
+                                    key={s.id}
+                                    value={s.id}
+                                    defaultChecked={s.id === productDetail?.size?.id}
                                     control={<Radio />}
-                                    label={size.name?.toUpperCase()}
+                                    label={s.name?.toUpperCase()}
                                     sx={{
                                         mr: 4
                                     }}
@@ -143,7 +170,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 value={quantity}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
-                                    if (value >= 1 && value <= (product.quantity ?? 0)) {
+                                    if (value >= 1 && value <= (productDetail?.quantity ?? 0)) {
                                         setQuantity(value);
                                     }
                                 }}
@@ -155,7 +182,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 }}
                                 inputProps={{
                                     min: 1,
-                                    max: product.quantity,
+                                    max: productDetail?.quantity,
                                     type: 'number',
                                     style: {
                                         padding: "9px 0 9px 20px",
@@ -165,7 +192,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
 
                             <Button
                                 variant="contained"
-                                onClick={() => setQuantity(Math.min(product.quantity ?? 0, quantity + 1))}
+                                onClick={() => setQuantity(Math.min(productDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -183,7 +210,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                         </Box>
 
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Còn {product.quantity} sản phẩm
+                            Còn {productDetail?.quantity} sản phẩm
                         </Typography>
                     </Box>
 

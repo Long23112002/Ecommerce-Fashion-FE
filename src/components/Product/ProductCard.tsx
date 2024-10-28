@@ -32,7 +32,7 @@ const ProductCard: React.FC<IProps> = ({ product }) => {
                 sx={{
                     paddingTop: '120%',
                 }}
-                image={product.images?.[0]}
+                image={product.productDetails?.[0].images?.[0]}
             />
             <CardContent
                 sx={{
