@@ -7,7 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import Product from '../../types/Product';
 import ProductCard from './ProductCard';
-import { useIsMobile } from '../../hook/useWindowSize';
+import { useIsMobile } from '../../hook/useSize';
 
 interface IProps {
     similarProduct: Product[]

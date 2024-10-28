@@ -26,7 +26,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
 
     return (
         <Box
-            className='shadow-section'
+            className='shadow-section-2'
             sx={{
                 backgroundColor: 'white',
                 p: {
