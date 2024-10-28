@@ -3,7 +3,7 @@ import { setUser } from "../redux/reducers/UserReducer";
 
 export const useUserAction = () => {
     const dispatch = useDispatch()
-    const useLogin = (userData: any) => {
+    const save = (userData: any) => {
         dispatch(setUser({
             id: Number(userData.id),
             email: userData.email,
@@ -16,5 +16,5 @@ export const useUserAction = () => {
             roles: userData.roles,
         }));
     }
-    return { useLogin }
+    return { save }
 }

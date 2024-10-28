@@ -53,7 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
             const loginResponse = await handleLogin(loginRequest);
             storeUserData(loginResponse);
             const userData = loginResponse.userResponse
-            userAction.useLogin(userData);
+            userAction.save(userData);
             toast.success("Đăng nhập thành công!");
             handleCancel();
         } catch (error) {

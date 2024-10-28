@@ -1,12 +1,12 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import NotificationIcon from '../../../components/notification'
-import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
+import { getUserData } from '../../../api/AuthApi'
 import Avatar from '../../../components/avatar'
 import AvatarDrawer from '../../../components/avatar/AvatarDrawer'
-import { getUserData } from '../../../api/AuthApi'
+import NotificationIcon from '../../../components/notification'
 import { useUserAction } from '../../../hook/useUserAction'
+import { userSelector } from '../../../redux/reducers/UserReducer'
 
 interface IProps {
     handleCollapse: () => void,
@@ -22,7 +22,7 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
 
     useEffect(() => {
         const userData = getUserData();
-        userAction.useLogin(userData)
+        userAction.save(userData)
     }, [dispatch]);
 
     return (
