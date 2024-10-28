@@ -8,7 +8,7 @@ interface IProps {
     mr?: boolean;
 }
 
-const Notification: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
+const NotificationIcon: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
 
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     const [totalNotifications, setTotalNotifications] = useState<number>(0)
@@ -26,12 +26,12 @@ const Notification: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
             sx={{
                 display: invisible ? 'flex' : 'none',
                 ml: ml ? {
-                    xs: 0.5,
-                    md: 2
+                    xs: 2,
+                    md: 3
                 } : 0,
                 mr: mr ? {
-                    xs: 0.5,
-                    md: 2
+                    xs: 2,
+                    md: 3
                 } : 0
             }}
         >
@@ -75,4 +75,4 @@ const Notification: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
     )
 }
 
-export default Notification
+export default NotificationIcon

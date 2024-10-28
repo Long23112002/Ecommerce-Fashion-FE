@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import Link from '../Link';
-import ProductCard from '../../components/Product/ProductCard';
+import ProductCard from './ProductCard';
 import Product from '../../types/Product';
 
 interface IProps {

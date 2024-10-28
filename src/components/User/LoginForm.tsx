@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
-import { Button, Input } from 'antd';
 import { FacebookFilled, GoogleOutlined } from '@ant-design/icons';
-import { LoginRequest } from "../../types/login/request/loginRequest.ts";
-import { handleLogin, storeUserData } from "../../api/AuthApi.ts";
+import { Button, Input } from 'antd';
+import React, { useState } from 'react';
 import { toast } from "react-toastify";
-import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import { handleLogin, storeUserData } from "../../api/AuthApi.ts";
 import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../api/Oauth2.ts";
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../redux/reducers/UserReducer.ts';
+import { useUserAction } from '../../hook/useUserAction.ts';
+import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import { LoginRequest } from "../../types/login/request/loginRequest.ts";
 
 interface LoginFormProps {
     handleCancel: () => void;
@@ -16,7 +15,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, onRegister }) => {
-    const dispatch = useDispatch();
+    const userAction = useUserAction()
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -54,13 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
             const loginResponse = await handleLogin(loginRequest);
             storeUserData(loginResponse);
             const userData = loginResponse.userResponse
-            dispatch(setUser({
-                id: Number(userData.id),
-                fullName: userData.fullName,
-                email: userData.email,
-                avatar: userData.avatar,
-                isAdmin: userData.isAdmin
-            }));
+            userAction.useLogin(userData);
             toast.success("Đăng nhập thành công!");
             handleCancel();
         } catch (error) {

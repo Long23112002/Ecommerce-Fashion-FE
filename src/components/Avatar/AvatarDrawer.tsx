@@ -3,9 +3,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigate } from "react-router-dom";
-import { getUserData, handleLogout } from "../../api/AuthApi.ts";
-import { clearUser, setUser, userSelector } from "../../redux/reducers/UserReducer.ts";
-import Button from "../Button.tsx";
+import { getUserData, handleLogout } from "../../api/AuthApi.js";
+import { clearUser, setUser, userSelector } from "../../redux/reducers/UserReducer.js";
+import Button from "../Button.js";
 
 interface IProps {
     open?: boolean;

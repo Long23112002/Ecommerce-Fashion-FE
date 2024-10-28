@@ -1,9 +1,8 @@
-import {PaginationParam} from "./PermissionApi.ts";
-import {BASE_API} from "../constants/BaseApi.ts";
+import { BASE_API } from "../constants/BaseApi.ts";
+import { GenderEnum } from "../enum/GenderEnum.ts";
+import { ResponseData } from "../types/responseApi.ts";
+import { UserRequest } from "../types/User.ts";
 import axiosInstance from "./AxiosInstance.ts";
-import {ResponseData} from "../types/responseApi.ts";
-import {UserRequest} from "../types/User.ts";
-import {GenderEnum} from "../enum/GenderEnum.ts";
 
 export interface UserAssignRole {
     email: string;

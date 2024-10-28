@@ -1,11 +1,11 @@
 import { Container } from '@mui/material'
 import React, { useState } from 'react'
-import ProductOverview from '../../../components/Product/ProductOverview'
-import ProductReviews from '../../../components/Product/ProductReviews'
-import SimilarProducts from '../../../components/Product/SimilarProducts'
+import ProductOverview from '../../../components/product/ProductOverview'
+import ProductReviews from '../../../components/product/ProductReviews'
+import SimilarProducts from '../../../components/product/SimilarProducts'
 import Product from '../../../types/Product'
 
-const ProductDetail: React.FC = () => {
+const ProductDetailPage: React.FC = () => {
 
     // fake data sản phẩm hiện tại
     const [product, setProduct] = useState<Product>({
@@ -127,4 +127,4 @@ const ProductDetail: React.FC = () => {
     )
 }
 
-export default ProductDetail
+export default ProductDetailPage

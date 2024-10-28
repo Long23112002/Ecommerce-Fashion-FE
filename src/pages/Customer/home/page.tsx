@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import HeroBanner from '../../../components/HeroBanner';
-import ProductShowcase from '../../../components/Product/ProductShowcase';
+import ProductShowcase from '../../../components/product/ProductShowcase';
 import Product from '../../../types/Product';
 import { Box } from '@mui/material';
 
-const Home: React.FC = () => {
+const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -54,4 +54,4 @@ const Home: React.FC = () => {
   );
 }
 
-export default Home;
+export default HomePage;
