@@ -7,14 +7,14 @@ type ProductDetail = {
     id?: number,
     price?: number,
     quantity?: number,
+    images?: string[],
     product?: Product,
-    sizes?: Size[],
-    colors?: Color[],
+    size?: Size,
+    color?: Color,
     createAt?: Date,
     updateAt?: Date | null,
     createBy?: User,
-    updateBy?: User,
-    deleted?: boolean
+    updateBy?: User
 }
 
 export default ProductDetail

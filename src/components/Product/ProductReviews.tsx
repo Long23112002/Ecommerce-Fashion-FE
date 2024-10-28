@@ -60,7 +60,7 @@ const ProductReviews: React.FC<IProps> = ({ product }) => {
                                 gap={1}
                             >
                                 <Avatar src='' />
-                                <Typography variant="body1">{review.user?.name}</Typography>
+                                <Typography variant="body1">{review.user?.fullName}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', mt: 1 }}>
                                 <Rating value={review.rating} precision={0.5} readOnly />
