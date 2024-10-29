@@ -41,6 +41,7 @@ import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import moment from "moment";
 import Cookies from "js-cookie";
 import dayjs from 'dayjs';
+import {useNavigate} from "react-router-dom";
 
 const ManagerPromotion = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -66,6 +67,12 @@ const ManagerPromotion = () => {
   const [form] = Form.useForm();
   const [editingPromotion, setEditingPromotion] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+const applyPromotion = (promotion: Promotion) => {
+  console.log(promotion);
+  navigate(`/admin/promotion/scheduled/${promotion.id}`, {state:promotion});
+};
 
   const mode = editingPromotion ? "update" : "add";
 
@@ -236,7 +243,7 @@ const ManagerPromotion = () => {
       dataIndex: "statusPromotionEnum",
       key: "statusPromotionEnum",
       render: (status: StatusPromotionEnum) => {
-        let color = 'default'; // Mặc định
+        let color = 'default';
   
         switch (status) {
           case StatusPromotionEnum.ACTIVE:
@@ -264,6 +271,15 @@ const ManagerPromotion = () => {
       key: "actions",
       render: (_: any, record: any) => (
         <div>
+           <Tooltip title="Lên lịch cho sản phẩm">
+            <Button
+              className="btn-outline-primary"
+              onClick={() => applyPromotion(record)}
+              style={{ marginRight: 8 }}
+            >
+              <i className="fa-solid fa-clipboard-check"></i>
+            </Button>
+          </Tooltip>
           <Tooltip title="Chi tiết">
             <Button
               className="btn-outline-info"

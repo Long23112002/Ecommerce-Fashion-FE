@@ -6,8 +6,10 @@ export interface Color {
     updatedAt?: Date;
     createBy?:number;
     updateBy?: number;
+    code: string;
 }
 
 export interface ColorRequest {
     name: string;
+    code: string;
 }

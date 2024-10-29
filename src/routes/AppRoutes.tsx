@@ -17,6 +17,7 @@ import Home from "../pages/Customer/Home.tsx";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import ProductDetail from '../pages/Customer/ProductDetail.tsx';
+import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 
 
 
@@ -44,6 +45,7 @@ const AppRoutes = () => {
                 <Route path="/admin/user" element={<ManagerUser />} />
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
+                <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />}/>
             </Route>
 
             {/* Route xử lý lỗi */}
