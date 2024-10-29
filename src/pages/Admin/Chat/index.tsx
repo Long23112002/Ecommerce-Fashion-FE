@@ -1,7 +1,7 @@
 import { Box, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import ChatRoomList from '../../../components/chat/ChatRoomList'
 import ChatArea from '../../../components/Chat/ChatArea'
-import ChatRoomList from '../../../components/Chat/ChatRoomList'
 
 const ChatPage: React.FC = () => {
 
@@ -11,10 +11,10 @@ const ChatPage: React.FC = () => {
         <Box sx={{ display: 'flex', py: 0, flexDirection: 'column' }}>
             <Grid container justifyContent='space-between'>
                 <Grid item xs={2.8}
-                sx={{
-                    borderRight: '1px solid #C6C7C8',
-                    maxWidth: '73px'
-                }}>
+                    sx={{
+                        borderRight: '1px solid #C6C7C8',
+                        maxWidth: '73px'
+                    }}>
                     <ChatRoomList
                         setIdRoom={setIdRoom}
                     />

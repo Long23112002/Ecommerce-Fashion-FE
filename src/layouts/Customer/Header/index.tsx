@@ -1,9 +1,10 @@
 import { UserOutlined } from '@ant-design/icons';
-import { MenuOutlined, SearchOutlined } from '@mui/icons-material';
+import { MenuOutlined } from '@mui/icons-material';
 import {
     AppBar, Box,
     Container,
-    Drawer, IconButton, InputBase, List, ListItem, ListItemText,
+    Drawer, IconButton,
+    List, ListItem, ListItemText,
     Toolbar, Typography
 } from '@mui/material';
 import { Button, Dropdown, MenuProps } from "antd";
@@ -11,9 +12,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getUserData } from '../../../api/AuthApi';
-import Avatar from '../../../components/Avatar';
-import CartIcon from '../../../components/Cart/CartIcon';
-import Notification from '../../../components/Notification';
+import Avatar from '../../../components/avatar';
+import CartIcon from '../../../components/cart/CartIcon';
+import Notification from '../../../components/notification';
+import SearchInput from '../../../components/SearchInput';
 import { LoginUserModel } from '../../../components/User/LoginModelUser';
 import { setUser, userSelector } from '../../../redux/reducers/UserReducer';
 import '../../../styles/style.css';
@@ -89,6 +91,7 @@ const UserHeader: React.FC = () => {
     return (
         <>
             <AppBar position="sticky"
+                id='user-header'
                 sx={{
                     top: -1,
                     backgroundColor: 'white',
@@ -102,10 +105,14 @@ const UserHeader: React.FC = () => {
                         height: headerHeight
                     }}
                     >
-                        <Box sx={{ cursor: 'pointer' }}
+                        <Box sx={{
+                            cursor: 'pointer',
+                            overflow: "hidden",
+                            borderRadius: 2,
+                        }}
                             onClick={() => navigate('/')}
                         >
-                            <img src="/logo.png" alt="Logo" height="40" />
+                            <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
                         </Box>
 
                         <Box sx={{
@@ -140,36 +147,21 @@ const UserHeader: React.FC = () => {
                             gap: 2
                         }}
                         >
-                            <Box
+                            <SearchInput
+                                height={38}
                                 sx={{
-                                    border: '1px solid #9b9b9b',
-                                    backgroundColor: '#fafafa',
-                                    borderRadius: '20px',
-                                    alignItems: 'center',
-                                    padding: '0 0 0 8px',
-                                    display: { xs: 'none', lg: 'flex' },
-                                    height: '40px',
+                                    display: { xs: 'none', lg: 'flex' }
                                 }}
-                            >
-                                <InputBase
-                                    placeholder="Bạn tìm gì..."
-                                    sx={{ ml: 1, flex: 1 }}
-                                />
-                                <IconButton
-                                    sx={{
-                                        marginLeft: 1,
-                                    }}
-                                >
-                                    <SearchOutlined />
-                                </IconButton>
-                            </Box>
+                            // onChange={}
+                            // onClick={}
+                            />
                             <CartIcon />
                             <Notification invisible={false} />
 
                             {isLogin ? (
-                                <Dropdown menu={{ items }} trigger={['hover', 'click']}>
+                                <Dropdown menu={{ items }} trigger={['hover', 'click']} >
                                     <Box
-                                        // className="btn-custom"
+                                        className="btn-custom"
                                         onClick={(e) => e.preventDefault()}
                                         sx={{
                                             cursor: 'pointer',
@@ -242,31 +234,15 @@ const UserHeader: React.FC = () => {
                         pt: 4,
                     }}
                 >
-                    <Box
+                    <SearchInput
+                        // onChange={}
+                        // onClick={}
+                        height={45}
                         sx={{
-                            border: '1px solid #e0e0e0',
-                            backgroundColor: '#fff',
-                            borderRadius: '25px',
                             display: 'flex',
-                            alignItems: 'center',
-                            padding: '5px 0 5px 12px',
-                            height: '45px',
                             mb: 3,
                         }}
-                    >
-                        <InputBase
-                            placeholder="Bạn tìm gì..."
-                            sx={{ ml: 1, flex: 1, fontSize: '16px' }}
-                        />
-                        <IconButton
-                            sx={{
-                                p: 1,
-                                color: '#616161',
-                            }}
-                        >
-                            <SearchOutlined sx={{ fontSize: 28 }} />
-                        </IconButton>
-                    </Box>
+                    />
 
                     <List>
                         {categories.map((category, index) => (

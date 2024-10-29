@@ -13,11 +13,14 @@ import { ManagerRole, ManagerUser } from "../pages/Admin/User";
 import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
 import Login from '../pages/Admin/User/Login';
-import Home from "../pages/Customer/Home.tsx";
+import ProductFilterPage from '../pages/Customer/filter/page.tsx';
+import HomePage from '../pages/Customer/home/page.tsx';
+import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import ProductDetail from '../pages/Customer/ProductDetail.tsx';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
+import CartPage from '../pages/Customer/cart/page.tsx';
 
 
 
@@ -29,8 +32,10 @@ const AppRoutes = () => {
             <Route path="/authenticate-fb" element={<AuthenticateFacebook />} />
 
             <Route element={<UserLayout />}>
-                <Route path='/' element={<Home />} />
-                <Route path='/product/:id' element={<ProductDetail />} />
+                <Route path='/' element={<HomePage />} />
+                <Route path='/product/:id' element={<ProductDetailPage />} />
+                <Route path='/filter' element={<ProductFilterPage />} />
+                <Route path='/cart' element={<CartPage />} />
             </Route>
 
             <Route element={<AdminLayout />}>

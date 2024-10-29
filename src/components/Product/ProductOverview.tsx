@@ -1,10 +1,7 @@
 import { ShoppingBasket, ShoppingCart } from '@mui/icons-material'
 import {
-    Avatar,
     Box,
     Button,
-    Card,
-    CardContent,
     FormControlLabel,
     Grid,
     Radio,
@@ -13,78 +10,66 @@ import {
     TextField,
     Typography
 } from '@mui/material'
-import React, { useState } from 'react'
-import ImageCarousel from '../../components/Product/ImageCarousel'
+import React, { useEffect, useState } from 'react'
+import ImageCarousel from './ImageCarousel'
 import Product from '../../types/Product'
+import ProductDetail from '../../types/ProductDetail'
+import { Color } from '../../pages/Admin/Attributes/color/color'
+import { Size } from '../../pages/Admin/Attributes/size/size'
 
-const ProductDetail: React.FC = () => {
-    const [product, setProduct] = useState<Product>({
-        id: 1,
-        name: "Áo Thun Unisex Cotton",
-        description: "Áo thun unisex cotton cao cấp, thiết kế đơn giản nhưng tinh tế, phù hợp cho cả nam và nữ.",
-        images: [
-            "https://owen.cdn.vccloud.vn/media/catalog/product/cache/b23ce5dda22a5cf61bb112966c86a52a/_/m/_mb_tsn220964_4_.jpg",
-            "https://owen.cdn.vccloud.vn/media/catalog/product/cache/d52d7e242fac6dae82288d9a793c0676/_/m/_mb_tsn220964_2_.jpg",
-            "https://owen.cdn.vccloud.vn/media/catalog/product/cache/d52d7e242fac6dae82288d9a793c0676/_/m/_mb_tsn220964_5_.jpg"
-        ],
-        price: 299000,
-        brand: {
-            name: "FashionVN"
-        },
-        origin: {
-            name: "Việt Nam"
-        },
-        material: {
-            name: "100% Cotton"
-        },
-        category: {
-            name: "Áo thun"
-        },
-        quantity: 50,
-        colors: [
-            { name: "Đen" },
-            { name: "Đỏ" },
-            { name: "Xanh" },
-            { name: "Hồng" },
-        ],
-        sizes: [
-            { name: "S" },
-            { name: "M" },
-            { name: "L" },
-            { name: "XL" },
-        ],
-        rating: 3,
-        reviews: [
-            {
-                id: 1,
-                user: { name: "Trần Minh Thái" },
-                rating: 5,
-                comment: "Sản phẩm tốt"
-            },
-            {
-                id: 2,
-                user: { name: "Nguyễn Hải Long" },
-                rating: 4,
-                comment: "Tôi rất tuyệt tôi ủng hộ shop"
-            },
-            {
-                id: 3,
-                user: { name: "Mai Duy Nghiệp" },
-                rating: 1,
-                comment: "Lừa đảo, ncct"
-            }
-        ]
-    })
-    const [selectedColor, setSelectedColor] = useState<string>(product.colors?.[0]?.name ?? "")
-    const [selectedSize, setSelectedSize] = useState(product.sizes?.[0].name + "")
+interface IProps {
+    product: Product
+}
+
+const ProductOverview: React.FC<IProps> = ({ product }) => {
+
     const [quantity, setQuantity] = useState(1)
+    const [productDetail, setProductDetail] = useState<ProductDetail | undefined>(product.productDetails?.[0])
+    const [colors, setColors] = useState<Color[]>([])
+    const [sizes, setSizes] = useState<Size[]>([])
+    const [selectedColor, setSelectedColor] = useState<number>(product.productDetails?.[0].color?.id || -1)
+    const [selectedSize, setSelectedSize] = useState<number>(product.productDetails?.[0].size?.id || -1)
+
+    useEffect(() => {
+        const arrayColor: Color[] = product.productDetails?.reduce((acc: Color[], pd) => {
+            if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
+                acc.push(pd.color);
+            }
+            return acc;
+        }, []) || [];
+
+        setColors(arrayColor);
+
+        const arraySize: Size[] = product.productDetails?.reduce((acc: Size[], pd) => {
+            if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
+                acc.push(pd.size);
+            }
+            return acc;
+        }, []) || [];
+
+        setSizes(arraySize);
+    }, [product.productDetails]);
 
     return (
-        <Box sx={{ maxWidth: '1200px', mx: 'auto', py: 4, px: 2 }}>
+        <Box
+            className='shadow-section-2'
+            sx={{
+                backgroundColor: 'white',
+                p: {
+                    xs: 2,
+                    md: 5
+                },
+                my: 2,
+                borderRadius: {
+                    xs: 4,
+                    md: 7
+                }
+            }}
+        >
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={product.images || []}
+                        images={productDetail?.images || []}
                     />
                 </Grid>
 
@@ -121,13 +106,13 @@ const ProductDetail: React.FC = () => {
 
                     <Box sx={{ mt: 3 }}>
                         <Typography variant="body2">Màu sắc</Typography>
-                        <RadioGroup row value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
-                            {product.colors?.map((color) => (
+                        <RadioGroup row value={selectedColor} onChange={(e) => setSelectedColor(Number(e.target.value))}>
+                            {colors.map((c) => (
                                 <FormControlLabel
-                                    key={color.name}
-                                    value={color.name}
+                                    key={c.id}
+                                    value={c.id}
                                     control={<Radio />}
-                                    label={color.name}
+                                    label={c.name}
                                     sx={{
                                         mr: 4
                                     }}
@@ -140,13 +125,14 @@ const ProductDetail: React.FC = () => {
                         <Typography variant="body2">Kích thước</Typography>
                         <RadioGroup row
                             value={selectedSize}
-                            onChange={(e) => setSelectedSize(e.target.value)}>
-                            {product.sizes?.map((size) => (
+                            onChange={(e) => setSelectedSize(Number(e.target.value))}>
+                            {sizes.map((s) => (
                                 <FormControlLabel
-                                    key={size.name}
-                                    value={size.name}
+                                    key={s.id}
+                                    value={s.id}
+                                    defaultChecked={s.id === productDetail?.size?.id}
                                     control={<Radio />}
-                                    label={size.name?.toUpperCase()}
+                                    label={s.name?.toUpperCase()}
                                     sx={{
                                         mr: 4
                                     }}
@@ -184,7 +170,7 @@ const ProductDetail: React.FC = () => {
                                 value={quantity}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
-                                    if (value >= 1 && value <= (product.quantity ?? 0)) {
+                                    if (value >= 1 && value <= (productDetail?.quantity ?? 0)) {
                                         setQuantity(value);
                                     }
                                 }}
@@ -196,7 +182,7 @@ const ProductDetail: React.FC = () => {
                                 }}
                                 inputProps={{
                                     min: 1,
-                                    max: product.quantity,
+                                    max: productDetail?.quantity,
                                     type: 'number',
                                     style: {
                                         padding: "9px 0 9px 20px",
@@ -206,7 +192,7 @@ const ProductDetail: React.FC = () => {
 
                             <Button
                                 variant="contained"
-                                onClick={() => setQuantity(Math.min(product.quantity ?? 0, quantity + 1))}
+                                onClick={() => setQuantity(Math.min(productDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -224,7 +210,7 @@ const ProductDetail: React.FC = () => {
                         </Box>
 
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Còn {product.quantity} sản phẩm
+                            Còn {productDetail?.quantity} sản phẩm
                         </Typography>
                     </Box>
 
@@ -257,53 +243,8 @@ const ProductDetail: React.FC = () => {
                     </Grid>
                 </Grid>
             </Grid>
-
-            <Box sx={{ mt: 4 }}>
-                <Typography variant="h4" gutterBottom>
-                    Bình luận
-                </Typography>
-
-                <TextField
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    placeholder="Viết bình luận của bạn..."
-                    variant="outlined"
-                    margin="normal"
-                    sx={{ backgroundColor: 'white' }}
-                />
-                <Button variant="contained" color="primary" className="mt-2">
-                    Gửi bình luận
-                </Button>
-            </Box>
-
-            <Box sx={{ mt: 4 }}>
-                <Typography variant="h5">Đánh giá từ khách hàng</Typography>
-                {product.reviews?.map((review) => (
-                    <Card key={review.id} sx={{ mt: 2 }}>
-                        <CardContent>
-                            <Box display='flex'
-                                alignItems='center'
-                                gap={1}
-                            >
-                                <Avatar src='' />
-                                <Typography variant="h6">{review.user?.name}</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', mt: 1 }}>
-                                <Rating value={review.rating} precision={0.5} readOnly />
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 1 }}>
-                                {review.comment}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                ))}
-            </Box>
-
-
-
         </Box>
     )
 }
 
-export default ProductDetail
+export default ProductOverview

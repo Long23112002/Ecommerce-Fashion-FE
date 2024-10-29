@@ -1,20 +1,17 @@
-import { Card, CardContent, CardMedia, IconButton, Typography } from '@mui/material'
-import React from 'react'
-import Product from '../../types/Product'
+import { Card, CardContent, CardMedia, Typography } from '@mui/material';
+import React from 'react';
 import useNavigate from '../../hook/useNavigateCustom';
+import { useIsMobile } from '../../hook/useSize';
+import Product from '../../types/Product';
+// import { useNavigate } from 'react-router-dom';
 
 interface IProps {
-    product: Product,
-    isMobile?: boolean
+    product: Product
 }
 
-const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
+const ProductCard: React.FC<IProps> = ({ product }) => {
     const navigate = useNavigate();
-
-    const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.stopPropagation();
-        // Xử lý sự kiện thêm sản phẩm vào giỏ h
-    };
+    const isMobile = useIsMobile();
 
     return (
         <Card
@@ -23,6 +20,7 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'all 0.3s ease-in-out',
+                borderRadius: 4,
                 '&:hover': {
                     transform: 'translateY(-5px)',
                     boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
@@ -33,26 +31,9 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
             <CardMedia
                 sx={{
                     paddingTop: '120%',
-                    position: 'relative',
                 }}
-                image={product.images?.[0]}
-            >
-                <IconButton
-                    onClick={handleAddToCart}
-                    sx={{
-                        position: 'absolute',
-                        bottom: '16px',
-                        right: '16px',
-                        backgroundColor: '#1976d2',
-                        color: '#fff',
-                        '&:hover': {
-                            backgroundColor: '#115293',
-                        },
-                    }}
-                >
-                    <i className="fa-solid fa-cart-shopping fs-5" />
-                </IconButton>
-            </CardMedia>
+                image={product.productDetails?.[0].images?.[0]}
+            />
             <CardContent
                 sx={{
                     flexGrow: 1,
@@ -77,7 +58,7 @@ const ProductCard: React.FC<IProps> = ({ product, isMobile }) => {
                     color='primary'
                     sx={{
                         fontWeight: 700,
-                        fontSize: !isMobile ? '1.1rem' : '1rem',
+                        fontSize: !isMobile ? '1.1rem' : '0.9rem',
                         pb: !isMobile ? '0.8rem' : 0
                     }}
                 >

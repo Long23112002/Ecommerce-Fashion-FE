@@ -243,7 +243,7 @@ const applyPromotion = (promotion: Promotion) => {
       dataIndex: "statusPromotionEnum",
       key: "statusPromotionEnum",
       render: (status: StatusPromotionEnum) => {
-        let color = 'default';
+        let color = 'default'; // Mặc định
   
         switch (status) {
           case StatusPromotionEnum.ACTIVE:

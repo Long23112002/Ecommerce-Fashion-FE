@@ -1,11 +1,12 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import Notification from '../../../components/Notification'
-import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
-import Avatar from '../../../components/Avatar'
-import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
 import { getUserData } from '../../../api/AuthApi'
+import Avatar from '../../../components/avatar'
+import AvatarDrawer from '../../../components/avatar/AvatarDrawer'
+import NotificationIcon from '../../../components/notification'
+import { useUserAction } from '../../../hook/useUserAction'
+import { userSelector } from '../../../redux/reducers/UserReducer'
 
 interface IProps {
     handleCollapse: () => void,
@@ -15,18 +16,13 @@ interface IProps {
 
 const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }) => {
 
+    const userAction = useUserAction()
     const user = useSelector(userSelector)
     const dispatch = useDispatch();
 
     useEffect(() => {
         const userData = getUserData();
-        dispatch(setUser({
-            id: Number(userData.id),
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            isAdmin: Boolean(userData.isAdmin)
-        }));
+        userAction.save(userData)
     }, [dispatch]);
 
     return (
@@ -54,7 +50,7 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
 
                     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
 
-                        <Notification mr />
+                        <NotificationIcon mr />
 
                         <Box component='span' display='flex' alignItems='center'>
 

@@ -4,8 +4,8 @@ import { debounce } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { createBrand, deleteBrand, fetchAllBrands, getBrandById, updateBrand } from "../../../../api/BrandApi.ts";
-import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.tsx"; // New detail modal
-import BrandModel from "../../../../components/Brand/BrandModel.tsx";
+import BrandDetailModal from "../../../../components/brand/BrandDetailModal.js"; // New detail modal
+import BrandModel from "../../../../components/brand/BrandModel.js";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
 import { Brand } from "../../../../types/brand.ts";
