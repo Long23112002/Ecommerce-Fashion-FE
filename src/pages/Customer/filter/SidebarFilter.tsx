@@ -10,6 +10,7 @@ import { Brand } from '../../../types/brand'
 import { Color } from '../../Admin/Attributes/color/color'
 import { Size } from '../../Admin/Attributes/size/size'
 import { ISelectedFilter } from './page'
+import { isDarkColor } from '../../../utils/isDarkColor'
 
 interface IProps {
     selectedFilter: ISelectedFilter,
@@ -239,7 +240,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                             borderColor: c ? c.code : 'transparent',
                             borderImage: c ? 'none' : 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet) 1',
                         },
-                        borderColor: isSelected ? c?.code : '',
                         padding: 1,
                         borderRadius: '10%',
                     }}
@@ -247,16 +247,30 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                 >
                     <Box
                         sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                             width: '60%',
                             aspectRatio: '1/1',
                             maxWidth: 35,
                             minWidth: 20,
+                            border: '1px solid #c8c8c8',
                             backgroundColor: c?.code,
-                            backgroundImage: c ? '' : 'linear-gradient(135deg, red 10%,orange,yellow,green,blue,indigo,violet)',
+                            backgroundImage: c
+                                ? ''
+                                : 'linear-gradient(135deg, red 10%,orange,yellow,green,blue,indigo,violet)',
                             borderRadius: '50%',
-                            marginBottom: 1
+                            marginBottom: 1,
                         }}
-                    />
+                    >
+                        {isSelected &&
+                            <i
+                                className="fa-solid fa-check"
+                                style={{ color: isDarkColor(c?.code + '') ? 'white' : 'black' }}
+                            />
+                        }
+                    </Box>
+
                     <Typography variant='caption' align="center">{c?.name || 'tất cả'}</Typography>
                 </Box>
             </Grid >
