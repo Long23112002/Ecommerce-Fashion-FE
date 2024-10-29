@@ -18,8 +18,8 @@ const CartPage = () => {
             price: 299000,
             product: {
                 name: 'Áo Phông Nam Clean Việt Nam',
-                images: ['https://m.yodycdn.com/fit-in/filters:format(webp)/products/ao-thun-nam-clean-yody-tsm7137-ghi-1.jpg'],
             },
+            images: ['https://m.yodycdn.com/fit-in/filters:format(webp)/products/ao-thun-nam-clean-yody-tsm7137-ghi-1.jpg'],
             size: {
                 name: 'XL'
             },
@@ -33,8 +33,8 @@ const CartPage = () => {
             price: 150000,
             product: {
                 name: 'Quần Jean Nữ Basic',
-                images: ['https://salt.tikicdn.com/cache/280x280/ts/product/41/63/3c/45fc1889b34d853a9bfbcef1dc705a28.jpg.webp'],
             },
+            images: ['https://salt.tikicdn.com/cache/280x280/ts/product/41/63/3c/45fc1889b34d853a9bfbcef1dc705a28.jpg.webp'],
             size: {
                 name: 'M'
             },
@@ -48,8 +48,8 @@ const CartPage = () => {
             price: 450000,
             product: {
                 name: 'Áo khoác nam chống nắng gió thu đông Doka',
-                images: ['https://salt.tikicdn.com/cache/750x750/ts/product/67/c4/ef/ac34217d8d1f56c87118f586b87fee7a.jpg.webp'],
             },
+            images: ['https://salt.tikicdn.com/cache/750x750/ts/product/67/c4/ef/ac34217d8d1f56c87118f586b87fee7a.jpg.webp'],
             size: {
                 name: '42'
             },
@@ -76,20 +76,24 @@ const CartPage = () => {
         <Box sx={{ maxWidth: 1200, margin: 'auto', padding: 2 }}>
             <Grid container spacing={3}>
                 <Grid item xs={12} md={8}>
-                    <Box sx={{ border: '1px solid #ccc', borderRadius: 2, padding: 2 }}>
+                    <Box className='shadow-section' sx={{
+                        backgroundColor: 'white',
+                        borderRadius: 5,
+                        padding: 2
+                    }}>
                         <Typography variant="h5" gutterBottom>
                             Giỏ hàng
                         </Typography>
                         {productDetails.map((pd) => (
                             <Box key={pd.id} sx={{ display: 'flex', my: 2, borderBottom: '1px solid #ccc', paddingBottom: 1 }}>
-                                <img src={pd.product?.images?.[0]} alt={pd.product?.name} style={{ width: 100, height: 100, objectFit: 'cover' }} />
+                                <img src={pd.images?.[0]} alt={pd.product?.name} style={{ width: 100, height: 100, objectFit: 'cover' }} />
                                 <Box sx={{ ml: 2, flexGrow: 1 }}>
                                     <Typography variant="subtitle1">{pd.product?.name}</Typography>
                                     <Typography variant="body2" color="text.secondary">
                                         {(pd.price || 0).toLocaleString('vi-VN')} ₫
                                     </Typography>
-                                    <Typography variant="body2" >{pd.size?.name}</Typography>
-                                    <Typography variant="body2" >{pd.color?.name}</Typography>
+                                    <Typography variant="body2" color="text.secondary" >{pd.size?.name}</Typography>
+                                    <Typography variant="body2" color="text.secondary" >{pd.color?.name}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <IconButton onClick={() => handleQuantityChange(pd.id || -1, -1)}>
@@ -105,7 +109,7 @@ const CartPage = () => {
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Box sx={{ border: '1px solid #ccc', borderRadius: 2, padding: 2 }}>
+                    <Box className='shadow-section' sx={{ backgroundColor: 'white', borderRadius: 5, padding: 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Chi tiết đơn hàng
                         </Typography>

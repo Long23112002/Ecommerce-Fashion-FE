@@ -2,7 +2,7 @@ import { Avatar, Box, MenuItem, Stack, Typography } from '@mui/material'
 import { Parser } from 'html-to-react'
 import React, { useState } from 'react'
 import Notification from '../../types/Notification'
-import { formatDateTime } from '../../utils/timeUtils'
+import { formatDateTime } from '../../utils/formatDateTime'
 import MenuCustom from '../MenuCustom'
 
 interface IProps {
