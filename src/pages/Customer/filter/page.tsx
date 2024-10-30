@@ -30,43 +30,71 @@ const FilterPage: React.FC = () => {
             id: 1,
             name: 'Áo phao',
             price: 3000000,
-            images: ['https://ae01.alicdn.com/kf/Sb394741e22f04f97a71e7e8e4c293c6aM/2023-Neoprene-Life-Jacket-Portable-Fashion-Adult-Children-s-Life-Jacket-Swimming-Water-Sports-Fishing-Kayak.jpg'],
+            productDetails: [
+                {
+                    images: ['https://ae01.alicdn.com/kf/Sb394741e22f04f97a71e7e8e4c293c6aM/2023-Neoprene-Life-Jacket-Portable-Fashion-Adult-Children-s-Life-Jacket-Swimming-Water-Sports-Fishing-Kayak.jpg'],
+                }
+            ]
         },
         {
             id: 2,
             name: 'Quần sịp',
             price: 500000,
-            images: ['https://ae01.alicdn.com/kf/S80c1d74fa70b4aa78eb168d028970c75q/Fashion-Salad-Cat-Meme-Boxers-Shorts-Panties-Men-s-Underpants-Comfortable-Briefs-Underwear.jpg'],
+            productDetails: [
+                {
+                    images: ['https://ae01.alicdn.com/kf/S80c1d74fa70b4aa78eb168d028970c75q/Fashion-Salad-Cat-Meme-Boxers-Shorts-Panties-Men-s-Underpants-Comfortable-Briefs-Underwear.jpg'],
+                }
+            ]
         },
         {
             id: 3,
             name: 'Đôn chề',
             price: 1000000,
-            images: ['https://m.yodycdn.com/blog/phong-cach-don-che-la-gi-yodyvn6.jpg'],
+            productDetails: [
+                {
+                    images: ['https://m.yodycdn.com/blog/phong-cach-don-che-la-gi-yodyvn6.jpg'],
+                }
+            ]
         },
         {
             id: 4,
             name: 'Mai Duy Nghiệp',
             price: 999999,
-            images: ['https://i.bbcosplay.com/1683/Trang-Phuc-Chu-He-Tre-Em-1683.jpg']
+            productDetails: [
+                {
+                    images: ['https://i.bbcosplay.com/1683/Trang-Phuc-Chu-He-Tre-Em-1683.jpg']
+                }
+            ]
         },
         {
             id: 5,
             name: 'Thời trang hiện đại',
             price: 69000000,
-            images: ['https://s2.r29static.com/bin/entry/0ae/x,80/1526815/image.jpg'],
+            productDetails: [
+                {
+                    images: ['https://s2.r29static.com/bin/entry/0ae/x,80/1526815/image.jpg'],
+                }
+            ]
         },
         {
             id: 6,
             name: 'Không mua',
             price: 0,
-            images: ['https://i.pinimg.com/originals/de/23/83/de238328593da21dbf9185ed3f7d991d.gif']
+            productDetails: [
+                {
+                    images: ['https://i.pinimg.com/originals/de/23/83/de238328593da21dbf9185ed3f7d991d.gif']
+                }
+            ]
         },
         {
             id: 7,
             name: 'Áo thun unisex cotton',
             price: 299000,
-            images: ['https://owen.cdn.vccloud.vn/media/catalog/product/cache/b23ce5dda22a5cf61bb112966c86a52a/_/m/_mb_tsn220964_4_.jpg']
+            productDetails: [
+                {
+                    images: ['https://owen.cdn.vccloud.vn/media/catalog/product/cache/b23ce5dda22a5cf61bb112966c86a52a/_/m/_mb_tsn220964_4_.jpg']
+                }
+            ]
         },
     ]);
 
