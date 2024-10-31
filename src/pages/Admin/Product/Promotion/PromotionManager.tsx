@@ -33,15 +33,12 @@ import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
-import {
-  Promotion,
-  PromotionRequest,
-} from "../../../../types/Promotion.ts";
+import { Promotion, PromotionRequest } from "../../../../types/Promotion.ts";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import moment from "moment";
 import Cookies from "js-cookie";
-import dayjs from 'dayjs';
-import {useNavigate} from "react-router-dom";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 const ManagerPromotion = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -69,10 +66,12 @@ const ManagerPromotion = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const navigate = useNavigate();
 
-const applyPromotion = (promotion: Promotion) => {
-  console.log(promotion);
-  navigate(`/admin/promotion/scheduled/${promotion.id}`, {state:promotion});
-};
+  const applyPromotion = (promotion: Promotion) => {
+    console.log(promotion);
+    navigate(`/admin/promotion/scheduled/${promotion.id}`, {
+      state: promotion,
+    });
+  };
 
   const mode = editingPromotion ? "update" : "add";
 
@@ -180,32 +179,32 @@ const applyPromotion = (promotion: Promotion) => {
 
   const showModal = async (record: PromotionRequest | null) => {
     if (record) {
-        const formattedPromotion = {
-          ...record,
-          startDate: dayjs(record.startDate),
-          endDate: dayjs(record.endDate),
-        };
-    
-        setCurrentPromotion(formattedPromotion);
-        setEditingPromotion(formattedPromotion);
-      } else {
-        setCurrentPromotion(null);
-      }
+      const formattedPromotion = {
+        ...record,
+        startDate: dayjs(record.startDate),
+        endDate: dayjs(record.endDate),
+      };
+
+      setCurrentPromotion(formattedPromotion);
+      setEditingPromotion(formattedPromotion);
+    } else {
+      setCurrentPromotion(null);
+    }
     setIsModalOpen(true);
   };
 
   const showDetail = (record: PromotionRequest) => {
     if (record) {
-        const formattedPromotion = {
-          ...record,
-          startDate: dayjs(record.startDate),
-          endDate: dayjs(record.endDate),
-        };
-    
-        setCurrentPromotion(formattedPromotion);
-      } else {
-        setCurrentPromotion(null);
-      }
+      const formattedPromotion = {
+        ...record,
+        startDate: dayjs(record.startDate),
+        endDate: dayjs(record.endDate),
+      };
+
+      setCurrentPromotion(formattedPromotion);
+    } else {
+      setCurrentPromotion(null);
+    }
     setIsDetailModalOpen(true);
   };
 
@@ -243,76 +242,77 @@ const applyPromotion = (promotion: Promotion) => {
       dataIndex: "statusPromotionEnum",
       key: "statusPromotionEnum",
       render: (status: StatusPromotionEnum) => {
-        let color = 'default'; // Mặc định
-  
+        let color = "default"; // Mặc định
+
         switch (status) {
           case StatusPromotionEnum.ACTIVE:
-            color = 'green';
+            color = "green";
             break;
           case StatusPromotionEnum.ENDED:
-            color = 'red';
+            color = "red";
             break;
           case StatusPromotionEnum.UPCOMING:
-            color = 'gold';
+            color = "gold";
             break;
           default:
-            color = 'grey';
+            color = "grey";
         }
-  
-        return (
-          <Tag color={color}>
-            {StatusPromotionLable[status]}
-          </Tag>
-        );
+
+        return <Tag color={color}>{StatusPromotionLable[status]}</Tag>;
       },
     },
     {
       title: "Thao tác",
       key: "actions",
-      render: (_: any, record: any) => (
-        <div>
-           <Tooltip title="Lên lịch cho sản phẩm">
-            <Button
-              className="btn-outline-primary"
-              onClick={() => applyPromotion(record)}
-              style={{ marginRight: 8 }}
-            >
-              <i className="fa-solid fa-clipboard-check"></i>
-            </Button>
-          </Tooltip>
-          <Tooltip title="Chi tiết">
-            <Button
-              className="btn-outline-info"
-              onClick={() => showDetail(record)}
-              style={{ marginRight: 8 }}
-            >
-              <i className="fa-solid fa-eye"></i>
-            </Button>
-          </Tooltip>
-
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              className="btn-outline-warning"
-              onClick={() => showModal(record)}
-              style={{ marginRight: 8 }}
-            >
-              <i className="fa-solid fa-pen-to-square"></i>
-            </Button>
-          </Tooltip>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa khuyến mãi này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Tooltip title="Xóa" placement="bottom">
-              <Button className="btn-outline-danger">
-                <i className="fa-solid fa-trash-can"></i>
+      render: (_: any, record: any) => {
+        const isPromotionEnded =
+          record.statusPromotionEnum === StatusPromotionEnum.ENDED;
+        return (
+          <div>
+            <Tooltip title="Lên lịch cho sản phẩm">
+              <Button
+                className="btn-outline-primary"
+                onClick={() => applyPromotion(record)}
+                style={{ marginRight: 8 }}
+                disabled={isPromotionEnded}
+              >
+                <i className="fa-solid fa-clipboard-check"></i>
               </Button>
             </Tooltip>
-          </Popconfirm>
-        </div>
-      ),
+            <Tooltip title="Chi tiết">
+              <Button
+                className="btn-outline-info"
+                onClick={() => showDetail(record)}
+                style={{ marginRight: 8 }}
+              >
+                <i className="fa-solid fa-eye"></i>
+              </Button>
+            </Tooltip>
+
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                className="btn-outline-warning"
+                onClick={() => showModal(record)}
+                style={{ marginRight: 8 }}
+              >
+                <i className="fa-solid fa-pen-to-square"></i>
+              </Button>
+            </Tooltip>
+            <Popconfirm
+              title="Bạn có chắc chắn muốn xóa khuyến mãi này?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Có"
+              cancelText="Không"
+            >
+              <Tooltip title="Xóa" placement="bottom">
+                <Button className="btn-outline-danger">
+                  <i className="fa-solid fa-trash-can"></i>
+                </Button>
+              </Tooltip>
+            </Popconfirm>
+          </div>
+        );
+      },
     },
   ];
 
