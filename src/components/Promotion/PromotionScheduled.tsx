@@ -31,6 +31,8 @@ import { BASE_API } from "../../constants/BaseApi.ts";
 import LoadingCustom from "../../components/Loading/LoadingCustom.tsx";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import Product from "./../../types/Product";
 
 interface Product {
   id: number;
@@ -46,6 +48,7 @@ interface ProductDetail {
   color: string;
   quantity: number;
   price: number;
+  product: Product;
 }
 
 const columnsProduct: ColumnsType<Product> = [
@@ -133,11 +136,34 @@ const PromotionScheduled: React.FC = () => {
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     console.log("ID sản phẩm: ", newSelectedRowKeys);
+
     setSelectedRowKeys(newSelectedRowKeys as number[]);
+
+    const previousSelectedDetailIds = new Set(selectedRowKeysDetail);
+
+    const updatedSelectedProductDetailIds: number[] = [];
+
+    newSelectedRowKeys.forEach((productId) => {
+      const productDetailIds = productDetails
+        .filter((detail) => detail.product && detail.product.id === productId)
+        .map((detail) => detail.id);
+
+      updatedSelectedProductDetailIds.push(...productDetailIds);
+    });
+
+    const allSelectedProductDetailIds = Array.from(
+      new Set([
+        ...previousSelectedDetailIds,
+        ...updatedSelectedProductDetailIds,
+      ])
+    );
+
+    setSelectedRowKeysDetail(allSelectedProductDetailIds);
     if (newSelectedRowKeys.length > 0) {
       fetchProductDetail(newSelectedRowKeys as number[]);
     } else {
       setProductDetails([]);
+      setSelectedRowKeysDetail([]);
     }
   };
 
@@ -231,6 +257,7 @@ const PromotionScheduled: React.FC = () => {
         color: item.color?.name,
         quantity: item.quantity,
         price: item.price,
+        product: item.product.id,
       }));
 
       setProductDetails(allProductDetails);
@@ -254,13 +281,15 @@ const PromotionScheduled: React.FC = () => {
   useEffect(() => {
     const selectedPromotion = location.state;
     if (selectedPromotion && selectedPromotion.productDetailList) {
-      const productIds = selectedPromotion.productDetailList.map(
-        (detail: any) => detail.product.id
+      const productIdsSet = new Set<number>(
+        selectedPromotion.productDetailList
+          .map((detail: ProductDetail) => detail.product?.id)
+          .filter((id: number | undefined) => id !== undefined)
       );
       const productDetailIds = selectedPromotion.productDetailList.map(
         (detail: any) => detail.id
       );
-
+      const productIds = Array.from(productIdsSet);
       setSelectedRowKeys(productIds);
       setSelectedRowKeysDetail(productDetailIds);
       fetchData();
@@ -288,13 +317,19 @@ const PromotionScheduled: React.FC = () => {
     setLoading(true);
 
     try {
+      const token = Cookies.get("accessToken");
       const promotionId = selectedPromotion.id;
-      const response = await axiosInstance.post(
-        `${BASE_API}/api/v1/promotion/${promotionId}`,
-        selectedRowKeysDetail
-      );
+      if (token) {
+        const response = await axiosInstance.post(
+          `${BASE_API}/api/v1/promotion/${promotionId}`,
+          selectedRowKeysDetail
+        );
 
-      toast.success("Lên lịch giảm giá thành công");
+        toast.success("Lên lịch giảm giá thành công");
+        return response.data;
+      } else {
+        toast.error("Lỗi xác thực");
+      }
     } catch (error) {
       console.error("Error adding product details to promotion:", error);
     } finally {
