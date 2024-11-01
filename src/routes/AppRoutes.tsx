@@ -9,7 +9,6 @@ import ProductManager from '../pages/Admin/Product';
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
-import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import { ManagerRole, ManagerUser } from "../pages/Admin/User";
 import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
@@ -18,6 +17,9 @@ import ProductFilterPage from '../pages/Customer/filter/page.tsx';
 import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
+import ProductDetail from '../pages/Customer/ProductDetail.tsx';
+import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import CartPage from '../pages/Customer/cart/page.tsx';
 
 
@@ -48,6 +50,7 @@ const AppRoutes = () => {
                 <Route path="/admin/user" element={<ManagerUser />} />
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
+                <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />}/>
             </Route>
 
             {/* Route xử lý lỗi */}
