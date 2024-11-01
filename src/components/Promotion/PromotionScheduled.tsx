@@ -123,6 +123,7 @@ const PromotionScheduled: React.FC = () => {
       setSelectedRowKeys([]);
       setLoading(false);
       setProductDetails([]);
+      setSelectedRowKeysDetail([]);
     }, 200);
   };
 
