@@ -46,7 +46,7 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
     useEffect(() => {
         if (mode === 'update' && role) {
             form.setFieldsValue({
-                name: role.name,
+                name: role.description,
                 permissionIds: role.permissions.map((perm: any) => perm.id),
             });
         } else {
