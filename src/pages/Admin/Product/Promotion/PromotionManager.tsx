@@ -29,7 +29,7 @@ import {
 } from "../../../../enum/TypePromotionEnum.ts";
 import PromotionModal from "../../../../components/Promotion/PromotionModal.tsx";
 import PromotionDetailModal from "../../../../components/Promotion/PromotionDetailModal.tsx";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";

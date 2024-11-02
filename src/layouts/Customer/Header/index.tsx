@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { Button, Dropdown, MenuProps } from "antd";
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { getUserData } from '../../../api/AuthApi';
 import Avatar from '../../../components/avatar';
 import CartIcon from '../../../components/cart/CartIcon';
@@ -17,7 +17,8 @@ import Link from '../../../components/Link';
 import Notification from '../../../components/notification';
 import SearchInput from '../../../components/SearchInput';
 import { LoginUserModel } from '../../../components/User/LoginModelUser';
-import { setUser, userSelector } from '../../../redux/reducers/UserReducer';
+import { useUserAction } from '../../../hook/useUserAction';
+import { userSelector } from '../../../redux/reducers/UserReducer';
 import '../../../styles/style.css';
 
 const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
@@ -60,7 +61,7 @@ const items: MenuProps['items'] = [
 const headerHeight = 50;
 
 const UserHeader: React.FC = () => {
-    const dispatch = useDispatch();
+    const userAction = useUserAction()
     const user = useSelector(userSelector);
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -69,13 +70,7 @@ const UserHeader: React.FC = () => {
 
     useEffect(() => {
         const userData = getUserData();
-        dispatch(setUser({
-            id: Number(userData.id),
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            isAdmin: false
-        }));
+        userAction.save(userData)
     }, []);
 
     useEffect(() => {
@@ -109,7 +104,9 @@ const UserHeader: React.FC = () => {
                             overflow: "hidden",
                             borderRadius: 2,
                         }}>
-                            <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                            <Link to={'/'}>
+                                <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                            </Link>
                         </Box>
 
                         <Box sx={{
