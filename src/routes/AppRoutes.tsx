@@ -19,6 +19,7 @@ import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CartPage from '../pages/Customer/cart/page.tsx';
+import UserInfoPage from '../pages/Customer/user-info/page.tsx';
 
 
 
@@ -34,6 +35,7 @@ const AppRoutes = () => {
                 <Route path='/product/:id' element={<ProductDetailPage />} />
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
+                <Route path='/user-info' element={<UserInfoPage />} />
             </Route>
 
             <Route element={<AdminLayout />}>
