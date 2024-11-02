@@ -11,4 +11,5 @@ export interface Color {
 
 export interface ColorRequest {
     name: string;
+    code: string;
 }
