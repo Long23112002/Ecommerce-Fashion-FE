@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux"
-import { setUser } from "../redux/reducers/UserReducer";
+import { clearUser, setUser } from "../redux/reducers/UserReducer";
 
 export const useUserAction = () => {
     const dispatch = useDispatch()
@@ -10,11 +10,14 @@ export const useUserAction = () => {
             fullName: userData.fullName,
             birth: userData.birth,
             gender: userData.gender,
-            phoneNumber: userData.phoneNumber,
+            phoneNumber: userData.phoneNumber === 'null' ? null : userData.phoneNumber,
             avatar: userData.avatar,
-            isAdmin: userData.isAdmin,
+            isAdmin: userData.isAdmin === 'true' || userData.isAdmin == true,
             roles: userData.roles,
         }));
     }
-    return { save }
+    const clear = () => {
+        dispatch(clearUser());
+    }
+    return { save, clear }
 }

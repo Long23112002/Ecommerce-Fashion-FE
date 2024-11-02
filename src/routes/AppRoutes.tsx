@@ -16,11 +16,13 @@ import Login from '../pages/Admin/User/Login';
 import ProductFilterPage from '../pages/Customer/filter/page.tsx';
 import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
+import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
-import ProductDetail from '../pages/Customer/ProductDetail.tsx';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import CartPage from '../pages/Customer/cart/page.tsx';
+import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
+import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
 
 
 
@@ -36,6 +38,10 @@ const AppRoutes = () => {
                 <Route path='/product/:id' element={<ProductDetailPage />} />
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
+                <Route element={<UserInfoLayout />}>
+                    <Route path="/user-info" element={<UserInfoPage />} />
+                    <Route path="/change-password" element={<ChangePasswordPage />} />
+                </Route>
             </Route>
 
             <Route element={<AdminLayout />}>
@@ -50,7 +56,7 @@ const AppRoutes = () => {
                 <Route path="/admin/user" element={<ManagerUser />} />
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
-                <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />}/>
+                <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />} />
             </Route>
 
             {/* Route xử lý lỗi */}

@@ -9,15 +9,16 @@ import {
 } from '@mui/material';
 import { Button, Dropdown, MenuProps } from "antd";
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { getUserData } from '../../../api/AuthApi';
 import Avatar from '../../../components/avatar';
 import CartIcon from '../../../components/cart/CartIcon';
+import Link from '../../../components/Link';
 import Notification from '../../../components/notification';
 import SearchInput from '../../../components/SearchInput';
 import { LoginUserModel } from '../../../components/User/LoginModelUser';
-import { setUser, userSelector } from '../../../redux/reducers/UserReducer';
+import { useUserAction } from '../../../hook/useUserAction';
+import { userSelector } from '../../../redux/reducers/UserReducer';
 import '../../../styles/style.css';
 
 const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
@@ -26,33 +27,33 @@ const items: MenuProps['items'] = [
     {
         key: '0',
         label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+            <Link to='/user-info' color='black'>
                 Thông tin tài khoản
-            </a>
+            </Link>
         ),
     },
     {
         key: '1',
         label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+            <Link to='/user-info' color='black'>
                 Đơn hàng của tôi
-            </a>
+            </Link>
         ),
     },
     {
         key: '2',
         label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+            <Link to='/user-info' color='black'>
                 Trung tâm hỗ trợ
-            </a>
+            </Link>
         ),
     },
     {
         key: '3',
         label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+            <Link to='/user-info' color='black'>
                 Đăng xuất
-            </a>
+            </Link>
         ),
     },
 ];
@@ -60,23 +61,16 @@ const items: MenuProps['items'] = [
 const headerHeight = 50;
 
 const UserHeader: React.FC = () => {
+    const userAction = useUserAction()
+    const user = useSelector(userSelector);
+
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const user = useSelector(userSelector);
-
     useEffect(() => {
         const userData = getUserData();
-        dispatch(setUser({
-            id: Number(userData.id),
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            isAdmin: false
-        }));
+        userAction.save(userData)
     }, []);
 
     useEffect(() => {
@@ -109,10 +103,10 @@ const UserHeader: React.FC = () => {
                             cursor: 'pointer',
                             overflow: "hidden",
                             borderRadius: 2,
-                        }}
-                            onClick={() => navigate('/')}
-                        >
-                            <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                        }}>
+                            <Link to={'/'}>
+                                <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                            </Link>
                         </Box>
 
                         <Box sx={{
@@ -123,21 +117,21 @@ const UserHeader: React.FC = () => {
                             gap: 3.5
                         }}>
                             {categories.map((category) => (
-                                <Typography
-                                    key={category}
-                                    variant="button"
-                                    onClick={() => navigate(`/filter/${category.toLowerCase()}`)}
-                                    sx={{
-                                        cursor: 'pointer',
-                                        color: 'black',
-                                        position: 'relative',
-                                        ":hover": {
-                                            color: '#1E90FF'
-                                        }
-                                    }}
-                                >
-                                    {category}
-                                </Typography>
+                                <Link to={`/filter/${category.toLowerCase()}`} key={category}>
+                                    <Typography
+                                        variant="button"
+                                        sx={{
+                                            cursor: 'pointer',
+                                            color: 'black',
+                                            position: 'relative',
+                                            ":hover": {
+                                                color: '#1E90FF'
+                                            }
+                                        }}
+                                    >
+                                        {category}
+                                    </Typography>
+                                </Link>
                             ))}
                         </Box>
 
@@ -246,25 +240,26 @@ const UserHeader: React.FC = () => {
 
                     <List>
                         {categories.map((category, index) => (
-                            <ListItem
-                                key={index}
-                                onClick={() => navigate(`/category/${category.toLowerCase()}`)}
-                                sx={{
-                                    borderRadius: '12px',
-                                    '&:hover': {
-                                        backgroundColor: '#e0f7fa',
-                                    },
-                                    mb: 1,
-                                }}
-                            >
-                                <ListItemText
-                                    primary={category}
-                                    primaryTypographyProps={{
-                                        fontSize: '18px',
-                                        fontWeight: 500,
+                            <Link to={`/filter/${category.toLowerCase()}`} color={'black'} key={index}>
+                                <ListItem
+                                    sx={{
+                                        borderRadius: '12px',
+                                        '&:hover': {
+                                            backgroundColor: '#e0f7fa',
+                                        },
+                                        mb: 1,
                                     }}
-                                />
-                            </ListItem>
+                                >
+                                    <ListItemText
+                                        primary={category}
+                                        primaryTypographyProps={{
+                                            component: "span",
+                                            fontSize: '18px',
+                                            fontWeight: 500,
+                                        }}
+                                    />
+                                </ListItem>
+                            </Link>
                         ))}
                     </List>
                 </Box>

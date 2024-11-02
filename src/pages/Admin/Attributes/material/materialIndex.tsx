@@ -23,7 +23,7 @@ import createPaginationConfig, {
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 
 const ManagerMaterial = () => {
   const [loading, setLoading] = useState(false);

@@ -1,33 +1,29 @@
-import React from 'react'
-import useNavigate from '../hook/useNavigateCustom'
-import { Typography } from '@mui/material'
+import { Typography } from '@mui/material';
+import React, { forwardRef } from 'react';
+import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
 
-interface IProps {
-    children: React.ReactNode,
-    to: string,
-    color?: string,
-    underline?: boolean
+interface IProps extends RouterLinkProps {
+    children: React.ReactNode;
+    color?: string;
+    underline?: boolean;
 }
 
-const Link: React.FC<IProps> = ({ children, to, color, underline }) => {
-    const navigate = useNavigate()
+const Link = forwardRef<HTMLAnchorElement, IProps>(
+    ({ children, to, color = '#1E90FF', underline = false, ...props }, ref) => {
 
-    const handleNavigateTo = () => {
-        navigate(to);
+        return (
+            <RouterLink to={to} ref={ref} {...props}
+                style={{
+                    color: color,
+                    textDecoration: underline ? 'underline' : 'none',
+                }}
+            >
+                <Typography component='span'>
+                    {children}
+                </Typography>
+            </RouterLink>
+        );
     }
+);
 
-    return (
-        <Typography
-            sx={{
-                cursor: 'pointer',
-                color: color || '#1E90FF',
-                textDecoration: underline ? 'underline' : 'none'
-            }}
-            onClick={handleNavigateTo}
-        >
-            {children}
-        </Typography>
-    )
-}
-
-export default Link
+export default Link;

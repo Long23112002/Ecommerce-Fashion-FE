@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../../types/User";
 
 const initState: User = {
-    id: 0,
+    id: -1,
     email: '',
     roles: [],
     fullName: '',
     phoneNumber: '',
-    gender: '',
+    gender: 'OTHER',
     birth: '',
     avatar: '',
     isAdmin: false,
@@ -25,6 +25,9 @@ const UserReducer = createSlice({
             state.email = action.payload.email;
             state.avatar = action.payload.avatar;
             state.isAdmin = action.payload.isAdmin;
+            state.phoneNumber = action.payload.phoneNumber;
+            state.gender = action.payload.gender;
+            state.birth = action.payload.birth;
         },
         clearUser: () => {
             return initState;

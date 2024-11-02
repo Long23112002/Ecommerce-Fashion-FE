@@ -12,7 +12,7 @@ import {makeSlug} from "../../../utils/slug.ts";
 import {Container} from '@mui/material';
 import {getErrorMessage} from "../../Error/getErrorMessage.ts";
 import {Role} from "../../../types/role.ts";
-import LoadingCustom from "../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 
 const ManagerUser = () => {
     const [users, setUsers] = useState<UserData[]>([]);
