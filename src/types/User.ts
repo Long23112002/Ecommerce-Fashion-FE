@@ -31,3 +31,10 @@ export interface UserInfoRequest {
     gender: 'MALE' | 'FEMALE' | 'OTHER';
     avatar: string;
 }
+
+export interface ChangePasswordRequest {
+    email: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+}
