@@ -35,7 +35,6 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
   useEffect(() => {
     const initializeWebSocket = async () => {
       if (user.id) {
-        await refreshToken();
         const token = Cookies.get("accessToken") + ''
         const sock = new SockJS(SOCKET_CHAT_API);
         const stompClient = new Client({
@@ -123,7 +122,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
             <List>
               {
                 chatRooms.map((room) => (
-                  <ListItem button key={room.id}
+                  <ListItem key={room.id}
                     sx={{ pr: 3 }}
                     onClick={() => handleChangeRoom(room.id + '')}
                     onMouseOver={() => setHoverRoom(room.id + '')}
