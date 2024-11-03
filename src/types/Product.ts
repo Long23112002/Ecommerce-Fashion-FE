@@ -1,4 +1,8 @@
 import { UserData } from "../api/AuthApi";
+import { Material } from "../pages/Admin/Attributes/material/material";
+import { Brand } from "./brand";
+import { Category } from "./Category";
+import { Origin } from "./origin";
 
 export interface Product {
     id: number;
@@ -7,11 +11,11 @@ export interface Product {
     description: string;
     createAt: number;
     updateAt: number;
-    createBy: UserData | null;
-    updateBy: UserData | null;
+    createByUser: UserData | null;
+    updateByUser: UserData | null;
     deleted: boolean;
-    idBrand: number;
-    idOrigin: number;
-    idMaterial: number;
-    idCategory: number;
+    brand: Brand | null;
+    origin: Origin | null;
+    material: Material | null;
+    category: Category | null;
 }

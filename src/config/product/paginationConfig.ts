@@ -5,7 +5,7 @@ export interface PaginationState {
     totalPage: number;
 }
 
-const createPaginationConfig = (pagination: PaginationState, setPagination: (pagination: PaginationState) => void)=> {
+const createPaginationConfig = (pagination: PaginationState, setPagination: (pagination: PaginationState) => void) => {
     return {
         current: pagination.current,
         pageSize: pagination.pageSize,
@@ -18,7 +18,8 @@ const createPaginationConfig = (pagination: PaginationState, setPagination: (pag
             })
         },
         showSizeChange: true,
-        pageSizeOptions: ['5', '10', '20', '50']
+        pageSizeOptions: ['5', '10', '20', '50'],
+        showQuickJumper: true,
     }
 }
 

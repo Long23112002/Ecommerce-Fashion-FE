@@ -15,6 +15,7 @@ import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
 import Login from '../pages/Admin/User/Login';
 import Home from "../pages/Customer/Home";
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
 
 
 
@@ -30,7 +31,8 @@ const AppRoutes = () => {
             </Route>
 
             <Route element={<AdminLayout />}>
-                <Route path="/admin/product/*" element={<ProductManager />} />
+                <Route path="/admin/product/" element={<ProductManager />} />
+                <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
                 <Route path="/admin/user/role" element={<ManagerRole />} />
                 <Route path="/admin/brand" element={<ManagerBrand />} />
                 <Route path="/admin/origin" element={<ManaggerOrigin />} />
