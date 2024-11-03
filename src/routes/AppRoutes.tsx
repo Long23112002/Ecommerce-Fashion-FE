@@ -57,6 +57,10 @@ const AppRoutes = () => {
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
                 <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />} />
+                <Route element={<UserInfoLayout page='admin' />}>
+                    <Route path="/admin/user-info" element={<UserInfoPage />} />
+                    <Route path="/admin/change-password" element={<ChangePasswordPage />} />
+                </Route>
             </Route>
 
             {/* Route xử lý lỗi */}

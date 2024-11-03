@@ -1,7 +1,7 @@
 import { Box, Grid } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import ChatArea from '../../../components/chat/ChatArea'
 import ChatRoomList from '../../../components/chat/ChatRoomList'
-import ChatArea from '../../../components/Chat/ChatArea'
 
 const ChatPage: React.FC = () => {
 

@@ -36,8 +36,12 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
     const nextUrl = useRef<string | null>(null);
     const boxRef = useRef<HTMLElement | null>(null);
 
+    const isUserIdExist = () => {
+        return user.id && user.id > 0;
+    }
+
     const fetchFindAllNotiByUserId = async () => {
-        if (user.id > 0) {
+        if (isUserIdExist()) {
             const { results, next } = await callFindAllNotiByUserId(user.id);
             nextUrl.current = next;
             setNotifications(prevs => [...uniqueNotis(results, prevs), ...prevs]);
@@ -45,7 +49,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
     }
 
     const fetchFindAllUnSeenNotiByUserId = async () => {
-        if (user.id > 0) {
+        if (user.id && user.id > 0) {
             const { results, next } = await callFindAllUnSeenNotiByUserId(user.id);
             nextUrl.current = next;
             setNotifications(prevs => [...uniqueNotis(results, prevs), ...prevs]);
@@ -74,7 +78,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
     };
 
     const handleMarkSeenAllByIdUser = async () => {
-        if (user.id > 0) {
+        if (isUserIdExist()) {
             const res: Notification[] = await callMarkSeenAllByIdUser(user.id);
             updateNotifications(res);
         }
@@ -123,7 +127,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
     }
 
     const handleUnSeenNoti = async () => {
-        if (actionButton != 1 && user.id > 0) {
+        if (actionButton != 1 && isUserIdExist()) {
             setLoading(true)
             setNotifications([])
             setActionButton(1)
@@ -176,7 +180,7 @@ const NotificationBox: React.FC<IProps> = ({ anchorEl, handleClose, setTotalNoti
             }
         };
 
-        if (user.id > 0) {
+        if (isUserIdExist()) {
             initializeWebSocket();
         }
 

@@ -25,6 +25,8 @@ const NotificationIcon: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
         <Box
             sx={{
                 display: invisible ? 'flex' : 'none',
+                justifyContent: 'center',
+                alignItems: 'center',
                 ml: ml ? {
                     xs: 2,
                     md: 3
@@ -39,17 +41,16 @@ const NotificationIcon: React.FC<IProps> = ({ invisible = true, ml, mr }) => {
                 sx={{
                     color: '#A6B0B8',
                     position: 'relative',
-                    aspectRatio: '1/1',
-                    // padding: 0
+                    aspectRatio: '1',
                 }}
                 onClick={handleClick}
             >
-                <i className='fa-solid fa-bell fs-5' />
+                <i className='fa-solid fa-bell fs-4' />
                 <Box
                     component='span'
                     sx={{
                         position: 'absolute',
-                        top: 5,
+                        top: 3,
                         right: 3,
                         width: 16,
                         height: 16,

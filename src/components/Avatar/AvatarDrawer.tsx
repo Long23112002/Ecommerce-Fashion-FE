@@ -79,7 +79,7 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         >
                             <Avatar
                                 alt="Remy Sharp"
-                                src={user?.avatar}
+                                src={user?.avatar + ''}
                                 sx={{
                                     width: '100%',
                                     height: '100%',
