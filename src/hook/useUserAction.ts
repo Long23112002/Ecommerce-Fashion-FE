@@ -1,5 +1,6 @@
 import { useDispatch } from "react-redux"
 import { clearUser, setUser } from "../redux/reducers/UserReducer";
+import { handleLogout } from "../api/AuthApi";
 
 export const useUserAction = () => {
     const dispatch = useDispatch()
@@ -16,8 +17,9 @@ export const useUserAction = () => {
             roles: userData.roles,
         }));
     }
-    const clear = () => {
+    const logout = async () => {
+        await handleLogout()
         dispatch(clearUser());
     }
-    return { save, clear }
+    return { save, logout }
 }

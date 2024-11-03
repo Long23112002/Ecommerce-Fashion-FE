@@ -8,13 +8,17 @@ import {
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
-const UserInfoLayout: React.FC = () => {
+interface IProps {
+  page?: 'admin' | ''
+}
+
+const UserInfoLayout: React.FC<IProps> = ({ page = '' }) => {
   const theme = useTheme();
   const location = useLocation();
 
   return (
     <Container maxWidth="md">
-      <Box sx={{ p: 0, mb: 5}}>
+      <Box sx={{ p: 0, mb: 5 }}>
         <Tabs
           value={location.pathname}
           indicatorColor="primary"
@@ -23,9 +27,9 @@ const UserInfoLayout: React.FC = () => {
         >
           <Tab
             label="Thông tin người dùng"
-            value="/user-info"
+            value={`${'/' + page}/user-info`}
             component={Link}
-            to="/user-info"
+            to={`${'/' + page}/user-info`}
             sx={{
               '&:hover': {
                 backgroundColor: theme.palette.action.hover,
@@ -34,9 +38,9 @@ const UserInfoLayout: React.FC = () => {
           />
           <Tab
             label="Thay đổi mật khẩu"
-            value="/change-password"
+            value={`${'/' + page}/change-password`}
             component={Link}
-            to="/change-password"
+            to={`${'/' + page}/change-password`}
             sx={{
               '&:hover': {
                 backgroundColor: theme.palette.action.hover,

@@ -1,13 +1,3 @@
-import { UserOutlined } from '@ant-design/icons';
-import { MenuOutlined } from '@mui/icons-material';
-import {
-    AppBar, Box,
-    Container,
-    Drawer, IconButton,
-    List, ListItem, ListItemText,
-    Toolbar, Typography
-} from '@mui/material';
-import { Button, Dropdown, MenuProps } from "antd";
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getUserData } from '../../../api/AuthApi';
@@ -21,101 +11,76 @@ import { useUserAction } from '../../../hook/useUserAction';
 import { userSelector } from '../../../redux/reducers/UserReducer';
 import '../../../styles/style.css';
 
+import { UserOutlined } from '@ant-design/icons';
+import { MenuOutlined } from '@mui/icons-material';
+import {
+    AppBar, Box, Container,
+    Drawer, IconButton, List,
+    ListItem, ListItemText,
+    Toolbar, Typography
+} from '@mui/material';
+import { Button, Dropdown, MenuProps } from "antd";
+
 const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
-
-const items: MenuProps['items'] = [
-    {
-        key: '0',
-        label: (
-            <Link to='/user-info' color='black'>
-                Thông tin tài khoản
-            </Link>
-        ),
-    },
-    {
-        key: '1',
-        label: (
-            <Link to='/user-info' color='black'>
-                Đơn hàng của tôi
-            </Link>
-        ),
-    },
-    {
-        key: '2',
-        label: (
-            <Link to='/user-info' color='black'>
-                Trung tâm hỗ trợ
-            </Link>
-        ),
-    },
-    {
-        key: '3',
-        label: (
-            <Link to='/user-info' color='black'>
-                Đăng xuất
-            </Link>
-        ),
-    },
-];
-
 const headerHeight = 50;
 
 const UserHeader: React.FC = () => {
-    const userAction = useUserAction()
+    const userAction = useUserAction();
     const user = useSelector(userSelector);
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
 
+    const logout = async () => {
+        await userAction.logout();
+    };
+
+    const toggleDrawer = (open: boolean) => () => setIsDrawerOpen(open);
+    const openLoginModal = () => setIsLoginModalVisible(true);
+    const closeLoginModal = () => setIsLoginModalVisible(false);
+
+    const items: MenuProps['items'] = [
+        { key: '0', label: <Link to='/user-info' color='black'>Thông tin tài khoản</Link> },
+        { key: '1', label: <Link to='/user-info' color='black'>Đơn hàng của tôi</Link> },
+        { key: '2', label: <Link to='/user-info' color='black'>Trung tâm hỗ trợ</Link> },
+        { key: '3', label: <Link to='/user-info' color='black' onClick={logout}>Đăng xuất</Link> },
+    ];
+
     useEffect(() => {
         const userData = getUserData();
-        userAction.save(userData)
+        userAction.save(userData);
     }, []);
 
     useEffect(() => {
         setIsLogin(user.id !== -1);
     }, [user]);
 
-    const toggleDrawer = (open: boolean) => () => setIsDrawerOpen(open);
-
-    const openLoginModal = () => setIsLoginModalVisible(true);
-    const closeLoginModal = () => setIsLoginModalVisible(false);
-
     return (
-        <>
-            <AppBar position="sticky"
+        <Box position='sticky' top={-1} zIndex={10} className='shadow-header'>
+            <AppBar
+                position="sticky"
                 id='user-header'
                 sx={{
                     top: -1,
                     backgroundColor: 'white',
                     boxShadow: 'none',
                     borderBottom: '1px solid #eee'
-                }}>
+                }}
+            >
                 <Container maxWidth="xl">
                     <Toolbar sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         height: headerHeight
-                    }}
-                    >
-                        <Box sx={{
-                            cursor: 'pointer',
-                            overflow: "hidden",
-                            borderRadius: 2,
-                        }}>
-                            <Link to={'/'}>
+                    }}>
+                        <Box sx={{ cursor: 'pointer', overflow: "hidden", borderRadius: 2 }}>
+                            <Link to='/'>
                                 <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
                             </Link>
                         </Box>
 
-                        <Box sx={{
-                            display: {
-                                xs: 'none',
-                                lg: 'flex'
-                            },
-                            gap: 3.5
-                        }}>
+                        <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 3.5 }}>
                             {categories.map((category) => (
                                 <Link to={`/filter/${category.toLowerCase()}`} key={category}>
                                     <Typography
@@ -123,10 +88,7 @@ const UserHeader: React.FC = () => {
                                         sx={{
                                             cursor: 'pointer',
                                             color: 'black',
-                                            position: 'relative',
-                                            ":hover": {
-                                                color: '#1E90FF'
-                                            }
+                                            ":hover": { color: '#1E90FF' }
                                         }}
                                     >
                                         {category}
@@ -135,55 +97,32 @@ const UserHeader: React.FC = () => {
                             ))}
                         </Box>
 
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2
-                        }}
-                        >
-                            <SearchInput
-                                height={38}
-                                sx={{
-                                    display: { xs: 'none', lg: 'flex' }
-                                }}
-                            // onChange={}
-                            // onClick={}
-                            />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={38} />
                             <CartIcon />
                             <Notification invisible={false} />
 
                             {isLogin ? (
-                                <Dropdown menu={{ items }} trigger={['hover', 'click']} >
+                                <Dropdown menu={{ items }} trigger={['hover', 'click']}>
                                     <Box
-                                        className="btn-custom"
                                         onClick={(e) => e.preventDefault()}
                                         sx={{
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            mx: {
-                                                xs: 0.5,
-                                                sm: 1.5,
-                                                md: 3
-                                            }
+                                            mx: { xs: 0.5, sm: 1.5, md: 3 }
                                         }}
                                     >
                                         <Avatar height={headerHeight - 15} />
                                         <Typography
                                             sx={{
                                                 color: 'black',
-                                                display: {
-                                                    xs: "none",
-                                                    lg: "block"
-                                                },
+                                                display: { xs: "none", lg: "block" },
                                                 ml: 1,
-                                                textAlign: 'end',
                                                 maxWidth: 220,
                                                 height: 25,
-                                                overflow: 'hidden',
                                                 whiteSpace: 'nowrap',
                                                 textOverflow: 'ellipsis',
-                                                marginRight: '2px',
                                             }}
                                             aria-label="User's full name"
                                         >
@@ -192,72 +131,37 @@ const UserHeader: React.FC = () => {
                                     </Box>
                                 </Dropdown>
                             ) : (
-                                <Button type="text"
-                                    onClick={openLoginModal}
-                                    icon={<UserOutlined />}
-                                >
+                                <Button type="text" onClick={openLoginModal} icon={<UserOutlined />}>
                                     Đăng nhập
                                 </Button>
                             )}
-                            <IconButton
-                                edge="end"
-                                onClick={toggleDrawer(true)}
-                                sx={{ display: { xs: 'inline-flex', lg: 'none' } }}
-                            >
+
+                            <IconButton onClick={toggleDrawer(true)} sx={{ display: { xs: 'inline-flex', lg: 'none' } }}>
                                 <MenuOutlined />
                             </IconButton>
                         </Box>
-
                     </Toolbar>
                 </Container>
-            </AppBar >
+            </AppBar>
 
-            <Drawer
-                anchor="right"
-                open={isDrawerOpen}
-                onClose={toggleDrawer(false)}
-                sx={{
-                    color: '#f4f4f4',
-                }}
-            >
-                <Box
-                    sx={{
-                        width: '85vw',
-                        maxWidth: '400px',
-                        p: 3,
-                        pt: 4,
-                    }}
-                >
-                    <SearchInput
-                        // onChange={}
-                        // onClick={}
-                        height={45}
-                        sx={{
-                            display: 'flex',
-                            mb: 3,
-                        }}
-                    />
-
+            <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)} sx={{ color: '#f4f4f4' }}>
+                <Box sx={{ width: '85vw', maxWidth: '400px', p: 3, pt: 4 }}>
+                    <SearchInput height={45} sx={{ display: 'flex', mb: 3 }} />
                     <List>
                         {categories.map((category, index) => (
-                            <Link to={`/filter/${category.toLowerCase()}`} color={'black'} key={index}>
+                            <Link to={`/filter/${category.toLowerCase()}`} key={index} color='black'>
                                 <ListItem
                                     sx={{
                                         borderRadius: '12px',
-                                        '&:hover': {
-                                            backgroundColor: '#e0f7fa',
-                                        },
-                                        mb: 1,
+                                        '&:hover': { backgroundColor: '#e0f7fa' },
+                                        mb: 1
                                     }}
                                 >
-                                    <ListItemText
-                                        primary={category}
-                                        primaryTypographyProps={{
-                                            component: "span",
-                                            fontSize: '18px',
-                                            fontWeight: 500,
-                                        }}
-                                    />
+                                    <ListItemText primary={category} primaryTypographyProps={{
+                                        component: "span",
+                                        fontSize: '18px',
+                                        fontWeight: 500
+                                    }} />
                                 </ListItem>
                             </Link>
                         ))}
@@ -265,9 +169,8 @@ const UserHeader: React.FC = () => {
                 </Box>
             </Drawer>
 
-
             <LoginUserModel isModalVisible={isLoginModalVisible} handleCancel={closeLoginModal} />
-        </>
+        </Box>
     );
 };
 
