@@ -1,3 +1,5 @@
+// KHÔNG CẦN SỬ DỤNG NỮA VÌ ĐÃ CONFIG LẠI RỒI
+
 import { useNavigate as useNavigateDom } from "react-router-dom"
 /**
  * NOTE: Function này đơn giản chỉ tương tự như useNavigate của router-dom

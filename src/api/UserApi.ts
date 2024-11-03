@@ -1,5 +1,6 @@
 import { BASE_API } from "../constants/BaseApi.ts";
 import { GenderEnum } from "../enum/GenderEnum.ts";
+import { ChangePasswordRequest, UserInfoRequest } from "../types/User.ts";
 import { ResponseData } from "../types/responseApi.ts";
 import { UserRequest } from "../types/User.ts";
 import axiosInstance from "./AxiosInstance.ts";
@@ -86,6 +87,26 @@ export const updateUser = async (userId: number, user: UserRequest): Promise<Res
     try {
         const url = `${BASE_API}/api/v1/user/${userId}`;
         const response = await axiosInstance.put(url, user);
+        return response.data as ResponseData;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const updateUserInfo = async (userId: number, user: UserInfoRequest): Promise<ResponseData> => {
+    try {
+        const url = `${BASE_API}/api/v1/user/update-info/${userId}`;
+        const response = await axiosInstance.put(url, user);
+        return response.data as ResponseData;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const updateUserPassword = async (passwordsRequest: ChangePasswordRequest): Promise<ResponseData> => {
+    try {
+        const url = `${BASE_API}/api/v1/user/change-password`;
+        const response = await axiosInstance.put(url, passwordsRequest);
         return response.data as ResponseData;
     } catch (error) {
         throw error;

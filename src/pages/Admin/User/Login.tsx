@@ -31,6 +31,7 @@ export default function Login() {
                 }, 1000);
             }
         } catch (error) {
+            console.log(error)
             toast.error('Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!');
         }
     };

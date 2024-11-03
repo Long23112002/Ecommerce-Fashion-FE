@@ -11,7 +11,7 @@ import Cookies from "js-cookie";
 import { debounce } from "lodash";
 import { Fragment, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";

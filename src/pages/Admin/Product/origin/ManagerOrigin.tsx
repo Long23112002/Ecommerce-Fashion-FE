@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { createOrigin, deleteOrigin, fetchAllOrigins, getOriginById, updateOrigin } from "../../../../api/OriginApi.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 import OriginDetailModal from "../../../../components/Origin/OriginDetailModal.tsx";
 import OriginModel from "../../../../components/Origin/OriginModel.tsx";
 import createPaginationConfig, { PaginationState } from "../../../../config/origin/paginationConfig.ts";
