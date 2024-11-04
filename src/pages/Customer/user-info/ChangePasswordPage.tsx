@@ -76,13 +76,13 @@ const ChangePasswordPage: React.FC = () => {
                 toast.success('Đổi mật khẩu thành công');
             } catch (error: any) {
                 const messages = error.response.data.message;
-                if (typeof messages == 'string') {
-                    toast.error(messages);
+                if (typeof messages == 'object') {
+                    const firstKey = Object.keys(messages)[0];
+                    const firstMessage = messages[firstKey];
+                    toast.error(firstMessage);
                     return;
                 }
-                const firstKey = Object.keys(messages)[0];
-                const firstMessage = messages[firstKey];
-                toast.error(firstMessage);
+                toast.error(messages);
             }
         }
     };
