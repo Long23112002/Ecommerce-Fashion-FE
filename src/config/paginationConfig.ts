@@ -1,48 +1,31 @@
-// src/utils/paginationConfig.ts
+import { TablePaginationConfig } from 'antd';
 
-// Define a type for the pagination configuration to be used
+// Interface representing the state of pagination
 export interface PaginationState {
-    current: number;
-    pageSize: number;
-    total: number;
-    totalPage: number;
+  current: number;   // Current page number
+  pageSize: number;  // Number of items per page
+  total: number;     // Total number of items
+  totalPage: number; // Total number of pages
 }
 
+// Function to create pagination config for Ant Design Table
 const createPaginationConfig = (
-    pagination: PaginationState,
-    setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
-): {
-    current: number;
-    total: number;
-    pageSizeOptions: string[];
-    onChange: (page: number, pageSize?: number) => void;
-    showTotal: (total: number) => string;
-    pageSize: number;
-    onShowSizeChange: (current: number, size: number) => void;
-    showQuickJumper: boolean;
-    showSizeChanger: boolean
-} => ({
-    current: pagination.current,
-    pageSize: pagination.pageSize,
-    total: pagination.total,
-    showSizeChanger: true,
-    pageSizeOptions: ['5', '10', '20'],
-    onChange: (page: number, pageSize?: number) => {
-        setPagination(prev => ({
-            ...prev,
-            current: page,
-            pageSize: pageSize || prev.pageSize
-        }));
-    },
-    onShowSizeChange: (current: number, size: number) => {
-        setPagination(prev => ({
-            ...prev,
-            current: 1,
-            pageSize: size
-        }));
-    },
-    showTotal: (total: number) => "",
-    showQuickJumper: true
+  pagination: PaginationState, 
+  setPagination: (pagination: PaginationState) => void
+): TablePaginationConfig => ({
+  current: pagination.current,
+  pageSize: pagination.pageSize,
+  total: pagination.total,
+  showSizeChanger: true,
+  showQuickJumper: true,
+  pageSizeOptions: ['5', '10', '20', '50'],
+  onChange: (page, pageSize) => {
+    setPagination({
+      ...pagination,
+      current: page,
+      pageSize,
+    });
+  },
 });
 
 export default createPaginationConfig;

@@ -3,22 +3,23 @@ import {LoginRequest} from "../types/login/request/loginRequest.ts";
 import axios from 'axios';
 import {BASE_API} from "../constants/BaseApi.ts";
 import Cookies from "js-cookie";
-/* eslint-disable */
+import {toast} from "react-toastify";
 
 
 export interface UserData {
-    id: string;
+    id: number;
     email: string;
+    roles: { id: number; name: string }[];
     fullName: string;
     phoneNumber: string;
-    birth: string;
     gender: string;
+    birth: string;
     avatar: string;
-    roles: string[] | null;
     isAdmin: boolean;
-    accessToken: string | undefined;
-    refreshToken: string | undefined;
+    accessToken?: string;
+    refreshToken?: string;
 }
+
 
 export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResponse> => {
 
@@ -27,7 +28,7 @@ export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResp
         const response = await axios.post(url, loginRequest);
         return response.data as LoginResponse;
     } catch (error) {
-        console.error("Error fetching roles:", error);
+        toast.error("Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!")
     }
 }
 
@@ -53,6 +54,7 @@ export const clearUserData = () => {
     localStorage.removeItem('gender');
     localStorage.removeItem('avatar');
     localStorage.removeItem('roles');
+    localStorage.removeItem('isAdmin');
 
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
@@ -91,7 +93,7 @@ export const getUserData = (): {
     email: string;
     refreshToken: string | undefined
 } => {
-    const id = localStorage.getItem('userId') || '';
+    const id = localStorage.getItem('userId') || '-1';
     const email = localStorage.getItem('email') || '';
     const fullName = localStorage.getItem('fullName') || '';
     const phoneNumber = localStorage.getItem('phoneNumber') || '';

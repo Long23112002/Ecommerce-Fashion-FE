@@ -1,0 +1,53 @@
+/* EmailRegistrationForm.css */
+
+.form-section {
+    padding: 24px;
+}
+
+.header-section {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+}
+
+.styled-title {
+    margin: 0 !important;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.styled-button {
+    background-color: #ff424e;
+    border-color: #ff424e;
+}
+
+.styled-button:hover,
+.styled-button:focus {
+    background-color: #ff6b76;
+    border-color: #ff6b76;
+}
+
+.social-button {
+    width: 48%;
+}
+
+.social-button.facebook {
+    background-color: #3b5998;
+    border-color: #3b5998;
+    color: white;
+}
+
+.social-button.facebook:hover,
+.social-button.facebook:focus {
+    background-color: #4c70ba;
+    border-color: #4c70ba;
+}
+
+.illustration-section {
+    background-color: #e5f1ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}

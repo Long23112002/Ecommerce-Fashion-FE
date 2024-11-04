@@ -6,6 +6,7 @@ import {fetchAllPermission} from "../../api/PermissionApi.ts";
 interface Permission {
     id: number;
     name: string;
+    description: string;
 }
 
 interface PermissionsCheckboxProps {
@@ -30,15 +31,21 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({permissions, s
                 size: 5,
             };
             const response = await fetchAllPermission(params);
-            if (response.length < 5) setHasMore(false);
-            setVisiblePermissions(prev => [...prev, ...response]);
-            setPage(prev => prev + 1);
+
+            if (Array.isArray(response)) {
+                if (response.length < 5) setHasMore(false);
+                setVisiblePermissions(prev => [...prev, ...response]);
+                setPage(prev => prev + 1);
+            } else {
+                console.error("Unexpected response format:", response);
+            }
         } catch (error) {
             console.error("Error fetching permissions:", error);
         } finally {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         setVisiblePermissions(permissions);
@@ -49,7 +56,7 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({permissions, s
     };
 
     const content = (
-        <div id="scrollable-list" style={{maxWidth: 300, maxHeight: 300, overflowY: 'auto'}}>
+        <div id="scrollable-list" style={{maxWidth: 200, maxHeight: 300, overflowY: 'auto'}}>
             <InfiniteScroll
                 dataLength={visiblePermissions.length}
                 next={fetchMorePermissions}
@@ -58,22 +65,25 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({permissions, s
                 endMessage={<p style={{textAlign: 'center'}}>No more permissions</p>}
                 scrollableTarget="scrollable-list"
             >
-                <Checkbox.Group
-                    style={{width: '25%'}}
-                    options={visiblePermissions.map(permission => ({
-                        label: permission.name,
-                        value: permission.id
-                    }))}
-                    onChange={handleCheckboxChange}
-                    value={selectedPermissions}
-                />
+                <div className="row">
+                    <Checkbox.Group
+                        className="col-12"
+                        style={{width: '100%'}}
+                        options={visiblePermissions.map(permission => ({
+                            label: permission.description,
+                            value: permission.id
+                        }))}
+                        onChange={handleCheckboxChange}
+                        value={selectedPermissions}
+                    />
+                </div>
             </InfiniteScroll>
         </div>
     );
 
     return (
-        <Popover content={content} title="Select Permissions" trigger="click" placement="bottomLeft">
-            <Button>{selectedPermissions.length ? 'Edit Permissions' : 'Choose Permissions'}</Button>
+        <Popover content={content} title="Danh sách quyền" trigger="click" placement="bottomLeft">
+            <Button>{selectedPermissions.length ? 'Chỉnh sửa quyền' : 'Chọn quyền'}</Button>
         </Popover>
     );
 };

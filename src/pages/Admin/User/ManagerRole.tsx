@@ -1,13 +1,23 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {createRole, deleteRole, fetchAllRole, getRoleById, updateRole} from "../../../api/RoleApi.ts";
-import {Button, Form, Popconfirm, Table} from 'antd';
+import {Button, Form, Popconfirm, Table, Tooltip} from 'antd';
 import PermissionsCheckbox from "../../../components/User/PermissionsCheckbox.tsx";
-import {assignPermissionToRole, fetchAllPermission, Permission} from "../../../api/PermissionApi.ts";
+import {assignPermissionToRole, fetchAllPermission} from "../../../api/PermissionApi.ts";
 import createPaginationConfig, {PaginationState} from "../../../config/paginationConfig.ts";
 import {Role} from "../../../types/role.ts";
 import RoleModel from "../../../components/User/RoleModel.tsx";
 import {toast} from "react-toastify";
 import Cookies from "js-cookie";
+import {getErrorMessage} from "../../Error/getErrorMessage.ts";
+import {Container} from "@mui/material";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
+
+
+interface Permission {
+    id: number;
+    name: string;
+}
+
 
 const ManagerRole = () => {
     const [loading, setLoading] = useState(true);
@@ -39,13 +49,13 @@ const ManagerRole = () => {
     const fetchRoles = async (current: number, pageSize: number) => {
         try {
             const response = await fetchAllRole("", pageSize, current - 1);
-            const rolesWithPermissions = response.data.map((role: any) => ({
+            const rolesWithPermissions = response.data.map((role: Role) => ({
                 ...role,
-                permissions: role.permissions.map((perm: any) => perm.id)
+                permissions: role.permissions.map((perm: Permission) => perm.id)
             }));
             setRoles(rolesWithPermissions);
-            const rolePermissions = response.data.reduce((acc: Record<number, number[]>, role: any) => {
-                acc[role.id] = role.permissions.map((perm: any) => perm.id);
+            const rolePermissions = response.data.reduce((acc: Record<number, number[]>, role: Role) => {
+                acc[role.id] = role.permissions.map((perm: Permission) => perm.id);
                 return acc;
             }, {});
             setSelectedPermissions(rolePermissions);
@@ -68,11 +78,11 @@ const ManagerRole = () => {
                 const roleDetails = await getRoleById(role.id);
                 form.setFieldsValue({
                     name: roleDetails.name,
-                    permissionIds: roleDetails.permissions.map((perm: any) => perm.id)
+                    permissionIds: roleDetails.permissions.map((perm: Permission) => perm.id)
                 });
                 setEditingRole(roleDetails);
             } catch (error) {
-                toast.error(error.response?.data?.message || 'Failed to fetch role details');
+                toast.error(getErrorMessage(error));
             }
         } else {
             form.resetFields();
@@ -84,24 +94,24 @@ const ManagerRole = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            const { name, permissionIds } = values;
+            const {name, permissionIds} = values;
             const token = Cookies.get("accessToken");
 
             if (token) {
                 if (mode === 'add') {
-                    await createRole({ name, permissionIds }, token);
-                    toast.success('Role added successfully');
+                    await createRole({name, permissionIds}, token);
+                    toast.success('Thêm mới vai trò thành công');
                 } else if (mode === 'update' && editingRole) {
-                    await updateRole(editingRole.id, { name, permissionIds }, token);
-                    toast.success('Role updated successfully');
+                    await updateRole(editingRole.id, {name, permissionIds}, token);
+                    toast.success('Cập nhật vai trò thành công');
                 }
                 handleCancel();
                 refreshRoles();
             } else {
-                toast.error("Authorization failed");
+                toast.error("Không có quyên truy cập");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to save role');
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -127,13 +137,14 @@ const ManagerRole = () => {
             const token = Cookies.get("accessToken");
             if (token) {
                 await deleteRole(roleId, token);
-                toast.success("Role deleted successfully");
+                toast.success("Xóa vài trò thành công");
                 refreshRoles();
             } else {
                 toast.error("Authorization failed");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to delete role');
+            console.log(getErrorMessage(error));
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -153,15 +164,15 @@ const ManagerRole = () => {
             key: 'id',
         },
         {
-            title: 'Role Name',
-            dataIndex: 'name',
+            title: 'Tên vai trò',
+            dataIndex: 'description',
             key: 'name',
         },
         {
-            title: 'Permissions',
+            title: 'Quyền',
             dataIndex: 'permissions',
             key: 'permissions',
-            render: (_, record) => (
+            render: (_: any, record: Permission) => (
                 <PermissionsCheckbox
                     permissions={permissions}
                     selectedPermissions={selectedPermissions[record.id] || []}
@@ -170,20 +181,30 @@ const ManagerRole = () => {
             )
         },
         {
-            title: 'Actions',
+            title: 'Thao tác',
             key: 'actions',
-            render: (_, record) => (
+            render: (_: any, record: any) => (
                 <div>
-                    <Button onClick={() => showModal(record)} style={{marginRight: 8}}>
-                        Update
-                    </Button>
+                    <Tooltip title="Chỉnh sửa">
+                        <Button
+                            className="btn-outline-warning"
+                            onClick={() => showModal(record)}
+                            style={{marginRight: 8}}
+                        >
+                            <i className="fa-solid fa-pen-to-square"></i>
+                        </Button>
+                    </Tooltip>
                     <Popconfirm
-                        title="Are you sure you want to delete this role?"
+                        title="Bạn có chắc chắn muốn xóa vai trò này ?"
                         onConfirm={() => handleDelete(record.id)}
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button className="btn-outline-danger">Delete</Button>
+                        <Tooltip title="Xóa vai trò" placement="bottom">
+                            <Button className="btn-outline-danger">
+                                <i className="fa-solid fa-trash-can"></i>
+                            </Button>
+                        </Tooltip>
                     </Popconfirm>
                 </div>
             ),
@@ -191,34 +212,39 @@ const ManagerRole = () => {
     ];
 
     return (
-        <div className="text-center" style={{height: '200vh', marginLeft: 20, marginRight: 20}}>
-            <h1 className="text-danger">Manager Role</h1>
-            <Button
-                className="mt-3 mb-3"
-                style={{display: "flex", backgroundColor: "black", color: "white"}}
-                type="default"
-                onClick={() => showModal(null)}
-            >
-                Add Role
-            </Button>
-            <RoleModel
-                isModalOpen={isModalOpen}
-                handleOk={handleOk}
-                handleCancel={handleCancel}
-                form={form}
-                refreshRoles={refreshRoles}
-                mode={editingRole ? 'update' : 'add'}
-                role={editingRole || undefined}
-            />
+        <Container maxWidth='xl'>
+            <div>
+                <h1 className="text-danger text-center">Quản lí vai trò</h1>
+                <Button
+                    className="mt-3 mb-3"
+                    style={{display: "flex", backgroundColor: "black", color: "white"}}
+                    type="default"
+                    onClick={() => showModal(null)}
+                >
+                    Thêm mới
+                </Button>
+                <RoleModel
+                    isModalOpen={isModalOpen}
+                    handleOk={handleOk}
+                    handleCancel={handleCancel}
+                    form={form}
+                    refreshRoles={refreshRoles}
+                    mode={editingRole ? 'update' : 'add'}
+                    role={editingRole || undefined}
+                />
 
-            <Table
-                dataSource={roles}
-                columns={columns}
-                loading={loading}
-                rowKey="id"
-                pagination={createPaginationConfig(pagination, setPagination)}
-            />
-        </div>
+                <Table
+                    dataSource={roles}
+                    columns={columns}
+                    loading={{
+                        spinning: loading,
+                        indicator: <LoadingCustom />,
+                    }}
+                    rowKey="id"
+                    pagination={createPaginationConfig(pagination, setPagination)}
+                />
+            </div>
+        </Container>
     );
 };
 

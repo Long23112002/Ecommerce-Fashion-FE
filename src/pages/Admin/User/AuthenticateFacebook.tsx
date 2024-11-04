@@ -1,9 +1,10 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {Box, CircularProgress, Typography} from "@mui/material"
+import {Box, Typography} from "@mui/material"
 import {storeUserData} from "../../../api/AuthApi.ts";
 import Cookie from "js-cookie";
 import {Spin} from "antd";
+import {BASE_API} from "../../../constants/BaseApi.ts";
 
 export default function AuthenticateFacebook() {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function AuthenticateFacebook() {
         if (isMatch) {
             const authCode = isMatch[1];
 
-            fetch(`http://localhost:8080/api/v1/auth/facebook-login`, {
+            fetch(`${BASE_API}/api/v1/auth/facebook-login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export default function AuthenticateFacebook() {
 
     useEffect(() => {
         if (!loading && Cookie.get('accessToken')) {
-            navigate('/admin/user/role');
+            navigate('/');
         }
     }, [loading, navigate]);
     return (
@@ -57,7 +58,7 @@ export default function AuthenticateFacebook() {
                 }}
             >
                 <Spin tip={"loading"} size="large"></Spin>
-                <Typography>Authenticating...</Typography>
+                <Typography>Đang xác minh...</Typography>
             </Box>
         </>
     );

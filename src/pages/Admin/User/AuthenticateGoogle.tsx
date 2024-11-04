@@ -4,6 +4,7 @@ import {storeUserData} from "../../../api/AuthApi.ts";
 import {Box, Typography} from "@mui/material";
 import {Spin} from "antd";
 import Cookie from "js-cookie";
+import {BASE_API} from "../../../constants/BaseApi.ts";
 
 
 export default function AuthenticateGoogle() {
@@ -17,7 +18,7 @@ export default function AuthenticateGoogle() {
         if (isMatch) {
             const authCode = isMatch[1];
 
-            fetch(`http://localhost:8080/api/v1/auth/google-login?code=${authCode}`, {
+            fetch(`${BASE_API}/api/v1/auth/google-login?code=${authCode}`, {
                 method: "POST",
             })
                 .then((response) => {
@@ -34,7 +35,7 @@ export default function AuthenticateGoogle() {
     }, []);
     useEffect(() => {
         if (!loading && Cookie.get('accessToken')) {
-            navigate('/admin/user/role');
+            navigate('/');
         }
     }, [loading, navigate]);
 
@@ -51,7 +52,7 @@ export default function AuthenticateGoogle() {
                 }}
             >
                 <Spin tip={"loading"} size="large"></Spin>
-                <Typography>Authenticating...</Typography>
+                <Typography>Đang xác minh...</Typography>
             </Box>
         </>
     );

@@ -1,20 +1,22 @@
 import { UserData } from "../api/AuthApi";
 export enum TypeDiscount {
+    "NONE" = "",
     PERCENTAGE = 'PERCENTAGE',  // Phần trăm
     FIXED_AMOUNT = 'FIXED_AMOUNT'  // Số tiền cố định
 }
 
 export enum StatusDiscount {
-    ACTIVE = 'ACTIVE',  // Đang hoạt động
-    INACTIVE = 'INACTIVE',  // Không hoạt động
-    EXPIRED = 'EXPIRED' // ko hoat dong
+    "NONE" = "",
+    UPCOMING = 'UPCOMING',
+    ACTIVE = 'ACTIVE',
+    ENDED = 'ENDED'
 }
 
 export interface Condition {
-    productId: number;        // Mã sản phẩm
-    brandId: number;          // Mã thương hiệu
-    categoryId: number;       // Mã danh mục
-    productDetailId: number;  // Mã chi tiết sản phẩm
+    productId: number[];        // Mã sản phẩm
+    brandId: number[];          // Mã thương hiệu
+    categoryId: number[];       // Mã danh mục
+    productDetailId: number[];  // Mã chi tiết sản phẩm
 }
 export interface Discount {
     id: number;
@@ -33,3 +35,15 @@ export interface Discount {
     updateBy: UserData | null; // Người chỉnh sửa giảm giá lần cuối, có thể null
     deleted: boolean;  // Cờ cho việc xóa mềm
 }
+export const StatusDiscountLable: Record<StatusDiscount, string> = {
+    [StatusDiscount.UPCOMING]: "Chưa diễn ra",
+    [StatusDiscount.ACTIVE]: "Đang diễn ra",
+    [StatusDiscount.ENDED]: "Đã kết thúc",
+    [StatusDiscount.NONE]: "chưa xác định",
+}
+
+export const TypeDiscountLabel: Record<TypeDiscount, string> = {
+    [TypeDiscount.PERCENTAGE]: "Giảm theo %",
+    [TypeDiscount.FIXED_AMOUNT]: "Giảm theo số tiền",
+    [TypeDiscount.NONE]: "Chưa xác định",
+};

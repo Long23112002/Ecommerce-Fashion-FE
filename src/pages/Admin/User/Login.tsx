@@ -1,22 +1,20 @@
-import React from 'react';
-import {Form, Input, Button, Divider, Typography} from 'antd';
 import {
-    UserOutlined,
-    LockOutlined,
     EyeInvisibleOutlined,
     EyeTwoTone,
+    FacebookFilled,
     GoogleOutlined,
-    FacebookFilled
+    LockOutlined,
+    UserOutlined
 } from '@ant-design/icons';
-import {LoginRequest} from "../../../types/login/request/loginRequest.ts";
-import {ToastContainer, toast} from 'react-toastify';
+import { Button, Divider, Form, Input, Typography } from 'antd';
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {handleLogin, storeUserData} from "../../../api/AuthApi.ts";
-import Cookies from 'js-cookie'
-import {useNavigate} from "react-router-dom";
-import {OAuth2Config, OAuth2ConfigFB} from "../../../config/auth2Config.ts";
+import { handleLogin, storeUserData } from "../../../api/AuthApi.ts";
+import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../../api/Oauth2.ts";
+import { LoginRequest } from "../../../types/login/request/loginRequest.ts";
 
-const {Title} = Typography;
+const { Title } = Typography;
 
 export default function Login() {
     const [form] = Form.useForm();
@@ -26,47 +24,18 @@ export default function Login() {
         try {
             const response = await handleLogin(values);
             if (response) {
-                toast.success('Login successfully!');
+                toast.success('Đăng nhập thành công!');
                 storeUserData(response);
                 setTimeout(() => {
                     navigate('/admin/user/role');
                 }, 1000);
             }
         } catch (error) {
-            toast.error('Login failed!');
-            console.error('Login failed:', error);
+            console.log(error)
+            toast.error('Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!');
         }
     };
 
-    const handleContinueWithGoogle = () => {
-        const callbackUrl = OAuth2Config.redirectUri;
-        const authUrl = OAuth2Config.authUri;
-        const googleClientId = OAuth2Config.clientId;
-
-        const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
-            callbackUrl
-        )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
-
-        console.log(targetUrl);
-
-        window.location.href = targetUrl;
-    };
-
-    const handleContinueWithFacebook = () => {
-        const callbackUrl = OAuth2ConfigFB.redirectUri;
-        const authUrl = OAuth2ConfigFB.authUri;
-        const facebookClientId = OAuth2ConfigFB.clientId;
-
-        const targetUrl = `${authUrl}?client_id=${facebookClientId}&redirect_uri=${encodeURIComponent(
-            callbackUrl
-        )}&state=${encodeURIComponent(
-            JSON.stringify({callbackUrl})
-        )}&response_type=code&scope=email,public_profile`;
-
-        console.log(targetUrl);
-
-        window.location.href = targetUrl;
-    };
 
     return (
         <div style={{
@@ -84,7 +53,7 @@ export default function Login() {
                 borderRadius: '8px',
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)'
             }}>
-                <Title level={2} style={{textAlign: 'center', marginBottom: '2rem'}}>
+                <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     Admin Login
                 </Title>
                 <Form
@@ -96,30 +65,30 @@ export default function Login() {
                     <Form.Item
                         name="email"
                         rules={[
-                            {required: true, message: 'Please input your Email!'},
-                            {type: 'email', message: 'Please enter a valid email!'}
+                            { required: true, message: 'Please input your Email!' },
+                            { type: 'email', message: 'Please enter a valid email!' }
                         ]}
                     >
                         <Input
-                            prefix={<UserOutlined style={{color: 'rgba(0,0,0,.25)'}}/>}
+                            prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                             placeholder="Email"
                             size="large"
                         />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={[{required: true, message: 'Please input your Password!'}]}
+                        rules={[{ required: true, message: 'Please input your Password!' }]}
                     >
                         <Input.Password
-                            prefix={<LockOutlined style={{color: 'rgba(0,0,0,.25)'}}/>}
+                            prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                             placeholder="Password"
-                            iconRender={(visible) => (visible ? <EyeTwoTone/> : <EyeInvisibleOutlined/>)}
+                            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                             size="large"
                         />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit"
-                                style={{width: '100%', backgroundColor: 'black', borderColor: 'black'}} size="large">
+                            style={{ width: '100%', backgroundColor: 'black', borderColor: 'black' }} size="large">
                             Sign in with Email
                         </Button>
                     </Form.Item>
@@ -127,17 +96,17 @@ export default function Login() {
 
                 <Divider plain>Or continue with</Divider>
 
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <Button
-                        icon={<GoogleOutlined/>}
+                        icon={<GoogleOutlined />}
                         onClick={handleContinueWithGoogle}
                         size="large"
-                        style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
                         Google
                     </Button>
                     <Button
-                        icon={<FacebookFilled/>}
+                        icon={<FacebookFilled />}
                         onClick={handleContinueWithFacebook}
                         style={{
                             backgroundColor: '#1877F2',
@@ -154,7 +123,6 @@ export default function Login() {
                 </div>
             </div>
 
-            <ToastContainer/>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Form, Modal, Input, Button, Select, Spin} from 'antd';
+import {Button, Form, Input, Modal, Select, Spin} from 'antd';
 import {fetchAllPermission} from '../../api/PermissionApi.ts';
 import {Role} from "../../types/role.ts";
 /* eslint-disable */
@@ -46,7 +46,7 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
     useEffect(() => {
         if (mode === 'update' && role) {
             form.setFieldsValue({
-                name: role.name,
+                name: role.description,
                 permissionIds: role.permissions.map((perm: any) => perm.id),
             });
         } else {
@@ -61,7 +61,7 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
 
     return (
         <Modal
-            title={mode === 'update' ? 'Update Role' : 'Add Role'}
+            title={mode === 'update' ? 'Cập nhập vai trò' : 'Thêm vai trò'}
             visible={isModalOpen}
             onOk={() => form.submit()}
             onCancel={handleCancel}
@@ -70,7 +70,7 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
                     Cancel
                 </Button>,
                 <Button key="submit" type="primary" onClick={() => form.submit()}>
-                    {mode === 'update' ? 'Update' : 'Add'}
+                    {mode === 'update' ? 'Cập nhập' : 'Thêm mới'}
                 </Button>,
             ]}
         >
@@ -82,20 +82,20 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
             >
                 <Form.Item
                     name="name"
-                    label="Role Name"
-                    rules={[{required: true, message: 'Please input the role name!'}]}
+                    label="Tên vai trò"
+                    rules={[{required: true, message: 'Tên vai trò không được để trống !'}]}
                 >
-                    <Input placeholder="Enter role name"/>
+                    <Input placeholder="Tên vai trò"/>
                 </Form.Item>
 
                 <Form.Item
                     name="permissionIds"
-                    label="Permissions"
-                    rules={[{required: true, message: 'Please select at least one permission'}]}
+                    label="Quyền"
+                    rules={[{required: true, message: 'Vui lòng chọn ít nhất một quyền !'}]}
                 >
                     <Select
                         mode="multiple"
-                        placeholder="Select permissions"
+                        placeholder="Chọn quyền"
                         filterOption={false}
                         onSearch={handleSearch}
                         notFoundContent={loading ? <Spin size="small"/> : null}

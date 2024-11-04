@@ -1,80 +1,51 @@
-import axiosInstance from './AxiosInstance';  // Sử dụng axios instance đã cấu hình sẵn
-import { ResponseData } from '../types/responseApi';  // Định nghĩa phản hồi API
-import { Discount } from '../types/discount.ts';  // Định nghĩa kiểu Discount
-import { AxiosResponse } from 'axios';
+import axiosInstance from './AxiosInstance';
 import { BASE_API } from "../constants/BaseApi.ts";
-/* eslint-disable */
-export interface DiscountParams {
-  type?: string;
-  status?: string;
-  name?: string;
-}
-export enum TypeDiscount {
-  PERCENTAGE = 'PERCENTAGE', // Giảm giá theo phần trăm
-  FIXED_AMOUNT = 'FIXED_AMOUNT' // Giảm giá số tiền cố định
-}
+const BASE_URL = `${BASE_API}/api/v1/discount`;
 
-export enum StatusDiscount {
-  ACTIVE = 'ACTIVE', // Giảm giá đang hoạt động
-  INACTIVE = 'INACTIVE', // Giảm giá không hoạt động
-  EXPIRED = 'EXPIRED'
-}
-// Hàm lấy tất cả các chương trình giảm giá
-export const fetchAllDiscount = async (
-  params: DiscountParams = {},
-  size: number,
-  page: number
-): Promise<AxiosResponse<ResponseData>> => {
-  const url = `${BASE_API}/api/v1/discount`;
-  const response = await axiosInstance.get(url, {
-    params: { ...params, size, page: page }
-  });
-  return response.data;
-};
-
-// Hàm lấy thông tin chi tiết của giảm giá theo ID
-export const getDiscountById = async (discountId: number): Promise<Discount> => {
-  try {
-    const url = `${BASE_API}/api/v1/discount/${discountId}`;
-    const response = await axiosInstance.get(url);
-    console.log("Dữ liệu nhận được từ API:", response.data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Hàm tạo mới một chương trình giảm giá
-export const createDiscount = async (data: Discount, token: string): Promise<Discount> => {
-  const url = `${BASE_API}/api/v1/discount`;
-  const response = await axiosInstance.post(url, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+// Hàm lấy danh sách khuyến mãi với phân trang và tìm kiếm theo tên
+export const fetchAllDiscounts = async (pageSize: number, page: number, searchName: string) => {
+  const response = await axiosInstance.get(`${BASE_URL}`, {
+    params: {
+      page,
+      size: pageSize,
+      name: searchName
     }
   });
   return response.data;
 };
 
-// Hàm cập nhật giảm giá theo ID
-export const updateDiscount = async (discountId: number, data: Discount, token: string): Promise<Discount> => {
-  const url = `${BASE_API}/api/v1/discount/${discountId}`;
-  const response = await axiosInstance.put(url, data, {
+// Hàm lấy chi tiết một khuyến mãi theo ID
+export const getDiscountById = async (id: number) => {
+  const response = await axiosInstance.get(`${BASE_URL}/${id}`);
+  return response.data;
+};
+
+// Hàm tạo một khuyến mãi mới
+export const createDiscount = async (discountData: { name: string; value: number; maxValue: number }, token: string) => {
+  const response = await axiosInstance.post(`${BASE_URL}`, discountData, {
     headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
     }
   });
   return response.data;
 };
 
-// Hàm xóa một chương trình giảm giá theo ID
-export const deleteDiscount = async (discountId: number, token: string): Promise<void> => {
-  const url = `${BASE_API}/api/v1/discount/${discountId}`;
-  await axiosInstance.delete(url, {
+// Hàm cập nhật khuyến mãi theo ID
+export const updateDiscount = async (id: number, discountData: { name: string; value: number; maxValue: number }, token: string) => {
+  const response = await axiosInstance.put(`${BASE_URL}/${id}`, discountData, {
     headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
     }
   });
+  return response.data;
+};
+
+// Hàm xóa khuyến mãi theo ID
+export const deleteDiscount = async (id: number, token: string) => {
+  const response = await axiosInstance.delete(`${BASE_URL}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
 };
