@@ -120,9 +120,15 @@ const UserInfoPage: React.FC = () => {
         userAction.save(userResponse);
         storeUserData(newInfoData);
         toast.success('Đổi thông tin thành công');
-      } catch (error) {
-        console.log(error)
-        toast.error('Lỗi đổi thông tin');
+      } catch (error: any) {
+        const messages = error.response.data.message;
+        if (typeof messages == 'object') {
+          const firstKey = Object.keys(messages)[0];
+          const firstMessage = messages[firstKey];
+          toast.error(firstMessage);
+          return;
+        }
+        toast.error(messages);
       }
     }
   };
