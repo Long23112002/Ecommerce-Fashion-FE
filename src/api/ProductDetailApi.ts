@@ -1,17 +1,18 @@
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance from "./AxiosInstance";
+import { UploadFile } from "antd";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product-detail`
 
-export interface FileImage {
+export interface FileImage<T = any> extends UploadFile {
     url: string;
 }
 
 interface ProductDetailData {
     price: number;
     quantity: number;
-    images: FileImage[] | null;
+    images: String[] | null;
     idProduct: number;
     idSize: number;
     idColor: number;
@@ -37,10 +38,6 @@ export const getProductDetailByIdProduct = async (
     pageSize: number,
     page: number,
 ) => {
-    const token = Cookies.get("accessToken");
-    const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
-    };
     const params = {
         size: pageSize,
         page: page,
@@ -51,5 +48,23 @@ export const getProductDetailByIdProduct = async (
     } catch (error) {
         console.error("Error fetching product detail by id product", error);
         throw error;
+    }
+}
+
+export const deleteProductDetail = async (productDetailId: number) => {
+    try {
+        const response = await axiosInstance.delete(`${API_BASE_URL}/${productDetailId}`)
+        return response.data;
+    } catch (error: any) {
+        throw new Error(`Error deleting product detail: ${error.response?.data?.message || error.message}`);
+    }
+}
+
+export const getProductDetailById = async (productDetailId: number) => {
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/${productDetailId}`)
+        return response.data;
+    } catch (error: any) {
+        throw new Error(`Error getting product detail: ${error.response?.data?.message || error.message}`);
     }
 }

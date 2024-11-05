@@ -1,28 +1,34 @@
-import { Button, Col, Form, FormInstance, Input, message, Modal, Row, Select, Upload } from 'antd'
+import { Button, Col, Form, FormInstance, Input, message, Modal, Row, Select, Upload, UploadProps } from 'antd'
 import { Size } from '../../pages/Admin/Attributes/size/size';
 import { Color } from '../../pages/Admin/Attributes/color/color';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import axios from 'axios';
+import { RcFile, UploadChangeParam, UploadFile } from 'antd/es/upload';
 
 interface AddProductDetailModalProps {
     isModalOpen: boolean,
     handleOk: (values: any) => void;
     handleCancel: () => void;
-    handleUploadChange: (values: any) => void;
     form: FormInstance;
     sizes: Size[];
     colors: Color[];
-    urls: any;
+    normFile: (e: any) => any[] | undefined;
+    handleUpload: (file: RcFile) => Promise<boolean | void>
+    fileList: UploadFile[]
 }
 
 const AddProductDetailModal: React.FC<AddProductDetailModalProps> = ({
     isModalOpen,
     handleOk,
     handleCancel,
-    handleUploadChange,
     form,
     sizes,
     colors,
-    urls
+    normFile,
+    handleUpload,
+    fileList
+
 }) => {
 
     const onSubmit = async () => {
@@ -154,20 +160,21 @@ const AddProductDetailModal: React.FC<AddProductDetailModalProps> = ({
                         ))}
                     </Select>
                 </Form.Item>
-                
-                {/* <Form.Item label="Hình ảnh" valuePropName="images" getValueFromEvent={urls} >
+
+                <Form.Item label="Upload" valuePropName="images" getValueFromEvent={normFile}>
                     <Upload
                         listType="picture-card"
-                        onChange={handleUploadChange}
+                        fileList={fileList}
+                        customRequest={({ file }) => handleUpload(file as RcFile)}
                     >
                         <button style={{ border: 0, background: 'none' }} type="button">
                             <PlusOutlined />
                             <div style={{ marginTop: 8 }}>Upload</div>
                         </button>
                     </Upload>
-                </Form.Item> */}
+                </Form.Item>
             </Form>
-        </Modal>
+        </Modal >
     )
 }
 

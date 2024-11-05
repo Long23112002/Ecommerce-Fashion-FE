@@ -1,4 +1,4 @@
-import { Button, Form, message, Popconfirm, Table } from "antd";
+import { Button, Form, Image, message, Popconfirm, Table } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { ProductDetail } from "../../../../types/ProductDetail";
 import AddProductDetailModal from "../../../../components/ProductDetail/AddProductDetailModal";
@@ -10,7 +10,7 @@ import { fetchAllProducts } from "../../../../api/ProductApi";
 import { useLocation } from "react-router-dom";
 import ProductModal from "../../../../components/Product/ProductModal";
 import Cookies from 'js-cookie';
-import { addProductDetail, getProductDetailByIdProduct } from "../../../../api/ProductDetailApi";
+import { addProductDetail, deleteProductDetail, FileImage, getProductDetailById, getProductDetailByIdProduct } from "../../../../api/ProductDetailApi";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../../Error/getErrorMessage";
 import { fetchAllColors } from "../../Attributes/color/colorManagament";
@@ -19,6 +19,10 @@ import { postImage } from "../../../../api/ImageApi";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom";
 import { debounce } from "lodash";
 import createPaginationConfig, { PaginationState } from "../../../../config/paginationConfig";
+import axios from "axios";
+import { RcFile, UploadFile } from "antd/es/upload";
+import ModalViewProductDetail from "../../../../components/ProductDetail/ModalViewProductDetail";
+import { FileImageOutlined } from "@ant-design/icons";
 
 const ManageProductDetail = () => {
     const [form] = Form.useForm();
@@ -26,14 +30,13 @@ const ManageProductDetail = () => {
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
 
     const [productDetail, setProductDetail] = useState<ProductDetail | null>(null);
+    const [isModalViewOpen, setIsModalViewOpen] = useState<boolean>(false);
 
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
     const [isproductDetailsLoading, setIsProductDetailsLoading] = useState<boolean>(false);
 
-    const [products, setProducts] = useState<Product[]>([]);
-    const [url, setUrl] = useState(String)
+    const [imageList, setImageList] = useState<FileImage[]>([]);
     const [urls, setUrls] = useState<String[]>([]);
-    const [selectedFile, setSelectedFile] = useState<false | null>(null);
 
     const location = useLocation();
     const product = location.state?.product;
@@ -51,6 +54,15 @@ const ManageProductDetail = () => {
         total: 20,
         totalPage: 4
     })
+
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+
+    const normFile = (e: any): any[] | undefined => {
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e && e.fileList;
+    };
 
     const fetchColors = async () => {
         setIsColorLoading(true);
@@ -92,10 +104,11 @@ const ManageProductDetail = () => {
         try {
             const values = await form.validateFields();
             const { price, quantity, idColor, idSize } = values;
+            const images = imageList;
             const token = Cookies.get("accessToken");
             const idProduct = product.id;
             if (token) {
-                await addProductDetail({ price, quantity, idProduct, idColor, idSize }, token);
+                await addProductDetail({ price, quantity, images, idProduct, idColor, idSize }, token);
                 toast.success('Thêm sản phẩm Thành Công');
                 handleAddCancel();
                 // refreshProducts();
@@ -107,44 +120,98 @@ const ManageProductDetail = () => {
         }
     };
 
-    const handleUploadChange = async (e: any) => {
-        console.log('chay vao day');
-
-        if (e.file.status === 'done') {
-            console.log('done');
-
-            try {
-                const formData = new FormData();
-                // formData.append(e.file.originFileObj);
-                console.log('formData');
-
-                formData.append('file', e.file.originFileObj);
-
-                // Gọi API tải ảnh và nhận URL trả về
-                const response = await postImage(formData);
-
-                // Cập nhật URL vào state
-                setUrls((prevUrls) => [...prevUrls, response.url]);
-
-                message.success(`${e.file.name} tải lên thành công`);
-            } catch (error) {
-                console.error("Lỗi khi tải ảnh:", error);
-                message.error(`${e.file.name} tải lên thất bại.`);
+    const handleDelete = async (productId: number) => {
+        try {
+            const token = Cookies.get("accessToken");
+            if (token) {
+                await deleteProductDetail(productId, token);
+                toast.success("Xóa Thành Công");
+                refreshProducts();
+            } else {
+                toast.error("Authorization failed")
             }
-        } else if (e.file.status === 'error') {
-            message.error(`${e.file.name} tải lên thất bại.`);
+        } catch (error) {
+            toast.error(getErrorMessage(error))
+        }
+    }
+
+    const handleView = (productDetail: ProductDetail) => {
+        setProductDetail(productDetail);
+        setIsModalViewOpen(true);
+    }
+
+    const handleDetailCancel = () => {
+        setIsModalViewOpen(false);
+        setProductDetail(null)
+    }
+
+    const showUpdateModal = async (productDetail: ProductDetail | null = null) => {
+        if (productDetail) {
+            try {
+                const productItem = await getProductDetailById(productDetail.id);
+                form.setFieldsValue({
+                    price: productDetail.price,
+                    quantity: productDetail.quantity,
+                    images: productDetail.images,
+
+                })
+                setEditingProduct(productItem);
+            } catch (error) {
+                toast.error(error.response?.data?.message || 'Failed to fetch product item');
+            }
+            setIsItemUpdateOpen(true);
+        }
+    }
+
+    const handleUpload = async (file: RcFile): Promise<boolean | void> => {
+        const objectId = x.toString();
+        const objectName = product.name;
+
+        // Tạo formData và đính kèm thông tin cần gửi
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("objectId", objectId);
+        formData.append("objectName", objectName);
+
+        try {
+            const response = await axios.post("http://ecommerce-fashion.site:9099/api/v1/images", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            const url = response.data?.file?.[0]?.url;
+
+            setUrls((prevUrls) => [...prevUrls, url]);
+
+            setImageList((prevImages) => [...prevImages, { url: url }]);
+
+            // set để ảnh hiển thị preview
+            setFileList((prevFileList) => [
+                ...prevFileList,
+                {
+                    uid: file.uid,
+                    name: file.name,
+                    status: "done",
+                    url: url, // sử dụng URL nhận được từ API
+                },
+            ]);
+
+            message.success(`${file.name} tải lên thành công!`);
+            return false; // Ngăn chặn upload mặc định của Ant Design
+        } catch (error) {
+            message.error(`${file.name} tải lên thất bại.`);
+            console.error("Error uploading file:", error);
         }
     };
 
-    const fetchProductDetailsDebounced = useCallback(debounce(async ( pageSize: number, current: number, id: number) => {
-        setIsProductDetailsLoading(true);
+    const fetchProductDetailsDebounced = useCallback(debounce(async (
+        id: number,
+        current: number,
+        pageSize: number,
+    ) => {
+        setLoading(true);
         try {
-            fetchColors()
-            fetchSizes()
-
-            const response = await getProductDetailByIdProduct(id, pageSize, current);
+            const response = await getProductDetailByIdProduct(id, pageSize, current - 1);
             setProductDetails(response.data);
-            console.log(response);
 
             setPagination({
                 current: response.metaData.page + 1,
@@ -153,26 +220,65 @@ const ManageProductDetail = () => {
                 totalPage: response.metaData.totalPage
             })
         } catch (error) {
-            console.error("Error fetching product details: ", error)
+            console.error("Error fetching products: ", error)
         } finally {
-            setIsProductDetailsLoading(false)
+            setLoading(false)
         }
     }, 500), [])
 
-    const fetchProductDetails = (current: number, pageSize: number) => {
-        // console.log(x);
-        
-        fetchProductDetailsDebounced(x,pageSize, current);
+    const fetchProductDetails = (id: number, current: number, pageSize: number) => {
+        fetchProductDetailsDebounced(id, current, pageSize);
     }
 
+    const refreshProducts = () => {
+        // fetchProductDetailByIdProduct(pagination.current, pagination.pageSize)
+    }
+
+    // const fetchProductDetailByIdProduct = async () => {
+    //     setIsProductDetailsLoading(true);
+    //     try {
+    //         const response = await getProductDetailByIdProduct(x);
+    //         setProductDetails(response.data)
+    //     } catch (error) {
+    //         console.log('Loi');
+
+    //     } finally {
+    //         setIsProductDetailsLoading(false)
+    //     }
+    // }
+
     useEffect(() => {
-       setX(product.id)
-       console.log(x);
-       
-        fetchProductDetails(pagination.current, pagination.pageSize);
+        fetchColors()
+        fetchSizes()
+        // fetchProductDetailByIdProduct()
+        fetchProductDetails(x, pagination.current, pagination.pageSize)
+        // fetchProductDetails(pagination.current, pagination.pageSize)
+        // console.log(urls);
+
     }, [pagination.current, pagination.pageSize])
 
     const columns = [
+        {
+            title: 'Hình ảnh',
+            dataIndex: 'images',
+            key: 'images',
+            render: (images: { url: string }[] | null | undefined) => (
+                images && images.length > 0 ? (
+                    <Image
+                        width={120}
+                        src={images[0].url} // Hiển thị URL đầu tiên
+                        alt="first-image"
+                        style={{ borderRadius: '10px' }}
+                    />
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', color: '#aaa'}}>
+                        <FileImageOutlined style={{ fontSize: '24px', marginRight: '8px' }} />
+                        {/* <span>No Image</span> */}
+                    </div>
+                    // <span>No Image</span> // Xử lý nếu không có ảnh nào
+                )
+            ),
+        },
         {
             title: 'Màu sắc',
             dataIndex: 'color',
@@ -195,38 +301,34 @@ const ManageProductDetail = () => {
             dataIndex: 'quantity',
             key: 'quantity',
         },
-        // {
-        //     title: 'Thao tác',
-        //     key: 'actions',
-        //     render: (_, record) => (
-        //         <div>
-        //             <Button onClick={() => handleDetailProduct(record)} className="btn-outline-warning">
-        //                 <i className="fa-solid fa-eye"></i>
-        //             </Button>
-        //             <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
-        //                 <i className="fa-solid fa-pen-to-square"></i>
-        //             </Button>
-        //             <Popconfirm
-        //                 title="Bạn chắc chắn muốn xóa Sản phẩm này?"
-        //                 onConfirm={() => handleDelete(record.id)}
-        //                 okText="Có"
-        //                 cancelText="Hủy"
-        //             >
-        //                 <Button className="btn-outline-danger">
-        //                     <i className="fa-solid fa-trash-can"></i>
-        //                 </Button>
-        //             </Popconfirm>
-
-        //             <Button onClick={() => showViewDetail(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
-        //                 <i className="fa-solid fa-eye"></i>
-        //             </Button>
-        //         </div>
-        //     ),
-        // },
+        {
+            title: 'Thao tác',
+            key: 'actions',
+            render: (_, record) => (
+                <div>
+                    <Button onClick={() => handleView(record)} className="btn-outline-warning">
+                        <i className="fa-solid fa-eye"></i>
+                    </Button>
+                    <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
+                        <i className="fa-solid fa-pen-to-square"></i>
+                    </Button>
+                    <Popconfirm
+                        title="Bạn chắc chắn muốn xóa Sản phẩm này?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Có"
+                        cancelText="Hủy"
+                    >
+                        <Button className="btn-outline-danger">
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                    </Popconfirm>
+                </div>
+            ),
+        },
     ]
     return (
         <div className='text-center' style={{ marginLeft: 20, marginRight: 20 }}>
-            <h1 className='text-danger'>Thêm sản phẩm chi tiết </h1>
+            <h1 className='text-danger'>Thông tin sản phẩm chi tiết </h1>
             <ProductModal
                 product={product}
             />
@@ -243,7 +345,7 @@ const ManageProductDetail = () => {
                     loading={{
                         spinning: isproductDetailsLoading,
                         indicator: <LoadingCustom />,
-                      }}
+                    }}
                     pagination={createPaginationConfig(pagination, setPagination)}
 
                     expandable={{ childrenColumnName: 'children' }}
@@ -259,11 +361,17 @@ const ManageProductDetail = () => {
                 isModalOpen={isModalAddOpen}
                 handleOk={handleAddOk}
                 handleCancel={handleAddCancel}
-                handleUploadChange={handleUploadChange}
                 form={form}
                 sizes={sizes}
                 colors={colors}
-                urls={urls}
+                normFile={normFile}
+                fileList={fileList}
+                handleUpload={handleUpload}
+            />
+            <ModalViewProductDetail
+                visible={isModalViewOpen}
+                onCancel={handleDetailCancel}
+                productDetail={productDetail}
             />
         </div>
     )

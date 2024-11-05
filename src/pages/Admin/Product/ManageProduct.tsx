@@ -284,10 +284,10 @@ const ProductManager = () => {
   ) => {
     setLoading(true);
     try {
-      fetchDropDownOrigins();
-      fetchDropDownBrand();
-      fetchDropDownMaterial();
-      fetchDropDownCategories();
+      // fetchDropDownOrigins();
+      // fetchDropDownBrand();
+      // fetchDropDownMaterial();
+      // fetchDropDownCategories();
 
       const response = await fetchAllProducts(pageSize, current - 1, keyword, idOrigin, idBrand, idMaterial, idCategory);
       setProducts(response.data);
@@ -310,6 +310,10 @@ const ProductManager = () => {
   }
   useEffect(() => {
     fetchProducts(pagination.current, pagination.pageSize);
+    fetchDropDownOrigins();
+    fetchDropDownBrand();
+    fetchDropDownMaterial();
+    fetchDropDownCategories();
 
   }, [pagination.current, pagination.pageSize, searchParams])
 
