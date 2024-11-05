@@ -30,6 +30,7 @@
     "frontend-ecommerce-fashion": "file:",
     "html-to-react": "^1.7.0",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.436.0",
     "moment": "^2.30.1",

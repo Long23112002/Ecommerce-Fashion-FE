@@ -8,69 +8,80 @@ import {
     IconButton,
     Typography
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductDetail from '../../../types/ProductDetail';
+import Cookies from 'js-cookie';
+import { fetchCartByUserId, createCart, updateCart, deleteCart } from '../../../api/CartApi';
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
+import { toast } from "react-toastify";
 
 const CartPage = () => {
-    const [productDetails, setProductDetails] = useState<ProductDetail[]>([
-        {
-            id: 1,
-            price: 299000,
-            product: {
-                name: 'Áo Phông Nam Clean Việt Nam',
-            },
-            images: ['https://m.yodycdn.com/fit-in/filters:format(webp)/products/ao-thun-nam-clean-yody-tsm7137-ghi-1.jpg'],
-            size: {
-                name: 'XL'
-            },
-            color: {
-                name: 'Trắng'
-            },
-            quantity: 2
-        },
-        {
-            id: 2,
-            price: 150000,
-            product: {
-                name: 'Quần Jean Nữ Basic',
-            },
-            images: ['https://salt.tikicdn.com/cache/280x280/ts/product/41/63/3c/45fc1889b34d853a9bfbcef1dc705a28.jpg.webp'],
-            size: {
-                name: 'M'
-            },
-            color: {
-                name: 'Xanh'
-            },
-            quantity: 1
-        },
-        {
-            id: 3,
-            price: 450000,
-            product: {
-                name: 'Áo khoác nam chống nắng gió thu đông Doka',
-            },
-            images: ['https://salt.tikicdn.com/cache/750x750/ts/product/67/c4/ef/ac34217d8d1f56c87118f586b87fee7a.jpg.webp'],
-            size: {
-                name: '42'
-            },
-            color: {
-                name: 'Đen'
-            },
-            quantity: 1
-        },
-    ]);
+    const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const handleQuantityChange = (id: number, change: number) => {
-        setProductDetails(productDetails.map(pd =>
-            pd.id === id ? { ...pd, quantity: Math.max(1, (pd.quantity || 0) + change) } : pd
-        ));
+    const fetchCartData = async () => {
+        const token = Cookies.get("accessToken");
+
+        // Check if token is defined
+        if (!token) {
+            console.error("Token is not defined");
+            return;
+        }
+        setLoading(true);
+
+        try {
+            const data = await fetchCartByUserId(token);
+            const mappedDetails = data.cartValueInfos.map((item: any) => ({
+                id: item.productDetail.id,
+                price: item.productDetail.price,
+                originPrice: item.productDetail.originPrice,
+                product: {
+                    name: item.productDetail.product.name,
+                },
+                images: item.productDetail.images || [],
+                size: {
+                    name: item.productDetail.size.name
+                },
+                color: {
+                    name: item.productDetail.color.name
+                },
+                quantity: item.quantity
+            }));
+            setProductDetails(mappedDetails);
+        } catch (error) {
+            console.error("Lỗi khi lấy dữ liệu giỏ hàng:", error);
+        }finally{
+            setLoading(false);
+        }
     };
 
-    const subtotal = productDetails.reduce((sum, pd) => sum + (pd.price || 0) * (pd.quantity || 0), 0);
-    const discount = 49850;
-    const shipping = 20000;
-    const shippingDiscount = 20000;
-    const total = subtotal - discount + shipping - shippingDiscount;
+    useEffect(() => {
+        fetchCartData();
+    }, []);
+
+    const handleQuantityChange = (id: number, change: number) => {
+        setProductDetails(productDetails.map(pd => {
+            if (pd.id === id) {
+                const newQuantity = (pd.quantity || 0) + change;
+    
+                // Kiểm tra nếu số lượng mới vượt quá số lượng tối đa
+                if (newQuantity > pd.quantity) {
+                    toast.error("Số lượng mặt hàng đạt tối đa");
+                    return pd; // Giữ nguyên số lượng nếu vượt quá giới hạn
+                }
+    
+                return { ...pd, quantity: Math.max(1, newQuantity) };
+            }
+            return pd;
+        }));
+    };
+
+    const subtotal = productDetails.reduce((sum, pd) => sum + (pd.originPrice ? pd.originPrice:pd.price||0) * (pd.quantity || 0), 0);
+    const discount = productDetails.reduce((sum, pd) => 
+        pd.originPrice ? sum + ((pd.originPrice - pd.price)) * (pd.quantity || 0) : sum, 0);
+    // const shipping = 20000;
+    // const shippingDiscount = 20000;
+    const total = Math.max(0, subtotal - discount);
 
     return (
         <Box sx={{ maxWidth: 1200, margin: 'auto', padding: 2 }}>
@@ -90,7 +101,7 @@ const CartPage = () => {
                                 <Box sx={{ ml: 2, flexGrow: 1 }}>
                                     <Typography variant="subtitle1">{pd.product?.name}</Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        {(pd.price || 0).toLocaleString('vi-VN')} ₫
+                                        {(pd.originPrice ? pd.originPrice:pd.price||0).toLocaleString('vi-VN')} ₫
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" >{pd.size?.name}</Typography>
                                     <Typography variant="body2" color="text.secondary" >{pd.color?.name}</Typography>
@@ -121,14 +132,14 @@ const CartPage = () => {
                             <Typography>Giảm giá</Typography>
                             <Typography color="error">-{discount.toLocaleString('vi-VN')} ₫</Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
+                        {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
                             <Typography>Vận chuyển</Typography>
                             <Typography>{shipping.toLocaleString('vi-VN')} ₫</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
                             <Typography>Giảm giá vận chuyển</Typography>
                             <Typography color="error">-{shippingDiscount.toLocaleString('vi-VN')} ₫</Typography>
-                        </Box>
+                        </Box> */}
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
                             <Typography variant="h6">Tổng thanh toán</Typography>
@@ -142,6 +153,6 @@ const CartPage = () => {
             </Grid>
         </Box>
     );
-}
+};
 
 export default CartPage;
