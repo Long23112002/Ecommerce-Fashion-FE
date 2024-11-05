@@ -1,177 +1,177 @@
-import {AppBar, Box, Toolbar, Typography} from '@mui/material'
-import React, {useEffect, useState} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
-import Notification from '../../../components/Notification'
-import {setUser, userSelector} from '../../../redux/reducers/UserReducer'
-import Avatar from '../../../components/Avatar'
-import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
-import {getUserData} from '../../../api/AuthApi'
-import Cookies from "js-cookie";
-import {Button, Dropdown, MenuProps} from "antd";
-import {UserOutlined} from '@ant-design/icons';
-import {LoginUserModel} from "../../../components/User/LoginModelUser.tsx";
-import '../../../styles/style.css'
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../../api/AuthApi';
+import Avatar from '../../../components/avatar';
+import CartIcon from '../../../components/cart/CartIcon';
+import Link from '../../../components/Link';
+import Notification from '../../../components/notification';
+import SearchInput from '../../../components/SearchInput';
+import { LoginUserModel } from '../../../components/User/LoginModelUser';
+import { useUserAction } from '../../../hook/useUserAction';
+import { userSelector } from '../../../redux/reducers/UserReducer';
+import '../../../styles/style.css';
 
-const items: MenuProps['items'] = [
-    {
-        key: '0',
-        label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Thông tin tài khoản
-            </a>
-        ),
-    },
-    {
-        key: '1',
-        label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                Đơn hàng của tôi
-            </a>
-        ),
-    },
-    {
-        key: '2',
-        label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                Trung tâm hỗ trợ
-            </a>
-        ),
-    },
-    {
-        key: '3',
-        label: (
-            <a className="menu-link" target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-                Đăng xuất
-            </a>
-        ),
-    },
-];
+import { UserOutlined } from '@ant-design/icons';
+import { MenuOutlined } from '@mui/icons-material';
+import {
+    AppBar, Box, Container,
+    Drawer, IconButton, List,
+    ListItem, ListItemText,
+    Toolbar, Typography
+} from '@mui/material';
+import { Button, Dropdown, MenuProps } from "antd";
+
+const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
+const headerHeight = 50;
 
 const UserHeader: React.FC = () => {
-    const user = useSelector(userSelector)
-    const dispatch = useDispatch();
-    const isLogin = Cookies.get('accessToken');
+    const userAction = useUserAction();
+    const user = useSelector(userSelector);
 
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isLogin, setIsLogin] = useState(false);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+
+    const logout = async () => {
+        await userAction.logout();
+    };
+
+    const toggleDrawer = (open: boolean) => () => setIsDrawerOpen(open);
+    const openLoginModal = () => setIsLoginModalVisible(true);
+    const closeLoginModal = () => setIsLoginModalVisible(false);
+
+    const items: MenuProps['items'] = [
+        { key: '0', label: <Link to='/user-info' color='black'>Thông tin tài khoản</Link> },
+        { key: '1', label: <Link to='/user-info' color='black'>Đơn hàng của tôi</Link> },
+        { key: '2', label: <Link to='/user-info' color='black'>Trung tâm hỗ trợ</Link> },
+        { key: '3', label: <Link to='/user-info' color='black' onClick={logout}>Đăng xuất</Link> },
+    ];
 
     useEffect(() => {
         const userData = getUserData();
-        dispatch(setUser({
-            id: Number(userData.id),
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            isAdmin: false
-        }));
-    }, [dispatch]);
+        userAction.save(userData);
+    }, []);
 
-    const openLoginModal = () => {
-        setIsLoginModalVisible(true);
-    };
-
-    const closeLoginModal = () => {
-        setIsLoginModalVisible(false);
-    };
+    useEffect(() => {
+        setIsLogin(user.id !== -1);
+    }, [user]);
 
     return (
-        <>
-            <a href="" style={{textDecoration: "none", backgroundColor: "#EFFFF4", cursor: "pointer"}}
-               className="d-flex justify-content-center align-items-center header-top">
-                <div style={{color: "#00AB56", fontWeight: "bold"}}>
-                    Freeship đơn từ 45k, giảm nhiều hơn cùng
-                    <img style={{height: '16px', width: '79px', marginLeft: "10px"}} alt=""
-                         src="https://salt.tikicdn.com/ts/upload/a7/18/8c/910f3a83b017b7ced73e80c7ed4154b0.png"/>
-                </div>
-            </a>
-            <Box position='sticky' top={0} zIndex={10}>
-                <AppBar
-                    position='static'
-                    sx={{
-                        backgroundColor: 'white',
-                        boxShadow: 'none',
-                        height: 70,
-                        borderBottom: "1px solid #f0f0f0",
-                    }}
-                >
-                    <Toolbar>
-                        <Box
-                            width={50}
-                            sx={{
-                                overflow: 'hidden',
-                                borderRadius: 2
-                            }}
-                        >
-                            <img src="/logo.png" alt="" width='100%'/>
+        <Box position='sticky' top={-1} zIndex={10} className='shadow-header'>
+            <AppBar
+                position="sticky"
+                id='user-header'
+                sx={{
+                    top: -1,
+                    backgroundColor: 'white',
+                    boxShadow: 'none',
+                    borderBottom: '1px solid #eee'
+                }}
+            >
+                <Container maxWidth="xl">
+                    <Toolbar sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        height: headerHeight
+                    }}>
+                        <Box sx={{ cursor: 'pointer', overflow: "hidden", borderRadius: 2 }}>
+                            <Link to='/'>
+                                <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                            </Link>
                         </Box>
-                        <Box sx={{display: 'flex', flexGrow: 1, justifyContent: 'end'}}>
 
-
-                            <Box component='span' display='flex' alignItems='center'>
-                                {isLogin ? (
-                                    <>
-                                        <Dropdown menu={{items}} trigger={['hover']}>
-                                            <div
-                                                className="btn-custom"
-                                                onClick={(e) => e.preventDefault()}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                }}
-                                            >
-                                                <div style={{margin: "0 10px"}}>
-                                                    <Avatar draw={<AvatarDrawer/>} aria-label="User avatar"/>
-                                                </div>
-                                                <Typography
-                                                    sx={{
-                                                        color: 'black',
-                                                        display: {
-                                                            xs: "none",
-                                                            md: "block"
-                                                        },
-                                                        textAlign: 'end',
-                                                        maxWidth: 220,
-                                                        height: 25,
-                                                        overflow: 'hidden',
-                                                        whiteSpace: 'nowrap',
-                                                        textOverflow: 'ellipsis',
-                                                        marginRight: '2px',
-                                                    }}
-                                                    aria-label="User's full name"
-                                                >
-                                                    {user?.fullName || 'Guest'}
-                                                </Typography>
-                                            </div>
-                                        </Dropdown>
-
-                                    </>
-                                ) : (
-                                    <Button
-                                        type="text"
-                                        sx={{xl: 2}}
-                                        onClick={openLoginModal}
-                                        icon={<UserOutlined/>}
+                        <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 3.5 }}>
+                            {categories.map((category) => (
+                                <Link to={`/filter/${category.toLowerCase()}`} key={category}>
+                                    <Typography
+                                        variant="button"
+                                        sx={{
+                                            cursor: 'pointer',
+                                            color: 'black',
+                                            ":hover": { color: '#1E90FF' }
+                                        }}
                                     >
-                                        Đăng nhập
-                                    </Button>
-                                )}
-                            </Box>
+                                        {category}
+                                    </Typography>
+                                </Link>
+                            ))}
+                        </Box>
 
-                            <div style={{marginLeft: '13px'}}>
-                                <Notification/>
-                            </div>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={38} />
+                            <CartIcon />
+                            <Notification invisible={false} />
+
+                            {isLogin ? (
+                                <Dropdown menu={{ items }} trigger={['hover', 'click']}>
+                                    <Box
+                                        onClick={(e) => e.preventDefault()}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            mx: { xs: 0.5, sm: 1.5, md: 3 }
+                                        }}
+                                    >
+                                        <Avatar height={headerHeight - 15} />
+                                        <Typography
+                                            sx={{
+                                                color: 'black',
+                                                display: { xs: "none", lg: "block" },
+                                                ml: 1,
+                                                maxWidth: 220,
+                                                height: 25,
+                                                whiteSpace: 'nowrap',
+                                                textOverflow: 'ellipsis',
+                                            }}
+                                            aria-label="User's full name"
+                                        >
+                                            {user.fullName || 'Guest'}
+                                        </Typography>
+                                    </Box>
+                                </Dropdown>
+                            ) : (
+                                <Button type="text" onClick={openLoginModal} icon={<UserOutlined />}>
+                                    Đăng nhập
+                                </Button>
+                            )}
+
+                            <IconButton onClick={toggleDrawer(true)} sx={{ display: { xs: 'inline-flex', lg: 'none' } }}>
+                                <MenuOutlined />
+                            </IconButton>
                         </Box>
                     </Toolbar>
-                </AppBar>
+                </Container>
+            </AppBar>
 
-                <LoginUserModel
-                    isModalVisible={isLoginModalVisible}
-                    handleCancel={closeLoginModal}
-                />
-            </Box>
-        </>
+            <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)} sx={{ color: '#f4f4f4' }}>
+                <Box sx={{ width: '85vw', maxWidth: '400px', p: 3, pt: 4 }}>
+                    <SearchInput height={45} sx={{ display: 'flex', mb: 3 }} />
+                    <List>
+                        {categories.map((category, index) => (
+                            <Link to={`/filter/${category.toLowerCase()}`} key={index} color='black'>
+                                <ListItem
+                                    sx={{
+                                        borderRadius: '12px',
+                                        '&:hover': { backgroundColor: '#e0f7fa' },
+                                        mb: 1
+                                    }}
+                                >
+                                    <ListItemText primary={category} primaryTypographyProps={{
+                                        component: "span",
+                                        fontSize: '18px',
+                                        fontWeight: 500
+                                    }} />
+                                </ListItem>
+                            </Link>
+                        ))}
+                    </List>
+                </Box>
+            </Drawer>
 
-    )
-}
+            <LoginUserModel isModalVisible={isLoginModalVisible} handleCancel={closeLoginModal} />
+        </Box>
+    );
+};
 
 export default UserHeader;

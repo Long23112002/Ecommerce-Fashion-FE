@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, FormInstance, message } from 'antd';
-import { Brand } from '../../types/brand.ts';
+import { Brand } from '../../types/brand.js';
 
 interface BrandModelProps {
     isModalOpen: boolean;

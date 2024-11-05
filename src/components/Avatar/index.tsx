@@ -4,13 +4,15 @@ import { useSelector } from 'react-redux';
 import { userSelector } from '../../redux/reducers/UserReducer';
 
 interface IProps {
-    draw: ReactElement;
+    draw?: ReactElement;
+    width?: number | string;
+    height?: number | string
 }
 
-const Avatar: React.FC<IProps> = ({ draw }) => {
+const Avatar: React.FC<IProps> = ({ draw, width, height }) => {
 
     const user = useSelector(userSelector)
-    
+
     const [open, setOpen] = useState(false);
 
     const toggleDrawer = (open: boolean) => () => {
@@ -18,22 +20,20 @@ const Avatar: React.FC<IProps> = ({ draw }) => {
     };
     return (
         <>
-            <Avt 
-                src={user?.avatar+''}
+            <Avt
+                src={user?.avatar + ''}
                 sx={{
-                    ml: {
-                        xs: 0,
-                        sm: 3
-                    },
                     p: 0,
-                    height: 50,
-                    width: 50,
+                    height: height ?? width ?? 40,
+                    width: width ?? height ?? 40,
                     borderRadius: "50%",
                     overflow: 'hidden',
                 }}
                 onClick={() => setOpen(true)}
             />
-            {React.cloneElement(draw, { open, toggleDrawer })}
+            {draw &&
+                React.cloneElement(draw, { open, toggleDrawer })
+            }
         </>
     );
 };

@@ -16,14 +16,14 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import createPaginationConfig, {
   PaginationState,
 } from "../../../../config/paginationConfig.ts";
 import { debounce } from "lodash";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 
 const ManagerMaterial = () => {
   const [loading, setLoading] = useState(false);
@@ -279,7 +279,7 @@ const ManagerMaterial = () => {
           >
             <Tooltip title="Xóa chất liệu" placement="bottom">
               <Button className="btn-outline-danger">
-              <i className="fa-solid fa-trash-can"></i>
+                <i className="fa-solid fa-trash-can"></i>
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -299,7 +299,7 @@ const ManagerMaterial = () => {
           type="default"
           onClick={() => showModal(null)}
         >
-           <i className="fa-solid fa-circle-plus"></i>
+          <i className="fa-solid fa-circle-plus"></i>
         </Button>
       </Tooltip>
 
@@ -519,11 +519,10 @@ const ManagerMaterial = () => {
           indicator: <LoadingCustom />,
         }}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)??''}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ''}
         onChange={handleTableChange}
       />
     </div>
-    <ToastContainer/>
   </Fragment>
 };
 

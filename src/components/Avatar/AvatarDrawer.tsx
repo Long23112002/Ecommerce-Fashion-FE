@@ -3,9 +3,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigate } from "react-router-dom";
-import { getUserData, handleLogout } from "../../api/AuthApi.ts";
-import { clearUser, setUser, userSelector } from "../../redux/reducers/UserReducer.ts";
-import Button from "../Button.tsx";
+import { getUserData, handleLogout } from "../../api/AuthApi.js";
+import { clearUser, setUser, userSelector } from "../../redux/reducers/UserReducer.js";
+import Button from "../Button.js";
 
 interface IProps {
     open?: boolean;
@@ -79,7 +79,7 @@ const AvatarDrawer: React.FC<IProps> = ({ open, toggleDrawer }) => {
                         >
                             <Avatar
                                 alt="Remy Sharp"
-                                src={user?.avatar}
+                                src={user?.avatar + ''}
                                 sx={{
                                     width: '100%',
                                     height: '100%',

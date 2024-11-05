@@ -1,4 +1,13 @@
-import React, { Fragment, useEffect, useState } from "react";
+import { Button, Form, Input, Modal, Popconfirm, Table, Tooltip } from "antd";
+import Cookies from "js-cookie";
+import { debounce } from "lodash";
+import { Fragment, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
+import createPaginationConfig, {
+  PaginationState,
+} from "../../../../config/paginationConfig.ts";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import {
   createColor,
   deleteColor,
@@ -6,24 +15,7 @@ import {
   getColorById,
   updateColor,
 } from "./colorManagament.ts";
-import {
-  Button,
-  Form,
-  Popconfirm,
-  Table,
-  Input,
-  Modal,
-  Space,
-  Tooltip,
-} from "antd";
-import { toast, ToastContainer } from "react-toastify";
-import Cookies from "js-cookie";
-import createPaginationConfig, {
-  PaginationState,
-} from "../../../../config/paginationConfig.ts";
-import { debounce } from "lodash";
-import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
+import { SketchPicker } from "react-color";
 
 const ManagerColor = () => {
   const [loading, setLoading] = useState(false);
@@ -44,6 +36,8 @@ const ManagerColor = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const [selectedColor, setSelectedColor] = useState(null);
+
+  const [colorCode, setColorCode] = useState("#000000");
 
   const mode = editingColor ? "update" : "add";
 
@@ -76,12 +70,14 @@ const ManagerColor = () => {
         const colorDetails = await getColorById(color.id);
         form.setFieldsValue(colorDetails);
         setEditingColor(colorDetails);
+        setColorCode(colorDetails.code || "#000000");
       } catch (error) {
         toast.error(getErrorMessage(error));
       }
     } else {
       form.resetFields();
       setEditingColor(null);
+      setColorCode("#000000");
     }
     setIsModalOpen(true);
   };
@@ -93,17 +89,17 @@ const ManagerColor = () => {
       const trimmedValues = {
         ...values,
         name: values.name.trim(),
+        code: colorCode,
       };
 
-      const { name } = trimmedValues;
       const token = Cookies.get("accessToken");
 
       if (token) {
         if (mode === "add") {
-          await createColor({ name }, token);
+          await createColor(trimmedValues, token);
           toast.success("Thêm màu thành công");
         } else if (mode === "update" && editingColor) {
-          await updateColor(editingColor.id, { name }, token);
+          await updateColor(editingColor.id, trimmedValues, token);
           toast.success("Cập nhật màu thành công");
         }
         handleCancel();
@@ -188,6 +184,21 @@ const ManagerColor = () => {
       title: "Tên màu",
       dataIndex: "name",
       key: "name",
+      render: (name, record) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div
+            style={{
+              width: "20px",
+              height: "20px",
+              backgroundColor: record.code,
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              marginRight: "8px",
+            }}
+          />
+          <span>{name}</span>
+        </div>
+      ),
     },
     {
       title: "Ngày tạo",
@@ -284,158 +295,129 @@ const ManagerColor = () => {
     },
   ];
 
-  return <Fragment>
-    <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
-      <h1 className="text-danger">Quản lý màu sắc</h1>
-      <Tooltip title="Thêm mới">
-        <Button
-          className="mt-3 mb-3"
-          style={{ display: "flex", backgroundColor: "black", color: "white" }}
-          type="default"
-          onClick={() => showModal(null)}
-        >
-          <i className="fa-solid fa-circle-plus"></i>
-        </Button>
-      </Tooltip>
-
-      <div className="mb-5 d-flex justify-content-end">
-        <Input
-          placeholder="Nhập tên màu..."
-          onChange={(e) => handleSearch(e)}
-          className="form-control"
-          style={{ width: 300 }}
-        />
-      </div>
-
-      <Modal
-        title={mode === "add" ? "Thêm màu" : "Cập nhật màu"}
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        cancelText={"Hủy"}
-        okText={"Lưu"}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Tên màu"
-            rules={[{ required: true, message: "Vui lòng nhập tên màu!" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        open={isDetailModalOpen}
-        onOk={handleCancel}
-        onCancel={handleCancel}
-        centered
-        footer={null}
-      >
-        {selectedColor && (
-          <div
+  return (
+    <Fragment>
+      <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
+        <h1 className="text-danger">Quản lý màu sắc</h1>
+        <Tooltip title="Thêm mới">
+          <Button
+            className="mt-3 mb-3"
             style={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "20px",
+              backgroundColor: "black",
+              color: "white",
             }}
+            type="default"
+            onClick={() => showModal(null)}
           >
-            <h3
-              style={{
-                fontWeight: "bold",
-                color: "#333",
-                textAlign: "center",
-                marginBottom: "20px",
-                borderBottom: "1px solid #ddd",
-                paddingBottom: "10px",
-                width: "100%",
-              }}
-            >
-              Chi tiết màu sắc
-            </h3>
+            <i className="fa-solid fa-circle-plus"></i>
+          </Button>
+        </Tooltip>
 
-            <div
-              style={{
-                textAlign: "center",
-                marginBottom: "20px",
-                fontSize: "24px",
-                fontWeight: "bold",
-                color: "#D2B48C",
-              }}
-            >
-              {selectedColor.name}
-            </div>
+        <div className="mb-5 d-flex justify-content-end">
+          <Input
+            placeholder="Nhập tên màu..."
+            onChange={(e) => handleSearch(e)}
+            className="form-control"
+            style={{ width: 300 }}
+          />
+        </div>
 
-            <div
-              style={{
-                width: "100%",
-                padding: "15px",
-                borderRadius: "10px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "15px",
-              }}
+        <Modal
+          title={mode === "add" ? "Thêm màu" : "Cập nhật màu"}
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          cancelText={"Hủy"}
+          okText={"Lưu"}
+        >
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="name"
+              label="Tên màu"
+              rules={[{ required: true, message: "Vui lòng nhập tên màu!" }]}
             >
-              <div>
-                <label
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
-                  }}
-                >
-                  Ngày tạo:
-                </label>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={new Date(selectedColor.createdAt).toLocaleDateString()}
-                  readOnly
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    cursor: "default",
-                    border: "1px solid #ddd",
-                  }}
+              <Input />
+            </Form.Item>
+
+            <Form.Item label="Mã màu" name="code">
+              <Input value={colorCode} name="code" readOnly />
+              <br />
+              <br />
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <SketchPicker
+                  color={colorCode}
+                  onChange={(color) => setColorCode(color.hex)}
                 />
               </div>
+            </Form.Item>
+          </Form>
+        </Modal>
 
-              <div>
-                <label
+        <Modal
+          open={isDetailModalOpen}
+          onOk={handleCancel}
+          onCancel={handleCancel}
+          centered
+          footer={null}
+        >
+          {selectedColor && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "20px",
+              }}
+            >
+              <h3
+                style={{
+                  fontWeight: "bold",
+                  color: "#333",
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  borderBottom: "1px solid #ddd",
+                  paddingBottom: "10px",
+                  width: "100%",
+                }}
+              >
+                Chi tiết màu sắc
+              </h3>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  textAlign: "center",
+                  marginBottom: "20px",
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: selectedColor.code,
+                }}
+              >
+                {/* <div
                   style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                    marginBottom: "5px",
+                    width: "24px",
+                    height: "24px",
+                    backgroundColor: selectedColor.code,
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                    marginRight: "10px",
                   }}
-                >
-                  Người tạo:
-                </label>
-                <div style={{ padding: "10px" }}>
-                  <img
-                    src={selectedColor.createdBy.avatar}
-                    alt="createdBy-avatar"
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: "50%",
-                      marginRight: 15,
-                      border: "2px solid #ddd",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      color: "#333",
-                    }}
-                  >
-                    {selectedColor.createdBy.fullName}
-                  </span>
-                </div>
+                /> */}
+                {selectedColor.name}
               </div>
 
-              {selectedColor.updatedAt && (
+              <div
+                style={{
+                  width: "100%",
+                  padding: "15px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
                 <div>
                   <label
                     style={{
@@ -444,13 +426,13 @@ const ManagerColor = () => {
                       marginBottom: "5px",
                     }}
                   >
-                    Ngày cập nhật:
+                    Ngày tạo:
                   </label>
                   <input
                     className="form-control"
                     type="text"
                     value={new Date(
-                      selectedColor.updatedAt
+                      selectedColor.createdAt
                     ).toLocaleDateString()}
                     readOnly
                     style={{
@@ -460,9 +442,7 @@ const ManagerColor = () => {
                     }}
                   />
                 </div>
-              )}
 
-              {selectedColor.updatedBy && (
                 <div>
                   <label
                     style={{
@@ -471,12 +451,12 @@ const ManagerColor = () => {
                       marginBottom: "5px",
                     }}
                   >
-                    Người cập nhật:
+                    Người tạo:
                   </label>
                   <div style={{ padding: "10px" }}>
                     <img
-                      src={selectedColor.updatedBy.avatar}
-                      alt="updatedBy-avatar"
+                      src={selectedColor.createdBy.avatar}
+                      alt="createdBy-avatar"
                       style={{
                         width: 50,
                         height: 50,
@@ -492,31 +472,92 @@ const ManagerColor = () => {
                         color: "#333",
                       }}
                     >
-                      {selectedColor.updatedBy.fullName}
+                      {selectedColor.createdBy.fullName}
                     </span>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-      </Modal>
 
-      <Table
-        dataSource={colors}
-        columns={columns}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingCustom />,
-        }}
-        rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination) ?? ""}
-        onChange={handleTableChange}
-      />
-    </div>
-    <ToastContainer/>
+                {selectedColor.updatedAt && (
+                  <div>
+                    <label
+                      style={{
+                        color: "#555",
+                        fontWeight: "bold",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      Ngày cập nhật:
+                    </label>
+                    <input
+                      className="form-control"
+                      type="text"
+                      value={new Date(
+                        selectedColor.updatedAt
+                      ).toLocaleDateString()}
+                      readOnly
+                      style={{
+                        backgroundColor: "#f9f9f9",
+                        cursor: "default",
+                        border: "1px solid #ddd",
+                      }}
+                    />
+                  </div>
+                )}
+
+                {selectedColor.updatedBy && (
+                  <div>
+                    <label
+                      style={{
+                        color: "#555",
+                        fontWeight: "bold",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      Người cập nhật:
+                    </label>
+                    <div style={{ padding: "10px" }}>
+                      <img
+                        src={selectedColor.updatedBy.avatar}
+                        alt="updatedBy-avatar"
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: "50%",
+                          marginRight: 15,
+                          border: "2px solid #ddd",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          color: "#333",
+                        }}
+                      >
+                        {selectedColor.updatedBy.fullName}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        <Table
+          dataSource={colors}
+          columns={columns}
+          loading={{
+            spinning: loading,
+            indicator: <LoadingCustom />,
+          }}
+          rowKey="id"
+          pagination={createPaginationConfig(pagination, setPagination) ?? ""}
+          onChange={handleTableChange}
+        />
+      </div>
     </Fragment>
-  
+  );
 };
 
 export default ManagerColor;

@@ -10,7 +10,7 @@ import {toast} from "react-toastify";
 import Cookies from "js-cookie";
 import {getErrorMessage} from "../../Error/getErrorMessage.ts";
 import {Container} from "@mui/material";
-import LoadingCustom from "../../../components/Loading/LoadingCustom.tsx";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 
 
 interface Permission {
@@ -165,7 +165,7 @@ const ManagerRole = () => {
         },
         {
             title: 'Tên vai trò',
-            dataIndex: 'name',
+            dataIndex: 'description',
             key: 'name',
         },
         {

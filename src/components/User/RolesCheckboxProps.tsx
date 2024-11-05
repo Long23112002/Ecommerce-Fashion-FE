@@ -10,6 +10,7 @@ import {getErrorMessage} from "../../pages/Error/getErrorMessage.ts";
 interface Role {
     id: number;
     name: string;
+    description: string;
 }
 
 interface RolesCheckboxProps {
@@ -62,7 +63,7 @@ const RolesCheckbox: React.FC<RolesCheckboxProps> = ({email, selectedRoles, onCh
     };
 
     const content = (
-        <div id="scrollable-list" style={{maxWidth: '150px', maxHeight: 300, overflowY: 'auto'}}>
+        <div id="scrollable-list" style={{maxWidth: '160px', maxHeight: 300, overflowY: 'auto'}}>
             <InfiniteScroll
                 dataLength={visibleRoles.length}
                 next={fetchMoreRoles}
@@ -70,15 +71,19 @@ const RolesCheckbox: React.FC<RolesCheckboxProps> = ({email, selectedRoles, onCh
                 loader={loading && <Spin/>}
                 scrollableTarget="scrollable-list"
             >
-                <Checkbox.Group
-                    style={{width: '100%'}}
-                    options={visibleRoles.map(role => ({
-                        label: role.name,
-                        value: role.id
-                    }))}
-                    onChange={handleCheckboxChange}
-                    value={selectedRoles}
-                />
+                <div className="row">
+                    <Checkbox.Group
+                        className="col-12"
+                        style={{width: '100%'}}
+                        options={visibleRoles.map(role => ({
+                            label: role.description,
+                            value: role.id
+                        }))}
+                        onChange={handleCheckboxChange}
+                        value={selectedRoles}
+                    />
+                </div>
+
             </InfiniteScroll>
         </div>
     );
