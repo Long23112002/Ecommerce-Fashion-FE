@@ -11,6 +11,28 @@ interface IProps {
 const ProductCard: React.FC<IProps> = ({ product }) => {
     const isMobile = useIsMobile();
 
+    const handlePrice = () => {
+        const priceComponent = (price: number) => (
+            <Typography
+                color='primary'
+                sx={{
+                    fontWeight: 700,
+                    fontSize: !isMobile ? '1.1rem' : '0.9rem',
+                    pb: !isMobile ? '0.8rem' : 0
+                }}
+            >
+                {price.toLocaleString('vi-VN')}đ
+            </Typography>
+        )
+        const isEqual = product.minPrice == product.maxPrice;
+        return (
+            <>
+                {priceComponent(product.minPrice || 0)}
+                {/* {!isEqual && priceComponent(product.maxPrice || 0)} */}
+            </>
+        )
+    }
+
     return (
         <Link to={`/product/${product.id}`}>
             <Card
@@ -30,7 +52,7 @@ const ProductCard: React.FC<IProps> = ({ product }) => {
                     sx={{
                         paddingTop: '120%',
                     }}
-                    image={product.productDetails?.[0].images?.[0]}
+                    image={product.image}
                 />
                 <CardContent
                     sx={{
@@ -52,16 +74,7 @@ const ProductCard: React.FC<IProps> = ({ product }) => {
                     >
                         {product.name}
                     </Typography>
-                    <Typography
-                        color='primary'
-                        sx={{
-                            fontWeight: 700,
-                            fontSize: !isMobile ? '1.1rem' : '0.9rem',
-                            pb: !isMobile ? '0.8rem' : 0
-                        }}
-                    >
-                        {product.price?.toLocaleString('vi-VN')} VND
-                    </Typography>
+                    {handlePrice()}
                 </CardContent>
             </Card>
         </Link>

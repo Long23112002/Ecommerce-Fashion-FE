@@ -2,8 +2,8 @@ import { Container } from '@mui/material'
 import React, { useState } from 'react'
 import ProductOverview from '../../../components/product/ProductOverview'
 import ProductReviews from '../../../components/product/ProductReviews'
-import SimilarProducts from '../../../components/product/SimilarProducts'
 import Product from '../../../types/Product'
+import ProductSlider from '../../../components/product/ProductSlider'
 
 const ProductDetailPage: React.FC = () => {
 
@@ -244,7 +244,7 @@ const ProductDetailPage: React.FC = () => {
     return (
         <Container maxWidth='xl'>
             <ProductOverview product={product} />
-            <SimilarProducts similarProduct={similarProducts} />
+            <ProductSlider title='Sản phẩm tương tự' products={similarProducts} />
             <ProductReviews product={product} />
         </Container>
     )

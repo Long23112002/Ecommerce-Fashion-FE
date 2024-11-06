@@ -14,6 +14,7 @@ interface IProps {
     products: Product[]
 }
 
+// DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 const ProductShowcase: React.FC<IProps> = ({ title, products }) => {
 
     return (

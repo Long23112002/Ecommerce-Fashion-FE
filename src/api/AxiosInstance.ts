@@ -2,6 +2,13 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
 import { BASE_API } from "../constants/BaseApi";
 
+export interface PageableRequest {
+    page?: number,
+    size?: number,
+    sort?: 'ASC'|'DESC',
+    sortBy?: string
+}
+
 const refreshAxiosInstance = axios.create({
     baseURL: BASE_API,
     headers: {

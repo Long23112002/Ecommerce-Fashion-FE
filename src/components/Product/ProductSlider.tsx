@@ -1,5 +1,5 @@
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 // @ts-ignore
 import Slider from 'react-slick';
@@ -10,17 +10,21 @@ import ProductCard from './ProductCard';
 import { useIsMobile } from '../../hook/useSize';
 
 interface IProps {
-    similarProduct: Product[]
+    title?: string,
+    products: Product[],
+    slidesToShow?: number,
+    link?: React.ReactNode,
+    slider?: boolean
 }
 
-const SimilarProducts: React.FC<IProps> = ({ similarProduct }) => {
+const ProductSlider: React.FC<IProps> = ({ title, products, slidesToShow = 6, link, slider = true }) => {
     const settings = {
         dots: true,
         infinite: false,
         swipe: false,
         speed: 500,
-        slidesToShow: 6,
-        slidesToScroll: 6,
+        slidesToShow: slidesToShow,
+        slidesToScroll: slidesToShow,
         nextArrow: <Arrow direction="right" />,
         prevArrow: <Arrow direction="left" />,
         responsive: [
@@ -51,21 +55,44 @@ const SimilarProducts: React.FC<IProps> = ({ similarProduct }) => {
                 borderRadius: { xs: 4, md: 7 },
             }}
         >
-            <Typography
-                variant="h5"
-                gutterBottom
-                sx={{ fontWeight: 700, color: '#333', mb: 2 }}
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2
+                }}
             >
-                Sản phẩm tương tự
-            </Typography>
+                <Typography variant="h5" gutterBottom sx={{
+                    fontWeight: 700,
+                    color: '#333',
+                    mb: 0
+                }}>
+                    {title}
+                </Typography>
 
-            <Slider {...settings}>
-                {similarProduct.map((product) => (
-                    <Box key={product.id} px={1} pb={0.5}>
-                        <ProductCard product={product} />
-                    </Box>
-                ))}
-            </Slider>
+                {link}
+            </Box>
+
+            {
+                slider
+                    ?
+                    <Slider {...settings}>
+                        {products.map((product) => (
+                            <Box key={product.id} px={1} pb={0.5}>
+                                <ProductCard product={product} />
+                            </Box>
+                        ))}
+                    </Slider>
+                    :
+                    <Grid container spacing={2}>
+                        {products.slice(0,slidesToShow).map((product) => (
+                            <Grid item key={product.id} xs={6} sm={4} md={12/slidesToShow}>
+                                <ProductCard product={product} />
+                            </Grid>
+                        ))}
+                    </Grid>
+            }
         </Box>
     );
 }
@@ -110,4 +137,4 @@ const Arrow: React.FC<IArrowProps> = ({ onClick, direction }) => {
     );
 };
 
-export default SimilarProducts
+export default ProductSlider
