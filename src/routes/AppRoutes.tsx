@@ -5,7 +5,7 @@ import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import ChatPage from '../pages/Admin/Chat/index.tsx';
-import ProductManager from '../pages/Admin/Product';
+import ProductManager from '../pages/Admin/Product/ManageProduct';
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
@@ -18,6 +18,7 @@ import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import CartPage from '../pages/Customer/cart/page.tsx';
@@ -45,7 +46,8 @@ const AppRoutes = () => {
             </Route>
 
             <Route element={<AdminLayout />}>
-                <Route path="/admin/product/*" element={<ProductManager />} />
+                <Route path="/admin/product/" element={<ProductManager />} />
+                <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
                 <Route path="/admin/user/role" element={<ManagerRole />} />
                 <Route path="/admin/brand" element={<ManagerBrand />} />
                 <Route path="/admin/origin" element={<ManaggerOrigin />} />
