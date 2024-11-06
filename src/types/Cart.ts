@@ -1,11 +1,21 @@
 import ProductDetail from "./ProductDetail"
 import { User } from "./User"
 
-type Cart = {
+export interface Cart {
     id: number,
-    quantity: number,
+    cartValues: CartValues,
     productDetail: ProductDetail,
-    user: User
-    createAt: Date
-    createUpdate: Date | null
+    user: User,
+//     createAt: Date,
+//     createUpdate: Date | null
+}
+
+export interface CartValueInfos{
+        quantity: number;
+        productDetail: ProductDetail;        
+}
+
+export interface CartValues{
+    quantity: number;
+    productDetailId: number;
 }

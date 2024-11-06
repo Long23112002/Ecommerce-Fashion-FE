@@ -14,7 +14,8 @@ type ProductDetail = {
     createAt?: Date,
     updateAt?: Date | null,
     createBy?: User,
-    updateBy?: User
+    updateBy?: User,
+    originPrice?:number,
 }
 
 export default ProductDetail
