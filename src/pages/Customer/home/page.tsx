@@ -5,16 +5,32 @@ import HeroBanner from '../../../components/HeroBanner';
 import Link from '../../../components/Link';
 import ProductSlider from '../../../components/product/ProductSlider';
 import Product from '../../../types/Product';
+import { PageableRequest } from '../../../api/AxiosInstance';
 
 const HomePage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [hotProducts, setHotProducts] = useState<Product[]>([]);
+  const [hotLoading, setHotLoading] = useState<boolean>(true);
+
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [newLoading, setNewLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const res = await getAllProduct()
-      setProducts([...res.data])
+    const fetchNewProducts = async () => {
+      setNewLoading(true)
+      const pageable: PageableRequest = { sort: 'DESC', sortBy: 'createAt' }
+      const res = await getAllProduct({}, pageable)
+      setNewProducts([...res.data])
+      setNewLoading(false)
     }
-    fetchProducts()
+    const fetchHotProducts = async () => {
+      setHotLoading(true)
+      const res = await getAllProduct()
+      setHotProducts([...res.data])
+      setHotLoading(false)
+    }
+
+    fetchNewProducts()
+    fetchHotProducts()
   }, [])
 
   return (
@@ -27,7 +43,8 @@ const HomePage: React.FC = () => {
         <Stack spacing={5}>
           <ProductSlider
             title='Sản phẩm mới'
-            products={products}
+            products={newProducts}
+            loading={newLoading}
             slidesToShow={5}
             link={
               <Link to="/filter">Xem tất cả</Link>
@@ -36,7 +53,8 @@ const HomePage: React.FC = () => {
 
           <ProductSlider
             title='Sản phẩm hot'
-            products={products}
+            products={hotProducts}
+            loading={hotLoading}
             slidesToShow={5}
             link={
               <Link to="/filter">Xem tất cả</Link>
