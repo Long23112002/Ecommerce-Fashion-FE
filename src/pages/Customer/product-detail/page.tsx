@@ -7,6 +7,7 @@ import ProductSlider from '../../../components/product/ProductSlider'
 import { useParams } from 'react-router-dom'
 import { getAllProduct } from '../../../api/ProductApi'
 import ProductDetail from '../../../types/ProductDetail'
+import { getDetailByIdProduct } from '../../../api/ProductDetailApi'
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams()
@@ -14,17 +15,26 @@ const ProductDetailPage: React.FC = () => {
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([])
     const [similarProducts, setSimilarProduct] = useState<Product[]>([]);
 
-    useEffect(() => {
-        const fetchProductSimilar = async () => {
-            const res = await getAllProduct()
-            setSimilarProduct([...res.data])
+    const fetchProductDetails = async () => {
+        if (id) {
+            const { data } = await getDetailByIdProduct(id)
+            setProductDetails([...data])
+            setProduct({ ...data[0].product })
         }
+    }
+    const fetchProductSimilar = async () => {
+        const res = await getAllProduct()
+        setSimilarProduct([...res.data])
+    }
+
+    useEffect(() => {
+        fetchProductDetails()
         fetchProductSimilar()
-    }, [])
+    }, [id])
 
     return (
-        <Container maxWidth='xl'>
-            <ProductOverview product={product} />
+        <Container maxWidth='lg'>
+            <ProductOverview product={product} productDetails={productDetails} />
             <ProductSlider title='Sản phẩm tương tự' products={similarProducts} />
             <ProductReviews product={product} />
         </Container>

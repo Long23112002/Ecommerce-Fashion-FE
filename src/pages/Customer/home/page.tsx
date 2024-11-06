@@ -14,21 +14,22 @@ const HomePage: React.FC = () => {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [newLoading, setNewLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchNewProducts = async () => {
-      setNewLoading(true)
-      const pageable: PageableRequest = { sort: 'DESC', sortBy: 'createAt' }
-      const res = await getAllProduct({}, pageable)
-      setNewProducts([...res.data])
-      setNewLoading(false)
-    }
-    const fetchHotProducts = async () => {
-      setHotLoading(true)
-      const res = await getAllProduct()
-      setHotProducts([...res.data])
-      setHotLoading(false)
-    }
+  const fetchNewProducts = async () => {
+    setNewLoading(true)
+    const pageable: PageableRequest = { sort: 'DESC', sortBy: 'createAt' }
+    const res = await getAllProduct({}, pageable)
+    setNewProducts([...res.data])
+    setNewLoading(false)
+  }
+  
+  const fetchHotProducts = async () => {
+    setHotLoading(true)
+    const res = await getAllProduct()
+    setHotProducts([...res.data])
+    setHotLoading(false)
+  }
 
+  useEffect(() => {
     fetchNewProducts()
     fetchHotProducts()
   }, [])

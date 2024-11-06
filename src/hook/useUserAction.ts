@@ -18,8 +18,8 @@ export const useUserAction = () => {
         }));
     }
     const logout = async () => {
-        await handleLogout()
         dispatch(clearUser());
+        await handleLogout()
     }
     return { save, logout }
 }

@@ -18,37 +18,52 @@ import { Color } from '../../pages/Admin/Attributes/color/color'
 import { Size } from '../../pages/Admin/Attributes/size/size'
 
 interface IProps {
-    product: Product
+    product: Product,
+    productDetails: ProductDetail[]
 }
 
-const ProductOverview: React.FC<IProps> = ({ product }) => {
+const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
     const [quantity, setQuantity] = useState(1)
-    const [productDetail, setProductDetail] = useState<ProductDetail | undefined>(product.productDetails?.[0])
     const [colors, setColors] = useState<Color[]>([])
     const [sizes, setSizes] = useState<Size[]>([])
-    const [selectedColor, setSelectedColor] = useState<number>(product.productDetails?.[0].color?.id || -1)
-    const [selectedSize, setSelectedSize] = useState<number>(product.productDetails?.[0].size?.id || -1)
+    const [selectedProductDetail, setSeletedProductDetail] = useState<ProductDetail>()
+    const [selectedColor, setSelectedColor] = useState<number>(-1)
+    const [selectedSize, setSelectedSize] = useState<number>(-1)
+
+
+
+    const arrayColor: Color[] = productDetails?.reduce((acc: Color[], pd) => {
+        if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
+            acc.push(pd.color);
+        }
+        return acc;
+    }, []) || [];
+
+    const arraySize: Size[] = productDetails?.reduce((acc: Size[], pd) => {
+        if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
+            acc.push(pd.size);
+        }
+        return acc;
+    }, []) || [];
 
     useEffect(() => {
-        const arrayColor: Color[] = product.productDetails?.reduce((acc: Color[], pd) => {
-            if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
-                acc.push(pd.color);
-            }
-            return acc;
-        }, []) || [];
-
+        setSeletedProductDetail(productDetails[0])
         setColors(arrayColor);
-
-        const arraySize: Size[] = product.productDetails?.reduce((acc: Size[], pd) => {
-            if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
-                acc.push(pd.size);
-            }
-            return acc;
-        }, []) || [];
-
         setSizes(arraySize);
-    }, [product.productDetails]);
+    }, [productDetails]);
+
+    useEffect(() => {
+        if (colors.length && colors[0].id) {
+            setSelectedColor(colors[0].id)
+        }
+    }, [colors])
+
+    useEffect(() => {
+        if (sizes.length && sizes[0].id) {
+            setSelectedSize(sizes[0].id)
+        }
+    }, [sizes])
 
     return (
         <Box
@@ -69,14 +84,14 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={productDetail?.images || []}
+                        images={selectedProductDetail?.images?.map((image: any) => image.url) || []}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                     <Typography variant="h4" fontWeight="bold">{product.name}</Typography>
                     <Typography variant="h5" color="primary" sx={{ mt: 1 }}>
-                        {product.price?.toLocaleString('vi-VN')} VNĐ
+                        {selectedProductDetail?.price?.toLocaleString('vi-VN')} VNĐ
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -130,7 +145,6 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 <FormControlLabel
                                     key={s.id}
                                     value={s.id}
-                                    defaultChecked={s.id === productDetail?.size?.id}
                                     control={<Radio />}
                                     label={s.name?.toUpperCase()}
                                     sx={{
@@ -170,7 +184,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 value={quantity}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
-                                    if (value >= 1 && value <= (productDetail?.quantity ?? 0)) {
+                                    if (value >= 1 && value <= (selectedProductDetail?.quantity ?? 0)) {
                                         setQuantity(value);
                                     }
                                 }}
@@ -182,7 +196,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 }}
                                 inputProps={{
                                     min: 1,
-                                    max: productDetail?.quantity,
+                                    max: selectedProductDetail?.quantity,
                                     type: 'number',
                                     style: {
                                         padding: "9px 0 9px 20px",
@@ -192,7 +206,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
 
                             <Button
                                 variant="contained"
-                                onClick={() => setQuantity(Math.min(productDetail?.quantity ?? 0, quantity + 1))}
+                                onClick={() => setQuantity(Math.min(selectedProductDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -210,7 +224,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                         </Box>
 
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Còn {productDetail?.quantity} sản phẩm
+                            Còn {selectedProductDetail?.quantity} sản phẩm
                         </Typography>
                     </Box>
 

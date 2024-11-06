@@ -6,15 +6,16 @@ import { User } from "./User"
 type ProductDetail = {
     id?: number,
     price?: number,
+    originPrice?: number,
     quantity?: number,
     images?: string[],
-    product?: Product,
-    size?: Size,
-    color?: Color,
     createAt?: Date,
     updateAt?: Date | null,
     createBy?: User,
     updateBy?: User
+    product?: Product,
+    size?: Size,
+    color?: Color,
 }
 
 export default ProductDetail
