@@ -3,7 +3,7 @@ import { User } from "./User"
 
 export interface Cart {
     id: number,
-    quantity: number,
+    cartValues: CartValues,
     productDetail: ProductDetail,
     user: User,
 //     createAt: Date,
@@ -13,4 +13,9 @@ export interface Cart {
 export interface CartValueInfos{
         quantity: number;
         productDetail: ProductDetail;        
+}
+
+export interface CartValues{
+    quantity: number;
+    productDetailId: number;
 }

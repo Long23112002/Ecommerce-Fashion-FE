@@ -7,10 +7,11 @@ import {
   Grid,
   IconButton,
   Typography,
+  TextField,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import ProductDetail from "../../../types/ProductDetail";
-import { Cart, CartValueInfos } from "../../../types/Cart";
+import { Cart, CartValueInfos, CartValues } from "../../../types/Cart";
 import Cookies from "js-cookie";
 import {
   fetchCartByUserId,
@@ -20,6 +21,7 @@ import {
 } from "../../../api/CartApi";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 import { toast } from "react-toastify";
+import { debounce } from "lodash";
 
 const CartPage = () => {
   const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
@@ -28,22 +30,22 @@ const CartPage = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [subToTals, setSubToTals] = useState(0);
   const [cartValueInfos, setCartValueInfos] = useState<CartValueInfos[]>([]);
+  const [cartValues, setCartValues] = useState<CartValues[]>([]);
 
   const fetchCartData = async () => {
     const token = Cookies.get("accessToken");
 
-    // Check if token is defined
     if (!token) {
-      console.error("Lỗi xác thực");
+      toast.error("Lỗi xác thực");
       return;
     }
     setLoading(true);
 
     try {
-      // Fetch cart data from API
+      // Fetch cart data
       const data = await fetchCartByUserId(token);
 
-      // Map `cartValueInfos` to `productDetails`
+      // Map cartValueInfos to productDetails
       const mappedDetails = data.cartValueInfos.map((item: any) => ({
         id: item.productDetail.id,
         price: item.productDetail.price,
@@ -62,18 +64,9 @@ const CartPage = () => {
       }));
 
       setProductDetails(mappedDetails);
-
-      const mappedCart: Cart = {
-        id: data.id,
-        quantity: data.quantity,
-        productDetail: data.cartValueInfos.map(
-          (item: any) => item.productDetail
-        ),
-        user: data.user,
-      };
-
-      setCart(mappedCart);
       setCartValueInfos(data.cartValueInfos);
+      setCart(data);
+      console.log(data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu giỏ hàng:", error);
     } finally {
@@ -85,12 +78,31 @@ const CartPage = () => {
     fetchCartData();
   }, []);
 
+  const caculatePrice = () => {
+    const subtotal = cartValueInfos.reduce(
+      (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
+      0
+    );
+    const discount = 0;
+    const total = Math.max(0, subtotal - discount);
+
+    setSubToTals(subtotal);
+    setTotalPrice(total);
+  };
+
+  useEffect(() => {
+    caculatePrice();
+  }, [cartValueInfos]);
+
+  const debouncedUpdateCart = debounce(() => {
+    updateCartData();
+  }, 100);
+
   const handleQuantityChange = (id: number, change: number) => {
-    setCartValueInfos(
-      cartValueInfos.map((pd) => {
+    setCartValueInfos((prevCartValueInfos) => {
+      return prevCartValueInfos.map((pd) => {
         if (pd.productDetail.id === id) {
           const newQuantity = (pd.quantity || 0) + change;
-
           const maxQuantity = pd.productDetail.quantity ?? 0;
 
           if (newQuantity > maxQuantity) {
@@ -101,15 +113,46 @@ const CartPage = () => {
           return { ...pd, quantity: Math.max(1, newQuantity) };
         }
         return pd;
-      })
-    );
+      });
+    });
   };
 
-  const subtotal = productDetails.reduce(
-    (sum, pd) => sum + (pd.price || 0) * (pd.quantity || 0),
-    0
-  );
-  const discount = 0;
+  useEffect(() => {
+    if (cartValueInfos.length > 0) {
+      debouncedUpdateCart();
+    }
+  }, [cartValueInfos]);
+
+  const updateCartData = async () => {
+    const token = Cookies.get("accessToken");
+
+    if (!token) {
+      toast.error("Lỗi xác thực");
+      return;
+    }
+
+    try {
+      const cartData = {
+        cartValues: cartValueInfos.map((pd) => ({
+          productDetailId: pd.productDetail.id,
+          quantity: pd.quantity,
+        })),
+        userId: cart?.userId,
+      };
+
+      await updateCart(cartData, token);
+      console.log("Giỏ hàng đã được cập nhật", cartData);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật giỏ hàng:", error);
+      console.log("Cập nhật giỏ hàng thất bại");
+    }
+  };
+
+  // const subtotal = cartValueInfos.reduce(
+  //   (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
+  //   0
+  // );
+  // const discount = 0;
   //   const discount = productDetails.reduce(
   //     (sum, pd) =>
   //       pd.originPrice
@@ -119,7 +162,7 @@ const CartPage = () => {
   //   );
   // const shipping = 20000;
   // const shippingDiscount = 20000;
-  const total = Math.max(0, subtotal - discount);
+  // const total = Math.max(0, subtotal - discount);
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
@@ -147,7 +190,7 @@ const CartPage = () => {
                 }}
               >
                 <img
-                  src={pd.productDetail.images?.[0]}
+                  src={pd.productDetail.images?.[0].url}
                   alt={pd.productDetail.product?.name}
                   style={{ width: 100, height: 100, objectFit: "cover" }}
                 />
@@ -165,8 +208,9 @@ const CartPage = () => {
                       alignItems: "center",
                     }}
                     className="mt-3"
+                    component="div"
                   >
-                    <Typography variant="h6" color="info.main">
+                    <Typography variant="h6" color="info.main" component="div">
                       <b>
                         {(pd.productDetail.price || 0).toLocaleString("vi-VN")}{" "}
                         ₫
@@ -196,7 +240,39 @@ const CartPage = () => {
                     <RemoveIcon />
                   </IconButton>
                   {/* Display the quantity from the cart */}
-                  <Typography sx={{ mx: 1 }}>{pd.quantity}</Typography>
+                  <TextField
+                    type="number"
+                    value={pd.quantity}
+                    onChange={(e) => {
+                      const newQuantity = parseInt(e.target.value, 10);
+                      if (!isNaN(newQuantity)) {
+                        handleQuantityChange(
+                          pd.productDetail.id,
+                          newQuantity - pd.quantity
+                        );
+                      }
+                    }}
+                    sx={{
+                      width: 60,
+                      textAlign: "center",
+                      "& .MuiInput-underline:before": { borderBottom: "none" },
+                      "& .MuiInput-underline:after": { borderBottom: "none" },
+                      "& input": {
+                        padding: 0,
+                        textAlign: "center",
+                      },
+                      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                        {
+                          WebkitAppearance: "none",
+                          margin: 0,
+                        },
+                    }}
+                    inputProps={{
+                      min: 1,
+                      max: pd.productDetail.quantity,
+                    }}
+                    variant="standard"
+                  />
                   <IconButton
                     onClick={() => handleQuantityChange(pd.productDetail.id, 1)}
                   >
@@ -219,7 +295,7 @@ const CartPage = () => {
               sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
             >
               <Typography>Tổng giá trị sản phẩm</Typography>
-              <Typography>{subtotal.toLocaleString("vi-VN")} ₫</Typography>
+              <Typography>{subToTals.toLocaleString("vi-VN")} ₫</Typography>
             </Box>
             <Box
               sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
@@ -241,12 +317,12 @@ const CartPage = () => {
             >
               <Typography variant="h6">Tổng thanh toán</Typography>
               <Typography variant="h6">
-                {total.toLocaleString("vi-VN")} ₫
+                {totalPrice.toLocaleString("vi-VN")} ₫
               </Typography>
             </Box>
             <Button variant="contained" fullWidth sx={{ mt: 2 }}>
               Mua hàng (
-              {productDetails.reduce((sum, pd) => sum + (pd.quantity || 0), 0)})
+              {cartValueInfos.reduce((sum, pd) => sum + (pd.quantity || 0), 0)})
             </Button>
           </Box>
         </Grid>

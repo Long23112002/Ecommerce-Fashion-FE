@@ -44,8 +44,7 @@ export const createCart = async (cartData: { items: any[] }) => {
 };
 
 // Update existing cart
-export const updateCart = async (cartData: { items: any[] }) => {
-    const token = Cookies.get("accessToken");
+export const updateCart = async (cartData: { items: any[] },token: string) => {
     const config = {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
     };
