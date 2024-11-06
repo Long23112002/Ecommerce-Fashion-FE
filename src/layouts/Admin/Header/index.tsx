@@ -1,47 +1,38 @@
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import Notification from '../../../components/Notification'
-import { setUser, userSelector } from '../../../redux/reducers/UserReducer'
-import Avatar from '../../../components/Avatar'
-import AvatarDrawer from '../../../components/Avatar/AvatarDrawer'
-import { getUserData } from '../../../api/AuthApi'
+import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
+import { Dropdown } from 'antd';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserData } from '../../../api/AuthApi';
+import Avatar from '../../../components/avatar';
+import Link from '../../../components/Link';
+import NotificationIcon from '../../../components/notification';
+import { useUserAction } from '../../../hook/useUserAction';
+import { userSelector } from '../../../redux/reducers/UserReducer';
 
 interface IProps {
-    handleCollapse: () => void,
-    handleToggled: () => void,
-    broken: boolean
+    handleCollapse: () => void;
+    handleToggled: () => void;
+    broken: boolean;
 }
 
 const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }) => {
-
-    const user = useSelector(userSelector)
+    const userAction = useUserAction();
+    const user = useSelector(userSelector);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        const userData = getUserData();
-        dispatch(setUser({
-            id: Number(userData.id),
-            fullName: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            isAdmin: Boolean(userData.isAdmin)
-        }));
-    }, [dispatch]);
+        userAction.save(getUserData());
+    }, [dispatch, userAction]);
+
+    const menuItems = [
+        { key: '0', label: <Link to='/admin/user-info' color='black'>Thông tin tài khoản</Link> },
+        { key: '1', label: <Link to='/' color='black' onClick={() => userAction.logout()}>Đăng xuất</Link> },
+    ];
 
     return (
-        <Box position='sticky' top={0} zIndex={10}>
-            <AppBar
-                position='static'
-                sx={{
-                    boxShadow: 'none',
-                }}
-            >
-                <Toolbar
-                    sx={{
-                        backgroundColor: 'white',
-                    }}
-                >
+        <Box position='sticky' top={0} zIndex={10} className='shadow-header'>
+            <AppBar position='static' sx={{ boxShadow: 'none' }}>
+                <Toolbar sx={{ backgroundColor: 'white' }}>
                     <IconButton
                         size="large"
                         edge="start"
@@ -53,35 +44,32 @@ const AdminHeader: React.FC<IProps> = ({ handleCollapse, handleToggled, broken }
                     </IconButton>
 
                     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'end' }}>
-
-                        <Notification />
-
-                        <Box component='span' display='flex' alignItems='center'>
-
-                            <Typography
+                        <NotificationIcon mr />
+                        <Dropdown menu={{ items: menuItems }} trigger={['hover', 'click']}>
+                            <Box
+                                className="btn-custom"
+                                onClick={(e) => e.preventDefault()}
                                 sx={{
-                                    color: 'black',
-                                    display: {
-                                        xs: "none",
-                                        md: "block"
-                                    },
-                                    textAlign: 'end',
-                                    maxWidth: 220,
-                                    height: 25,
-                                    overflow: 'hidden'
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center',
                                 }}
                             >
-                                {user?.fullName}
-                            </Typography>
-
-                            <Avatar draw={<AvatarDrawer />} />
-
-                        </Box>
+                                <Typography
+                                    sx={{
+                                        color: 'black', display: { xs: 'none', lg: 'block' },
+                                        mr: 2, textAlign: 'end', maxWidth: 220, height: 25,
+                                        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    {user.fullName || 'Guest'}
+                                </Typography>
+                                <Avatar />
+                            </Box>
+                        </Dropdown>
                     </Box>
                 </Toolbar>
             </AppBar>
         </Box>
-    )
-}
+    );
+};
 
-export default AdminHeader
+export default AdminHeader;

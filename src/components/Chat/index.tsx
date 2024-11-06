@@ -32,12 +32,14 @@ const Chat: React.FC = () => {
                 sx={{
                     color: '#A6B0B8',
                     position: 'relative',
-                    p: 2,
-                    border: '1px solid #7d7d7d'
+                    p: 1.5,
+                    border: '1px solid #7d7d7d',
+                    backdropFilter: 'blur(2px)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)'
                 }}
                 onClick={toggleChat}
             >
-                <i className="fa-solid fa-message fs-2" />
+                <i className="fa-solid fa-message fs-3" />
                 {
                     seen &&
                     <Box

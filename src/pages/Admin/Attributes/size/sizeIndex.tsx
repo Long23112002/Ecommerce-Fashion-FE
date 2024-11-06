@@ -1,4 +1,21 @@
-import React, { Fragment, useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Table,
+  Tooltip
+} from "antd";
+import Cookies from "js-cookie";
+import { debounce } from "lodash";
+import { Fragment, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
+import createPaginationConfig, {
+  PaginationState,
+} from "../../../../config/paginationConfig.ts";
+import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import {
   createSize,
   deleteSize,
@@ -6,24 +23,6 @@ import {
   getSizeById,
   updateSize,
 } from "./sizeManagament.ts";
-import {
-  Button,
-  Form,
-  Popconfirm,
-  Table,
-  Input,
-  Modal,
-  Space,
-  Tooltip,
-} from "antd";
-import { toast, ToastContainer } from "react-toastify";
-import Cookies from "js-cookie";
-import createPaginationConfig, {
-  PaginationState,
-} from "../../../../config/paginationConfig.ts";
-import { debounce } from "lodash";
-import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.tsx";
 
 const ManagerSize = () => {
   const [loading, setLoading] = useState(false);
@@ -54,8 +53,8 @@ const ManagerSize = () => {
     setLoading(true);
     try {
       const response = await fetchAllSizes(
-        filterName, 
-        pageSize, 
+        filterName,
+        pageSize,
         current - 1
       );
       const sizeData = response.data || [];
@@ -115,7 +114,7 @@ const ManagerSize = () => {
         toast.error("Lỗi xác thực");
       }
     } catch (error) {
-     toast.error(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -352,7 +351,7 @@ const ManagerSize = () => {
               padding: "20px",
             }}
           >
-        
+
             <h3
               style={{
                 fontWeight: "bold",
@@ -522,11 +521,10 @@ const ManagerSize = () => {
           indicator: <LoadingCustom />,
         }}
         rowKey="id"
-        pagination={createPaginationConfig(pagination, setPagination)??''}
+        pagination={createPaginationConfig(pagination, setPagination) ?? ''}
         onChange={handleTableChange}
       />
     </div>
-    <ToastContainer/>
   </Fragment>
 };
 

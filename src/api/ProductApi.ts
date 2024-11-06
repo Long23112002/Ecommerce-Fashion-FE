@@ -1,4 +1,5 @@
 
+
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance from "./AxiosInstance";
@@ -15,6 +16,23 @@ interface ProductData {
     idOrigin: number;
     idMaterial: number;
 }
+
+interface ProductParams {
+    code?: string,
+    idBrand?: number,
+    idCategory?: number,
+    idMaterial?: number,
+    idOrigin?: number,
+    keyword?: string
+}
+
+export const getAllProduct = async (params?: ProductParams, pageable?: PageableRequest) => {
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${BASE_API}/api/v1/product`,
+        params: { params, ...pageable }
+    });
+    return data
 
 export const getProductById = async (id: number) => {
     const token = Cookies.get("accessToken");
@@ -83,4 +101,3 @@ export const addProduct = async (productData: ProductData) => {
         throw error;
     }
 }
-

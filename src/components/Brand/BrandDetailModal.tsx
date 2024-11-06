@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Form, Input, Avatar, Typography } from 'antd';
-import { Brand } from '../../types/brand.ts';
+import { Brand } from '../../types/brand.js';
 
 
 
