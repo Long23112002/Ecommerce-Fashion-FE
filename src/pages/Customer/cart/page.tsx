@@ -26,6 +26,7 @@ import { debounce } from "lodash";
 import Swal from "sweetalert2";
 import { Spin } from "antd";
 import { Tooltip } from "antd";
+import { getErrorMessage } from "../../Error/getErrorMessage.js";
 
 const CartPage = () => {
   const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
@@ -80,6 +81,7 @@ const CartPage = () => {
       setCart(data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu giỏ hàng:", error);
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -125,7 +127,7 @@ const CartPage = () => {
       console.log("Giỏ hàng đã được cập nhật", cartData);
     } catch (error) {
       console.error("Lỗi khi cập nhật giỏ hàng:", error);
-      console.log("Cập nhật giỏ hàng thất bại");
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -195,6 +197,7 @@ const CartPage = () => {
       console.log("Giỏ hàng đã được cập nhật", cartData);
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
+      toast.error(getErrorMessage(error));
     }
   };
 
