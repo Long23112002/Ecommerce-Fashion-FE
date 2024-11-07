@@ -22,13 +22,18 @@ import ProductFilterPage from '../pages/Customer/filter/page.tsx';
 import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
-// import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+
+import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+// import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
+
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import CartPage from '../pages/Customer/cart/page.tsx';
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
-import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+
+// import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+
 
 
 
