@@ -94,7 +94,7 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
     title: "Đơn giá",
     dataIndex: "price",
     key: "price",
-    render: (price: number) => `${price} VNĐ`,
+    render: (price: number) => `${price.toLocaleString("vi-VN")} VNĐ`,
   },
 ];
 
