@@ -15,6 +15,7 @@ interface IProps {
 const UserInfoLayout: React.FC<IProps> = ({ page = '' }) => {
   const theme = useTheme();
   const location = useLocation();
+  const path = page === 'admin' ? '/' + page : ''
 
   return (
     <Container maxWidth="md">
@@ -27,9 +28,9 @@ const UserInfoLayout: React.FC<IProps> = ({ page = '' }) => {
         >
           <Tab
             label="Thông tin người dùng"
-            value={`${'/' + page}/user-info`}
+            value={`${path}/user-info`}
             component={Link}
-            to={`${'/' + page}/user-info`}
+            to={`${path}/user-info`}
             sx={{
               '&:hover': {
                 backgroundColor: theme.palette.action.hover,
@@ -38,9 +39,9 @@ const UserInfoLayout: React.FC<IProps> = ({ page = '' }) => {
           />
           <Tab
             label="Thay đổi mật khẩu"
-            value={`${'/' + page}/change-password`}
+            value={`${path}/change-password`}
             component={Link}
-            to={`${'/' + page}/change-password`}
+            to={`${path}/change-password`}
             sx={{
               '&:hover': {
                 backgroundColor: theme.palette.action.hover,

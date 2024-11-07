@@ -1,28 +1,20 @@
-import axiosInstance from "./AxiosInstance";
+import axios from "axios";
+import { API_IMAGE } from "../constants/BaseApi";
 
-const API_BASE_URL = `http://ecommerce-fashion.site:9099/api/v1/images`
-
-export interface FileImage {
-    url: string;
-}
-
-interface ImageData {
-    file: FileImage[];
-    objectId: number;
-    objectName: string;
-}
-
-export const postImage = async (imageData: ImageData) => {
-    const config = {
+export const uploadMutiImage = async (file: File[], objectId: number, objectName: string): Promise<string[]> => {
+    const requestBody = { file, objectId, objectName };
+    const response = await axios({
+        method: 'post',
+        url: `${API_IMAGE}/api/v1/images`,
+        data: requestBody,
         headers: {
             'Content-Type': 'multipart/form-data',
-        }
-    };
-    try {
-        const response = await axiosInstance.post(`${API_BASE_URL}`, imageData, config)
-        return response.data;
-    } catch (error: any) {
-        console.log("Error post image", error);
-        throw error;
-    }
+        },
+    });
+    return response.data.file.map((f: any) => f.url);
+}
+
+export const uploadOneImage = async (file: File[], objectId: number, objectName: string): Promise<string> => {
+    const response = await uploadMutiImage([file[0]], objectId, objectName)
+    return response[0];
 }

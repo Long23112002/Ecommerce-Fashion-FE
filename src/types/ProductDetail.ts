@@ -27,16 +27,21 @@ import { User } from "./User"
 type ProductDetail = {
     id?: number,
     price?: number,
+    originPrice?: number,
     quantity?: number,
     images?: string[],
-    product?: Product,
-    size?: Size,
-    color?: Color,
     createAt?: Date,
     updateAt?: Date | null,
     createBy?: User,
+<<<<<<< HEAD
+    updateBy?: User
+    product?: Product,
+    size?: Size,
+    color?: Color,
+=======
     updateBy?: User,
     originPrice?:number,
+>>>>>>> 7bf5a911beec74582a27c7d61cfd82c8af75af37
 }
 
 export default ProductDetail
