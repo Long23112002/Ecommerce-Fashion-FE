@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../../../Error/getErrorMessage";
 import { fetchAllColors } from "../../Attributes/color/colorManagament";
 import { fetchAllSizes } from "../../Attributes/size/sizeManagament";
-import { postImage } from "../../../../api/ImageApi";
+import { postImage } from "../../../../api/ImageAPI";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom";
 import { debounce } from "lodash";
 import createPaginationConfig, { PaginationState } from "../../../../config/paginationConfig";
