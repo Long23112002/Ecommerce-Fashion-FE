@@ -49,7 +49,7 @@ import { User } from "./User"
 type ProductDetail = {
     id?: number,
     price?: number,
-    // originPrice?: number,
+    originPrice?: number,
     quantity?: number,
     images?: string[],
     createAt?: Date,
@@ -62,7 +62,7 @@ type ProductDetail = {
     color?: Color,
 
     updateBy?: User,
-    originPrice?:number,
+    // originPrice?:number,
 
 }
 
