@@ -1,11 +1,8 @@
 import { FacebookFilled, GoogleOutlined } from '@ant-design/icons';
 import { Button, Input } from 'antd';
 import React, { useState } from 'react';
-import { toast } from "react-toastify";
-import { handleLogin, storeUserData } from "../../api/AuthApi.ts";
 import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../api/Oauth2.ts";
 import { useUserAction } from '../../hook/useUserAction.ts';
-import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
 import { LoginRequest } from "../../types/login/request/loginRequest.ts";
 
 interface LoginFormProps {
@@ -50,14 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
         setLoading(true);
 
         try {
-            const loginResponse = await handleLogin(loginRequest);
-            storeUserData(loginResponse);
-            const userData = loginResponse.userResponse
-            userAction.save(userData);
-            toast.success("Đăng nhập thành công!");
-            handleCancel();
-        } catch (error) {
-            toast.error(getErrorMessage(error));
+            userAction.login(loginRequest, handleCancel);
         } finally {
             setLoading(false);
         }

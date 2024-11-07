@@ -82,18 +82,8 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
   },
   {
     title: "Tên sản phẩm",
-    dataIndex: "name",
     key: "name",
-  },
-  {
-    title: "Kích thước",
-    dataIndex: "size",
-    key: "size",
-  },
-  {
-    title: "Màu sắc",
-    dataIndex: "color",
-    key: "color",
+    render: (record: ProductDetail) => `${record.name} [ ${record.color} - ${record.size} ]`,
   },
   {
     title: "Số lượng",
