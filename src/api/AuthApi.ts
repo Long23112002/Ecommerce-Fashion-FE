@@ -35,9 +35,9 @@ export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResp
 
 export const handleLogout = async (): Promise<any> => {
     try {
+        clearUserData();
         const url = `${BASE_API}/api/v1/auth/logout`;
         const response = await axios.post(url);
-        clearUserData();
         return response.data;
     } catch (error) {
         console.error("Error fetching roles", error);

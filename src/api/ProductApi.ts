@@ -2,8 +2,7 @@
 
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
-import axiosInstance from "./AxiosInstance";
-import { Product } from '../types/Product';
+import axiosInstance, { PageableRequest } from "./AxiosInstance";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product`
 
@@ -33,6 +32,7 @@ export const getAllProduct = async (params?: ProductParams, pageable?: PageableR
         params: { params, ...pageable }
     });
     return data
+}
 
 export const getProductById = async (id: number) => {
     const token = Cookies.get("accessToken");
