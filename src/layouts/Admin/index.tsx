@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminHeader from './Header';
 import AdminSidebar from './Sidebar';
+import useAdminAuth from '../../hook/useAdminAuth';
 
 const AdminLayout: React.FC = () => {
+    const adminAuth = useAdminAuth()
     const [collapse, setCollapse] = useState<boolean>(false);
     const [toggled, setToggled] = useState(false);
     const [broken, setBroken] = useState(window.matchMedia('(max-width: 1000px)').matches);
@@ -19,6 +21,10 @@ const AdminLayout: React.FC = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    if (!adminAuth) {
+        return null
+    }
 
     return (
         <div className="d-flex" style={{ overflow: 'hidden', width: '100vw', height: '100vh' }}>
