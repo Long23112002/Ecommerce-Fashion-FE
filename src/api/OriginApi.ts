@@ -55,3 +55,18 @@ export const getOriginById = async (id: number) => {
     const response = await axiosInstance.get(`${API_BASE_URL}/${id}`);
     return response.data;
 };
+
+export const getOrigins = async (pageSize: number, pageIndex: number, searchName: string) => {
+    const params = {
+      size: pageSize,
+      page: pageIndex,
+      name: searchName || '',
+    };
+  
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}`, { params });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(`Error fetching categories: ${error.response?.data?.message || error.message}`);
+    }
+  };
