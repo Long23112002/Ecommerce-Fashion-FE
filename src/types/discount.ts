@@ -13,10 +13,10 @@ export enum StatusDiscount {
 }
 
 export interface Condition {
-    productId: number[];        // Mã sản phẩm
-    brandId: number[];          // Mã thương hiệu
-    categoryId: number[];       // Mã danh mục
-    productDetailId: number[];  // Mã chi tiết sản phẩm
+    idProduct: number[];        // Mã sản phẩm
+    idBrand: number[];          // Mã thương hiệu
+    idCategory: number[];       // Mã danh mục
+    idProductDetail: number[];  // Mã chi tiết sản phẩm
 }
 export interface Discount {
     id: number;

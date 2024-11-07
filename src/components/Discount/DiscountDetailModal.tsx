@@ -1,52 +1,70 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Avatar, Typography, Table } from 'antd';
+import { Form, Input, Avatar, Typography, Table, Row, Col } from 'antd';
 import { Discount } from '../../types/discount.js';
 import Product from '../../types/Product.js'
 import ProductDetail from '../../types/ProductDetail.js'
 import { Category } from '../../types/Category.js'
 import { Brand } from '../../types/brand.js'
+import { getDiscountById } from "../../api/DiscountApi.ts";
 import { fetchCategoriesByIds } from "../../api/CategoryApi.ts";
 import { fetchBrandsByIds } from "../../api/BrandApi.ts";
 import { fetchProductDetailsByIds } from "../../api/BrandApi.ts";
 import { fetchProductsByIds } from "../../api/BrandApi.ts";
-interface DiscountDetailModalProps {
-    visible: boolean;
-    onCancel: () => void;
-    discount: Discount | null;
-}
+// import { fetchProductsByCategoryBrandOrIds } from "../../api/BrandApi.ts";
+import { useParams } from "react-router-dom";
+
 const { Text } = Typography;
 
-const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({ visible, onCancel, discount }) => {
-
+const DiscountDetailModal: React.FC = () => {
+    const { discountId } = useParams<{ discountId: string }>();
+    const [discount, setDiscount] = useState<Discount | null>(null);
     const [categoryDetails, setCategoryDetails] = useState<Category[]>([]);
     const [brandDetails, setBrandDetails] = useState<Brand[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
     useEffect(() => {
-        if (visible && discount) {
-            const fetchDetails = async () => {
-                if (discount.condition.categoryId.length > 0) {
-                    const categories = await fetchCategoriesByIds(discount.condition.categoryId);
+        const fetchDiscountDetails = async () => {
+            // let combinedProducts: Product[] = [];
+            const parsedDiscountId = Number(discountId);
+            if (isNaN(parsedDiscountId)) {
+                console.error("Invalid discount ID:", discountId);
+                return;
+            }
+            const discountData = await getDiscountById(parsedDiscountId);
+            setDiscount(discountData);
+
+            if (discountData) {
+                if (discountData.condition.idCategory.length > 0) {
+                    const categories = await fetchCategoriesByIds(discountData.condition.idCategory);
                     setCategoryDetails(categories);
                 }
-
-                if (discount.condition.brandId.length > 0) {
-                    const brands = await fetchBrandsByIds(discount.condition.brandId);
+                if (discountData.condition.idBrand.length > 0) {
+                    const brands = await fetchBrandsByIds(discountData.condition.idBrand);
                     setBrandDetails(brands);
                 }
-                if (discount.condition.productDetailId.length > 0) {
-                    const productdetails = await fetchProductDetailsByIds(discount.condition.productDetailId);
+                if (discountData.condition.idProductDetail.length > 0) {
+                    const productdetails = await fetchProductDetailsByIds(discountData.condition.idProductDetail);
                     setProductDetails(productdetails);
                 }
-                if (discount.condition.productId.length > 0) {
-                    const products = await fetchProductsByIds(discount.condition.productId);
-                    setProducts(products);
-                }
-            };
 
-            fetchDetails();
-        }
-    }, [visible, discount]);
+                // let productsByCategoryAndBrand: Product[] = [];
+                // if (discountData.condition.idCategory.length > 0 && discountData.condition.idBrand.length > 0) {
+                //     productsByCategoryAndBrand = await fetchProductsByCategoryBrandOrIds(discountData.condition.idCategory, discountData.condition.idBrand);
+                // }
+                // let productsById = [];
+                if (discountData.condition.idProduct.length > 0) {
+                    const productsById = await fetchProductsByIds(discountData.condition.idProduct);
+                    setProducts(productsById);
+                }
+                // combinedProducts = [...productsByCategoryAndBrand, ...productsById];
+                // const uniqueProducts = Array.from(new Set(combinedProducts.map(p => p.id)))
+                //     .map(id => combinedProducts.find(p => p.id === id)!);
+
+
+            }
+        };
+        fetchDiscountDetails();
+    }, [discountId]);
     const productColumns = [
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Tên sản phẩm', dataIndex: 'name', key: 'name' },
@@ -67,19 +85,11 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({ visible, onCa
         return null;
     }
     return (
-        <Modal
-            title={
-                <div style={{ textAlign: 'center' }}>
-                    <Text strong style={{ fontSize: '18px' }}>Chi tiết Khuyến Mãi</Text>
-                    <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>{discount.name}</div>
-                </div>
-            }
-            visible={visible}
-            onCancel={onCancel}
-            footer={null}
-            width={900}
-            bodyStyle={{ padding: '24px', fontSize: '16px' }}
-        >
+        <div style={{ padding: '24px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <Text strong style={{ fontSize: '18px' }}>Chi tiết Khuyến Mãi</Text>
+                <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>{discount.name}</div>
+            </div>
             <Form
                 layout="vertical"
                 initialValues={{
@@ -96,83 +106,102 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({ visible, onCa
                     updateBy: discount.updateBy?.fullName || "Chưa cập nhật",
                 }}
             >
-                <Form.Item label={<Text strong>Mã Khuyến Mãi:</Text>} name="code">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Mã Khuyến Mãi:</Text>} name="code">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Loại Khuyến Mãi:</Text>} name="type">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Giá Trị:</Text>} name="value">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Giá Trị Tối Đa:</Text>} name="maxValue">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Ngày Bắt Đầu:</Text>} name="startDate">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Ngày Kết Thúc:</Text>} name="endDate">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Trạng Thái:</Text>} name="status">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
 
-                <Form.Item label={<Text strong>Loại Khuyến Mãi:</Text>} name="type">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Giá Trị:</Text>} name="value">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Giá Trị Tối Đa:</Text>} name="maxValue">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Ngày Bắt Đầu:</Text>} name="startDate">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Ngày Kết Thúc:</Text>} name="endDate">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Trạng Thái:</Text>} name="status">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Ngày Tạo:</Text>} name="createAt">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Người Tạo:</Text>} name="createBy">
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {discount.createBy?.avatar ? (
-                            <Avatar src={discount.createBy.avatar} size={40} style={{ marginRight: 10 }} />
-                        ) : (
-                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
-                        )}
-                        {<Text strong>{discount.createBy?.fullName || 'Không rõ'}</Text>}
-                    </div>
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Ngày Cập Nhật:</Text>} name="updateAt">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Người Cập Nhật:</Text>} name="updateBy">
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {discount.updateBy?.avatar ? (
-                            <Avatar src={discount.updateBy.avatar} size={40} style={{ marginRight: 10 }} />
-                        ) : (
-                            <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
-                        )}
-                        {<Text strong>{discount.updateBy?.fullName || 'Chưa có'}</Text>}
-                    </div>
-                </Form.Item>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}></Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Ngày Tạo:</Text>} name="createAt">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Người Tạo:</Text>} name="createBy">
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {discount.createBy?.avatar ? (
+                                    <Avatar src={discount.createBy.avatar} size={40} style={{ marginRight: 10 }} />
+                                ) : (
+                                    <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                                )}
+                                {<Text strong>{discount.createBy?.fullName || 'Không rõ'}</Text>}
+                            </div>
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Ngày Cập Nhật:</Text>} name="updateAt">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Người Cập Nhật:</Text>} name="updateBy">
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {discount.updateBy?.avatar ? (
+                                    <Avatar src={discount.updateBy.avatar} size={40} style={{ marginRight: 10 }} />
+                                ) : (
+                                    <Avatar size={40} style={{ marginRight: 10, backgroundColor: '#ccc' }} />
+                                )}
+                                {<Text strong>{discount.updateBy?.fullName || 'Chưa có'}</Text>}
+                            </div>
+                        </Form.Item>
+                    </Col>
+                </Row>
             </Form>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                <Text strong style={{ fontSize: '28px' }} >Điều Kiện</Text>
+            </div>
             <div style={{ marginTop: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Danh sách Danh Mục</Text>
-                <Table columns={categoryColumns} dataSource={categoryDetails} pagination={false} rowKey="id" />
+                <Table columns={categoryColumns} dataSource={categoryDetails} pagination={{ pageSize: 5 }} rowKey="id" />
             </div>
             <div style={{ marginTop: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Danh sách Thương Hiệu</Text>
-                <Table columns={brandColumns} dataSource={brandDetails} pagination={false} rowKey="id" />
+                <Table columns={brandColumns} dataSource={brandDetails} pagination={{ pageSize: 5 }} rowKey="id" />
             </div>
             <div style={{ marginTop: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Danh sách Sản Phẩm Chi Tiết</Text>
-                <Table columns={productDetailColumns} dataSource={productDetails} pagination={false} rowKey="id" />
+                <Table columns={productDetailColumns} dataSource={productDetails} pagination={{ pageSize: 5 }} rowKey="id" />
             </div>
-
             <div style={{ marginTop: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Danh sách Sản Phẩm</Text>
-                <Table columns={productColumns} dataSource={products} pagination={false} rowKey="id" />
+                <Table columns={productColumns} dataSource={products} pagination={{ pageSize: 5 }} rowKey="id" />
             </div>
-        </Modal>
+        </div >
     );
 };
+
 
 export default DiscountDetailModal;

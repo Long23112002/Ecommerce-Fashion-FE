@@ -4,21 +4,19 @@ import { debounce } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { createDiscount, deleteDiscount, fetchAllDiscounts, getDiscountById, updateDiscount } from "../../../api/DiscountApi.ts";
-import DiscountDetailModal from "../../../components/Discount/DiscountDetailModal.tsx";
 import DiscountModel from "../../../components/Discount/DiscountModel.tsx";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/discount/paginationConfig.ts";
 import { Discount, StatusDiscount, StatusDiscountLable, TypeDiscount, TypeDiscountLabel } from "../../../types/discount.ts";
 import { getErrorMessage } from "../../Error/getErrorMessage.ts";
+import { useNavigate } from 'react-router-dom';
 
 const ManagerDiscount = () => {
     const [loading, setLoading] = useState(true);
     const [discounts, setDiscounts] = useState<Discount[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [form] = Form.useForm();
     const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
-    const [detailDiscount, setDetailDiscount] = useState<Discount | null>(null);
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
@@ -26,7 +24,7 @@ const ManagerDiscount = () => {
         totalPage: 4
     });
     const [searchParams, setSearchParams] = useState<{ name: string }>({ name: '' });
-
+    const navigate = useNavigate();
     const mode = editingDiscount ? 'update' : 'add';
 
     const fetchDiscountsDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
@@ -72,13 +70,9 @@ const ManagerDiscount = () => {
     };
 
     const handleViewDetails = (discount: Discount) => {
-        setDetailDiscount(discount);
-        setIsDetailModalOpen(true);
-    };
-
-    const handleDetailCancel = () => {
-        setIsDetailModalOpen(false);
-        setDetailDiscount(null);
+        navigate(`/admin/discount/${discount.id}`, {
+            state: discount,
+        });
     };
 
     const handleOk = async () => {
@@ -187,25 +181,25 @@ const ManagerDiscount = () => {
             dataIndex: "discountStatus",
             key: "discountStatus",
             render: (status: StatusDiscount) => {
-              let color = "default"; // Mặc định
-      
-              switch (status) {
-                case StatusDiscount.ACTIVE:
-                  color = "green";
-                  break;
-                case StatusDiscount.ENDED:
-                  color = "red";
-                  break;
-                case StatusDiscount.UPCOMING:
-                  color = "gold";
-                  break;
-                default:
-                  color = "grey";
-              }
-      
-              return <Tag color={color}>{StatusDiscountLable[status]}</Tag>;
+                let color = "default"; // Mặc định
+
+                switch (status) {
+                    case StatusDiscount.ACTIVE:
+                        color = "green";
+                        break;
+                    case StatusDiscount.ENDED:
+                        color = "red";
+                        break;
+                    case StatusDiscount.UPCOMING:
+                        color = "gold";
+                        break;
+                    default:
+                        color = "grey";
+                }
+
+                return <Tag color={color}>{StatusDiscountLable[status]}</Tag>;
             },
-          },
+        },
         {
             title: 'Hành động',
             key: 'actions',
@@ -260,11 +254,6 @@ const ManagerDiscount = () => {
                 form={form}
                 mode={editingDiscount ? 'update' : 'add'}
                 discount={editingDiscount || undefined}
-            />
-            <DiscountDetailModal
-                visible={isDetailModalOpen}
-                onCancel={handleDetailCancel}
-                discount={detailDiscount}
             />
             <Table
                 dataSource={discounts}

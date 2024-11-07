@@ -25,6 +25,7 @@ import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
 import ManagerDiscount from '../pages/Admin/Discount/ManagerDiscount.tsx';
 import ManagerVoucher from '../pages/Admin/Voucher/ManagerVoucher.tsx';
+import DiscountDetailModal from '../components/Discount/DiscountDetailModal.tsx';
 
 
 
@@ -61,7 +62,7 @@ const AppRoutes = () => {
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
                 <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />} />
-                <Route path="/admin/discount/detail/:id" element={<PromotionSheducled />} />
+                <Route path="/admin/discount/:discountId" element={<DiscountDetailModal />} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />

@@ -1,111 +1,122 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message } from 'antd';
-import { createDiscount, updateDiscount } from '../../api/DiscountApi';
+import React, { useState } from 'react';
+import { Modal, Form, Input, DatePicker, InputNumber, Select, FormInstance, message } from 'antd';
+import { Discount } from '../../types/discount';
+
+interface DiscountModelProps {
+    isModalOpen: boolean;
+    handleOk: (values: any) => void;
+    handleCancel: () => void;
+    form: FormInstance;
+    mode: 'add' | 'update';
+    discount?: Discount;
+    existingDiscounts: Discount[];
+}
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const DiscountModel = ({ visible, onClose, discountData, onSave }) => {
-    const [form] = Form.useForm();
-    const isEditing = !!discountData;
+const DiscountModel: React.FC<DiscountModelProps> = ({
+    isModalOpen,
+    handleOk,
+    handleCancel,
+    form,
+    mode,
+    discount,
+    existingDiscounts = [],
+}) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (isEditing) {
-            form.setFieldsValue({
-                ...discountData,
-                dateRange: [discountData.startDate, discountData.endDate],
-            });
-        } else {
-            form.resetFields();
-        }
-    }, [discountData, visible]);
+    const checkDuplicateName = (name: string, excludeName: string = "") => {
+        return existingDiscounts.some((item) => item.name === name && item.name !== excludeName);
+    };
 
-    const handleSubmit = async (values) => {
-        const { dateRange, ...rest } = values;
-        const payload = {
-            ...rest,
-            startDate: dateRange[0],
-            endDate: dateRange[1],
-        };
-
+    const onSubmit = async () => {
         try {
-            if (isEditing) {
-                await updateDiscount(discountData.id, payload);
-                message.success('Cập nhật khuyến mãi thành công!');
-            } else {
-                await createDiscount(payload);
-                message.success('Tạo khuyến mãi mới thành công!');
+            const values = await form.validateFields();
+            const excludeName = mode === "update" ? discount?.name : "";
+            if (checkDuplicateName(values.name, excludeName)) {
+                message.error("Tên đã tồn tại! Vui lòng chọn tên khác.");
+                return;
             }
-            onSave();
-            onClose();
+            setIsSubmitting(true);
+            handleOk(values);
+            setIsSubmitting(false);
         } catch (error) {
-            message.error('Đã xảy ra lỗi. Vui lòng thử lại.');
+            console.error("Validation failed:", error);
         }
     };
 
     return (
         <Modal
-            title={isEditing ? 'Cập nhật khuyến mãi' : 'Tạo khuyến mãi mới'}
-            visible={visible}
-            onCancel={onClose}
-            footer={null}
+            title={mode === 'add' ? 'Thêm Giảm Giá' : 'Chỉnh Sửa Giảm Giá'}
+            visible={isModalOpen}
+            onOk={onSubmit}
+            onCancel={handleCancel}
+            okText={mode === "add" ? "Add" : "Update"}
+            cancelText="Cancel"
+            confirmLoading={isSubmitting}
         >
-            <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form
+                form={form}
+                layout="vertical"
+                initialValues={{
+                    name: discount?.name || "",
+                    condition: discount?.condition || {},
+                    type: discount?.type || "PERCENTAGE",
+                    value: discount?.value || 0,
+                    maxValue: discount?.maxValue || 0,
+                    startDate: discount?.startDate,
+                    endDate: discount?.endDate,
+                    discountStatus: discount?.discountStatus || "ACTIVE"
+                }}
+            >
                 <Form.Item
-                    label="Mã khuyến mãi"
-                    name="code"
-                    rules={[{ required: true, message: 'Vui lòng nhập mã khuyến mãi!' }]}
+                    name="name"
+                    label="Tên Giảm Giá"
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập tên!' },
+                        { max: 50, message: 'Tên phải ít hơn 50 ký tự' }
+                    ]}
                 >
-                    <Input />
+                    <Input placeholder="Enter discount name" />
                 </Form.Item>
-
                 <Form.Item
-                    label="Loại khuyến mãi"
+                    name="condition"
+                    label="Điều kiện"
+                    rules={[{ required: true, message: 'Vui lòng nhập điều kiện!' }]}
+                >
+                    <Input.TextArea placeholder="Enter conditions as JSON format" />
+                </Form.Item>
+                <Form.Item
                     name="type"
-                    rules={[{ required: true, message: 'Vui lòng chọn loại khuyến mãi!' }]}
+                    label="Loại Giảm Giá"
+                    rules={[{ required: true, message: 'Vui lòng chọn loại giảm giá!' }]}
                 >
-                    <Select>
-                        <Option value="percentage">Phần trăm</Option>
-                        <Option value="fixed">Cố định</Option>
+                    <Select placeholder="Select discount type">
+                        <Option value="PERCENTAGE">Phần %</Option>
+                        <Option value="FIXED_AMOUNT">Số thực</Option>
                     </Select>
                 </Form.Item>
-
                 <Form.Item
-                    label="Giá trị khuyến mãi"
                     name="value"
-                    rules={[{ required: true, message: 'Vui lòng nhập giá trị khuyến mãi!' }]}
+                    label="Giá Trị Giảm Giá"
+                    rules={[{ required: true, message: 'Vui lòng nhập giá trị giảm!' }]}
                 >
-                    <InputNumber min={0} style={{ width: '100%' }} />
+                    <InputNumber placeholder="Enter discount value" min={0} style={{ width: '100%' }} />
                 </Form.Item>
-
-                <Form.Item label="Giá trị tối đa" name="maxValue">
-                    <InputNumber min={0} style={{ width: '100%' }} />
-                </Form.Item>
-
                 <Form.Item
-                    label="Thời gian khuyến mãi"
+                    name="maxValue"
+                    label="Giá Trị Tối Đa"
+                    rules={[{ required: true, message: 'Vui lòng nhập giá trị tối đa!' }]}
+                >
+                    <InputNumber placeholder="Enter max discount value" min={0} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item
                     name="dateRange"
-                    rules={[{ required: true, message: 'Vui lòng chọn thời gian khuyến mãi!' }]}
+                    label="Thời Gian Áp Dụng"
+                    rules={[{ required: true, message: 'Vui lòng chọn thời gian áp dụng!' }]}
                 >
-                    <RangePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-                </Form.Item>
-
-                <Form.Item
-                    label="Trạng thái"
-                    name="status"
-                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-                >
-                    <Select>
-                        <Option value="active">Hoạt động</Option>
-                        <Option value="inactive">Không hoạt động</Option>
-                    </Select>
-                </Form.Item>
-
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" style={{ marginRight: '8px' }}>
-                        {isEditing ? 'Cập nhật' : 'Tạo mới'}
-                    </Button>
-                    <Button onClick={onClose}>Hủy</Button>
+                    <RangePicker showTime />
                 </Form.Item>
             </Form>
         </Modal>
