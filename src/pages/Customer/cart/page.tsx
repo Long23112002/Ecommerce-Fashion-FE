@@ -1,6 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { Checkbox } from "@mui/material";
 import {
   Box,
   Button,
@@ -8,9 +9,9 @@ import {
   Grid,
   IconButton,
   Typography,
-  TextField
+  TextField,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ProductDetail from "../../../types/ProductDetail";
 import { Cart, CartValueInfos, CartValues } from "../../../types/Cart";
 import Cookies from "js-cookie";
@@ -24,7 +25,7 @@ import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import { toast } from "react-toastify";
 import { debounce } from "lodash";
 import Swal from "sweetalert2";
-import { Spin } from "antd";
+import { Popconfirm, Spin } from "antd";
 import { Tooltip } from "antd";
 import { getErrorMessage } from "../../Error/getErrorMessage.js";
 
@@ -36,6 +37,48 @@ const CartPage = () => {
   const [subToTals, setSubToTals] = useState(0);
   const [cartValueInfos, setCartValueInfos] = useState<CartValueInfos[]>([]);
   const [cartValues, setCartValues] = useState<CartValues[]>([]);
+  const [selectedProductDetails, setSelectedProductDetails] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [selectAll, setSelectAll] = useState(false);
+  const [isCartUpdated, setIsCartUpdated] = useState(false);
+
+  const caculatePrice = () => {
+    const subtotal = cartValueInfos.reduce((sum, pd) => {
+      if (selectedProductDetails[pd.productDetail.id]) {
+        return sum + (pd.productDetail.price || 0) * (pd.quantity || 0);
+      }
+      return sum;
+    }, 0);
+
+    const discount = 0;
+    const total = Math.max(0, subtotal - discount);
+    setSubToTals(subtotal);
+    setTotalPrice(total);
+  };
+
+  const handleSelectProductDetail = (id: number) => {
+    setSelectedProductDetails((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleSelectAll = () => {
+    const newSelectAll = !selectAll;
+    setSelectAll(newSelectAll);
+
+    const newSelectedProductDetails = cartValueInfos.reduce((acc, pd) => {
+      acc[pd.productDetail.id] = newSelectAll;
+      return acc;
+    }, {} as { [key: number]: boolean });
+
+    setSelectedProductDetails(newSelectedProductDetails);
+  };
+
+  useEffect(() => {
+    caculatePrice();
+  }, [selectedProductDetails, cartValueInfos]);
 
   const fetchCartData = async () => {
     const token = Cookies.get("accessToken");
@@ -91,23 +134,23 @@ const CartPage = () => {
     fetchCartData();
   }, []);
 
-  const caculatePrice = () => {
-    const subtotal = cartValueInfos.reduce(
-      (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
-      0
-    );
-    const discount = 0;
-    const total = Math.max(0, subtotal - discount);
+  // const caculatePrice = () => {
+  //   const subtotal = cartValueInfos.reduce(
+  //     (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
+  //     0
+  //   );
+  //   const discount = 0;
+  //   const total = Math.max(0, subtotal - discount);
 
-    setSubToTals(subtotal);
-    setTotalPrice(total);
-  };
+  //   setSubToTals(subtotal);
+  //   setTotalPrice(total);
+  // };
 
-  useEffect(() => {
-    caculatePrice();
-  }, [cartValueInfos]);
+  // useEffect(() => {
+  //   caculatePrice();
+  // }, [cartValueInfos]);
 
-  const updateCartData = async () => {
+  const updateCartData = useCallback(async () => {
     const token = Cookies.get("accessToken");
     if (!token) {
       toast.error("Lỗi xác thực");
@@ -131,7 +174,15 @@ const CartPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  },[cartValueInfos]);
+
+  const debouncedUpdateCartData = debounce(() => {
+    updateCartData(); // gọi hàm updateCartData khi debounce hết thời gian
+  }, 1000);
+
+  useEffect(() => {
+    debouncedUpdateCartData();
+  }, [cartValueInfos]);
 
   const handleQuantityChange = (id: number, change: number) => {
     setCartValueInfos((prevCartValueInfos) => {
@@ -160,16 +211,16 @@ const CartPage = () => {
       );
       setCartValueInfos(updatedCartValueInfos);
       console.log(updatedCartValueInfos);
-
+      setIsCartUpdated(true);
       return updatedCartValueInfos;
     });
   };
 
-  useEffect(() => {
-    if (cartValueInfos.length > 0) {
-      updateCartData();
-    }
-  }, [cartValueInfos]);
+  // useEffect(() => {
+  //   if (cartValueInfos.length > 0) {
+  //     updateCartData();
+  //   }
+  // }, [cartValueInfos]);
 
   const handleRemoveProduct = async (id: number) => {
     const token = Cookies.get("accessToken");
@@ -199,6 +250,44 @@ const CartPage = () => {
       console.error("Lỗi khi xóa sản phẩm:", error);
       toast.error(getErrorMessage(error));
     }
+  };
+
+  const handleClearCart = async () => {
+    const token = Cookies.get("accessToken");
+    if (!token) {
+      toast.error("Lỗi xác thực");
+      return;
+    }
+
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const updatedCartValueInfos = [];
+          setCartValueInfos(updatedCartValueInfos); // Cập nhật giỏ hàng trên giao diện
+
+          const cartData = {
+            cartValues: updatedCartValueInfos.map((pd) => ({
+              productDetailId: pd.productDetail.id,
+              quantity: pd.quantity,
+            })),
+            userId: cart?.userId,
+          };
+
+          await updateCart(cartData, token);
+          setTotalPrice(0);
+          toast.success("Xóa thành công");
+        } catch (error) {
+          console.error("Lỗi khi xóa toàn bộ giỏ hàng:", error);
+          toast.error(getErrorMessage(error));
+        }
+      }
+    });
   };
 
   // const subtotal = cartValueInfos.reduce(
@@ -231,9 +320,38 @@ const CartPage = () => {
                 position: "relative",
               }}
             >
-              <Typography variant="h5" gutterBottom>
-                Giỏ hàng
-              </Typography>
+              <Box>
+                <Typography variant="h5" gutterBottom>
+                  Giỏ hàng
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 2,
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 2,
+                }}>
+                <Checkbox checked={selectAll} onChange={handleSelectAll} />
+                <Typography variant="body1">Sản phẩm</Typography>
+                </Box>
+                <Tooltip title="Xóa tất cả">
+                  <Button
+                    color="error"
+                    onClick={handleClearCart}
+                    disabled={cartValueInfos.length === 0}
+                  >
+                    XÓA TẤT CẢ
+                  </Button>
+                </Tooltip>
+              </Box>
+
               {cartValueInfos.map((pd) => (
                 <Box
                   key={pd.productDetail.id}
@@ -241,9 +359,24 @@ const CartPage = () => {
                     display: "flex",
                     my: 2,
                     borderBottom: "1px solid #ccc",
-                    paddingBottom: 1
+                    paddingBottom: 1,
                   }}
                 >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Checkbox
+                      checked={
+                        selectedProductDetails[pd.productDetail.id] || false
+                      }
+                      onChange={() =>
+                        handleSelectProductDetail(pd.productDetail.id)
+                      }
+                    />
+                  </div>
                   <img
                     src={pd.productDetail.images?.[0].url}
                     alt={pd.productDetail.product?.name}
@@ -299,8 +432,8 @@ const CartPage = () => {
                         position: "absolute",
                         left: -50,
                         borderRadius: "50%",
-                        width:"25px",
-                        height:"25px",
+                        width: "25px",
+                        height: "25px",
                         backgroundColor: "#f8f9fa",
                         color: "gray",
                         transform: "translateY(150%)",
@@ -403,12 +536,13 @@ const CartPage = () => {
                 </Typography>
               </Box>
               <Button variant="contained" fullWidth sx={{ mt: 2 }}>
-                Mua hàng (
+                Mua hàng
+                {/* (
                 {cartValueInfos.reduce(
-                  (sum, pd) => sum + (pd.quantity || 0),
+                  (sum, pd) => sum + (pd.quantity|| 0),
                   0
                 )}
-                )
+                ) */}
               </Button>
             </Box>
           </Grid>
