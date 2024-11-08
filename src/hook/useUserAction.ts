@@ -1,11 +1,14 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { handleLogin, handleLogout, storeUserData } from "../api/AuthApi";
-import { clearUser, setUser } from "../redux/reducers/UserReducer";
+import { clearUser, setUser, userSelector } from "../redux/reducers/UserReducer";
 import { LoginRequest } from "../types/login/request/loginRequest";
+import { useNavigate } from "react-router-dom";
 
 export const useUserAction = () => {
+    const user = useSelector(userSelector);
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const login = async (loginRequest: LoginRequest, onSuccess?: () => void, onError?: () => void) => {
         try {
@@ -14,7 +17,14 @@ export const useUserAction = () => {
             const userData = loginResponse.userResponse
             save(userData);
             toast.success("Đăng nhập thành công!");
-            if (onSuccess) onSuccess()
+            if (onSuccess) {
+                onSuccess()
+            }
+            if (isUserAdmin(userData)) {
+                navigate("/admin/user/role");
+            } else {
+                navigate("/")
+            }
         } catch (error) {
             if (onError) onError()
         }
@@ -29,14 +39,22 @@ export const useUserAction = () => {
             gender: userData.gender,
             phoneNumber: userData.phoneNumber === 'null' ? null : userData.phoneNumber,
             avatar: userData.avatar,
-            isAdmin: userData.isAdmin === 'true' || userData.isAdmin == true,
+            isAdmin: isUserAdmin(userData),
             roles: userData.roles,
         }));
+    }
+
+    const get = () => {
+        return user
     }
 
     const logout = async () => {
         dispatch(clearUser());
         await handleLogout()
     }
-    return { login, save, logout }
+    return { login, save, get, logout }
+}
+
+const isUserAdmin = (userData: any) => {
+    return userData.isAdmin === 'true' || userData.isAdmin == true;
 }

@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <HeroBanner />
+      <HeroBanner images={['https://d1csarkz8obe9u.cloudfront.net/posterpreviews/fashion-sale-banner-post-design-template-ea23b5c40dcc214228966e99cd0c3df6_screen.jpg?ts=1628576099','https://www.orchardtaunton.co.uk/app/uploads/2020/03/OSC-Spring-Generic-2020-Website-Fashion-Banner-01.jpg','https://marketplace.canva.com/EAFIMHQ5yhE/1/0/1600w/canva-orange-and-teal-summer-sale-kids-fashion-bright-website-banner-L6kUMOWkkho.jpg']} />
 
       <Container maxWidth='xl'
         sx={{ my: 4 }}
