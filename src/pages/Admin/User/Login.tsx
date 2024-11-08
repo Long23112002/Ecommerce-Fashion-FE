@@ -7,33 +7,19 @@ import {
     UserOutlined
 } from '@ant-design/icons';
 import { Button, Divider, Form, Input, Typography } from 'antd';
-import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { handleLogin, storeUserData } from "../../../api/AuthApi.ts";
 import { handleContinueWithFacebook, handleContinueWithGoogle } from "../../../api/Oauth2.ts";
+import { useUserAction } from '../../../hook/useUserAction.ts';
 import { LoginRequest } from "../../../types/login/request/loginRequest.ts";
 
 const { Title } = Typography;
 
 export default function Login() {
     const [form] = Form.useForm();
-    const navigate = useNavigate();
+    const userAction = useUserAction()
 
     const onFinish = async (values: LoginRequest) => {
-        try {
-            const response = await handleLogin(values);
-            if (response) {
-                toast.success('Đăng nhập thành công!');
-                storeUserData(response);
-                setTimeout(() => {
-                    navigate('/admin/user/role');
-                }, 1000);
-            }
-        } catch (error) {
-            console.log(error)
-            toast.error('Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!');
-        }
+        userAction.login(values)
     };
 
 
