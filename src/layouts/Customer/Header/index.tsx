@@ -22,7 +22,7 @@ import {
 import { Button, Dropdown, MenuProps } from "antd";
 
 const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
-const headerHeight = 50;
+const headerHeight = 55; // min = 15 nếu không thì bị vỡ do avatar
 
 const UserHeader: React.FC = () => {
     const userAction = useUserAction();
@@ -69,14 +69,20 @@ const UserHeader: React.FC = () => {
                 }}
             >
                 <Container maxWidth="xl">
-                    <Toolbar sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        height: headerHeight
-                    }}>
+                    <Toolbar
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                        style={{
+                            minHeight: headerHeight,
+                            height: headerHeight,
+                            maxHeight: headerHeight
+                        }}
+                    >
                         <Box sx={{ cursor: 'pointer', overflow: "hidden", borderRadius: 2 }}>
                             <Link to='/'>
-                                <img src="/logo.png" alt="Logo" height={`${headerHeight - 5}px`} />
+                                <img src="/logo.png" alt="Logo" height={`${headerHeight - 10}px`} />
                             </Link>
                         </Box>
 
@@ -98,7 +104,7 @@ const UserHeader: React.FC = () => {
                         </Box>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={38} />
+                            <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={Math.min(headerHeight - 5, 37)} />
                             <CartIcon />
                             <Notification invisible={false} />
 

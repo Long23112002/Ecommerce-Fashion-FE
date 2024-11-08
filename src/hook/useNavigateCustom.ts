@@ -1,3 +1,4 @@
+// DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 // KHÔNG CẦN SỬ DỤNG NỮA VÌ ĐÃ CONFIG LẠI RỒI
 
 import { useNavigate as useNavigateDom } from "react-router-dom"

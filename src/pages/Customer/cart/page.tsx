@@ -381,6 +381,26 @@ const CartPage = () => {
                     src={pd.productDetail.images?.[0].url}
                     alt={pd.productDetail.product?.name}
                     style={{ width: 100, height: 100, objectFit: "cover" }}
+                    sx={{
+                      width: 60,
+                      textAlign: "center",
+                      "& .MuiInput-underline:before": { borderBottom: "none" },
+                      "& .MuiInput-underline:after": { borderBottom: "none" },
+                      "& input": {
+                        padding: 0,
+                        textAlign: "center",
+                      },
+                      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                      {
+                        WebkitAppearance: "none",
+                        margin: 0,
+                      },
+                    }}
+                    inputProps={{
+                      min: 1,
+                      max: pd.productDetail.quantity,
+                    }}
+                    variant="standard"
                   />
                   <Box sx={{ ml: 2, flexGrow: 1 }}>
                     <Typography variant="h5">
