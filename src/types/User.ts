@@ -15,6 +15,7 @@ export type User = {
 }
 
 export interface UserRequest {
+    id: number;
     email: string;
     password: string;
     fullName: string;

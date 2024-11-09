@@ -1,4 +1,4 @@
-import axios from "axios";
+
 import {BASE_API} from "../constants/BaseApi.ts";
 import {ResponseData} from "../types/responseApi.ts";
 import axiosInstance from "./AxiosInstance.ts";
@@ -20,7 +20,7 @@ export interface PermissionAssign {
 
 export const fetchAllPermission = async (params: PaginationParam): Promise<ResponseData> => {
     try {
-        const url = `${BASE_API}/api/v1/permission`;
+        const url = `${BASE_API}/api/v1/permission_group`;
         const response = await axiosInstance.get(url, {params});
         return response.data as ResponseData;
     } catch (error) {
