@@ -1,7 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 // import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import AdminLayout from '../layouts/Admin';
-import UserLayout from "../layouts/Customer";
 import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
@@ -23,7 +22,7 @@ import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
 
-import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+// import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 // import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
 
 import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
@@ -31,9 +30,8 @@ import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import CartPage from '../pages/Customer/cart/page.tsx';
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
-
-// import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-
+import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import UserLayout from '../layouts/Customer/index.tsx';
 
 
 

@@ -262,10 +262,10 @@ const CartPage = () => {
                         textAlign: "center",
                       },
                       "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                        {
-                          WebkitAppearance: "none",
-                          margin: 0,
-                        },
+                      {
+                        WebkitAppearance: "none",
+                        margin: 0,
+                      },
                     }}
                     inputProps={{
                       min: 1,
