@@ -1,16 +1,20 @@
 import Button from '@mui/joy/Button'
 import { Box, Container, Grid, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Menu, SubMenu } from 'react-pro-sidebar'
-import { useIsMobile, useUserHeaderSize } from '../../../hook/useSize'
+import { fetchAllBrands } from '../../../api/BrandApi'
+import { fetchAllCategories } from '../../../api/CategoryApi'
+import { useUserHeaderSize } from '../../../hook/useSize'
 import MenuItem from '../../../layouts/Admin/Sidebar/MenuItem'
 import '../../../styles/scrollbar.css'
 import { Category } from '../../../types/Category'
 import { Brand } from '../../../types/brand'
+import { isDarkColor } from '../../../utils/isDarkColor'
 import { Color } from '../../Admin/Attributes/color/color'
+import { fetchAllColors } from '../../Admin/Attributes/color/colorManagament'
 import { Size } from '../../Admin/Attributes/size/size'
 import { ISelectedFilter } from './page'
-import { isDarkColor } from '../../../utils/isDarkColor'
+import { fetchAllSizes } from '../../Admin/Attributes/size/sizeManagament'
 
 interface IProps {
     selectedFilter: ISelectedFilter,
@@ -19,90 +23,45 @@ interface IProps {
 
 const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) => {
 
-    const isMobile = useIsMobile()
     const headerHeight = useUserHeaderSize()
+    const [categories, setCategories] = useState<Category[]>([])
+    const [brands, setBrands] = useState<Brand[]>([])
+    const [colors, setColors] = useState<Color[]>([])
 
-    const [categories, setCategories] = useState<Category[]>([
-        {
-            id: 1,
-            name: 'Áo',
-            lever: 1,
-            subCategories: [
-                {
-                    id: 2,
-                    name: 'Áo vest',
-                    lever: 2,
-                },
-                {
-                    id: 3,
-                    name: 'Áo phao',
-                    lever: 2,
-                },
-                {
-                    id: 4,
-                    name: 'Áo khoác',
-                    lever: 2
-                }
-            ]
-        },
-        {
-            id: 5,
-            name: 'Quần',
-            lever: 1,
-            subCategories: [
-                {
-                    id: 6,
-                    name: 'Quần jean',
-                    lever: 2,
-                },
-                {
-                    id: 7,
-                    name: 'Quần short',
-                    lever: 2,
-                },
-                {
-                    id: 8,
-                    name: 'Quần xì',
-                    lever: 2,
-                }
-            ]
-        }
-    ])
+    const [sizes, setSizes] = useState<Size[]>([])
 
-    const [brands, setBrands] = useState<Brand[]>([
-        { id: 1, name: 'Đôn chề' },
-        { id: 2, name: 'Luôn vui tươi' },
-        { id: 3, name: 'FashionVN' },
-        { id: 4, name: 'Lacoste' },
-        { id: 5, name: 'Gu chì' },
-    ])
+    const fetchCategories = async () => {
+        const res = await fetchAllCategories();
+        setCategories([...res.data])
+    }
 
-    const [colors, setColors] = useState<Color[]>([
-        { id: 1, name: 'đen', code: '#000000' },
-        { id: 2, name: 'đỏ', code: '#e7352b' },
-        { id: 3, name: 'vàng', code: '#FFC107' },
-        { id: 4, name: 'xanh lá', code: '#4CAF50' },
-        { id: 5, name: 'cam', code: '#FF9800' },
-        { id: 6, name: 'hồng', code: '#E91E63' },
-        { id: 7, name: 'nâu', code: '#795548' },
-        { id: 8, name: 'trắng', code: '#F6F6F6' },
-    ])
+    const fetchBrands = async () => {
+        const res = await fetchAllBrands();
+        setBrands([...res.data])
+    }
 
-    const [sizes, setSizes] = useState<Size[]>([
-        { id: 1, name: 'S' },
-        { id: 2, name: 'M' },
-        { id: 3, name: 'L' },
-        { id: 4, name: 'XL' },
-        { id: 5, name: 'XL' },
-        { id: 6, name: 'XXL' },
-        { id: 7, name: 'XNXX' },
-    ])
+    const fetchColors = async () => {
+        const res = await fetchAllColors('', 8, 0);
+        setColors([...res.data])
+    }
+
+    const fetchSizes = async () => {
+        const res = await fetchAllSizes();
+        setSizes([...res.data])
+    }
+
+    useEffect(() => {
+        fetchCategories()
+        fetchBrands()
+        fetchColors()
+        fetchSizes()
+    }, [])
 
     const handleSelectCategories = (id: number | undefined) => {
         if (!id) return;
         setSelectedFilter(prev => ({
             ...prev,
-            category: prev.category === id
+            idCategory: prev.idCategory === id
                 ? null
                 : id
         }));
@@ -117,9 +76,9 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         } else {
             setSelectedFilter(prev => ({
                 ...prev,
-                brands: prev.brands.includes(id)
-                    ? prev.brands.filter(b => b !== id)
-                    : [...prev.brands, id]
+                idBrand: prev.idBrand.includes(id)
+                    ? prev.idBrand.filter(b => b !== id)
+                    : [...prev.idBrand, id]
             }))
         }
     }
@@ -158,10 +117,9 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
 
     const renderCategories = (categories: Category[]) => {
         return categories.map(c =>
-            c.subCategories ? (
+            c.subCategories?.length ? (
                 <SubMenu
                     key={c.id}
-                    defaultOpen={!isMobile}
                     label={
                         <Typography
                             sx={{
@@ -184,7 +142,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     styleItem={{
                         marginTop: 5,
                         paddingLeft: 12.5 * ((c.lever || 1) + 1),
-                        backgroundColor: selectedFilter.category === c.id ? '#F3F3F3' : ''
+                        backgroundColor: selectedFilter.idCategory === c.id ? '#F3F3F3' : ''
                     }}
                     sxTypo={{
                         fontSize: 18,
@@ -207,7 +165,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     borderRadius: 10,
                     marginTop: 5,
                     paddingLeft: 30,
-                    backgroundColor: selectedFilter.brands.includes(b?.id || -1) ? '#F3F3F3' : ''
+                    backgroundColor: selectedFilter.idBrand.includes(b?.id || -1) ? '#F3F3F3' : ''
                 }}
                 sxTypo={{ fontSize: 18 }}
                 onClick={() => handleSelectBrands(b?.id)}
@@ -278,7 +236,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     }
 
     const renderColors = (colors: Color[]) => {
-        return colors.slice(0, 8).map(c => colorItem(c));
+        return colors.map(c => colorItem(c));
     }
 
     const sizeItem = (s?: Size) => {
@@ -330,7 +288,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
 
             <Menu>
                 <SubMenu
-                    defaultOpen={!isMobile}
                     label={<Typography variant='h6'>Danh mục</Typography>}
                     style={{ paddingLeft: 15 }}
                 >
@@ -340,7 +297,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
 
             <Menu>
                 <SubMenu
-                    defaultOpen={!isMobile}
                     label={<Typography variant='h6'>Thương hiệu</Typography>}
                     style={{ paddingLeft: 15 }}
                 >
@@ -350,7 +306,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
 
             <Menu>
                 <SubMenu
-                    defaultOpen={!isMobile}
                     label={<Typography variant='h6'>Màu sắc</Typography>}
                     style={{ paddingLeft: 15 }}
                 >
@@ -365,7 +320,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
 
             <Menu>
                 <SubMenu
-                    defaultOpen={!isMobile}
                     label={<Typography variant='h6'>Kích cỡ</Typography>}
                     style={{ paddingLeft: 15 }}
                 >

@@ -4,7 +4,7 @@ import axiosInstance from './AxiosInstance';
 
 const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
-export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
+export const fetchAllBrands = async (pageSize: number = 15, page: number = 0, searchName?: string) => {
     const token = Cookies.get("accessToken");
     const config = {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },

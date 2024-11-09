@@ -1,7 +1,7 @@
 import { Container } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getAllProduct } from '../../../api/ProductApi'
+import { getAllProducts } from '../../../api/ProductApi'
 import { getDetailByIdProduct } from '../../../api/ProductDetailApi'
 import ProductOverview from '../../../components/product/ProductOverview'
 import ProductReviews from '../../../components/product/ProductReviews'
@@ -22,7 +22,7 @@ const ProductDetailPage: React.FC = () => {
         }
     }
     const fetchProductSimilar = async () => {
-        const res = await getAllProduct()
+        const res = await getAllProducts()
         setSimilarProduct([...res.data])
     }
 

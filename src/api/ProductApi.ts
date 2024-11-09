@@ -25,14 +25,15 @@ interface ProductParams {
     keyword?: string
 }
 
-export const getAllProduct = async (params?: ProductParams, pageable?: PageableRequest) => {
+export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
     const { data } = await axiosInstance({
         method: 'GET',
         url: `${BASE_API}/api/v1/product`,
-        params: { params, ...pageable }
+        params: { ...query.params, ...query.pageable }
     });
-    return data
-}
+    return data;
+};
+
 
 export const getProductById = async (id: number) => {
     const token = Cookies.get("accessToken");

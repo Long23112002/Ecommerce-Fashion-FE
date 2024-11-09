@@ -20,7 +20,7 @@ const TopbarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) =
     const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedFilter(prev => ({
             ...prev,
-            search: e.target.value
+            keyword: e.target.value
         }))
     }
 
