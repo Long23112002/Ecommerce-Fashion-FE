@@ -1,13 +1,13 @@
-<<<<<<< HEAD
-import { BASE_API } from "../constants/BaseApi";
-import Cookies from 'js-cookie';
-import axiosInstance from "./AxiosInstance";
-=======
 
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance, { PageableRequest } from "./AxiosInstance";
->>>>>>> 8dc1d42804196e8fa5575a6b6389fa852f9e38b9
+
+
+// import { BASE_API } from "../constants/BaseApi";
+// import Cookies from 'js-cookie';
+// import axiosInstance, { PageableRequest } from "./AxiosInstance";
+
 import { UploadFile } from "antd";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product-detail`
@@ -25,8 +25,7 @@ interface ProductDetailData {
     idColor: number;
 }
 
-<<<<<<< HEAD
-=======
+
 export const getDetailByIdProduct = async (id: number | string, pageable?: PageableRequest) => {
     const { data } = await axiosInstance({
         method: 'GET',
@@ -36,7 +35,7 @@ export const getDetailByIdProduct = async (id: number | string, pageable?: Pagea
     return data
 }
 
->>>>>>> 8dc1d42804196e8fa5575a6b6389fa852f9e38b9
+
 export const addProductDetail = async (productDetailData: ProductDetailData) => {
     const token = Cookies.get("accessToken");
     const config = {
@@ -62,11 +61,11 @@ export const getProductDetailByIdProduct = async (
         page: page,
     };
     try {
-<<<<<<< HEAD
+
         const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, {params});
-=======
-        const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, { params });
->>>>>>> 8dc1d42804196e8fa5575a6b6389fa852f9e38b9
+
+        // const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, { params });
+
         return response.data;
     } catch (error) {
         console.error("Error fetching product detail by id product", error);
