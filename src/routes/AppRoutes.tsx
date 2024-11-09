@@ -1,33 +1,25 @@
 import { Route, Routes } from 'react-router-dom';
-// import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
+import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import AdminLayout from '../layouts/Admin';
 import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
 import ChatPage from '../pages/Admin/Chat/index.tsx';
-// import ProductManager from '../pages/Admin/Product';
 import ManagerBrand from '../pages/Admin/Product/brand/ManagerBrand.tsx';
 import ManagerCategory from '../pages/Admin/Product/Category/ManagerCategory.tsx';
 import ProductManager from '../pages/Admin/Product/ManageProduct';
 import ManaggerOrigin from '../pages/Admin/Product/origin/ManagerOrigin.tsx';
 import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
-// import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
+import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
 import { ManagerRole, ManagerUser } from "../pages/Admin/User";
 import AuthenticateFacebook from '../pages/Admin/User/AuthenticateFacebook';
 import AuthenticateGoogle from '../pages/Admin/User/AuthenticateGoogle';
 import Login from '../pages/Admin/User/Login';
-// import CartPage from '../pages/Customer/cart/page.tsx';
+import CartPage from '../pages/Customer/cart/page.tsx';
 import ProductFilterPage from '../pages/Customer/filter/page.tsx';
 import HomePage from '../pages/Customer/home/page.tsx';
 import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
-
-// import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-// import ManageProductDetail from '../pages/Admin/Product/product_detail/ManageProductDetail.tsx';
-
-import ManagerPromotion from '../pages/Admin/Product/Promotion/PromotionManager.tsx';
-import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
-import CartPage from '../pages/Customer/cart/page.tsx';
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";

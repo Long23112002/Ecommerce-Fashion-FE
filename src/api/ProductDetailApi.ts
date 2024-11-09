@@ -2,12 +2,6 @@
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance, { PageableRequest } from "./AxiosInstance";
-
-
-// import { BASE_API } from "../constants/BaseApi";
-// import Cookies from 'js-cookie';
-// import axiosInstance, { PageableRequest } from "./AxiosInstance";
-
 import { UploadFile } from "antd";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product-detail`
@@ -25,7 +19,6 @@ interface ProductDetailData {
     idColor: number;
 }
 
-
 export const getDetailByIdProduct = async (id: number | string, pageable?: PageableRequest) => {
     const { data } = await axiosInstance({
         method: 'GET',
@@ -34,7 +27,6 @@ export const getDetailByIdProduct = async (id: number | string, pageable?: Pagea
     });
     return data
 }
-
 
 export const addProductDetail = async (productDetailData: ProductDetailData) => {
     const token = Cookies.get("accessToken");
@@ -61,11 +53,7 @@ export const getProductDetailByIdProduct = async (
         page: page,
     };
     try {
-
-        const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, {params});
-
-        // const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, { params });
-
+        const response = await axiosInstance.get(`${API_BASE_URL}/product/${id}`, { params });
         return response.data;
     } catch (error) {
         console.error("Error fetching product detail by id product", error);
