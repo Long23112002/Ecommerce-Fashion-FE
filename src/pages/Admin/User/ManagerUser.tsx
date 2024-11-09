@@ -61,7 +61,7 @@ const ManagerUser = () => {
         fetchUsers();
     }, [filterParams]);
 
-    const handleTableChange = (newPagination) => {
+    const handleTableChange = (newPagination:any) => {
         setFilterParams(prevParams => ({
             ...prevParams,
             page: newPagination.current,
@@ -69,7 +69,7 @@ const ManagerUser = () => {
         }));
     };
 
-    const handleFilterChange = (changedValues) => {
+    const handleFilterChange = (changedValues:any) => {
         setFilterParams(prevParams => ({
             ...prevParams,
             ...changedValues,
@@ -185,7 +185,7 @@ const ManagerUser = () => {
         {
             title: 'Thao tác',
             key: 'actions',
-            render: (_: any, record) => (
+            render: (_: any, record:any) => (
                 <div>
                     <Tooltip title="Chỉnh sửa">
                         <Button

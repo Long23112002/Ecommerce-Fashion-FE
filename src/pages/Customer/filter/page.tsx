@@ -8,12 +8,14 @@ import { getAllProducts } from '../../../api/ProductApi'
 
 export interface ISelectedFilter {
     keyword: string,
-    idBrand: number[],
-    idOrigin: number[],
+    idBrand: number | null,
+    idOrigin: number | null,
     idCategory: number | null,
-    idMaterial: number[],
-    colors: number[],
-    sizes: number[],
+    idMaterial: number | null,
+    idColors: number[],
+    idSizes: number[],
+    maxPrice: number,
+    minPrice: number,
     sort: 'newest' | 'name' | 'price-asc' | 'price-desc'
 }
 
@@ -21,18 +23,19 @@ const FilterPage: React.FC = () => {
 
     const [selectedFilter, setSelectedFilter] = useState<ISelectedFilter>({
         keyword: '',
-        idBrand: [],
-        idOrigin: [],
+        idBrand: null,
+        idOrigin: null,
         idCategory: null,
-        idMaterial: [],
-        colors: [],
-        sizes: [],
+        idMaterial: null,
+        idColors: [],
+        idSizes: [],
+        maxPrice: 0,
+        minPrice: 10000000,
         sort: 'newest'
     })
     const [products, setProduct] = useState<Product[]>([]);
 
     useEffect(() => {
-        // const { keyword, idBrand, idOrigin, idCategory, idMaterial } = selectedFilter
         const res = getAllProducts()
     }, [selectedFilter])
 

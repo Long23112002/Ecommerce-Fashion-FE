@@ -76,9 +76,9 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         } else {
             setSelectedFilter(prev => ({
                 ...prev,
-                idBrand: prev.idBrand.includes(id)
-                    ? prev.idBrand.filter(b => b !== id)
-                    : [...prev.idBrand, id]
+                idBrand: prev.idBrand == id
+                    ? null
+                    : id
             }))
         }
     }
@@ -92,9 +92,9 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         } else {
             setSelectedFilter(prev => ({
                 ...prev,
-                colors: prev.colors.includes(id)
-                    ? prev.colors.filter(c => c !== id)
-                    : [...prev.colors, id],
+                idColors: prev.idColors.includes(id)
+                    ? prev.idColors.filter(c => c !== id)
+                    : [...prev.idColors, id],
             }));
         }
     };
@@ -108,9 +108,9 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         } else {
             setSelectedFilter(prev => ({
                 ...prev,
-                sizes: prev.sizes.includes(id)
-                    ? prev.colors.filter(c => c !== id)
-                    : [...prev.sizes, id]
+                idSizes: prev.idSizes.includes(id)
+                    ? prev.idSizes.filter(c => c !== id)
+                    : [...prev.idSizes, id]
             }))
         }
     }
@@ -165,7 +165,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     borderRadius: 10,
                     marginTop: 5,
                     paddingLeft: 30,
-                    backgroundColor: selectedFilter.idBrand.includes(b?.id || -1) ? '#F3F3F3' : ''
+                    backgroundColor: selectedFilter.idBrand == (b?.id || -1) ? '#F3F3F3' : ''
                 }}
                 sxTypo={{ fontSize: 18 }}
                 onClick={() => handleSelectBrands(b?.id)}
@@ -180,7 +180,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     }
 
     const colorItem = (c?: Color) => {
-        const isSelected = c ? selectedFilter.colors.includes(c.id || -1) : false
+        const isSelected = c ? selectedFilter.idColors.includes(c.id || -1) : false
 
         return (
             <Grid item xs={4} key={c?.id}>
@@ -240,7 +240,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     }
 
     const sizeItem = (s?: Size) => {
-        const isSelected = s ? selectedFilter.sizes.includes(s.id || -1) : false;
+        const isSelected = s ? selectedFilter.idSizes.includes(s.id || -1) : false;
 
         return (
             <Grid item xs={4} key={s?.id}>
