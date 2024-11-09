@@ -24,7 +24,7 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
             const params = {
                 search,
                 page: 0,
-                size: 10,
+                size: 2000,
             };
             const response = await fetchAllPermission(params);
             const permissionOptions = response.data.map((perm: any) => ({
@@ -38,6 +38,8 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
             setLoading(false);
         }
     };
+
+    console.log('permissions', searchValue);
 
     useEffect(() => {
         loadPermissions();

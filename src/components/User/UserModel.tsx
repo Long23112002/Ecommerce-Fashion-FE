@@ -1,5 +1,5 @@
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect,} from 'react';
 import {Button, DatePicker, Form, Input, Modal, Select} from 'antd';
 import {GenderEnum} from "../../enum/GenderEnum.ts";
 import {fetchAllRole} from "../../api/RoleApi.ts";
@@ -19,7 +19,6 @@ interface UserModelProps {
 const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCancel, form, mode, user}) => {
     const [roles, setRoles] = React.useState<{ label: string; value: number }[]>([]);
     const [loading, setLoading] = React.useState(false);
-    const [searchValue, setSearchValue] = React.useState('');
 
     const loadRoles = async (search: string = '') => {
         setLoading(true);
@@ -39,6 +38,8 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
             console.error('Failed to fetch roles', error);
         } finally {
             setLoading(false);
+            console.debug('Roles:', roles);
+            console.debug('Roles:', loading);
         }
     };
 
@@ -63,10 +64,6 @@ const UserModel: React.FC<UserModelProps> = ({isModalOpen, handleOk, handleCance
         }
     }, [mode, user, form]);
 
-    const handleSearch = (value: string) => {
-        setSearchValue(value);
-        loadRoles(value);
-    };
 
     return (
         <Modal
