@@ -42,17 +42,15 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
     const fetchFindAllChatByIdChatRoom = async () => {
         if (user.id > 0 && idRoom) {
             const { results, next } = await callFindAllChatByIdChatRoom(idRoom)
-            const newChat = uniqueChats(results)
-            setChats(prevChats => [...newChat, ...prevChats]);
+            setChats(prevChats => [...uniqueChats(results, prevChats)]);
             nextUrl.current = next
         }
     };
 
-    const uniqueChats = (res: ChatWithFocus[]) => {
-        const idChats = chats.map(c => c.id)
-        const newChat = res.filter(c => !idChats.includes(c.id))
-        return newChat
-    }
+    const uniqueChats = (newChats: ChatWithFocus[], prevChats: ChatWithFocus[]) => {
+        const idChats = new Set(prevChats.map(c => c.id));
+        return [...newChats.filter(c => !idChats.has(c.id)), ...prevChats];
+    };
 
     const fetchSeenAllByIdChatRoom = async () => {
         if (idRoom && user.isAdmin) {
@@ -90,7 +88,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
         if (!chats.map(c => c.id).includes(id)) {
             setLoading(true);
             scrollUp()
-            const {results, next} = await callFindChatsUntilTarget(id);
+            const { results, next } = await callFindChatsUntilTarget(id);
             setChats([...results.map((chat: ChatWithFocus) => {
                 if (chat.id === id) {
                     chat.focus = true
@@ -112,8 +110,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
         if (chatBox && chatBox.scrollTop === 0 && !moreLoading && nextApi) {
             setMoreLoading(true);
             const { results, next } = await callGetInstance(nextApi)
-            const newChat = uniqueChats(results)
-            setChats(prevChats => [...newChat, ...prevChats]);
+            setChats(prevChats => [...uniqueChats(results, prevChats)]);
             nextUrl.current = next
             setMoreLoading(false);
             scrollUp()
@@ -183,7 +180,7 @@ const ChatArea: React.FC<IProps> = ({ idRoom, isAdmin, py, px, isChatOpen }) => 
                 clientRef.current = null;
             }
         };
-    }, [idRoom]);
+    }, [idRoom, user]);
 
     useEffect(() => {
         if (shouldScroll.current) {
