@@ -42,6 +42,9 @@ const CartPage = () => {
   }>({});
   const [selectAll, setSelectAll] = useState(false);
   const [isCartUpdated, setIsCartUpdated] = useState(false);
+  const [tempQuantity, setTempQuantity] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   const caculatePrice = () => {
     const subtotal = cartValueInfos.reduce((sum, pd) => {
@@ -62,6 +65,7 @@ const CartPage = () => {
       ...prev,
       [id]: !prev[id],
     }));
+    handleQuantityChange(id, 0);
   };
 
   const handleSelectAll = () => {
@@ -70,6 +74,7 @@ const CartPage = () => {
 
     const newSelectedProductDetails = cartValueInfos.reduce((acc, pd) => {
       acc[pd.productDetail.id] = newSelectAll;
+      handleQuantityChange(pd.productDetail.id, 0);
       return acc;
     }, {} as { [key: number]: boolean });
 
@@ -150,7 +155,7 @@ const CartPage = () => {
   //   caculatePrice();
   // }, [cartValueInfos]);
 
-  const updateCartData = useCallback(async () => {
+  const updateCartData = async() => {
     const token = Cookies.get("accessToken");
     if (!token) {
       toast.error("Lỗi xác thực");
@@ -174,15 +179,17 @@ const CartPage = () => {
     } finally {
       setLoading(false);
     }
-  },[cartValueInfos]);
+  };
 
   const debouncedUpdateCartData = debounce(() => {
-    updateCartData(); // gọi hàm updateCartData khi debounce hết thời gian
+    if (isCartUpdated) {
+      updateCartData();
+    }
   }, 1000);
 
-  useEffect(() => {
-    debouncedUpdateCartData();
-  }, [cartValueInfos]);
+  // useEffect(() => {
+  //   debouncedUpdateCartData();
+  // }, [cartValueInfos]);
 
   const handleQuantityChange = (id: number, change: number) => {
     setCartValueInfos((prevCartValueInfos) => {
@@ -190,6 +197,10 @@ const CartPage = () => {
         if (pd.productDetail.id === id) {
           const newQuantity = (pd.quantity || 0) + change;
           const maxQuantity = pd.productDetail.quantity ?? 0;
+
+          if (isNaN(newQuantity)) {
+            return pd;
+          }
 
           if (newQuantity > maxQuantity) {
             Swal.fire({
@@ -199,21 +210,46 @@ const CartPage = () => {
             return { ...pd, quantity: maxQuantity };
           }
 
-          return { ...pd, quantity: Math.max(1, newQuantity) };
+          return { ...pd, quantity: Math.max(0, newQuantity) };
         }
         return pd;
       });
+      setCartValueInfos(updatedCartValueInfos);
       setCartValues(
         updatedCartValueInfos.map((pd) => ({
           productDetailId: pd.productDetail.id!,
           quantity: pd.quantity,
-        }))
-      );
-      setCartValueInfos(updatedCartValueInfos);
+        })));
+      
       console.log(updatedCartValueInfos);
       setIsCartUpdated(true);
       return updatedCartValueInfos;
     });
+    debouncedUpdateCartData();
+  };
+
+  const handleQuantityBlur = (id: number, quantity: number) => {
+    if (quantity === 0 || isNaN(quantity)) {
+      Swal.fire({
+        title: "Bạn có muốn xóa sản phẩm khỏi giỏ hàng không?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          handleRemoveProduct(id);
+        } else {
+          setCartValueInfos((prevCartValueInfos) =>
+            prevCartValueInfos.map((pd) =>
+              pd.productDetail.id === id
+                ? { ...pd, quantity: tempQuantity[id] || 1 }
+                : pd
+            )
+          );
+        }
+      });
+    }
   };
 
   // useEffect(() => {
@@ -269,7 +305,7 @@ const CartPage = () => {
       if (result.isConfirmed) {
         try {
           const updatedCartValueInfos = [];
-          setCartValueInfos(updatedCartValueInfos); // Cập nhật giỏ hàng trên giao diện
+          setCartValueInfos(updatedCartValueInfos);
 
           const cartData = {
             cartValues: updatedCartValueInfos.map((pd) => ({
@@ -333,13 +369,15 @@ const CartPage = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <Box sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mb: 2,
-                }}>
-                <Checkbox checked={selectAll} onChange={handleSelectAll} />
-                <Typography variant="body1">Sản phẩm</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
+                  <Checkbox checked={selectAll} onChange={handleSelectAll} />
+                  <Typography variant="body1">Sản phẩm</Typography>
                 </Box>
                 <Tooltip title="Xóa tất cả">
                   <Button
@@ -391,10 +429,10 @@ const CartPage = () => {
                         textAlign: "center",
                       },
                       "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                      {
-                        WebkitAppearance: "none",
-                        margin: 0,
-                      },
+                        {
+                          WebkitAppearance: "none",
+                          margin: 0,
+                        },
                     }}
                     inputProps={{
                       min: 1,
@@ -481,8 +519,25 @@ const CartPage = () => {
                             pd.productDetail.id,
                             newQuantity - pd.quantity
                           );
+                        }else{
+                          setCartValueInfos((prevCartValueInfos) =>
+                            prevCartValueInfos.map((item) =>
+                              item.productDetail.id === pd.productDetail.id
+                                ? { ...item, quantity: 0 } // hoặc một giá trị mặc định
+                                : item
+                            )
+                          );
                         }
                       }}
+                      onFocus={() =>
+                        setTempQuantity((prev) => ({
+                          ...prev,
+                          [pd.productDetail.id]: pd.quantity,
+                        }))
+                      }
+                      onBlur={() =>
+                        handleQuantityBlur(pd.productDetail.id, pd.quantity)
+                      }
                       sx={{
                         width: 60,
                         textAlign: "center",
@@ -501,7 +556,7 @@ const CartPage = () => {
                           },
                       }}
                       inputProps={{
-                        min: 1,
+                        min: 0,
                         max: pd.productDetail.quantity,
                       }}
                       variant="standard"
