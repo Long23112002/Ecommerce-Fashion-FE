@@ -106,7 +106,7 @@ const UserHeader: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={Math.min(headerHeight - 5, 37)} />
                             <CartIcon />
-                            <Notification invisible={false} />
+                            {/* <Notification invisible={false} /> */}
 
                             {isLogin ? (
                                 <Dropdown menu={{ items }} trigger={['hover', 'click']}>
