@@ -1,4 +1,4 @@
-import { Avatar, Form, Input, Modal, Row, Col, Typography } from "antd";
+import { Avatar, Form, Input, Modal, Row, Col, Typography, Upload, Image } from "antd";
 import { Product } from "../../types/Product";
 import React from "react";
 
@@ -19,13 +19,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
         return null;
     }
     return (
-        <div 
-        style={{
-            border: '1px solid #d9d9d9', 
-            padding: '24px',
-            textAlign: 'left' 
-        }}
-        > 
+        <div
+            style={{
+                border: '1px solid #d9d9d9',
+                padding: '24px',
+                textAlign: 'left'
+            }}
+        >
             <h2 style={{ marginBottom: '16px' }}>Thông tin sản phẩm</h2>
             <Form
                 layout="vertical"
@@ -33,6 +33,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     name: product.name,
                     code: product.code,
                     description: product.description,
+                    image: product.image,
                     createAt: new Date(product.createAt).toLocaleDateString(),
                     updateAt: product.updateAt ? new Date(product.updateAt).toLocaleDateString() : "Không có",
                     createByUser: product.createByUser?.fullName || "Không rõ",
@@ -42,8 +43,29 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     material: product.material?.name,
                     brand: product.brand?.name,
                 }}
-               
+
             >
+                <Form.Item label={<Text strong>Ảnh bìa:</Text>} name="image">
+                    <Image.PreviewGroup>
+                        {/* <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <Image
+                                width={80}
+                                src={image}
+                                alt="Product Image"
+                                style={{ borderRadius: '5px', cursor: 'pointer' }}
+                            />
+                        </div> */}
+                    </Image.PreviewGroup>
+                    {/* <Upload
+                        listType="picture-card"
+                        fileList={image}
+                        showUploadList={{
+                            showPreviewIcon: true,
+                            showRemoveIcon: true,
+                        }}
+                    /> */}
+                </Form.Item>
+
                 <Form.Item label={<Text strong>Sản Phẩm :</Text>} name="name">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>

@@ -1,13 +1,15 @@
-import { Avatar, Form, Image, Input, Modal, Typography } from "antd";
+import { Avatar, Button, Form, Image, Input, Modal, Typography, Upload, UploadFile } from "antd";
 import { ProductDetail } from "../../types/ProductDetail";
+import { CloseOutlined } from "@ant-design/icons";
 
 interface ModalViewProductDetailProps {
   visible: boolean;
   onCancel: () => void;
   productDetail: ProductDetail | null;
+  onRemove: (file: UploadFile) => boolean;
 }
 const { Text } = Typography;
-const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible, onCancel, productDetail }) => {
+const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible, onCancel, productDetail, onRemove }) => {
   if (!productDetail) return null;
 
   return (
@@ -20,6 +22,7 @@ const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible
       }
       visible={visible}
       onCancel={onCancel}
+      onRemove={onRemove}
       footer={null}
       width={600}
       bodyStyle={{ padding: '24px', fontSize: '16px' }}
@@ -44,7 +47,7 @@ const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible
         </Form.Item>
 
         <Form.Item label={<Text strong>Danh sách ảnh:</Text>} name="images">
-          <Image.PreviewGroup>
+          {/* <Image.PreviewGroup>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {productDetail.images.map((image, index) => (
                 <Image
@@ -54,10 +57,56 @@ const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible
                   alt={`Product Image ${index + 1}`}
                   style={{ borderRadius: '5px', cursor: 'pointer' }}
                 />
+              )
+              )}
+            </div>
+          </Image.PreviewGroup> */}
+          <Upload
+            listType="picture-card"
+            fileList={productDetail.images.map((image) => ({
+              uid: image.url,
+              name: image.url,
+              status: 'done',
+              url: image.url,
+            }))}
+            onRemove={onRemove}
+            showUploadList={{
+              showPreviewIcon: true,
+              showRemoveIcon: true,
+            }}
+          />
+        </Form.Item>
+
+        {/* <Form.Item label={<Text strong>Danh sách ảnh:</Text>} name="images">
+          <Image.PreviewGroup>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {productDetail.images.map((image, index) => (
+                <div key={index} style={{ position: 'relative' }}>
+                  <Image
+                    width={80}
+                    src={image.url}
+                    alt={`Product Image ${index + 1}`}
+                    style={{ borderRadius: '5px', cursor: 'pointer' }}
+                  />
+                  <Button
+                    shape="circle"
+                    icon={<CloseOutlined />}
+                    size="small"
+                    onClick={() => handleDeleteImage(index)}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      transform: 'translate(50%, -50%)',
+                      backgroundColor: '#ff4d4f',
+                      color: 'white',
+                    }}
+                  />
+                </div>
               ))}
             </div>
           </Image.PreviewGroup>
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item label={<Text strong>Giá</Text>} name="price">
           <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
