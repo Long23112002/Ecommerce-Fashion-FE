@@ -57,7 +57,6 @@ const FilterPage: React.FC = () => {
     const fetchProducts = async () => {
         setLoading(true)
         const res = await getAllProducts({params:{...selectedFilter}, pageable: {...getSort(selectedFilter.sort)}});
-        // const res = await getAllProducts();
         setProduct([...res.data])
         setLoading(false)
     }
