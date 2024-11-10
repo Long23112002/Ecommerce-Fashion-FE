@@ -5,13 +5,14 @@ import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'
 import { getAllProducts } from '../../../api/ProductApi'
+import MuiLoading from '../../../components/Loading/MuiLoading'
 
 export interface ISelectedFilter {
     keyword: string,
     idBrand: number | null,
-    idOrigin: number | null,
+    idOrigin: number | null, //
     idCategory: number | null,
-    idMaterial: number | null,
+    idMaterial: number | null, //
     idColors: number[],
     idSizes: number[],
     maxPrice: number,
@@ -34,9 +35,17 @@ const FilterPage: React.FC = () => {
         sort: 'newest'
     })
     const [products, setProduct] = useState<Product[]>([]);
+    const [loading, setLoading] = useState<boolean>(true)
+
+    const fetchProducts = async () => {
+        setLoading(true)
+        const res = await getAllProducts();
+        setProduct([...res.data])
+        setLoading(false)
+    }
 
     useEffect(() => {
-        const res = getAllProducts()
+        fetchProducts()
     }, [selectedFilter])
 
     return (
@@ -73,18 +82,21 @@ const FilterPage: React.FC = () => {
                     >
                         <Typography variant='h6' mb={2}>Kết quả</Typography>
                         <Box>
-                            {
-                                products.length
-                                    ?
-                                    <Grid container spacing={2}>
-                                        {products.map((product) => (
-                                            <Grid item key={product.id} xs={6} sm={4} md={3}>
-                                                <ProductCard product={product} />
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                    :
-                                    <Typography>Không có sản phẩm phù hợp</Typography>
+                            {!loading ?
+                                (
+                                    products.length
+                                        ?
+                                        <Grid container spacing={2}>
+                                            {products.map((product) => (
+                                                <Grid item key={product.id} xs={6} sm={4} md={3}>
+                                                    <ProductCard product={product} />
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                        :
+                                        <Typography>Không có sản phẩm phù hợp</Typography>
+                                )
+                                : <MuiLoading/>
                             }
                         </Box>
                     </Box>

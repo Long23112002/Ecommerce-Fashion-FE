@@ -9,12 +9,16 @@ import MenuItem from '../../../layouts/Admin/Sidebar/MenuItem'
 import '../../../styles/scrollbar.css'
 import { Category } from '../../../types/Category'
 import { Brand } from '../../../types/brand'
+import { Origin } from '../../../types/origin'
 import { isDarkColor } from '../../../utils/isDarkColor'
 import { Color } from '../../Admin/Attributes/color/color'
 import { fetchAllColors } from '../../Admin/Attributes/color/colorManagament'
+import { Material } from '../../Admin/Attributes/material/material'
 import { Size } from '../../Admin/Attributes/size/size'
-import { ISelectedFilter } from './page'
 import { fetchAllSizes } from '../../Admin/Attributes/size/sizeManagament'
+import { ISelectedFilter } from './page'
+import { fetchAllMaterials } from '../../Admin/Attributes/material/materialManagament'
+import { fetchAllOrigins } from '../../../api/OriginApi'
 
 interface IProps {
     selectedFilter: ISelectedFilter,
@@ -27,92 +31,40 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     const [categories, setCategories] = useState<Category[]>([])
     const [brands, setBrands] = useState<Brand[]>([])
     const [colors, setColors] = useState<Color[]>([])
-
+    const [origins, setOrigins] = useState<Origin[]>([])
+    const [materials, setMaterials] = useState<Material[]>([])
     const [sizes, setSizes] = useState<Size[]>([])
 
-    const fetchCategories = async () => {
-        const res = await fetchAllCategories();
-        setCategories([...res.data])
-    }
-
-    const fetchBrands = async () => {
-        const res = await fetchAllBrands();
-        setBrands([...res.data])
-    }
-
-    const fetchColors = async () => {
-        const res = await fetchAllColors('', 8, 0);
-        setColors([...res.data])
-    }
-
-    const fetchSizes = async () => {
-        const res = await fetchAllSizes();
-        setSizes([...res.data])
-    }
 
     useEffect(() => {
-        fetchCategories()
-        fetchBrands()
-        fetchColors()
-        fetchSizes()
-    }, [])
+        fetchAllCategories().then(res => setCategories(res.data));
+        fetchAllBrands().then(res => setBrands(res.data));
+        fetchAllColors('', 8, 0).then(res => setColors(res.data));
+        fetchAllSizes().then(res => setSizes(res.data));
+        fetchAllMaterials().then(res => setMaterials(res.data));
+        fetchAllOrigins().then(res => setOrigins(res.data));
+    }, []);
 
-    const handleSelectCategories = (id: number | undefined) => {
-        if (!id) return;
+    const handleSelect = (id: number | undefined, type: keyof ISelectedFilter) => {
+        if (!id || !(type in selectedFilter)) return
         setSelectedFilter(prev => ({
             ...prev,
-            idCategory: prev.idCategory === id
+            [type]: prev[type] == id
                 ? null
                 : id
-        }));
-    };
-
-    const handleSelectBrands = (id: number | undefined) => {
-        if (!id) {
-            setSelectedFilter(prev => ({
-                ...prev,
-                brands: []
-            }))
-        } else {
-            setSelectedFilter(prev => ({
-                ...prev,
-                idBrand: prev.idBrand == id
-                    ? null
-                    : id
-            }))
-        }
+        }))
     }
 
-    const handleSelectColor = (id: number | undefined) => {
-        if (!id) {
-            setSelectedFilter(prev => ({
-                ...prev,
-                colors: []
-            }));
-        } else {
-            setSelectedFilter(prev => ({
-                ...prev,
-                idColors: prev.idColors.includes(id)
-                    ? prev.idColors.filter(c => c !== id)
-                    : [...prev.idColors, id],
-            }));
-        }
-    };
-
-    const handleSelectSize = (id: number | undefined) => {
-        if (!id) {
-            setSelectedFilter(prev => ({
-                ...prev,
-                sizes: []
-            }));
-        } else {
-            setSelectedFilter(prev => ({
-                ...prev,
-                idSizes: prev.idSizes.includes(id)
-                    ? prev.idSizes.filter(c => c !== id)
-                    : [...prev.idSizes, id]
-            }))
-        }
+    const handleSelectMuti = (id: number | undefined, type: 'idColors' | 'idSizes') => {
+        if (!(type in selectedFilter)) return
+        setSelectedFilter(prev => ({
+            ...prev,
+            [type]: !id
+                ? []
+                : prev[type].includes(id)
+                    ? prev[type].filter(c => c !== id)
+                    : [...prev[type], id]
+        }));
     }
 
     const renderCategories = (categories: Category[]) => {
@@ -126,7 +78,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                                 fontSize: 18,
                             }}
                             variant="h6"
-                            onClick={() => handleSelectCategories(c.id)}
+                            onClick={() => handleSelect(c.id, 'idCategory')}
                         >
                             {c.name}
                         </Typography>
@@ -147,7 +99,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     sxTypo={{
                         fontSize: 18,
                     }}
-                    onClick={() => handleSelectCategories(c.id)}
+                    onClick={() => handleSelect(c.id, 'idCategory')}
                 >
                     {c.name}
                 </MenuItem>
@@ -168,15 +120,49 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     backgroundColor: selectedFilter.idBrand == (b?.id || -1) ? '#F3F3F3' : ''
                 }}
                 sxTypo={{ fontSize: 18 }}
-                onClick={() => handleSelectBrands(b?.id)}
+                onClick={() => handleSelect(b?.id, 'idBrand')}
             >
                 {b?.name || 'Tất cả'}
             </MenuItem>
         )
     }
 
-    const renderBrands = (brands: Brand[]) => {
-        return brands.map(b => brandItem(b));
+    const originItem = (o?: Origin) => {
+        return (
+            <MenuItem
+                key={o?.id}
+                collapse={false}
+                styleItem={{
+                    borderRadius: 10,
+                    marginTop: 5,
+                    paddingLeft: 30,
+                    backgroundColor: selectedFilter.idOrigin == (o?.id || -1) ? '#F3F3F3' : ''
+                }}
+                sxTypo={{ fontSize: 18 }}
+                onClick={() => handleSelect(o?.id, 'idOrigin')}
+            >
+                {o?.name || 'Tất cả'}
+            </MenuItem>
+        )
+    }
+
+    const materialItem = (m?: Material) => {
+        return (
+            <MenuItem
+                key={m?.id}
+                collapse={false}
+                styleItem={{
+                    borderRadius: 10,
+                    marginTop: 5,
+                    paddingLeft: 30,
+                    backgroundColor: selectedFilter.idMaterial == (m?.id || -1) ? '#F3F3F3' : ''
+                }}
+                sxTypo={{ fontSize: 18 }}
+                onClick={() => handleSelect(m?.id, 'idMaterial')}
+            >
+                {m?.name || 'Tất cả'}
+            </MenuItem>
+        )
     }
 
     const colorItem = (c?: Color) => {
@@ -201,7 +187,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                         padding: 1,
                         borderRadius: '10%',
                     }}
-                    onClick={() => handleSelectColor(c?.id)}
+                    onClick={() => handleSelectMuti(c?.id, 'idColors')}
                 >
                     <Box
                         sx={{
@@ -235,10 +221,6 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         )
     }
 
-    const renderColors = (colors: Color[]) => {
-        return colors.map(c => colorItem(c));
-    }
-
     const sizeItem = (s?: Size) => {
         const isSelected = s ? selectedFilter.idSizes.includes(s.id || -1) : false;
 
@@ -252,13 +234,21 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                         backgroundColor: isSelected ? '#E3EFFB' : '#FFFFFF',
                         borderColor: isSelected ? '#1976D2' : 'rgba(0, 0, 0, 0.23)',
                     }}
-                    onClick={() => handleSelectSize(s?.id)}
+                    onClick={() => handleSelectMuti(s?.id, 'idSizes')}
                 >
                     {s?.name || 'Tất cả'}
                 </Button>
             </Grid>
         );
     };
+
+    const renders = (key: Brand[] | Origin[] | Material[], item: (k: any) => JSX.Element) => {
+        return key.map(k => item(k));
+    }
+
+    const renderColors = (colors: Color[]) => {
+        return colors.map(c => colorItem(c));
+    }
 
 
     const renderSizes = (sizes: Size[]) => {
@@ -300,7 +290,25 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     label={<Typography variant='h6'>Thương hiệu</Typography>}
                     style={{ paddingLeft: 15 }}
                 >
-                    {renderBrands(brands)}
+                    {renders(brands, brandItem)}
+                </SubMenu>
+            </Menu>
+
+            <Menu>
+                <SubMenu
+                    label={<Typography variant='h6'>Xuất xứ</Typography>}
+                    style={{ paddingLeft: 15 }}
+                >
+                    {renders(origins, originItem)}
+                </SubMenu>
+            </Menu>
+
+            <Menu>
+                <SubMenu
+                    label={<Typography variant='h6'>Chất liệu</Typography>}
+                    style={{ paddingLeft: 15 }}
+                >
+                    {renders(materials, materialItem)}
                 </SubMenu>
             </Menu>
 
