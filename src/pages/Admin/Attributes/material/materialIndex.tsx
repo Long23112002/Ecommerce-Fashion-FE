@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import  { Fragment, useEffect, useState } from "react";
 import {
   createMaterial,
   deleteMaterial,
@@ -13,7 +13,6 @@ import {
   Table,
   Input,
   Modal,
-  Space,
   Tooltip,
 } from "antd";
 import { toast } from "react-toastify";
@@ -25,9 +24,24 @@ import { debounce } from "lodash";
 import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
 
+interface Material {
+    id: number;
+    name: string;
+    createdAt: string;
+    createdBy: UserBy;
+    updatedAt: string;
+    updatedBy: UserBy;
+}
+
+interface UserBy{
+    id: number;
+    fullName: string;
+    avatar: string;
+}
+
 const ManagerMaterial = () => {
   const [loading, setLoading] = useState(false);
-  const [materials, setMaterials] = useState([]);
+  const [materials, setMaterials] = useState<Material[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [editingMaterial, setEditingMaterial] = useState(null);
@@ -139,7 +153,7 @@ const ManagerMaterial = () => {
     }
   };
 
-  const handleTableChange = (pagination, filters) => {
+  const handleTableChange = (pagination:any, filters:any) => {
     setPagination({
       ...pagination,
       current: pagination.current,
@@ -150,7 +164,7 @@ const ManagerMaterial = () => {
     fetchMaterials(pagination.current, pagination.pageSize, nameFilter);
   };
 
-  const showDetailModal = async (material) => {
+  const showDetailModal = async (material:any) => {
     const materialDetails = await getMaterialById(material.id);
     setSelectedMaterial(materialDetails);
     setIsDetailModalOpen(true);
@@ -167,7 +181,7 @@ const ManagerMaterial = () => {
     setFilterName(search);
   }, 1000);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e:any) => {
     const search = e.target.value.trim();
     setLoading(true);
     debouncedSearch(search);
@@ -195,13 +209,13 @@ const ManagerMaterial = () => {
       title: "Ngày tạo",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date:any) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Người tạo",
       dataIndex: "createdBy",
       key: "createdBy",
-      render: (createdBy) => (
+      render: (createdBy:any) => (
         <div>
           <img
             src={createdBy.avatar}
@@ -220,14 +234,14 @@ const ManagerMaterial = () => {
       title: "Ngày cập nhật",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date) =>
+      render: (date:any) =>
         date ? new Date(date).toLocaleDateString() : "N/A",
     },
     {
       title: "Người cập nhật",
       dataIndex: "updatedBy",
       key: "updatedBy",
-      render: (updatedBy) =>
+      render: (updatedBy:any) =>
         updatedBy ? (
           <div>
             <img
@@ -248,7 +262,7 @@ const ManagerMaterial = () => {
     {
       title: "Thao tác",
       key: "actions",
-      render: (_, record) => (
+      render: (_, record:any) => (
         <div>
 
           <Tooltip title="Chi tiết">
@@ -471,7 +485,7 @@ const ManagerMaterial = () => {
                 </div>
               )}
 
-              {selectedMaterial.updatedBy && (
+              {selectedMaterial.updatedAt && (
                 <div>
                   <label
                     style={{
@@ -501,7 +515,7 @@ const ManagerMaterial = () => {
                         color: "#333",
                       }}
                     >
-                      {selectedMaterial.updatedBy.fullName}
+                      {selectedMaterial?.updatedBy?.fullName}
                     </span>
                   </div>
                 </div>
