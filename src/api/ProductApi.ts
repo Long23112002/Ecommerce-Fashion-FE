@@ -16,13 +16,16 @@ interface ProductData {
     idMaterial: number;
 }
 
-interface ProductParams {
-    code?: string,
-    idBrand?: number,
-    idCategory?: number,
-    idMaterial?: number,
-    idOrigin?: number,
-    keyword?: string
+export interface ProductParams {
+    keyword?: string|null,
+    idBrand?: number|null,
+    idOrigin?: number|null,
+    idCategory?: number|null,
+    idMaterial?: number|null,
+    idColors?: number[]|null,
+    idSizes?: number[]|null,
+    maxPrice?: number|null,
+    minPrice?: number|null
 }
 
 export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {

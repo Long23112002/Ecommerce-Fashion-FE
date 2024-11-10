@@ -48,13 +48,15 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     }, []);
 
     useEffect(() => {
+        const { minPrice, maxPrice } = selectedFilter
+        if (min == minPrice && max == maxPrice) return
         const setTimeoutPrice = setTimeout(() => {
             setSelectedFilter(prev => ({
                 ...prev,
                 minPrice: min,
                 maxPrice: max
             }))
-        }, 2000)
+        }, 1500)
         return () => clearTimeout(setTimeoutPrice)
     }, [min, max])
 
@@ -87,7 +89,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     }
 
     const handleChangePrice = (
-        event: Event,
+        _: Event,
         newValue: number | number[],
     ) => {
         if (!Array.isArray(newValue) || !newValue.every(item => typeof item === 'number')) return

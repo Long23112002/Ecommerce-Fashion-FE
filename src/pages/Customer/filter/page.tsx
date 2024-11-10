@@ -15,9 +15,26 @@ export interface ISelectedFilter {
     idMaterial: number | null, //
     idColors: number[],
     idSizes: number[],
-    maxPrice: number,
     minPrice: number,
+    maxPrice: number | null,
     sort: 'newest' | 'name' | 'price-asc' | 'price-desc'
+}
+
+const getSort = (sort: 'newest' | 'name' | 'price-asc' | 'price-desc'): { sort: 'ASC' | 'DESC', sortBy: string } => {
+    switch (sort) {
+        case 'newest': {
+            return { sort: 'DESC', sortBy: 'createAt' }
+        }
+        case 'name': {
+            return { sort: 'ASC', sortBy: 'name' }
+        }
+        case 'price-asc': {
+            return { sort: 'ASC', sortBy: 'maxPrice' }
+        }
+        case 'price-desc': {
+            return { sort: 'DESC', sortBy: 'minPrice' }
+        }
+    }
 }
 
 const FilterPage: React.FC = () => {
@@ -30,8 +47,8 @@ const FilterPage: React.FC = () => {
         idMaterial: null,
         idColors: [],
         idSizes: [],
-        maxPrice: 0,
-        minPrice: 2000000,
+        minPrice: 0,
+        maxPrice: 2000000,
         sort: 'newest'
     })
     const [products, setProduct] = useState<Product[]>([]);
@@ -39,7 +56,8 @@ const FilterPage: React.FC = () => {
 
     const fetchProducts = async () => {
         setLoading(true)
-        const res = await getAllProducts();
+        const res = await getAllProducts({params:{...selectedFilter}, pageable: {...getSort(selectedFilter.sort)}});
+        // const res = await getAllProducts();
         setProduct([...res.data])
         setLoading(false)
     }
@@ -96,7 +114,7 @@ const FilterPage: React.FC = () => {
                                         :
                                         <Typography>Không có sản phẩm phù hợp</Typography>
                                 )
-                                : <MuiLoading/>
+                                : <MuiLoading />
                             }
                         </Box>
                     </Box>
