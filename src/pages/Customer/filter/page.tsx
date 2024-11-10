@@ -31,7 +31,7 @@ const FilterPage: React.FC = () => {
         idColors: [],
         idSizes: [],
         maxPrice: 0,
-        minPrice: 10000000,
+        minPrice: 2000000,
         sort: 'newest'
     })
     const [products, setProduct] = useState<Product[]>([]);

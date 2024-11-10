@@ -1,9 +1,10 @@
 import Button from '@mui/joy/Button'
-import { Box, Container, Grid, Typography } from '@mui/material'
+import { Box, Container, Grid, Slider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { Menu, SubMenu } from 'react-pro-sidebar'
 import { fetchAllBrands } from '../../../api/BrandApi'
 import { fetchAllCategories } from '../../../api/CategoryApi'
+import { fetchAllOrigins } from '../../../api/OriginApi'
 import { useUserHeaderSize } from '../../../hook/useSize'
 import MenuItem from '../../../layouts/Admin/Sidebar/MenuItem'
 import '../../../styles/scrollbar.css'
@@ -14,11 +15,10 @@ import { isDarkColor } from '../../../utils/isDarkColor'
 import { Color } from '../../Admin/Attributes/color/color'
 import { fetchAllColors } from '../../Admin/Attributes/color/colorManagament'
 import { Material } from '../../Admin/Attributes/material/material'
+import { fetchAllMaterials } from '../../Admin/Attributes/material/materialManagament'
 import { Size } from '../../Admin/Attributes/size/size'
 import { fetchAllSizes } from '../../Admin/Attributes/size/sizeManagament'
 import { ISelectedFilter } from './page'
-import { fetchAllMaterials } from '../../Admin/Attributes/material/materialManagament'
-import { fetchAllOrigins } from '../../../api/OriginApi'
 
 interface IProps {
     selectedFilter: ISelectedFilter,
@@ -34,6 +34,8 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
     const [origins, setOrigins] = useState<Origin[]>([])
     const [materials, setMaterials] = useState<Material[]>([])
     const [sizes, setSizes] = useState<Size[]>([])
+    const [min, setMin] = useState<number>(0)
+    const [max, setMax] = useState<number>(2000000)
 
 
     useEffect(() => {
@@ -45,7 +47,21 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         fetchAllOrigins().then(res => setOrigins(res.data));
     }, []);
 
-    const handleSelect = (id: number | undefined, type: keyof ISelectedFilter) => {
+    useEffect(() => {
+        const setTimeoutPrice = setTimeout(() => {
+            setSelectedFilter(prev => ({
+                ...prev,
+                minPrice: min,
+                maxPrice: max
+            }))
+        }, 2000)
+        return () => clearTimeout(setTimeoutPrice)
+    }, [min, max])
+
+    const handleSelect = (
+        id: number | undefined,
+        type: keyof ISelectedFilter
+    ) => {
         if (!id || !(type in selectedFilter)) return
         setSelectedFilter(prev => ({
             ...prev,
@@ -55,7 +71,10 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
         }))
     }
 
-    const handleSelectMuti = (id: number | undefined, type: 'idColors' | 'idSizes') => {
+    const handleSelectMuti = (
+        id: number | undefined,
+        type: 'idColors' | 'idSizes'
+    ) => {
         if (!(type in selectedFilter)) return
         setSelectedFilter(prev => ({
             ...prev,
@@ -65,6 +84,15 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     ? prev[type].filter(c => c !== id)
                     : [...prev[type], id]
         }));
+    }
+
+    const handleChangePrice = (
+        event: Event,
+        newValue: number | number[],
+    ) => {
+        if (!Array.isArray(newValue) || !newValue.every(item => typeof item === 'number')) return
+        setMin(newValue[0])
+        setMax(newValue[1])
     }
 
     const renderCategories = (categories: Category[]) => {
@@ -339,6 +367,18 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                     </Box>
                 </SubMenu>
             </Menu>
+
+            <Box sx={{ mx: 2, mt: 1 }}>
+                <Typography variant='h6'>Mức giá</Typography>
+                <Typography align='center'>{min.toLocaleString('vi-VN')}đ-{max.toLocaleString('vi-VN')}{max >= 2000000 ? '+' : ''}đ</Typography>
+                <Slider
+                    value={[min, max]}
+                    onChange={handleChangePrice}
+                    min={0}
+                    max={2000000}
+                    step={1000}
+                />
+            </Box>
 
         </Box>
     )
