@@ -1,9 +1,11 @@
-import { Button, Form, FormInstance, Input, message, Modal, Select } from "antd";
+import { Button, Form, FormInstance, Input, message, Modal, Select, Upload } from "antd";
 import { Product } from "../../types/Product";
 import { Brand } from "../../types/brand";
 import { Origin } from "../../types/origin";
 import { Material } from "../../pages/Admin/Attributes/material/material";
 import { Category } from "../../types/Category";
+import { PlusOutlined } from "@ant-design/icons";
+import { RcFile, UploadFile } from "antd/es/upload";
 
 interface AddProductModalProps {
   isModalOpen: boolean,
@@ -15,6 +17,10 @@ interface AddProductModalProps {
   origins: Origin[];
   materials: Material[];
   categories: Category[];
+  normFile: (e: any) => any[] | undefined;
+  handleUpload: (file: RcFile) => Promise<boolean | void>
+  fileList: UploadFile[]
+  onRemove: (file: UploadFile)=> boolean 
 }
 
 
@@ -27,7 +33,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   brands,
   origins,
   materials,
-  categories
+  categories,
+  normFile,
+  handleUpload,
+  fileList,
+  onRemove
 }) => {
 
   const checkDuplicateName = (name: string, excludeName: string = "") => {
@@ -77,6 +87,21 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         </Button>
       ]}
     >
+      <Form.Item label="Upload ảnh bìa" valuePropName="image" getValueFromEvent={normFile}>
+        <Upload
+          listType="picture-card"
+          maxCount={1}
+          fileList={fileList}
+          onRemove={onRemove}
+          customRequest={({ file }) => handleUpload(file as RcFile)}
+        >
+          <button style={{ border: 0, background: 'none' }} type="button">
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+          </button>
+        </Upload>
+      </Form.Item>
+
       <Form form={form} layout="vertical">
         <Form.Item
           name="name"

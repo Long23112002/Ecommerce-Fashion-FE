@@ -78,3 +78,13 @@ export const getProductDetailById = async (productDetailId: number) => {
         throw new Error(`Error getting product detail: ${error.response?.data?.message || error.message}`);
     }
 }
+
+export const updateProductDetail = async (productDetailId: number, productData: ProductDetailData) => {
+    try {
+        const response = await axiosInstance.put(`${API_BASE_URL}/${productDetailId}`, productData)
+        return response.data;
+    } catch (error: any) {
+        console.log("Error update product detail", error);
+        throw error;
+    }
+}

@@ -33,15 +33,15 @@ type ProductDetail = {
     createAt?: Date,
     updateAt?: Date | null,
     createBy?: User,
-<<<<<<< HEAD
+
     updateBy?: User
     product?: Product,
     size?: Size,
     color?: Color,
-=======
-    updateBy?: User,
-    originPrice?:number,
->>>>>>> 7bf5a911beec74582a27c7d61cfd82c8af75af37
+
+    // updateBy?: User,
+    // originPrice?:number,
+
 }
 
 export default ProductDetail

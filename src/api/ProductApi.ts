@@ -14,6 +14,7 @@ interface ProductData {
     idBrand: number;
     idOrigin: number;
     idMaterial: number;
+    image: String | null;
 }
 
 interface ProductParams {
