@@ -15,6 +15,6 @@ export const uploadMutiImage = async (file: File[], objectId: number, objectName
 }
 
 export const uploadOneImage = async (file: File[], objectId: number, objectName: string): Promise<string> => {
-    const response = await uploadMutiImage(file, objectId, objectName)
+    const response = await uploadMutiImage([file[0]], objectId, objectName)
     return response[0];
 }

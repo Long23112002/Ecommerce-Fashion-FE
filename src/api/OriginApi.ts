@@ -6,7 +6,7 @@ import axiosInstance from "./AxiosInstance";
 const API_BASE_URL = `${BASE_API}/api/v1/origin`;
 
 // Lấy tất cả các origin với phân trang và lọc theo tên
-export const fetchAllOrigins = async (pageSize: number, page: number, name: string) => {
+export const fetchAllOrigins = async (pageSize: number = 15, page: number = 0, name: string = '') => {
     const response = await axiosInstance.get(`${API_BASE_URL}`, {
         params: {
             size: pageSize,
