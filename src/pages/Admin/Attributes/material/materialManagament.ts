@@ -52,6 +52,7 @@ export const deleteMaterial = async (materialId: number, token: string): Promise
 };
 
 export const getMaterialById = async (materialId: number): Promise<Material> => {
+    // eslint-disable-next-line no-useless-catch
     try {
         const url = `${BASE_API}/api/v1/material/${materialId}`;
         const response = await axiosInstance.get<Material>(url);
@@ -62,6 +63,7 @@ export const getMaterialById = async (materialId: number): Promise<Material> => 
 };
 
 export const updateMaterial = async (materialId: number, material: MaterialRequest, token: string): Promise<ResponseData> => {
+    // eslint-disable-next-line no-useless-catch
     try {
         const url = `${BASE_API}/api/v1/material/${materialId}`;
         const auth = {
