@@ -1,18 +1,18 @@
 import { Box, Container, Grid, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import ProductCard from '../../../components/product/ProductCard'
 import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'
 import { getAllProducts } from '../../../api/ProductApi'
 import MuiLoading from '../../../components/Loading/MuiLoading'
+import ProductCard from '../../../components/product/ProductCard'
 
 export interface ISelectedFilter {
     keyword: string,
     idBrand: number | null,
-    idOrigin: number | null, //
+    idOrigin: number | null, 
     idCategory: number | null,
-    idMaterial: number | null, //
+    idMaterial: number | null, 
     idColors: number[],
     idSizes: number[],
     minPrice: number,
