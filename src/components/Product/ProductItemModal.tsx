@@ -1,4 +1,4 @@
-import { Avatar, Form, Input, Modal, Typography } from "antd";
+import { Avatar, Form, Image, Input, Modal, Typography } from "antd";
 import { Product } from "../../types/Product";
 import React from "react";
 
@@ -47,11 +47,43 @@ const ProductItemModal: React.FC<ProductItemModalProps> = ({
                     brand: product.brand?.name,
                 }}
             >
+                  <Form.Item
+                    name="image"
+                    label="Ảnh bìa"
+                    rules={[
+                        { required: true, message: 'Vui lòng upload một ảnh!' },
+                    ]}
+                    valuePropName="image"
+                >
+                    <Image
+                        width={120}
+                        src={product.image}
+                        alt="first-image"
+                        style={{ borderRadius: '10px' }}
+                    />
+                </Form.Item>
+                
                 <Form.Item label={<Text strong>Mã Sản Phẩm :</Text>} name="code">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item label={<Text strong>Mô tả :</Text>} name="description">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Danh mục</Text>} name="category">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Thương hiệu </Text>} name="brand">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Nguồn gốc</Text>} name="origin">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Chất liệu</Text>} name="material">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
@@ -83,22 +115,6 @@ const ProductItemModal: React.FC<ProductItemModalProps> = ({
                         )}
                         {<Text strong>{product.updateByUser?.fullName || 'Chưa có'}</Text>}
                     </div>
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Danh mục</Text>} name="category">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Thương hiệu </Text>} name="brand">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Nguồn gốc</Text>} name="origin">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item label={<Text strong>Chất liệu</Text>} name="material">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
             </Form>

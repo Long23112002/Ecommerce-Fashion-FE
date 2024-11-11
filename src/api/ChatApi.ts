@@ -14,7 +14,7 @@ export const callFindIdChatRoomByUserId = async (id: string | number) => {
 }
 
 export const callCreateChatRoom = async (chatRoom: ChatRoom) => {
-    const { data } = await axiosInstance.post(`/api/v1/chat_room`, chatRoom)
+    const { data } = await axiosInstance.post(`${CHAT_ROOM_API}`, chatRoom)
     return data
 }
 

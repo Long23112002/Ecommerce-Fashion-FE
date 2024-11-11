@@ -30,7 +30,8 @@ const UserLayout: React.FC = () => {
                         sx={{
                             position: 'fixed',
                             bottom: 20,
-                            right: 20
+                            right: 20,
+                            zIndex: 10
                         }}
                     >
                         <Chat />

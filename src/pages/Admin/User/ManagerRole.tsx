@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {createRole, deleteRole, fetchAllRole, getRoleById, updateRole} from "../../../api/RoleApi.ts";
 import {Button, Form, Popconfirm, Table, Tooltip} from 'antd';
-import PermissionsCheckbox from "../../../components/User/PermissionsCheckbox.tsx";
+import PermissionsCheckbox, {PermissionGroup} from "../../../components/User/PermissionsCheckbox.tsx";
 import {assignPermissionToRole, fetchAllPermission} from "../../../api/PermissionApi.ts";
 import createPaginationConfig, {PaginationState} from "../../../config/paginationConfig.ts";
 import {Role} from "../../../types/role.ts";
@@ -22,7 +22,7 @@ interface Permission {
 const ManagerRole = () => {
     const [loading, setLoading] = useState(true);
     const [roles, setRoles] = useState<Role[]>([]);
-    const [permissions, setPermissions] = useState<Permission[]>([]);
+    const [permissions, setPermissions] = useState<PermissionGroup[]>([]);
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, number[]>>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
@@ -38,7 +38,7 @@ const ManagerRole = () => {
 
     const fetchPermissions = async () => {
         try {
-            const params = {page: 0, size: 5};
+            const params = {page: 0, size: 2000};
             const response = await fetchAllPermission(params);
             setPermissions(response.data);
         } catch (error) {
@@ -172,13 +172,12 @@ const ManagerRole = () => {
             title: 'Quyền',
             dataIndex: 'permissions',
             key: 'permissions',
-            render: (_: any, record: Permission) => (
+            render: (_: any, record: PermissionGroup) => (
                 <PermissionsCheckbox
-                    permissions={permissions}
-                    selectedPermissions={selectedPermissions[record.id] || []}
-                    onChange={(selected) => handlePermissionChange(record.id, selected)}
-                />
-            )
+                    selectedPermissions={selectedPermissions[record.id] || []} // Permissions for the current record
+                    onChange={(selected: any) => handlePermissionChange(record.id, selected)} // Handle the selection change
+                 permissionGroups={permissions}/>
+            ),
         },
         {
             title: 'Thao tác',

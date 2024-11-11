@@ -1,5 +1,4 @@
-import { Button, Form, Input, Popconfirm, Select, Spin, Table } from 'antd'
-import { Product } from '../../../types/Product'
+import { Button, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Select, Space, Spin, Table, UploadFile } from 'antd'
 import { toast, ToastContainer } from 'react-toastify'
 import { addProduct, deleteProduct, fetchAllProducts, getProductById, updateProduct } from '../../../api/ProductApi'
 import { useCallback, useEffect, useState } from 'react'
@@ -20,6 +19,11 @@ import ProductItemModal from '../../../components/Product/ProductItemModal'
 import UpdateProductModal from '../../../components/Product/UpdateProductModal'
 import AddProductModal from '../../../components/Product/AddProductModal'
 import { useNavigate } from 'react-router-dom'
+import { RcFile } from 'antd/es/upload'
+import axios from 'axios'
+import { DownloadOutlined, EditOutlined, FileImageOutlined, FileOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons'
+import { uploadOneImage } from '../../../api/ImageApi'
+import Product from '../../../types/Product'
 
 
 const ProductManager = () => {
@@ -55,6 +59,8 @@ const ProductManager = () => {
   const [isItemUpdateOpen, setIsItemUpdateOpen] = useState(false);
   const [isItemAddOpen, setIsItemAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [url, setUrl] = useState<String | null>('');
+
   const [pagination, setPagination] = useState<PaginationState>({
     current: 1,
     pageSize: 5,
@@ -81,6 +87,58 @@ const ProductManager = () => {
     idMaterial?: number;
     idCategory?: number;
   }
+
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const normFile = (e: any) => {
+    return Array.isArray(e) ? e : e && e.fileList;
+  };
+
+  const handleUpload = async (file: RcFile): Promise<boolean | void> => {
+    const objectId = 1;
+    const objectName = '';
+
+    // Tạo formData và đính kèm thông tin cần gửi
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("objectId", objectId);
+    formData.append("objectName", objectName);
+
+    try {
+      const response = await await axios.post("http://ecommerce-fashion.site:9099/api/v1/images", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const url = response.data?.file?.[0]?.url;
+
+      setUrl(url);
+
+      // set để ảnh hiển thị preview
+      setFileList([
+        {
+          uid: file.uid,
+          name: file.name,
+          status: 'done',
+          url: url,
+        },
+      ]);
+
+      message.success(`${file.name} tải lên thành công!`);
+      return false; // Ngăn chặn upload mặc định của Ant Design
+    } catch (error) {
+      message.error(`${file.name} tải lên thất bại.`);
+      console.error("Error uploading file:", error);
+    }
+  };
+
+  const onRemove = () => {
+    setFileList([]); // Xóa fileList khi ảnh bị xóa
+    setUrl(null); // Đặt lại URL nếu cần
+  }
+
+  const onChangeImage = () => {
+    setFileList([]); // Xóa fileList khi ảnh bị xóa
+    setUrl(null); // Đặt lại URL nếu cần
+  }
+
 
   const handleDetailProduct = (product: Product) => {
     setItemProduct(product);
@@ -169,10 +227,11 @@ const ProductManager = () => {
     try {
       const values = await form.validateFields();
       const { name, code, description, idCategory, idBrand, idOrigin, idMaterial } = values;
+      const image = url;
       const token = Cookies.get("accessToken");
 
       if (token) {
-        await addProduct({ name, code, description, idCategory, idBrand, idOrigin, idMaterial }, token);
+        await addProduct({ name, code, description, idCategory, idBrand, idOrigin, idMaterial, image }, token);
         toast.success('Thêm sản phẩm Thành Công');
         handleAddCancel();
         refreshProducts();
@@ -272,7 +331,7 @@ const ProductManager = () => {
   const navigate = useNavigate();
 
   const showViewDetail = (product: Product) => {
-      navigate(`/admin/product-detail`, { state: { product: product } });
+    navigate(`/admin/product-detail`, { state: { product: product } });
   };
 
   const refreshProducts = () => {
@@ -327,6 +386,25 @@ const ProductManager = () => {
       title: 'Mã sản phẩm',
       dataIndex: 'code',
       key: 'code',
+    },
+    {
+      title: 'Hình ảnh',
+      dataIndex: 'image',
+      key: 'image',
+      render: (image: string | null | undefined) => (
+        image ? (
+          <Image
+            width={110}
+            src={image}
+            alt="first-image"
+            style={{ borderRadius: '10px' }}
+          />
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', color: '#aaa' }}>
+            <FileImageOutlined style={{ fontSize: '24px', marginRight: '8px' }} />
+          </div>
+        )
+      ),
     },
     {
       title: 'Tên sản phẩm',
@@ -392,18 +470,67 @@ const ProductManager = () => {
     }
   ]
 
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    showAddModal();
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      label: 'Thêm sản phẩm',
+      key: '1',
+      icon:  <i className="fa-solid fa-circle-plus"></i>,
+    },
+    {
+      label: 'Nhập dữ liệu sản phẩm',
+      key: '2',
+      icon: <EditOutlined />,
+    },
+    {
+      label: 'Tải file mẫu',
+      key: '3',
+      icon: <DownloadOutlined />,
+      danger: true,
+    },
+    {
+      label: 'Xuất excel',
+      key: '4',
+      icon: <FileOutlined  />,
+      danger: true,
+    },
+  ];
+
+  const menuProps = {
+    items,
+    onClick: handleMenuClick,
+  };
+
+  
+
   return (
     <div className='text-center' style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className='text-danger'>Quản lý sản phẩm</h1>
 
-      <Button
+      {/* <Button
         className="mt-3 mb-3"
         style={{ display: "flex", backgroundColor: "black", color: "white" }}
         type="default"
         onClick={showAddModal}
       >
         <i className="fa-solid fa-circle-plus"></i>
-      </Button>
+      </Button> */}
+
+      <Space direction="vertical"
+        style={{ display: "flex", color: "white" }}
+        className="mt-3 mb-3"
+      >
+        <Dropdown.Button
+        menu={menuProps} 
+        >
+          <PlusCircleOutlined />
+          {/* Add product */}
+        </Dropdown.Button>
+      </Space>
 
       <Form
         layout="inline"
@@ -529,6 +656,10 @@ const ProductManager = () => {
         brands={brands}
         categories={categories}
         materials={materials}
+        normFile={normFile}
+        fileList={fileList}
+        handleUpload={handleUpload}
+        onRemove={onRemove}
       />
 
       <UpdateProductModal
@@ -541,6 +672,10 @@ const ProductManager = () => {
         brands={brands}
         categories={categories}
         materials={materials}
+        // onRemove={onChangeImage}
+        handleUpload={handleUpload}
+        fileList={fileList}
+        normFile={normFile}
       />
       <ProductItemModal
         visible={isItemModelOpen}

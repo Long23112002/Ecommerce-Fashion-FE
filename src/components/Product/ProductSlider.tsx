@@ -131,7 +131,7 @@ const Arrow: React.FC<{ direction: 'right' | 'left'; onClick?: () => void }> = (
                 top: '50%',
                 transform: 'translateY(-50%)',
                 [direction === 'left' ? 'left' : 'right']: -17,
-                zIndex: 2,
+                zIndex: 1,
                 width: isMobile ? 40 : 50,
                 height: isMobile ? 40 : 50,
                 backgroundColor: 'rgba(240, 240, 240, 0.5)',

@@ -14,25 +14,33 @@ interface ProductData {
     idBrand: number;
     idOrigin: number;
     idMaterial: number;
+    image: String | null;
 }
 
-interface ProductParams {
-    code?: string,
-    idBrand?: number,
-    idCategory?: number,
-    idMaterial?: number,
-    idOrigin?: number,
-    keyword?: string
+export interface ProductParams {
+    keyword?: string | null,
+    idBrand?: number | null,
+    idOrigin?: number | null,
+    idCategory?: number | null,
+    idMaterial?: number | null,
+    idColors?: number[] | null,
+    idSizes?: number[] | null,
+    maxPrice?: number | null,
+    minPrice?: number | null
 }
 
-export const getAllProduct = async (params?: ProductParams, pageable?: PageableRequest) => {
+export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
     const { data } = await axiosInstance({
         method: 'GET',
         url: `${BASE_API}/api/v1/product`,
-        params: { params, ...pageable }
+        params: { ...query.params, ...query.pageable },
+        paramsSerializer: {
+            indexes: null,
+        }
     });
-    return data
-}
+    return data;
+};
+
 
 export const getProductById = async (id: number) => {
     const token = Cookies.get("accessToken");
