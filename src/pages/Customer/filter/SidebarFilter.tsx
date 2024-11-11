@@ -56,7 +56,7 @@ const SidebarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) 
                 minPrice: min,
                 maxPrice: max
             }))
-        }, 1500)
+        }, 500)
         return () => clearTimeout(setTimeoutPrice)
     }, [min, max])
 

@@ -1,5 +1,5 @@
-import { Box, Grid, MenuItem, Select, Typography, SelectChangeEvent } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, Grid, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import SearchInput from '../../../components/SearchInput';
 import { ISelectedFilter } from './page';
 
