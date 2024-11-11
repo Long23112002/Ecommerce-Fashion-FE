@@ -4,30 +4,40 @@ import { Brand } from "../../types/brand";
 import { Category } from "../../types/Category";
 import { Origin } from "../../types/origin";
 import { Product } from "../../types/Product";
-import { Modal, Form, Input, Button, Select } from 'antd';
+import { Modal, Form, Input, Button, Select, UploadFile, Upload, Image } from 'antd';
+import { PlusOutlined } from "@ant-design/icons";
+import { RcFile } from "antd/es/upload";
 
 interface UpdateProductModalProps {
     isModalOpen: boolean;
     handleOk: (values: any) => void;
     handleCancel: () => void;
+    // onRemove: (file: UploadFile) => boolean;
     form: any;
     product: Product | null;
     brands: Brand[];
     origins: Origin[];
     materials: Material[];
     categories: Category[];
+    normFile: (e: any) => any[] | undefined;
+    handleUpload: (file: RcFile) => Promise<boolean | void>
+    fileList: UploadFile[]
 }
 
 const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     isModalOpen,
     handleOk,
     handleCancel,
+    // onRemove,
     form,
     product,
     brands,
     origins,
     materials,
-    categories
+    categories,
+    normFile,
+    handleUpload,
+    fileList,
 }) => {
     useEffect(() => {
         if (product) {
@@ -35,6 +45,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 name: product.name,
                 code: product.code,
                 description: product.description,
+                image: product.image ? [{ url: product.image }] : [],
                 idCategory: product.category?.id,
                 idBrand: product.brand?.id,
                 idOrigin: product.origin?.id,
@@ -96,6 +107,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 <Form.Item
                     name="idOrigin"
                     label="Nguồn gốc"
+                    rules={[{ required: true, message: 'Please select an origin!' }]}
                 >
                     <Select
                         placeholder="Select origin"
@@ -112,6 +124,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 <Form.Item
                     name="idBrand"
                     label="Thương hiệu"
+                    rules={[{ required: true, message: 'Please select an brand!' }]}
                 >
                     <Select
                         placeholder="Select brand"
@@ -128,6 +141,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 <Form.Item
                     name="idMaterial"
                     label="Chất liệu"
+                    rules={[{ required: true, message: 'Please select an material!' }]}
                 >
                     <Select
                         placeholder="Select material"
@@ -144,6 +158,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 <Form.Item
                     name="idCategory"
                     label="Danh mục"
+                    rules={[{ required: true, message: 'Please select an category!' }]}
                 >
                     <Select
                         placeholder="Select category"
@@ -156,6 +171,32 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                         ))}
                     </Select>
                 </Form.Item>
+
+                <Form.Item
+                    name="image"
+                    label="Ảnh bìa"
+                    rules={[
+                        { required: true, message: 'Vui lòng upload một ảnh!' },
+                    ]}
+                    valuePropName="fileList"
+                    getValueFromEvent={normFile}
+                >
+                    <Upload
+                        // maxCount={1}
+                        listType="picture-card"
+                        fileList={fileList}
+                        // onRemove={onRemove}
+                        customRequest={({ file }) => handleUpload(file as RcFile)}
+                    >
+                        {fileList.length < 1 && (
+                            <div>
+                                <PlusOutlined />
+                                <div style={{ marginTop: 8 }}>Upload</div>
+                            </div>
+                        )}
+                    </Upload>
+                </Form.Item>
+
             </Form>
         </Modal>
     )
