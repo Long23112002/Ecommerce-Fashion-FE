@@ -1,102 +1,69 @@
 import { Box, Container, Grid, Typography } from '@mui/material'
-import React, { useState } from 'react'
-import ProductCard from '../../../components/product/ProductCard'
+import React, { useEffect, useState } from 'react'
 import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'
+import { getAllProducts } from '../../../api/ProductApi'
+import MuiLoading from '../../../components/Loading/MuiLoading'
+import ProductCard from '../../../components/product/ProductCard'
 
 export interface ISelectedFilter {
-    category: number | null,
-    brands: number[],
-    colors: number[],
-    sizes: number[],
-    search: string,
+    keyword: string,
+    idBrand: number | null,
+    idOrigin: number | null, 
+    idCategory: number | null,
+    idMaterial: number | null, 
+    idColors: number[],
+    idSizes: number[],
+    minPrice: number,
+    maxPrice: number | null,
     sort: 'newest' | 'name' | 'price-asc' | 'price-desc'
+}
+
+const getSort = (sort: 'newest' | 'name' | 'price-asc' | 'price-desc'): { sort: 'ASC' | 'DESC', sortBy: string } => {
+    switch (sort) {
+        case 'newest': {
+            return { sort: 'DESC', sortBy: 'createAt' }
+        }
+        case 'name': {
+            return { sort: 'ASC', sortBy: 'name' }
+        }
+        case 'price-asc': {
+            return { sort: 'ASC', sortBy: 'maxPrice' }
+        }
+        case 'price-desc': {
+            return { sort: 'DESC', sortBy: 'minPrice' }
+        }
+    }
 }
 
 const FilterPage: React.FC = () => {
 
     const [selectedFilter, setSelectedFilter] = useState<ISelectedFilter>({
-        category: null,
-        brands: [],
-        colors: [],
-        sizes: [],
-        search: '',
+        keyword: '',
+        idBrand: null,
+        idOrigin: null,
+        idCategory: null,
+        idMaterial: null,
+        idColors: [],
+        idSizes: [],
+        minPrice: 0,
+        maxPrice: 2000000,
         sort: 'newest'
     })
+    const [products, setProduct] = useState<Product[]>([]);
+    const [loading, setLoading] = useState<boolean>(true)
 
-    const [products, setProduct] = useState<Product[]>([
-        {
-            id: 1,
-            name: 'Áo phao',
-            price: 3000000,
-            productDetails: [
-                {
-                    images: ['https://ae01.alicdn.com/kf/Sb394741e22f04f97a71e7e8e4c293c6aM/2023-Neoprene-Life-Jacket-Portable-Fashion-Adult-Children-s-Life-Jacket-Swimming-Water-Sports-Fishing-Kayak.jpg'],
-                }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Quần sịp',
-            price: 500000,
-            productDetails: [
-                {
-                    images: ['https://ae01.alicdn.com/kf/S80c1d74fa70b4aa78eb168d028970c75q/Fashion-Salad-Cat-Meme-Boxers-Shorts-Panties-Men-s-Underpants-Comfortable-Briefs-Underwear.jpg'],
-                }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Đôn chề',
-            price: 1000000,
-            productDetails: [
-                {
-                    images: ['https://m.yodycdn.com/blog/phong-cach-don-che-la-gi-yodyvn6.jpg'],
-                }
-            ]
-        },
-        {
-            id: 4,
-            name: 'Mai Duy Nghiệp',
-            price: 999999,
-            productDetails: [
-                {
-                    images: ['https://i.bbcosplay.com/1683/Trang-Phuc-Chu-He-Tre-Em-1683.jpg']
-                }
-            ]
-        },
-        {
-            id: 5,
-            name: 'Thời trang hiện đại',
-            price: 69000000,
-            productDetails: [
-                {
-                    images: ['https://s2.r29static.com/bin/entry/0ae/x,80/1526815/image.jpg'],
-                }
-            ]
-        },
-        {
-            id: 6,
-            name: 'Không mua',
-            price: 0,
-            productDetails: [
-                {
-                    images: ['https://i.pinimg.com/originals/de/23/83/de238328593da21dbf9185ed3f7d991d.gif']
-                }
-            ]
-        },
-        {
-            id: 7,
-            name: 'Áo thun unisex cotton',
-            price: 299000,
-            productDetails: [
-                {
-                    images: ['https://owen.cdn.vccloud.vn/media/catalog/product/cache/b23ce5dda22a5cf61bb112966c86a52a/_/m/_mb_tsn220964_4_.jpg']
-                }
-            ]
-        },
-    ]);
+    const fetchProducts = async () => {
+        setLoading(true)
+        const res = await getAllProducts({params:{...selectedFilter}, pageable: {...getSort(selectedFilter.sort)}});
+        setProduct([...res.data])
+        setLoading(false)
+    }
+
+    useEffect(() => {
+        fetchProducts()
+    }, [selectedFilter])
 
     return (
         <Container
@@ -132,13 +99,22 @@ const FilterPage: React.FC = () => {
                     >
                         <Typography variant='h6' mb={2}>Kết quả</Typography>
                         <Box>
-                            <Grid container spacing={2}>
-                                {products.map((product) => (
-                                    <Grid item key={product.id} xs={6} sm={4} md={3}>
-                                        <ProductCard product={product} />
-                                    </Grid>
-                                ))}
-                            </Grid>
+                            {!loading ?
+                                (
+                                    products.length
+                                        ?
+                                        <Grid container spacing={2}>
+                                            {products.map((product) => (
+                                                <Grid item key={product.id} xs={6} sm={4} md={3}>
+                                                    <ProductCard product={product} />
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                        :
+                                        <Typography>Không có sản phẩm phù hợp</Typography>
+                                )
+                                : <MuiLoading />
+                            }
                         </Box>
                     </Box>
                 </Grid>

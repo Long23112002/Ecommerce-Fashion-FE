@@ -1,5 +1,4 @@
 import { Button, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Select, Space, Spin, Table, UploadFile } from 'antd'
-import { Product } from '../../../types/Product'
 import { toast, ToastContainer } from 'react-toastify'
 import { addProduct, deleteProduct, fetchAllProducts, getProductById, updateProduct } from '../../../api/ProductApi'
 import { useCallback, useEffect, useState } from 'react'
@@ -21,9 +20,10 @@ import UpdateProductModal from '../../../components/Product/UpdateProductModal'
 import AddProductModal from '../../../components/Product/AddProductModal'
 import { useNavigate } from 'react-router-dom'
 import { RcFile } from 'antd/es/upload'
-import { uploadOneImage } from '../../../api/ImageAPI'
 import axios from 'axios'
 import { DownloadOutlined, EditOutlined, FileImageOutlined, FileOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons'
+import { uploadOneImage } from '../../../api/ImageApi'
+import Product from '../../../types/Product'
 
 
 const ProductManager = () => {
