@@ -1,4 +1,4 @@
-import { Button, Form, Image, Input, message, Popconfirm, Select, Spin, Table, UploadFile } from 'antd'
+import { Button, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Select, Space, Spin, Table, UploadFile } from 'antd'
 import { Product } from '../../../types/Product'
 import { toast, ToastContainer } from 'react-toastify'
 import { addProduct, deleteProduct, fetchAllProducts, getProductById, updateProduct } from '../../../api/ProductApi'
@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom'
 import { RcFile } from 'antd/es/upload'
 import { uploadOneImage } from '../../../api/ImageAPI'
 import axios from 'axios'
-import { FileImageOutlined } from '@ant-design/icons'
+import { DownloadOutlined, EditOutlined, FileImageOutlined, FileOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons'
 
 
 const ProductManager = () => {
@@ -470,18 +470,67 @@ const ProductManager = () => {
     }
   ]
 
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    showAddModal();
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      label: 'Thêm sản phẩm',
+      key: '1',
+      icon:  <i className="fa-solid fa-circle-plus"></i>,
+    },
+    {
+      label: 'Nhập dữ liệu sản phẩm',
+      key: '2',
+      icon: <EditOutlined />,
+    },
+    {
+      label: 'Tải file mẫu',
+      key: '3',
+      icon: <DownloadOutlined />,
+      danger: true,
+    },
+    {
+      label: 'Xuất excel',
+      key: '4',
+      icon: <FileOutlined  />,
+      danger: true,
+    },
+  ];
+
+  const menuProps = {
+    items,
+    onClick: handleMenuClick,
+  };
+
+  
+
   return (
     <div className='text-center' style={{ marginLeft: 20, marginRight: 20 }}>
       <h1 className='text-danger'>Quản lý sản phẩm</h1>
 
-      <Button
+      {/* <Button
         className="mt-3 mb-3"
         style={{ display: "flex", backgroundColor: "black", color: "white" }}
         type="default"
         onClick={showAddModal}
       >
         <i className="fa-solid fa-circle-plus"></i>
-      </Button>
+      </Button> */}
+
+      <Space direction="vertical"
+        style={{ display: "flex", color: "white" }}
+        className="mt-3 mb-3"
+      >
+        <Dropdown.Button
+        menu={menuProps} 
+        >
+          <PlusCircleOutlined />
+          {/* Add product */}
+        </Dropdown.Button>
+      </Space>
 
       <Form
         layout="inline"
