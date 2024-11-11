@@ -18,55 +18,20 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<CartValueInfos>) => {
-      
-        const newItem = action.payload;
-
-      const existingItem = state.items.find(item => item.productDetail.id === action.payload.productDetail.id);
-
-      if (existingItem) {
-        // Nếu có rồi, chỉ cần cộng thêm số lượng
-        existingItem.quantity += action.payload.quantity;
+    addItemToCart(state,action){
+      const newItem = action.payload;
+      const existingItem = state.cartValues.find(item => item.productDetailId === newItem.productDetail.id);
+      state.totalQuantity = state.totalQuantity + 1;
+      if(existingItem){
+        existingItem.quantity += newItem.quantity;
+        state.totalQuantity += newItem.quantity;
       } else {
-        // Nếu chưa có, thêm sản phẩm mới vào giỏ
-        state.cartItems.push(action.payload);
+        state.cartValues.push(newItem);
+        state.totalQuantity += newItem.quantity;
       }
-
-      // Cập nhật tổng số lượng sản phẩm trong giỏ
-      state.totalQuantity = state.cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    },
-
-    // Cập nhật số lượng sản phẩm trong giỏ
-    updateQuantity: (state, action: PayloadAction<{ productDetailId: number, quantity: number }>) => {
-      const item = state.cartItems.find(item => item.productDetail.id === action.payload.productDetailId);
-      if (item) {
-        item.quantity = action.payload.quantity;
-      }
-
-      // Cập nhật lại tổng số lượng
-      state.totalQuantity = state.cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    },
-
-    // Xóa sản phẩm khỏi giỏ hàng
-    removeFromCart: (state, action: PayloadAction<number>) => {
-      state.cartItems = state.cartItems.filter(item => item.productDetail.id !== action.payload);
-      // Cập nhật lại tổng số lượng
-      state.totalQuantity = state.cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    },
-
-    // Xóa tất cả sản phẩm khỏi giỏ hàng
-    clearCart: (state) => {
-      state.cartItems = [];
-      state.totalQuantity = 0;
-    },
-  },
+      
+      state.totalPrice += newItem.productDetail.price * newItem.quantity;
+    }
+  }
 });
-
-// Export các actions
-export const { addToCart, updateQuantity, removeFromCart, clearCart } = cartSlice.actions;
-
-// Selector để lấy các thông tin giỏ hàng
-export const cartItemsSelector = (state: { cart: CartState }) => state.cart.cartItems;
-export const totalQuantitySelector = (state: { cart: CartState }) => state.cart.totalQuantity;
-
 export default cartSlice.reducer;
