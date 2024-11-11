@@ -18,3 +18,4 @@ export const uploadOneImage = async (file: File[], objectId: number, objectName:
     const response = await uploadMutiImage([file[0]], objectId, objectName)
     return response[0];
 }
+

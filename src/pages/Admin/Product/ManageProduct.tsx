@@ -21,7 +21,7 @@ import UpdateProductModal from '../../../components/Product/UpdateProductModal'
 import AddProductModal from '../../../components/Product/AddProductModal'
 import { useNavigate } from 'react-router-dom'
 import { RcFile } from 'antd/es/upload'
-import { uploadOneImage } from '../../../api/ImageAPI'
+import { uploadOneImage } from '../../../api/ImageApi'
 import axios from 'axios'
 import { FileImageOutlined } from '@ant-design/icons'
 
