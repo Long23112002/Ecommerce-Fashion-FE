@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import AdminLayout from '../layouts/Admin';
+import UserLayout from '../layouts/Customer/index.tsx';
 import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
@@ -23,7 +24,6 @@ import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.t
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-import UserLayout from '../layouts/Customer/index.tsx';
 
 
 

@@ -7,16 +7,18 @@ interface IProps {
     checked?: boolean;
     disable?: boolean;
     onClick?: (...args: any[]) => void;
+    // onOver?: 
+    size?: number
 }
 
-const ColorRadio: React.FC<IProps> = ({ color, checked, disable, onClick }) => {
+const ColorRadio: React.FC<IProps> = ({ color, checked, disable, onClick, size = 40 }) => {
     return (
         <Box
             component="span"
             onClick={() => { if (!disable && onClick) onClick(); }}
             sx={{
-                width: 40,
-                height: 40,
+                width: size,
+                height: size,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
