@@ -1,4 +1,3 @@
-
 import { BASE_API } from "../constants/BaseApi";
 import { OrderDetailValue } from "../types/Order";
 import axiosInstance from "./AxiosInstance";
@@ -33,14 +32,10 @@ export const createOrder = async (orderDetails: OrderDetailValue[]) => {
     return data
 }
 
-export const getOrderById = async () => {
-    const orderId = Cookies.get('orderId')
-    if (!orderId) {
-        throw Error('Người dùng không có đơn hàng')
-    }
+export const getOrderById = async (id: number | string) => {
     const { data } = await axiosInstance({
         method: 'GET',
-        url: `${BASE_API}/api/v1/orders/${orderId}`
+        url: `${BASE_API}/api/v1/orders/${id}`
     })
     return data
 }
@@ -53,7 +48,7 @@ export const updateAdressOrder = async (request: OrderAddressUpdate) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/update-address/${orderId}`,
-        data: {...request}
+        data: { ...request }
     })
     return data
 }
@@ -76,19 +71,7 @@ export const fetchAllOrders = async (param: OrderParam, page: number, size: numb
         throw error;
     }
 };
-export const getOrderById = async (id: number) => {
-    const token = Cookies.get("accessToken");
-    const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
-    };
-    try {
-        const response = await axiosInstance.get(`${BASE_URL}/${id}`, config);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching brand by ID", error);
-        throw error;
-    }
-};
+
 export const updateStateOrder = async (id: number, orderChangeState: any) => {
     try {
         const response = await axiosInstance.put(`${BASE_URL}/${id}`, orderChangeState);

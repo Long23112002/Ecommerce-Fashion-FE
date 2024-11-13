@@ -5,6 +5,7 @@ import Order, { OrderRequest } from '../../../types/Order'
 import PaymentInfo from './PaymentInfo'
 import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
+import Cookies from 'js-cookie'
 
 const CheckoutPage: React.FC = () => {
 
@@ -35,8 +36,10 @@ const CheckoutPage: React.FC = () => {
 
 
   useEffect(() => {
+    const id = Cookies.get('orderId')
+    if (!id) return
     const callGetOrderById = async () => {
-      const data = await getOrderById()
+      const data = await getOrderById(id)
       setOrder({ ...data })
     }
     callGetOrderById()
