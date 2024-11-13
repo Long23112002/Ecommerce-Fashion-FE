@@ -24,6 +24,7 @@ import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.t
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
+import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 
 
 
@@ -39,6 +40,7 @@ const AppRoutes = () => {
                 <Route path='/product/:id' element={<ProductDetailPage />} />
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
+                <Route path='/checkout' element={<CheckoutPage />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
