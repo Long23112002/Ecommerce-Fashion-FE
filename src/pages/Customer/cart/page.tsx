@@ -51,6 +51,8 @@ const CartPage = () => {
     {}
   );
 
+  const selectedProductCount = Object.values(selectedProductDetails).filter(Boolean).length;
+
   const caculatePrice = () => {
     const subtotal = cartValueInfos.reduce((sum, pd) => {
       if (selectedProductDetails[pd.productDetail.id]) {
@@ -66,11 +68,23 @@ const CartPage = () => {
   };
 
   const handleSelectProductDetail = (id: number) => {
+    const productDetail = cartValueInfos.find((pd) => pd.productDetail.id === id);
+  
+  if (productDetail && productDetail.productDetail.quantity === 0) {
+    Swal.fire({
+      icon: "error",
+      title: "Sản phẩm đã hết hàng",
+      text: "Sản phẩm này sẽ được xóa khỏi giỏ hàng.",
+    }).then(() => {
+      handleRemoveProduct(id);
+    });
+  } else {
     setSelectedProductDetails((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
     handleQuantityChange(id, 0);
+  }
   };
 
   const handleSelectAll = () => {
