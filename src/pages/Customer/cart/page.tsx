@@ -53,7 +53,9 @@ const CartPage = () => {
       if (selectedProductDetails[pd.productDetail.id]) {
         return sum + (pd.productDetail.price || 0) * (pd.quantity || 0);
       }
+
       return sum;
+      
     }, 0);
 
     const discount = 0;
