@@ -22,6 +22,12 @@ import ProductDetailPage from '../pages/Customer/product-detail/page.tsx';
 import ChangePasswordPage from '../pages/Customer/user-info/ChangePasswordPage.tsx';
 import UserInfoLayout from '../pages/Customer/user-info/index.tsx';
 import UserInfoPage from '../pages/Customer/user-info/UserInfoPage.tsx';
+import ManagerDiscount from '../pages/Admin/Discount/ManagerDiscount.tsx';
+import ManagerVoucher from '../pages/Admin/Voucher/ManagerVoucher.tsx';
+import DiscountDetailModal from '../components/Discount/DiscountDetailModal.tsx';
+import AddDiscount from '../components/Discount/AddDiscount.tsx';
+import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
+import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import UserLayout from '../layouts/Customer/index.tsx';
 
@@ -56,9 +62,15 @@ const AppRoutes = () => {
                 <Route path="/admin/material" element={<ManagerMaterial />} />
                 <Route path="/admin/chat" element={<ChatPage />} />
                 <Route path="/admin/user" element={<ManagerUser />} />
+                <Route path="/admin/discount" element={<ManagerDiscount />} />
+                <Route path="/admin/voucher" element={<ManagerVoucher />} />
                 <Route path="/admin/category" element={<ManagerCategory />} />
                 <Route path="/admin/promotion" element={<ManagerPromotion />} />
                 <Route path="/admin/promotion/scheduled/:id" element={<PromotionSheducled />} />
+                <Route path="/admin/discount/:discountId" element={<DiscountDetailModal />} />
+                <Route path="/admin/discount/edit/:discountId" element={<UpdateDiscount />} />
+                <Route path="/admin/discount/add" element={<AddDiscount />} />
+                <Route path="/admin/order" element={<ManagerOrder />} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />
