@@ -1,85 +1,87 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Avatar, Typography, Table, Row, Col } from 'antd';
 import { Discount } from '../../types/discount.js';
-import Product from '../../types/Product.js'
 import ProductDetail from '../../types/ProductDetail.js'
-import { Category } from '../../types/Category.js'
-import { Brand } from '../../types/brand.js'
 import { getDiscountById } from "../../api/DiscountApi.ts";
-import { fetchCategoriesByIds } from "../../api/CategoryApi.ts";
-import { fetchBrandsByIds } from "../../api/BrandApi.ts";
 import { fetchProductDetailsByIds } from "../../api/BrandApi.ts";
-import { fetchProductsByIds } from "../../api/BrandApi.ts";
-// import { fetchProductsByCategoryBrandOrIds } from "../../api/BrandApi.ts";
 import { useParams } from "react-router-dom";
-
+import LoadingCustom from "../../components/Loading/LoadingCustom.js";
+import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import { toast } from "react-toastify";
 const { Text } = Typography;
 
 const DiscountDetailModal: React.FC = () => {
+    const [loading, setLoading] = useState(true);
     const { discountId } = useParams<{ discountId: string }>();
     const [discount, setDiscount] = useState<Discount | null>(null);
-    const [categoryDetails, setCategoryDetails] = useState<Category[]>([]);
-    const [brandDetails, setBrandDetails] = useState<Brand[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
     useEffect(() => {
         const fetchDiscountDetails = async () => {
             // let combinedProducts: Product[] = [];
-            const parsedDiscountId = Number(discountId);
-            if (isNaN(parsedDiscountId)) {
-                console.error("Invalid discount ID:", discountId);
-                return;
-            }
-            const discountData = await getDiscountById(parsedDiscountId);
-            setDiscount(discountData);
-
-            if (discountData) {
-                if (discountData.condition.idCategory.length > 0) {
-                    const categories = await fetchCategoriesByIds(discountData.condition.idCategory);
-                    setCategoryDetails(categories);
+            setLoading(true);
+            try {
+                const parsedDiscountId = Number(discountId);
+                if (isNaN(parsedDiscountId)) {
+                    console.error("Invalid discount ID:", discountId);
+                    return;
                 }
-                if (discountData.condition.idBrand.length > 0) {
-                    const brands = await fetchBrandsByIds(discountData.condition.idBrand);
-                    setBrandDetails(brands);
-                }
-                if (discountData.condition.idProductDetail.length > 0) {
-                    const productdetails = await fetchProductDetailsByIds(discountData.condition.idProductDetail);
-                    setProductDetails(productdetails);
-                }
+                const discountData = await getDiscountById(parsedDiscountId);
+                setDiscount(discountData);
 
-                // let productsByCategoryAndBrand: Product[] = [];
-                // if (discountData.condition.idCategory.length > 0 && discountData.condition.idBrand.length > 0) {
-                //     productsByCategoryAndBrand = await fetchProductsByCategoryBrandOrIds(discountData.condition.idCategory, discountData.condition.idBrand);
-                // }
-                // let productsById = [];
-                if (discountData.condition.idProduct.length > 0) {
-                    const productsById = await fetchProductsByIds(discountData.condition.idProduct);
-                    setProducts(productsById);
+                if (discountData) {
+                    if (discountData.condition.idProductDetail.length > 0) {
+                        const productdetails = await fetchProductDetailsByIds(discountData.condition.idProductDetail);
+                        setProductDetails(productdetails);
+                        // setPagination(
+                        //     {
+                        //         current: productdetails.metaData.page + 1,
+                        //         pageSize: productdetails.metaData.size,
+                        //         total: productdetails.metaData.total,
+                        //         totalPage: response.metaData.totalPage
+                        //     }
+                        // )
+                    }
                 }
-                // combinedProducts = [...productsByCategoryAndBrand, ...productsById];
-                // const uniqueProducts = Array.from(new Set(combinedProducts.map(p => p.id)))
-                //     .map(id => combinedProducts.find(p => p.id === id)!);
-
-
+            } catch (error) {
+                toast.error(getErrorMessage(error))
+            } finally {
+                setLoading(false);
             }
         };
         fetchDiscountDetails();
     }, [discountId]);
-    const productColumns = [
-        { title: 'ID', dataIndex: 'id', key: 'id' },
-        { title: 'Tên sản phẩm', dataIndex: 'name', key: 'name' },
-    ];
     const productDetailColumns = [
-        { title: 'ID', dataIndex: 'id', key: 'id' },
-        { title: 'Tên chi tiết sản phẩm', dataIndex: 'price', key: 'price' },
-    ];
-    const categoryColumns = [
-        { title: 'ID', dataIndex: 'id', key: 'id' },
-        { title: 'Tên danh mục', dataIndex: 'name', key: 'name' }
-    ];
-    const brandColumns = [
-        { title: 'ID', dataIndex: 'id', key: 'id' },
-        { title: 'Tên thương hiệu', dataIndex: 'name', key: 'name' }
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Hình ảnh',
+            dataIndex: 'images',
+            key: 'images',
+            render: (images: { url: string }[]) => (
+                images && images.length > 0 ? (
+                    <img src={images[0].url} alt="Product" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+                ) : null
+            ),
+        },
+        {
+            title: 'Tên sản phẩm',
+            dataIndex: ['product', 'name'],
+            key: 'name',
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            render: (price: number) => `${price.toLocaleString()}₫`,
+        },
+        {
+            title: 'Số lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+        }
     ];
     if (!discount) {
         return null;
@@ -183,21 +185,23 @@ const DiscountDetailModal: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
                 <Text strong style={{ fontSize: '28px' }} >Điều Kiện</Text>
             </div>
-            <div style={{ marginTop: '20px' }}>
-                <Text strong style={{ fontSize: '18px' }}>Danh sách Danh Mục</Text>
-                <Table columns={categoryColumns} dataSource={categoryDetails} pagination={{ pageSize: 5 }} rowKey="id" />
-            </div>
-            <div style={{ marginTop: '20px' }}>
-                <Text strong style={{ fontSize: '18px' }}>Danh sách Thương Hiệu</Text>
-                <Table columns={brandColumns} dataSource={brandDetails} pagination={{ pageSize: 5 }} rowKey="id" />
-            </div>
+            <Col span={12}>
+                <Form.Item label={<Text strong>Giá Điều Kiện</Text>}>
+                    <Input value={discount.condition.price} disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+            </Col>
             <div style={{ marginTop: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Danh sách Sản Phẩm Chi Tiết</Text>
-                <Table columns={productDetailColumns} dataSource={productDetails} pagination={{ pageSize: 5 }} rowKey="id" />
-            </div>
-            <div style={{ marginTop: '20px' }}>
-                <Text strong style={{ fontSize: '18px' }}>Danh sách Sản Phẩm</Text>
-                <Table columns={productColumns} dataSource={products} pagination={{ pageSize: 5 }} rowKey="id" />
+                <Table
+                    columns={productDetailColumns}
+                    dataSource={productDetails}
+                    pagination={{ pageSize: 5 }}
+                    loading={{
+                        spinning: loading,
+                        indicator: <LoadingCustom />,
+                    }}
+                    rowKey="id"
+                />
             </div>
         </div >
     );

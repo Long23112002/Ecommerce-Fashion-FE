@@ -5,9 +5,8 @@ import axiosInstance from './AxiosInstance';
 const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
 export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
-    const token = Cookies.get("accessToken");
+
     const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
         params: {
             size: pageSize,
             page: page,
@@ -124,6 +123,28 @@ export const fetchProductDetailsByIds = async (ids: number[]) => {
         return responses;
     } catch (error) {
         console.error("Error fetching Product by IDs", error);
+        throw error;
+    }
+};
+export const fetchAllProductDetails = async (pageSize: number, page: number, searchName?: string) => {
+    const token = Cookies.get('accessToken');
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        params: {
+            size: pageSize,
+            page: page,
+            ...(searchName && { name: searchName }),
+        },
+    };
+
+    try {
+        const response = await axiosInstance.get(`http://localhost:8888/api/v1/product-detail`, config);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching product details:', error);
         throw error;
     }
 };

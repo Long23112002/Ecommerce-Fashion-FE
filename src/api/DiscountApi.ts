@@ -2,45 +2,67 @@ import axiosInstance from './AxiosInstance';
 import { BASE_API } from "../constants/BaseApi.ts";
 const BASE_URL = `${BASE_API}/api/v1/discount`;
 
-// Hàm lấy danh sách khuyến mãi với phân trang và tìm kiếm theo tên
-export const fetchAllDiscounts = async (pageSize: number, page: number, searchName: string) => {
+export const fetchAllDiscounts = async (
+  pageSize: number,
+  page: number,
+  name: string,
+  type?: string,
+  status?: string) => {
   const response = await axiosInstance.get(`${BASE_URL}`, {
     params: {
       page,
       size: pageSize,
-      name: searchName
+      name,
+      type,
+      status
     }
   });
   return response.data;
 };
 
-// Hàm lấy chi tiết một khuyến mãi theo ID
 export const getDiscountById = async (id: number) => {
-  const response = await axiosInstance.get(`${BASE_URL}/${id}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.get(`${BASE_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching discount:", error);
+  }
+};
+export const createDiscount = async (discountRequest: any, token: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `${BASE_URL}`,
+      discountRequest,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error('Lỗi khi thêm khuyến mãi:', error);
+    throw error
+  }
 };
 
-// Hàm tạo một khuyến mãi mới
-export const createDiscount = async (discountData: { name: string; value: number; maxValue: number }, token: string) => {
-  const response = await axiosInstance.post(`${BASE_URL}`, discountData, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return response.data;
+
+export const updateDiscount = async (id: number, discountRequest: any, token: string) => {
+  try {
+    const response = await axiosInstance.put(`${BASE_URL}/${id}`, discountRequest, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
+    return response;
+  } catch (error: any) {
+    console.error('Lỗi khi update khuyến mãi:', error);
+    throw error
+  }
 };
 
-// Hàm cập nhật khuyến mãi theo ID
-export const updateDiscount = async (id: number, discountData: { name: string; value: number; maxValue: number }, token: string) => {
-  const response = await axiosInstance.put(`${BASE_URL}/${id}`, discountData, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-  return response.data;
-};
-
-// Hàm xóa khuyến mãi theo ID
 export const deleteDiscount = async (id: number, token: string) => {
   const response = await axiosInstance.delete(`${BASE_URL}/${id}`, {
     headers: {
@@ -48,4 +70,18 @@ export const deleteDiscount = async (id: number, token: string) => {
     }
   });
   return response.data;
+};
+
+export const getAllDiscount = async (pageSize: number, pageIndex: number) => {
+  const params = {
+    size: pageSize,
+    page: pageIndex,
+  };
+
+  try {
+    const response = await axiosInstance.get(`${BASE_URL}/select`, { params });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error fetching Discount: ${error.response?.data?.message || error.message}`);
+  }
 };

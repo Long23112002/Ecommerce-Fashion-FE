@@ -1,7 +1,9 @@
-import React from 'react';
-import { Modal, Form, Input } from 'antd';
-import { VoucherResponse } from '../../types/voucher';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Select } from 'antd';
+import { Voucher } from '../../types/voucher';
 import { FormInstance } from 'antd';
+import { getAllDiscount } from '../../api/DiscountApi';
+import { Discount } from '../../types/discount';
 
 interface VoucherModelProps {
     isModalOpen: boolean;
@@ -9,7 +11,8 @@ interface VoucherModelProps {
     handleCancel: () => void;
     form: FormInstance;
     mode: 'add' | 'update';
-    voucher?: VoucherResponse;
+    voucher?: Voucher; // Thêm voucher để nhận dữ liệu cho chế độ update
+    discount: Discount;
 }
 
 const VoucherModel: React.FC<VoucherModelProps> = ({
@@ -18,8 +21,23 @@ const VoucherModel: React.FC<VoucherModelProps> = ({
     handleCancel,
     form,
     mode,
-    voucher,
+    voucher, // Đảm bảo voucher được truyền vào
 }) => {
+    const [discounts, setDiscounts] = useState<Discount[]>([]);
+
+    // Tải dữ liệu discount khi component mount
+    useEffect(() => {
+        const loadDiscounts = async () => {
+            try {
+                const response = await getAllDiscount(100, 0); // Lấy 100 discounts từ trang 0
+                setDiscounts(response.data);
+            } catch (error) {
+                console.error('Failed to fetch discounts', error);
+            }
+        };
+        loadDiscounts();
+    }, []);
+
     return (
         <Modal
             title={mode === 'add' ? 'Add Voucher' : 'Update Voucher'}
@@ -31,20 +49,22 @@ const VoucherModel: React.FC<VoucherModelProps> = ({
             <Form
                 form={form}
                 layout="vertical"
-                initialValues={
-                    voucher
-                        ? {
-                            discountId: voucher.discount?.id || '',
-                        }
-                        : {}
-                }
+                initialValues={{
+                    discountId: voucher?.discount?.id || '', // Dùng voucher nếu có
+                }}
             >
                 <Form.Item
-                    label="Discount ID"
+                    label="Discount"
                     name="discountId"
-                    rules={[{ required: true, message: 'Please enter the discount ID' }]}
+                    rules={[{ required: true, message: 'Please select a discount' }]}
                 >
-                    <Input />
+                    <Select placeholder="Select a discount">
+                        {discounts.map((discount) => (
+                            <Select.Option key={discount.id} value={discount.id}>
+                                {discount.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
             </Form>
         </Modal>
