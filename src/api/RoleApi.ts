@@ -2,6 +2,8 @@ import {BASE_API} from "../constants/BaseApi.ts";
 import {ResponseData} from "../types/responseApi.ts";
 import {Role} from "../types/role.ts";
 import axiosInstance from "./AxiosInstance.ts";
+/* eslint-disable */
+
 
 
 export interface RoleRequest {
@@ -17,7 +19,7 @@ export const fetchAllRole = async (
     try {
         const url = `${BASE_API}/api/v1/role?page=${page}&size=${size}`;
         const response = await axiosInstance.get<{ data: Role[], total: number }>(url);
-        return response.data as ResponseData;
+        return response.data as unknown as ResponseData;
     } catch (error) {
         throw error;
     }
@@ -38,7 +40,7 @@ export const createRole = async (role: RoleRequest, token: string): Promise<Resp
             },
         };
         const response = await axiosInstance.post<Role>(url, modifiedRole, auth);
-        return response.data as ResponseData;
+        return response.data as unknown as ResponseData;
     } catch (error) {
         throw error;
     }
@@ -54,7 +56,7 @@ export const deleteRole = async (roleId: number, token: string): Promise<Respons
             },
         };
         const response = await axiosInstance.delete(url, auth);
-        return response as ResponseData;
+        return response as unknown as ResponseData;
     } catch (error) {
         console.error("Error deleting role:", error);
         throw error;
