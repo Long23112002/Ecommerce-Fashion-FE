@@ -37,6 +37,20 @@ export interface Order {
     orderDetails?: OrderDetail[];
 }
 
+export type OrderRequest = {
+    discountId?: number;
+    paymentMethodId: number;
+    phoneNumber: string;
+    fullName: string;
+    email: string;
+    address: string;
+    shipDate?: Date;
+    moneyShip?: number;
+    note?: string;
+    totalMoney: number;
+    orderDetails: OrderDetailValue[];
+}
+
 export type OrderCreateRequest = {
     orderDetails: OrderDetailValue[]
 }
@@ -45,3 +59,5 @@ export type OrderDetailValue = {
     productDetailId: number,
     quantity: number
 }
+
+export default Order
