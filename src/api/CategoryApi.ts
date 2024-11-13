@@ -11,7 +11,7 @@ interface CategoryData {
 }
 
 // Fetch all categories with pagination and optional search parameters
-export const fetchAllCategories = async (pageSize: number, pageIndex: number, searchName: string) => {
+export const fetchAllCategories = async (pageSize: number = 15, pageIndex: number = 0, searchName: string = '') => {
   const params = {
     size: pageSize,
     page: pageIndex,

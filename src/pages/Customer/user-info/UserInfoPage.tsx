@@ -8,11 +8,11 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { getUserData, storeUserData } from '../../../api/AuthApi';
-import { uploadImage } from '../../../api/ImageAPI';
 import { updateUserInfo } from '../../../api/UserApi';
 import { useUserAction } from '../../../hook/useUserAction';
 import { userSelector } from '../../../redux/reducers/UserReducer';
 import { UserInfoRequest } from '../../../types/User';
+import { uploadOneImage } from '../../../api/ImageAPI';
 
 const UserInfoPage: React.FC = () => {
   const userAction = useUserAction();
@@ -99,10 +99,10 @@ const UserInfoPage: React.FC = () => {
       try {
         let avatarImage = null;
         if (fileImage) {
-          avatarImage = await uploadImage([fileImage], user.id, 'USER')
+          avatarImage = await uploadOneImage([fileImage], user.id, 'USER')
         }
 
-        const updatedUserInfo = {
+        const updatedUserInfo: UserInfoRequest = {
           ...userInfo,
           avatar: avatarImage,
         };
@@ -120,9 +120,15 @@ const UserInfoPage: React.FC = () => {
         userAction.save(userResponse);
         storeUserData(newInfoData);
         toast.success('Đổi thông tin thành công');
-      } catch (error) {
-        console.log(error)
-        toast.error('Lỗi đổi thông tin');
+      } catch (error: any) {
+        const messages = error.response.data.message;
+        if (typeof messages == 'object') {
+          const firstKey = Object.keys(messages)[0];
+          const firstMessage = messages[firstKey];
+          toast.error(firstMessage);
+          return;
+        }
+        toast.error(messages);
       }
     }
   };
@@ -131,7 +137,7 @@ const UserInfoPage: React.FC = () => {
     <Box sx={{ p: { xs: 3, sm: 5 } }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <Box sx={{ position: 'relative' }}>
-          <Avatar src={userInfo.avatar} sx={{ width: 100, height: 100 }} />
+          <Avatar src={userInfo.avatar + ''} sx={{ width: 100, height: 100 }} />
           <input
             accept="image/*"
             type="file"

@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Product from "./../../types/Product";
+import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
 
 interface Product {
   id: number;
@@ -82,18 +83,8 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
   },
   {
     title: "Tên sản phẩm",
-    dataIndex: "name",
     key: "name",
-  },
-  {
-    title: "Kích thước",
-    dataIndex: "size",
-    key: "size",
-  },
-  {
-    title: "Màu sắc",
-    dataIndex: "color",
-    key: "color",
+    render: (record: ProductDetail) => `${record.name} [ ${record.color} - ${record.size} ]`,
   },
   {
     title: "Số lượng",
@@ -104,7 +95,7 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
     title: "Đơn giá",
     dataIndex: "price",
     key: "price",
-    render: (price: number) => `${price} VNĐ`,
+    render: (price: number) => `${price.toLocaleString("vi-VN")} VNĐ`,
   },
 ];
 
@@ -233,6 +224,7 @@ const PromotionScheduled: React.FC = () => {
       console.log(data);
     } catch (error) {
       console.error(error);
+      getErrorMessage(error);
     } finally {
       setLoading(false);
     }
@@ -247,7 +239,6 @@ const PromotionScheduled: React.FC = () => {
         return response.data.data;
       });
 
-      // Chờ cho tất cả các Promise hoàn thành
       const detailsArray = await Promise.all(detailPromises);
 
       // Kết hợp tất cả chi tiết sản phẩm vào một mảng duy nhất
@@ -265,6 +256,7 @@ const PromotionScheduled: React.FC = () => {
       console.log("Sản phẩm chi tiết", allProductDetails);
     } catch (error) {
       console.error("Error fetching product detail:", error);
+      getErrorMessage(error);
     } finally {
       setLoading(false);
     }
@@ -333,6 +325,7 @@ const PromotionScheduled: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding product details to promotion:", error);
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
 

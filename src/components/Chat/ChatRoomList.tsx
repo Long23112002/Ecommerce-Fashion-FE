@@ -5,7 +5,6 @@ import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SockJS from 'sockjs-client';
-import { refreshToken } from '../../api/AxiosInstance';
 import { callDeleteRoomById, callFindAllChatRoom } from '../../api/ChatApi';
 import { SOCKET_CHAT_API } from '../../constants/BaseApi';
 import { userSelector } from '../../redux/reducers/UserReducer';

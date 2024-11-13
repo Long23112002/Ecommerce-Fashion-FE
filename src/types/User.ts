@@ -15,6 +15,7 @@ export type User = {
 }
 
 export interface UserRequest {
+    id: number;
     email: string;
     password: string;
     fullName: string;
@@ -29,7 +30,7 @@ export interface UserInfoRequest {
     phoneNumber: string | null;
     birth: Date | null;
     gender: 'MALE' | 'FEMALE' | 'OTHER';
-    avatar: string;
+    avatar: string | null;
 }
 
 export interface ChangePasswordRequest {

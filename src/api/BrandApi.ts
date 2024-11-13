@@ -4,8 +4,8 @@ import axiosInstance from './AxiosInstance';
 
 const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
-export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
 
+export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
     const config = {
         params: {
             size: pageSize,

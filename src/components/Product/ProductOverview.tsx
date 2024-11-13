@@ -2,53 +2,121 @@ import { ShoppingBasket, ShoppingCart } from '@mui/icons-material'
 import {
     Box,
     Button,
-    FormControlLabel,
     Grid,
-    Radio,
-    RadioGroup,
     Rating,
+    Stack,
     TextField,
     Typography
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import ImageCarousel from './ImageCarousel'
-import Product from '../../types/Product'
-import ProductDetail from '../../types/ProductDetail'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Color } from '../../pages/Admin/Attributes/color/color'
 import { Size } from '../../pages/Admin/Attributes/size/size'
+import Product from '../../types/Product'
+import ProductDetail from '../../types/ProductDetail'
+import ColorRadio from '../ColorRadio'
+import SizeButton from '../SizeButton'
+import ImageCarousel from './ImageCarousel'
 
 interface IProps {
-    product: Product
+    product: Product,
+    productDetails: ProductDetail[]
 }
 
-const ProductOverview: React.FC<IProps> = ({ product }) => {
-
+const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [quantity, setQuantity] = useState(1)
-    const [productDetail, setProductDetail] = useState<ProductDetail | undefined>(product.productDetails?.[0])
     const [colors, setColors] = useState<Color[]>([])
     const [sizes, setSizes] = useState<Size[]>([])
-    const [selectedColor, setSelectedColor] = useState<number>(product.productDetails?.[0].color?.id || -1)
-    const [selectedSize, setSelectedSize] = useState<number>(product.productDetails?.[0].size?.id || -1)
+    const [selectedProductDetail, setSeletedProductDetail] = useState<ProductDetail>()
+    const [selectedColor, setSelectedColor] = useState<number | null>(null)
+    const [selectedSize, setSelectedSize] = useState<number | null>(null)
 
     useEffect(() => {
-        const arrayColor: Color[] = product.productDetails?.reduce((acc: Color[], pd) => {
-            if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
-                acc.push(pd.color);
-            }
-            return acc;
-        }, []) || [];
+        const sizeId = searchParams.get('sizeId') as number | null;
+        const colorId = searchParams.get('colorId') as number | null;
 
+        if (colorId == selectedColor || sizeId == selectedSize) return
+
+        if (sizeId == null || colorId == null) {
+            setSelectedSize(productDetails?.[0].size?.id || null)
+            setSelectedColor(productDetails?.[0].color?.id || null)
+            return
+        }
+
+        setSelectedColor(colorId)
+        setSelectedSize(sizeId)
+    }, [searchParams, productDetails])
+
+    useEffect(() => {
+        if (!selectedColor || !selectedSize) return;
+
+        const params = new URLSearchParams();
+        if (selectedColor != null) {
+            params.set('colorId', selectedColor + '');
+        }
+        if (selectedSize != null) {
+            params.set('sizeId', selectedSize + '');
+        }
+
+        navigate({ search: params.toString() }, { replace: true });
+
+        const selectedProduct = productDetails.find(
+            pd => pd.color?.id === selectedColor && pd.size?.id === selectedSize
+        );
+
+        setSeletedProductDetail({ ...selectedProduct });
+    }, [selectedColor, selectedSize, navigate, productDetails]);
+
+    useEffect(() => {
+        const sizes = getSizesByColor(selectedColor);
+        const isSizeExist = sizes.includes(selectedSize || -1)
+        if (!isSizeExist) {
+            setSelectedSize(sizes[0])
+        }
+    }, [selectedColor])
+
+    const getSizesByColor = (id: number | undefined | null): number[] => {
+        if (id) {
+            return productDetails
+                .filter(pd => (pd.color && pd.color.id == id))
+                .map(pd => pd.size?.id || -1)
+        }
+        return []
+    }
+
+    const arrayColor: Color[] = productDetails?.reduce((acc: Color[], pd) => {
+        if (pd.color && !acc.some(c => c.id === pd.color?.id)) {
+            acc.push(pd.color);
+        }
+        return acc;
+    }, []) || [];
+
+    const arraySize: Size[] = productDetails?.reduce((acc: Size[], pd) => {
+        if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
+            acc.push(pd.size);
+        }
+        return acc;
+    }, []) || [];
+
+    useEffect(() => {
+        setSeletedProductDetail(productDetails[0])
         setColors(arrayColor);
-
-        const arraySize: Size[] = product.productDetails?.reduce((acc: Size[], pd) => {
-            if (pd.size && !acc.some(c => c.id === pd.size?.id)) {
-                acc.push(pd.size);
-            }
-            return acc;
-        }, []) || [];
-
         setSizes(arraySize);
-    }, [product.productDetails]);
+    }, [productDetails]);
+
+    useEffect(() => {
+        if (colors.length && colors[0].id) {
+            setSelectedColor(colors[0].id)
+        }
+    }, [colors])
+
+    useEffect(() => {
+        if (sizes.length && sizes[0].id) {
+            setSelectedSize(sizes[0].id)
+        }
+    }, [sizes])
 
     return (
         <Box
@@ -69,14 +137,14 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={productDetail?.images || []}
+                        images={selectedProductDetail?.images?.map((image: any) => image.url) || []}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                     <Typography variant="h4" fontWeight="bold">{product.name}</Typography>
                     <Typography variant="h5" color="primary" sx={{ mt: 1 }}>
-                        {product.price?.toLocaleString('vi-VN')} VNĐ
+                        {selectedProductDetail?.price?.toLocaleString('vi-VN')} VNĐ
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -105,40 +173,33 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                     </Box>
 
                     <Box sx={{ mt: 3 }}>
-                        <Typography variant="body2">Màu sắc</Typography>
-                        <RadioGroup row value={selectedColor} onChange={(e) => setSelectedColor(Number(e.target.value))}>
+                        <Typography variant="body2">Màu sắc: {colors.filter(c => selectedColor == c.id)[0]?.name || ''}</Typography>
+                        <Stack direction="row" spacing={1} mt={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
                             {colors.map((c) => (
-                                <FormControlLabel
+                                <ColorRadio
                                     key={c.id}
-                                    value={c.id}
-                                    control={<Radio />}
-                                    label={c.name}
-                                    sx={{
-                                        mr: 4
-                                    }}
+                                    color={c}
+                                    // disable={!getColorsBySize(selectedSize).includes(c.id || -1)}
+                                    checked={c.id == selectedColor}
+                                    onClick={() => { setSelectedColor(c.id || null) }}
                                 />
                             ))}
-                        </RadioGroup>
+                        </Stack>
                     </Box>
 
                     <Box sx={{ mt: 3 }}>
-                        <Typography variant="body2">Kích thước</Typography>
-                        <RadioGroup row
-                            value={selectedSize}
-                            onChange={(e) => setSelectedSize(Number(e.target.value))}>
+                        <Typography variant="body2">Kích thước: {sizes.filter(s => selectedSize == s.id)[0]?.name || ''}</Typography>
+                        <Stack direction="row" spacing={1} mt={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
                             {sizes.map((s) => (
-                                <FormControlLabel
+                                <SizeButton
                                     key={s.id}
-                                    value={s.id}
-                                    defaultChecked={s.id === productDetail?.size?.id}
-                                    control={<Radio />}
-                                    label={s.name?.toUpperCase()}
-                                    sx={{
-                                        mr: 4
-                                    }}
+                                    size={s}
+                                    disable={!getSizesByColor(selectedColor).includes(s.id || -1)}
+                                    checked={s.id == selectedSize}
+                                    onClick={() => { setSelectedSize(s.id || null) }}
                                 />
                             ))}
-                        </RadioGroup>
+                        </Stack>
                     </Box>
 
                     <Box sx={{ mb: 3 }}>
@@ -170,7 +231,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 value={quantity}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
-                                    if (value >= 1 && value <= (productDetail?.quantity ?? 0)) {
+                                    if (value >= 1 && value <= (selectedProductDetail?.quantity ?? 0)) {
                                         setQuantity(value);
                                     }
                                 }}
@@ -182,7 +243,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                                 }}
                                 inputProps={{
                                     min: 1,
-                                    max: productDetail?.quantity,
+                                    max: selectedProductDetail?.quantity,
                                     type: 'number',
                                     style: {
                                         padding: "9px 0 9px 20px",
@@ -192,7 +253,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
 
                             <Button
                                 variant="contained"
-                                onClick={() => setQuantity(Math.min(productDetail?.quantity ?? 0, quantity + 1))}
+                                onClick={() => setQuantity(Math.min(selectedProductDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -210,7 +271,7 @@ const ProductOverview: React.FC<IProps> = ({ product }) => {
                         </Box>
 
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Còn {productDetail?.quantity} sản phẩm
+                            Còn {selectedProductDetail?.quantity} sản phẩm
                         </Typography>
                     </Box>
 
