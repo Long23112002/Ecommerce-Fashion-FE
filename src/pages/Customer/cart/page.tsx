@@ -34,7 +34,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [cart, setCart] = useState<Cart[]>([]);
@@ -51,7 +51,9 @@ const CartPage = () => {
     {}
   );
 
-  const selectedProductCount = Object.values(selectedProductDetails).filter(Boolean).length;
+  const selectedProductCount = Object.values(selectedProductDetails).filter(
+    Boolean
+  ).length;
 
   const caculatePrice = () => {
     const subtotal = cartValueInfos.reduce((sum, pd) => {
@@ -60,7 +62,6 @@ const CartPage = () => {
       }
 
       return sum;
-      
     }, 0);
 
     const discount = 0;
@@ -69,36 +70,35 @@ const CartPage = () => {
     setTotalPrice(total);
   };
 
+  const checkProductAvailability = (productDetailId: number) => {
+    const product = cartValueInfos.find(
+      (pd) => pd.productDetail.id === productDetailId
+    );
+  
+    if (product && product.productDetail.quantity === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Sản phẩm đã hết hàng",
+        text: "Sản phẩm này sẽ được xóa khỏi giỏ hàng.",
+      })
+      handleRemoveProduct(productDetailId);
+      return false;
+    }
+    return true;
+  };
+
   const handleSelectProductDetail = (id: number) => {
-    const productDetail = cartValueInfos.find((pd) => pd.productDetail.id === id);
-  
-  if (productDetail && productDetail.productDetail.quantity === 0) {
-    Swal.fire({
-      icon: "error",
-      title: "Sản phẩm đã hết hàng",
-      text: "Sản phẩm này sẽ được xóa khỏi giỏ hàng.",
-    }).then(() => {
-      handleRemoveProduct(id);
-    });
-  } else {
-    const productDetail = cartValueInfos.find((pd) => pd.productDetail.id === id);
-  
-  if (productDetail && productDetail.productDetail.quantity === 0) {
-    Swal.fire({
-      icon: "error",
-      title: "Sản phẩm đã hết hàng",
-      text: "Sản phẩm này sẽ được xóa khỏi giỏ hàng.",
-    }).then(() => {
-      handleRemoveProduct(id);
-    });
-  } else {
-    setSelectedProductDetails((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-    handleQuantityChange(id, 0);
-  }
-  }
+
+    if (!checkProductAvailability(id)) {
+      return;
+    }
+
+      setSelectedProductDetails((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+      handleQuantityChange(id, 0);
+    
   };
 
   const handleSelectAll = () => {
@@ -225,6 +225,11 @@ const CartPage = () => {
   // }, [cartValueInfos]);
 
   const handleQuantityChange = (id: number, change: number) => {
+
+    if (!checkProductAvailability(id)) {
+      return;
+    }
+
     setCartValueInfos((prevCartValueInfos) => {
       const updatedCartValueInfos = prevCartValueInfos.map((pd) => {
         if (pd.productDetail.id === id) {
@@ -252,7 +257,8 @@ const CartPage = () => {
         updatedCartValueInfos.map((pd) => ({
           productDetailId: pd.productDetail.id!,
           quantity: pd.quantity,
-        })));
+        }))
+      );
 
       console.log(updatedCartValueInfos);
       setIsCartUpdated(true);
@@ -376,17 +382,17 @@ const CartPage = () => {
   // const total = Math.max(0, subtotal - discount);
 
   const handleBuy = async () => {
-    if (cartValueInfos.length < 0) return
-    const orderDetails: OrderDetailValue[] = cartValueInfos.map(value => {
+    if (cartValueInfos.length < 0) return;
+    const orderDetails: OrderDetailValue[] = cartValueInfos.map((value) => {
       return {
         productDetailId: value.productDetail.id,
-        quantity: value.quantity
-      }
-    })
+        quantity: value.quantity,
+      };
+    });
     const data = await createOrder(orderDetails);
-    Cookies.set('orderId', data.id, { expires: 1 / 6 })
-    navigate('/checkout')
-  }
+    Cookies.set("orderId", data.id, { expires: 1 / 6 });
+    navigate("/checkout");
+  };
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
@@ -475,10 +481,10 @@ const CartPage = () => {
                         textAlign: "center",
                       },
                       "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                      {
-                        WebkitAppearance: "none",
-                        margin: 0,
-                      },
+                        {
+                          WebkitAppearance: "none",
+                          margin: 0,
+                        },
                     }}
                     inputProps={{
                       min: 1,
@@ -596,10 +602,10 @@ const CartPage = () => {
                           textAlign: "center",
                         },
                         "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                        {
-                          WebkitAppearance: "none",
-                          margin: 0,
-                        },
+                          {
+                            WebkitAppearance: "none",
+                            margin: 0,
+                          },
                       }}
                       inputProps={{
                         min: 0,
@@ -656,11 +662,12 @@ const CartPage = () => {
                   {totalPrice.toLocaleString("vi-VN")} ₫
                 </Typography>
               </Box>
-              <Button 
-              variant="contained" 
-              onClick={handleBuy}
-              fullWidth sx={{ mt: 2 }}
-              disabled={selectedProductCount === 0}
+              <Button
+                variant="contained"
+                onClick={handleBuy}
+                fullWidth
+                sx={{ mt: 2 }}
+                disabled={selectedProductCount === 0}
               >
                 Mua hàng
                 {/* (
