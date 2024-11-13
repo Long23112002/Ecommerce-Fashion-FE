@@ -137,7 +137,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={selectedProductDetail?.images?.map((image: any) => image.url) || []}
+                        images={selectedProductDetail?.images?.map((image) => image.url) || []}
                     />
                 </Grid>
 

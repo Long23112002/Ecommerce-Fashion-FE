@@ -13,7 +13,7 @@ type Order = {
     note?: string;
     totalMoney: number;
     updatedBy?: User;
-    createdAt: Date;
+    createdAt?: Date;
     updatedAt?: Date;
     orderDetails?: OrderDetail[];
 }
@@ -31,6 +31,10 @@ export type OrderRequest = {
     note?: string;
     totalMoney: number;
     orderDetails: OrderDetailValue[];
+}
+
+export type OrderCreateRequest = {
+    orderDetails: OrderDetailValue[]
 }
 
 export type OrderDetailValue = {

@@ -1,8 +1,9 @@
 import { Container, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import { getOrderById } from '../../../api/OrderApi'
 import Order, { OrderRequest } from '../../../types/Order'
 import PaymentInfo from './PaymentInfo'
-import ProductsInfo from './ProductsInfo'
+import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
 
 const CheckoutPage: React.FC = () => {
@@ -18,37 +19,57 @@ const CheckoutPage: React.FC = () => {
     totalMoney: 0,
     orderDetails: [],
   });
-  
 
-  useEffect(()=>{
+  useEffect(() => {
+    setOrderRequest(prev => ({
+      ...prev,
+      orderDetails: Array.isArray(order?.orderDetails)
+        ? order.orderDetails.map(od => ({
+          productDetailId: od.productDetail.id,
+          quantity: od.quantity,
+        }))
+        : []
+    }));
 
-  },[])
+  }, [order])
+
+
+  useEffect(() => {
+    const callGetOrderById = async () => {
+      const data = await getOrderById()
+      setOrder({ ...data })
+    }
+    callGetOrderById()
+  }, [])
 
   return (
-    <Container maxWidth='lg'>
-      <Grid container
-        spacing={2}
-        justifyContent='space-between'
-        direction={{ xs: "column-reverse", md: "row" }}
-      >
-        <Grid item sm={12} md={6.5}>
-          <ReceiverInfo
-            orderRequest={orderRequest}
-            setOrderRequest={setOrderRequest}
-          />
-          <PaymentInfo
-            orderRequest={orderRequest}
-            setOrderRequest={setOrderRequest}
-          />
-        </Grid>
-        <Grid item sm={12} md={5.5}>
-          <ProductsInfo
-            orderRequest={orderRequest}
-            setOrderRequest={setOrderRequest}
-          />
-        </Grid>
-      </Grid>
-    </Container>
+    <>
+      {order &&
+        <Container maxWidth='lg'>
+          <Grid container
+            spacing={2}
+            justifyContent='space-between'
+            direction={{ xs: "column-reverse", md: "row" }}
+          >
+            <Grid item sm={12} md={6.5}>
+              <ReceiverInfo
+                order={order}
+                setOrder={setOrder}
+                orderRequest={orderRequest}
+                setOrderRequest={setOrderRequest}
+              />
+              <PaymentInfo
+                orderRequest={orderRequest}
+                setOrderRequest={setOrderRequest}
+              />
+            </Grid>
+            <Grid item sm={12} md={5.5}>
+              <ProductOrderInfo order={order} />
+            </Grid>
+          </Grid>
+        </Container>
+      }
+    </>
   )
 }
 

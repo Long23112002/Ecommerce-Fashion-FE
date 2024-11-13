@@ -3,8 +3,8 @@ import axios from "axios"
 const SHOP_ID = 4467830
 const FROM_DISTRICT = 3440
 const SERVICE_TYPE_ID = 2
-const LENGTH = 500
-const WIDTH = 500
+const LENGTH = 30
+const WIDTH = 30
 
 const GHTKAxios = axios.create({
     baseURL: 'https://online-gateway.ghn.vn/shiip/public-api',

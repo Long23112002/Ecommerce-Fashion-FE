@@ -21,6 +21,7 @@
 // =======
 import { Color } from "../pages/Admin/Attributes/color/color"
 import { Size } from "../pages/Admin/Attributes/size/size"
+import File from "./File"
 import Product from "./Product"
 import { User } from "./User"
 
@@ -29,7 +30,7 @@ type ProductDetail = {
     price: number,
     originPrice: number,
     quantity: number,
-    images: string[],
+    images: File[],
     createAt: Date,
     updateAt: Date | null,
     createBy: User,

@@ -29,7 +29,7 @@ const ProductSlider: React.FC<IProps> = ({
     const settings = {
         dots: true,
         infinite: false,
-        swipe: true,
+        swipe: false,
         speed: 500,
         slidesToShow,
         slidesToScroll: slidesToShow,

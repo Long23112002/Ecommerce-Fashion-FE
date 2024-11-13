@@ -1,23 +1,22 @@
 import { Autocomplete, Box, TextField, Typography } from '@mui/material'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getAllDistrictByProvinceId, getAllProvinces, getAllWardByDistrictId, availableServices, shippingOrderFee } from '../../../api/GHTKApi'
+import { getAllDistrictByProvinceId, getAllProvinces, getAllWardByDistrictId } from '../../../api/GHTKApi'
+import { OrderAddressUpdate, updateAdressOrder } from '../../../api/OrderApi'
 import { userSelector } from '../../../redux/reducers/UserReducer'
 import District from '../../../types/District'
-import { OrderRequest } from '../../../types/Order'
+import Order, { OrderRequest } from '../../../types/Order'
 import Province from '../../../types/Province'
 import Ward from '../../../types/Ward'
-import { Height } from '@mui/icons-material'
-
-const WEIGHT = 500
-const HEIGHT = 5
 
 interface IProps {
+  order: Order,
+  setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
   orderRequest: OrderRequest,
   setOrderRequest: React.Dispatch<React.SetStateAction<OrderRequest>>
 }
 
-const ReceiverInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
+const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest }) => {
 
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -63,8 +62,6 @@ const ReceiverInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
     }))
   }
 
-
-
   useEffect(() => {
     const fetchProvinces = async () => {
       const { data } = await getAllProvinces()
@@ -98,22 +95,29 @@ const ReceiverInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
   }, [selectedDistrict])
 
   useEffect(() => {
-    if (!selectedWard || !selectedWard.WardCode) return
+    if (!selectedWard?.WardCode) return
+
     setOrderRequest(prev => ({
       ...prev,
       address: `${specificAddress || ''}-${selectedWard?.WardName || ''}-${selectedDistrict?.DistrictName || ''}-${selectedProvince?.ProvinceName || ''}`
     }))
-    if (!selectedDistrict || !selectedDistrict.DistrictID) return
-    const callShippingOrderFee = async () => {
-      const weight = 2 * WEIGHT
-      const height = 2 * HEIGHT
-      const { data } = await shippingOrderFee(10000, selectedDistrict.DistrictID, selectedWard.WardCode, height, weight)
-      setOrderRequest(prev => ({
-        ...prev,
-        moneyShip: data.total
-      }))
+
+    if (!selectedDistrict?.DistrictID) return
+
+    const callUpdateAdressOrder = async () => {
+      const request: OrderAddressUpdate = {
+        provinceID: selectedDistrict.DistrictID,
+        provinceName: selectedDistrict.DistrictName,
+        districtID: selectedDistrict.DistrictID,
+        districtName: selectedDistrict.DistrictName,
+        wardCode: selectedWard.WardCode,
+        wardName: selectedWard.WardName
+      }
+      const data = await updateAdressOrder(request)
+      setOrder({...data})
     }
-    callShippingOrderFee()
+
+    callUpdateAdressOrder()
   }, [selectedWard])
 
   useEffect(() => {
@@ -126,8 +130,6 @@ const ReceiverInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
       }));
     }
   }, [user]);
-
-  useEffect(() => { console.log(orderRequest) }, [orderRequest])
 
 
   return (
