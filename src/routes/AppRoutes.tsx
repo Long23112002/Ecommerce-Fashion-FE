@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import PromotionSheducled from '../components/Promotion/PromotionScheduled.tsx';
 import AdminLayout from '../layouts/Admin';
+import UserLayout from '../layouts/Customer/index.tsx';
 import ManagerColor from '../pages/Admin/Attributes/color/colorIndex.tsx';
 import ManagerMaterial from '../pages/Admin/Attributes/material/materialIndex.tsx';
 import ManagerSize from '../pages/Admin/Attributes/size/sizeIndex.tsx';
@@ -29,7 +30,7 @@ import AddDiscount from '../components/Discount/AddDiscount.tsx';
 import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
-import UserLayout from '../layouts/Customer/index.tsx';
+import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 
 
 
@@ -45,6 +46,7 @@ const AppRoutes = () => {
                 <Route path='/product/:id' element={<ProductDetailPage />} />
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
+                <Route path='/checkout' element={<CheckoutPage />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />

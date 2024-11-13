@@ -12,7 +12,7 @@ import { updateUserInfo } from '../../../api/UserApi';
 import { useUserAction } from '../../../hook/useUserAction';
 import { userSelector } from '../../../redux/reducers/UserReducer';
 import { UserInfoRequest } from '../../../types/User';
-import { uploadOneImage } from '../../../api/ImageAPI';
+import { uploadOneImage } from '../../../api/ImageApi';
 
 const UserInfoPage: React.FC = () => {
   const userAction = useUserAction();
