@@ -1,40 +1,40 @@
-import { Button, Form, Input, Popconfirm, Table } from 'antd';
+import { Button, Form, Popconfirm, Table } from 'antd';
 import Cookies from "js-cookie";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { createBrand, deleteBrand, fetchAllBrands, getBrandById, updateBrand } from "../../../../api/BrandApi.ts";
-import BrandDetailModal from "../../../../components/Brand/BrandDetailModal.js"; // New detail modal
-import BrandModel from "../../../../components/Brand/BrandModel.js";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
-import createPaginationConfig, { PaginationState } from "../../../../config/brand/paginationConfig.ts";
-import { Brand } from "../../../../types/brand.ts";
-import { getErrorMessage } from "../../../Error/getErrorMessage.ts";
+import { createVoucher, deleteVoucher, fetchAllVouchers, getVoucherById, updateVoucher } from "../../../api/VoucherApi.ts";
+import VoucherDetailModal from "../../../components/Voucher/VoucherDetailModal.tsx"; // New detail modal for vouchers
+import VoucherModel from "../../../components/Voucher/VoucherModel.js";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
+import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
+import { Voucher } from "../../../types/voucher.ts";
+import { getErrorMessage } from "../../Error/getErrorMessage.ts";
 
-const ManagerBrand = () => {
+const ManagerVoucher = () => {
     const [loading, setLoading] = useState(true);
-    const [brands, setBrands] = useState<Brand[]>([]);
+    const [vouchers, setVouchers] = useState<Voucher[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // State for detail modal
     const [form] = Form.useForm();
-    const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
-    const [detailBrand, setDetailBrand] = useState<Brand | null>(null); // State for brand details
+    const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+    const [detailVoucher, setDetailVoucher] = useState<Voucher | null>(null); // State for voucher details
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
         total: 20,
         totalPage: 4
     });
-    const [searchParams, setSearchParams] = useState<{ name: string }>({ name: '' });
+    const [searchParams, setSearchParams] = useState<{ code: string }>({ code: '' });
 
-    const mode = editingBrand ? 'update' : 'add';
+    const mode = editingVoucher ? 'update' : 'add';
 
-    const fetchBrandsDebounced = useCallback(
-        debounce(async (current: number, pageSize: number, searchName: string) => {
+    const fetchVouchersDebounced = useCallback(
+        debounce(async (current: number, pageSize: number) => {
             setLoading(true);
             try {
-                const response = await fetchAllBrands(pageSize, current - 1, searchName);
-                setBrands(response.data);
+                const response = await fetchAllVouchers(pageSize, current - 1);
+                setVouchers(response.data);
                 setPagination({
                     current: response.metaData.page + 1,
                     pageSize: response.metaData.size,
@@ -42,60 +42,58 @@ const ManagerBrand = () => {
                     totalPage: response.metaData.totalPage
                 });
             } catch (error) {
-                console.error("Error fetching brands:", error);
+                console.error("Error fetching vouchers:", error);
             } finally {
                 setLoading(false);
             }
         }, 500), []);
 
-    const fetchBrands = (current: number, pageSize: number) => {
-        fetchBrandsDebounced(current, pageSize, searchParams.name);
+    const fetchVouchers = (current: number, pageSize: number) => {
+        fetchVouchersDebounced(current, pageSize);
     };
 
-    const showModal = async (brand: Brand | null = null) => {
-        if (brand) {
+    const showModal = async (voucher: Voucher | null = null) => {
+        if (voucher) {
             try {
-                const brandDetails = await getBrandById(brand.id);
+                const voucherDetails = await getVoucherById(voucher.id);
                 form.setFieldsValue({
-                    name: brandDetails.name
+                    code: voucherDetails.code,
                 });
-                setEditingBrand(brandDetails);
+                setEditingVoucher(voucherDetails);
             } catch (error) {
-                toast.error(error.response?.data?.message || 'Failed to fetch brand details');
+                toast.error(getErrorMessage(error))
             }
         } else {
             form.resetFields();
-            setEditingBrand(null);
+            setEditingVoucher(null);
         }
         setIsModalOpen(true);
     };
 
-    const handleViewDetails = (brand: Brand) => {
-        setDetailBrand(brand);
+    const handleViewDetails = (voucher: Voucher) => {
+        setDetailVoucher(voucher);
         setIsDetailModalOpen(true);
     };
 
     const handleDetailCancel = () => {
         setIsDetailModalOpen(false);
-        setDetailBrand(null);
+        setDetailVoucher(null);
     };
 
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-            const { name } = values;
             const token = Cookies.get("accessToken");
-
             if (token) {
                 if (mode === 'add') {
-                    await createBrand({ name }, token);
-                    toast.success('Thêm thương hiệu Thành Công');
-                } else if (mode === 'update' && editingBrand) {
-                    await updateBrand(editingBrand.id, { name }, token);
-                    toast.success('Cập nhật Thành Công');
+                    await createVoucher(values.discountId, token);
+                    toast.success('Thêm voucher thành công');
+                } else if (mode === 'update' && editingVoucher) {
+                    await updateVoucher(editingVoucher.id, values.discountId, token);
+                    toast.success('Cập nhật voucher thành công');
                 }
                 handleCancel();
-                refreshBrands();
+                refreshVouchers();
             } else {
                 toast.error("Authorization failed");
             }
@@ -108,13 +106,13 @@ const ManagerBrand = () => {
         setIsModalOpen(false);
     };
 
-    const handleDelete = async (brandId: number) => {
+    const handleDelete = async (voucherId: number) => {
         try {
             const token = Cookies.get("accessToken");
             if (token) {
-                await deleteBrand(brandId, token);
-                toast.success("Xóa Thành Công");
-                refreshBrands();
+                await deleteVoucher(voucherId, token);
+                toast.success("Xóa voucher thành công");
+                refreshVouchers();
             } else {
                 toast.error("Authorization failed");
             }
@@ -122,10 +120,11 @@ const ManagerBrand = () => {
             toast.error(getErrorMessage(error))
         }
     };
+
     const handleSearch = (changedValues: any) => {
         setSearchParams(prevParams => ({
             ...prevParams,
-            name: changedValues.name,
+            code: changedValues.code,
         }));
         setPagination(prevPagination => ({
             ...prevPagination,
@@ -133,12 +132,12 @@ const ManagerBrand = () => {
         }));
     };
 
-    const refreshBrands = () => {
-        fetchBrands(pagination.current, pagination.pageSize);
+    const refreshVouchers = () => {
+        fetchVouchers(pagination.current, pagination.pageSize);
     };
 
     useEffect(() => {
-        fetchBrands(pagination.current, pagination.pageSize);
+        fetchVouchers(pagination.current, pagination.pageSize);
     }, [pagination.current, pagination.pageSize, searchParams]);
 
     const columns = [
@@ -148,9 +147,9 @@ const ManagerBrand = () => {
             key: 'id',
         },
         {
-            title: 'Tên thương hiệu',
-            dataIndex: 'name',
-            key: 'name',
+            title: 'Mã Voucher',
+            dataIndex: 'code',
+            key: 'code',
         },
         {
             title: 'Thời gian tạo',
@@ -165,7 +164,7 @@ const ManagerBrand = () => {
             render: (createBy) => (
                 <div>
                     <img
-                        src={createBy.avatar}
+                        src={createBy?.avatar}
                         style={{
                             width: 40,
                             height: 40,
@@ -173,7 +172,7 @@ const ManagerBrand = () => {
                             marginRight: 10,
                         }}
                     />
-                    {createBy.fullName}
+                    {createBy?.fullName}
                 </div>
             ),
         },
@@ -189,7 +188,7 @@ const ManagerBrand = () => {
                         <i className="fa-solid fa-pen-to-square"></i>
                     </Button>
                     <Popconfirm
-                        title="Bạn chắc chắn muốn xóa Thương hiệu này?"
+                        title="Bạn chắc chắn muốn xóa voucher này?"
                         onConfirm={() => handleDelete(record.id)}
                         okText="Có"
                         cancelText="Không"
@@ -205,7 +204,7 @@ const ManagerBrand = () => {
 
     return (
         <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
-            <h1 className="text-danger">Quán Lý Thương Hiệu</h1>
+            <h1 className="text-danger">Quản Lý Voucher</h1>
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -214,31 +213,31 @@ const ManagerBrand = () => {
             >
                 <i className="fa-solid fa-circle-plus"></i>
             </Button>
-            <Form
+            {/* <Form
                 layout="inline"
                 onValuesChange={handleSearch}
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
-                <Form.Item name="name" label="Tên Thương Hiệu">
-                    <Input placeholder="Tìm kiếm theo tên Thương hiệu" />
+                <Form.Item name="code" label="Mã Voucher">
+                    <Input placeholder="Tìm kiếm theo mã voucher" />
                 </Form.Item>
-            </Form>
-            <BrandModel
+            </Form> */}
+            <VoucherModel
                 isModalOpen={isModalOpen}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
                 form={form}
-                mode={editingBrand ? 'update' : 'add'}
-                brand={editingBrand || undefined}
+                mode={editingVoucher ? 'update' : 'add'}
+                voucher={editingVoucher || undefined}
             />
-            <BrandDetailModal
+            <VoucherDetailModal
                 visible={isDetailModalOpen}
                 onCancel={handleDetailCancel}
-                brand={detailBrand}
+                voucher={detailVoucher}
             />
             <Table
-                dataSource={brands}
+                dataSource={vouchers}
                 columns={columns}
                 loading={{
                     spinning: loading,
@@ -251,4 +250,4 @@ const ManagerBrand = () => {
     );
 };
 
-export default ManagerBrand;
+export default ManagerVoucher;
