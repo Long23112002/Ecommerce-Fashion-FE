@@ -658,6 +658,7 @@ const CartPage = () => {
               </Box>
               <Button 
               variant="contained" 
+              onClick={handleBuy}
               fullWidth sx={{ mt: 2 }}
               disabled={selectedProductCount === 0}
               >
