@@ -248,6 +248,30 @@ const CartPage = () => {
             return { ...pd, quantity: maxQuantity };
           }
 
+          if (newQuantity <= 0) {
+            Swal.fire({
+              title: "Xóa sản phẩm?",
+              text: "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonText: "Có",
+              cancelButtonText: "Hủy",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                setCartValueInfos((prevInfos) =>
+                  prevInfos.filter((item) => item.productDetail.id !== id)
+                );
+              } else {
+                setCartValueInfos((prevInfos) =>
+                  prevInfos.map((item) =>
+                    item.productDetail.id === id ? { ...item, quantity: 1 } : item
+                  )
+                );
+              }
+            });
+            return pd;
+          }
+
           return { ...pd, quantity: Math.max(0, newQuantity) };
         }
         return pd;
@@ -428,7 +452,11 @@ const CartPage = () => {
                     mb: 2,
                   }}
                 >
-                  <Checkbox checked={selectAll} onChange={handleSelectAll} />
+                  <Checkbox 
+                  checked={selectAll} 
+                  onChange={handleSelectAll} 
+                  disabled={cartValueInfos.length === 0}
+                  />
                   <Typography variant="body1">Sản phẩm</Typography>
                 </Box>
                 <Tooltip title="Xóa tất cả">
@@ -557,7 +585,7 @@ const CartPage = () => {
                       onClick={() =>
                         handleQuantityChange(pd.productDetail.id, -1)
                       }
-                      disabled={pd.quantity <= 1}
+                      // disabled={pd.quantity <= 1}
                     >
                       <RemoveIcon />
                     </IconButton>
