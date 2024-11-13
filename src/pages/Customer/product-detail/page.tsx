@@ -1,24 +1,31 @@
 import { Container } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getAllProducts } from '../../../api/ProductApi'
-import { getDetailByIdProduct } from '../../../api/ProductDetailApi'
+import { getAllProducts, getProductById } from '../../../api/ProductApi'
 import ProductOverview from '../../../components/product/ProductOverview'
 import ProductReviews from '../../../components/product/ProductReviews'
 import ProductSlider from '../../../components/product/ProductSlider'
 import Product from '../../../types/Product'
 import ProductDetail from '../../../types/ProductDetail'
+import MuiLoading from '../../../components/Loading/MuiLoading'
+import NotFound from '../../../components/NotFound'
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams()
-    const [product, setProduct] = useState<Product>({});
+    const [product, setProduct] = useState<Product>();
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([])
     const [similarProducts, setSimilarProduct] = useState<Product[]>([]);
-    const fetchProductDetails = async () => {
+    const [loading, setLoading] = useState<boolean>(true)
+    const fetchProduct = async () => {
         if (id) {
-            const { data } = await getDetailByIdProduct(id)
-            setProductDetails([...data])
-            setProduct({ ...data[0].product })
+            try {
+                setLoading(true)
+                const data = await getProductById(id)
+                setProduct({ ...data })
+                setProductDetails([...data.productDetails])
+            } finally {
+                setLoading(false)
+            }
         }
     }
     const fetchProductSimilar = async () => {
@@ -27,16 +34,29 @@ const ProductDetailPage: React.FC = () => {
     }
 
     useEffect(() => {
-        fetchProductDetails()
+        fetchProduct()
         fetchProductSimilar()
     }, [id])
 
     return (
-        <Container maxWidth='lg'>
-            <ProductOverview product={product} productDetails={productDetails} />
-            <ProductSlider title='Sản phẩm tương tự' products={similarProducts} />
-            <ProductReviews product={product} />
-        </Container>
+        <>
+            {
+                !loading
+                    ?
+                    product
+                        ?
+                        <Container maxWidth='lg'>
+                            <ProductOverview product={product} productDetails={productDetails} />
+                            <ProductSlider title='Sản phẩm tương tự' products={similarProducts} />
+                            <ProductReviews product={product} />
+                        </Container>
+                        :
+                        <NotFound />
+                    :
+                    <MuiLoading />
+            }
+        </>
+
     )
 }
 
