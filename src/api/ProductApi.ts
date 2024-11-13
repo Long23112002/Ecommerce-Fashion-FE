@@ -3,8 +3,10 @@
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance, { PageableRequest } from "./AxiosInstance";
+import {toast} from "react-toastify";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product`
+const API_SERVICE_UPLOAD_URL = `http://ecommerce-fashion.site:9099`;
 
 interface ProductData {
     name: string;
@@ -14,7 +16,7 @@ interface ProductData {
     idBrand: number;
     idOrigin: number;
     idMaterial: number;
-    image: String | null;
+    image: string | null;
 }
 
 export interface ProductParams {
@@ -106,6 +108,40 @@ export const addProduct = async (productData: ProductData) => {
         return response.data;
     } catch (error: any) {
         console.log("Error add product ", error);
+        throw error;
+    }
+}
+
+export const downloadTemplate = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/export-sample-file`, {
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'template.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.info("Tải file mẫu thành công");
+    } catch (error) {
+        console.error("Error downloading template", error);
+    }
+};
+
+export const historyImport = async (size: number, page: number) => {
+    try {
+        const response = await axiosInstance.get(`${API_SERVICE_UPLOAD_URL}/api/v1/files`, {
+            params: {
+                size,
+                page,
+            },
+        })
+        return response.data
+    } catch (error) {
+        console.error("Error fetching history import", error);
         throw error;
     }
 }

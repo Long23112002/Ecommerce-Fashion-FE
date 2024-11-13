@@ -1,6 +1,13 @@
 import { Button, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Select, Space, Spin, Table, UploadFile } from 'antd'
 import { toast, ToastContainer } from 'react-toastify'
-import { addProduct, deleteProduct, fetchAllProducts, getProductById, updateProduct } from '../../../api/ProductApi'
+import {
+  addProduct,
+  deleteProduct,
+  downloadTemplate,
+  fetchAllProducts,
+  getProductById,
+  updateProduct
+} from '../../../api/ProductApi'
 import { useCallback, useEffect, useState } from 'react'
 import { debounce } from 'lodash'
 import createPaginationConfig, { PaginationState } from '../../../config/product/paginationConfig'
@@ -471,9 +478,25 @@ const ProductManager = () => {
   ]
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
-    showAddModal();
+    switch (e.key) {
+      case '1':
+        showAddModal();
+        break;
+      case '2':
+        break;
+      case '3':
+        downloadTemplate().then(r => console.log(r));
+        break;
+      case '4':
+        break;
+      case '5':
+        break;
+      default:
+        break;
+    }
   };
+
+
 
   const items: MenuProps['items'] = [
     {
@@ -495,6 +518,12 @@ const ProductManager = () => {
     {
       label: 'Xuất excel',
       key: '4',
+      icon: <FileOutlined  />,
+      danger: true,
+    },
+    {
+      label: 'Lịch sử nhập liệu',
+      key: '5',
       icon: <FileOutlined  />,
       danger: true,
     },
