@@ -21,12 +21,12 @@ export interface UserData {
 }
 
 
-export const handleLogin = async (loginRequest: LoginRequest): Promise<LoginResponse> => {
+export const handleLogin = async (loginRequest: LoginRequest): Promise<any> => {
 
     try {
         const url = `${BASE_API}/api/v1/auth/login`;
         const response = await axios.post(url, loginRequest);
-        return response.data as LoginResponse;
+        return response.data
     } catch (error) {
         toast.error("Đang nhập thất bại vui lòng kiểm tra lại email hoặc mật khẩu!")
     }
@@ -58,11 +58,10 @@ export const clearUserData = () => {
 
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
-    ``
 };
 
 
-export const storeUserData = (data: LoginResponse) => {
+export const storeUserData = (data: any) => {
     const {id, email, fullName, phoneNumber, birth, gender, avatar, roles, isAdmin} = data.userResponse;
 
     localStorage.setItem('userId', id.toString());
