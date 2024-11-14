@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Material } from "../../pages/Admin/Attributes/material/material";
 import { Brand } from "../../types/brand";
 import { Category } from "../../types/Category";
@@ -12,7 +12,7 @@ interface UpdateProductModalProps {
     isModalOpen: boolean;
     handleOk: (values: any) => void;
     handleCancel: () => void;
-    // onRemove: (file: UploadFile) => boolean;
+    onRemove: (file: UploadFile) => boolean;
     form: any;
     product: Product | null;
     brands: Brand[];
@@ -28,7 +28,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     isModalOpen,
     handleOk,
     handleCancel,
-    // onRemove,
+    onRemove,
     form,
     product,
     brands,
@@ -37,8 +37,10 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     categories,
     normFile,
     handleUpload,
-    fileList,
+    fileList: initialFileList,
 }) => {
+    const [fileList, setFileList] = useState<UploadFile[]>(initialFileList);
+
     useEffect(() => {
         if (product) {
             form.setFieldsValue({
@@ -51,8 +53,12 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                 idOrigin: product.origin?.id,
                 idMaterial: product.material?.id,
             });
+
+            // Cập nhật fileList để hiển thị ảnh từ cơ sở dữ liệu
+            setFileList(product.image ? [{ url: product.image, uid: '-1', name: 'image', status: 'done' }] : []);
         }
     }, [product, form])
+
 
     const onOk = () => {
         form.validateFields()
@@ -182,18 +188,16 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                     getValueFromEvent={normFile}
                 >
                     <Upload
-                        // maxCount={1}
                         listType="picture-card"
+                        maxCount={1}
                         fileList={fileList}
-                        // onRemove={onRemove}
+                        onRemove={onRemove}
                         customRequest={({ file }) => handleUpload(file as RcFile)}
                     >
-                        {fileList.length < 1 && (
-                            <div>
-                                <PlusOutlined />
-                                <div style={{ marginTop: 8 }}>Upload</div>
-                            </div>
-                        )}
+                        <button style={{ border: 0, background: 'none' }} type="button">
+                            <PlusOutlined />
+                            <div style={{ marginTop: 8 }}>Upload</div>
+                        </button>
                     </Upload>
                 </Form.Item>
 
