@@ -1,4 +1,4 @@
-import { Button, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Select, Space, Spin, Table, UploadFile } from 'antd'
+import { Button, Col, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Row, Select, Space, Spin, Table, Tooltip, UploadFile } from 'antd'
 import { toast, ToastContainer } from 'react-toastify'
 import { addProduct, deleteProduct, fetchAllProducts, getProductById, updateProduct } from '../../../api/ProductApi'
 import { useCallback, useEffect, useState } from 'react'
@@ -444,28 +444,45 @@ const ProductManager = () => {
       title: 'Thao tác',
       key: 'actions',
       render: (_, record) => (
-        <div>
-          <Button onClick={() => handleDetailProduct(record)} className="btn-outline-warning">
-            <i className="fa-solid fa-eye"></i>
-          </Button>
-          <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
-            <i className="fa-solid fa-pen-to-square"></i>
-          </Button>
-          <Popconfirm
-            title="Bạn chắc chắn muốn xóa Sản phẩm này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Hủy"
-          >
-            <Button className="btn-outline-danger">
-              <i className="fa-solid fa-trash-can"></i>
-            </Button>
-          </Popconfirm>
-
-          <Button onClick={() => showViewDetail(record)} style={{ margin: '0 8px' }} className="btn-outline-primary">
-            <i className="fa-solid fa-eye"></i>
-          </Button>
-        </div>
+        <>
+          <Row>
+            <Col span={6} order={1}>
+              <Tooltip title="Xem chi tiết sản phẩm " >
+                <Button onClick={() => handleDetailProduct(record)} style={{ margin: '0 4px' }} className="btn-outline-warning">
+                  <i className="fa-solid fa-eye"></i>
+                </Button>
+              </Tooltip>
+            </Col>
+            <Col span={6} order={2}>
+              <Tooltip title="Cập nhật sản phẩm " >
+                <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 4px' }} className="btn-outline-primary">
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </Button>
+              </Tooltip>
+            </Col>
+            <Col span={6} order={3} >
+              <Tooltip title="Xóa sản phẩm " >
+                <Popconfirm
+                  title="Bạn chắc chắn muốn xóa Sản phẩm này?"
+                  onConfirm={() => handleDelete(record.id)}
+                  okText="Có"
+                  cancelText="Hủy"
+                >
+                  <Button className="btn-outline-danger" style={{ margin: '0 4px' }}>
+                    <i className="fa-solid fa-trash-can"></i>
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            </Col>
+            <Col span={6} order={4}>
+              <Tooltip title="Xem sản phẩm chi tiết " >
+                <Button onClick={() => showViewDetail(record)} className="btn-outline-primary">
+                  <i className="fa-solid fa-eye"></i>
+                </Button>
+              </Tooltip>
+            </Col>
+          </Row>
+        </ >
       ),
     }
   ]
@@ -479,7 +496,7 @@ const ProductManager = () => {
     {
       label: 'Thêm sản phẩm',
       key: '1',
-      icon:  <i className="fa-solid fa-circle-plus"></i>,
+      icon: <i className="fa-solid fa-circle-plus"></i>,
     },
     {
       label: 'Nhập dữ liệu sản phẩm',
@@ -495,7 +512,7 @@ const ProductManager = () => {
     {
       label: 'Xuất excel',
       key: '4',
-      icon: <FileOutlined  />,
+      icon: <FileOutlined />,
       danger: true,
     },
   ];
@@ -505,7 +522,7 @@ const ProductManager = () => {
     onClick: handleMenuClick,
   };
 
-  
+
 
   return (
     <div className='text-center' style={{ marginLeft: 20, marginRight: 20 }}>
@@ -525,10 +542,10 @@ const ProductManager = () => {
         className="mt-3 mb-3"
       >
         <Dropdown.Button
-        menu={menuProps} 
+          menu={menuProps}
         >
-          <PlusCircleOutlined />
-          {/* Add product */}
+          {/* <PlusCircleOutlined /> */}
+          Thêm sản phẩm
         </Dropdown.Button>
       </Space>
 
