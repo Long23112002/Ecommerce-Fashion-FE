@@ -62,11 +62,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
         navigate({ search: params.toString() }, { replace: true });
 
-        const selectedProduct = productDetails.find(
+        const selectedProductDetail = productDetails.find(
             pd => pd.color?.id === selectedColor && pd.size?.id === selectedSize
         );
 
-        setSeletedProductDetail({ ...selectedProduct });
+        setSeletedProductDetail({...selectedProductDetail});
     }, [selectedColor, selectedSize, navigate, productDetails]);
 
     useEffect(() => {
@@ -137,7 +137,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={selectedProductDetail?.images?.map((image: any) => image.url) || []}
+                        images={selectedProductDetail?.images?.map((image) => image.url) || []}
                     />
                 </Grid>
 

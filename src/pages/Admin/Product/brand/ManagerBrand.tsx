@@ -29,23 +29,24 @@ const ManagerBrand = () => {
 
     const mode = editingBrand ? 'update' : 'add';
 
-    const fetchBrandsDebounced = useCallback(debounce(async (current: number, pageSize: number, searchName: string) => {
-        setLoading(true);
-        try {
-            const response = await fetchAllBrands(pageSize, current - 1, searchName);
-            setBrands(response.data);
-            setPagination({
-                current: response.metaData.page + 1,
-                pageSize: response.metaData.size,
-                total: response.metaData.total,
-                totalPage: response.metaData.totalPage
-            });
-        } catch (error) {
-            console.error("Error fetching brands:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, 500), []);
+    const fetchBrandsDebounced = useCallback(
+        debounce(async (current: number, pageSize: number, searchName: string) => {
+            setLoading(true);
+            try {
+                const response = await fetchAllBrands(pageSize, current - 1, searchName);
+                setBrands(response.data);
+                setPagination({
+                    current: response.metaData.page + 1,
+                    pageSize: response.metaData.size,
+                    total: response.metaData.total,
+                    totalPage: response.metaData.totalPage
+                });
+            } catch (error) {
+                console.error("Error fetching brands:", error);
+            } finally {
+                setLoading(false);
+            }
+        }, 500), []);
 
     const fetchBrands = (current: number, pageSize: number) => {
         fetchBrandsDebounced(current, pageSize, searchParams.name);

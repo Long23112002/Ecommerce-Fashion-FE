@@ -1,6 +1,6 @@
 import { BASE_API } from '../constants/BaseApi';
 import axiosInstance from './AxiosInstance';
-
+import Cookies from 'js-cookie';
 // Define the base URL for the API
 const API_BASE_URL = `${BASE_API}/api/v1/category`;
 
@@ -81,5 +81,21 @@ export const getAllCategories = async (pageSize: number, pageIndex: number, sear
     return response.data;
   } catch (error: any) {
     throw new Error(`Error fetching categories: ${error.response?.data?.message || error.message}`);
+  }
+};
+export const fetchCategoriesByIds = async (ids: number[]) => {
+  const token = Cookies.get("accessToken");
+  try {
+    const responses = await Promise.all(
+      ids.map(id =>
+        axiosInstance.get(`${API_BASE_URL}/${id}`, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        }).then(res => res.data)
+      )
+    );
+    return responses;
+  } catch (error) {
+    console.error("Error fetching category by IDs", error);
+    throw error;
   }
 };

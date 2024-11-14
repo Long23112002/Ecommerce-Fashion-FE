@@ -45,7 +45,7 @@ export const getAllProducts = async (query: { params?: ProductParams; pageable?:
 };
 
 
-export const getProductById = async (id: number) => {
+export const getProductById = async (id: number | string) => {
     const token = Cookies.get("accessToken");
     const config = {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
