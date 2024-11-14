@@ -104,25 +104,25 @@ const ProductManager = () => {
     formData.append("objectName", objectName);
 
     try {
-      const response = await await axios.post("http://ecommerce-fashion.site:9099/api/v1/images", formData, {
+      const response = await axios.post("http://ecommerce-fashion.site:9099/api/v1/images", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const url = response.data?.file?.[0]?.url;
 
       setUrl(url);
 
-      // set để ảnh hiển thị preview
-      setFileList([
-        {
+      if (url) {
+        setFileList([{
           uid: file.uid,
           name: file.name,
           status: 'done',
           url: url,
-        },
-      ]);
+        }]);
 
-      message.success(`${file.name} tải lên thành công!`);
+        message.success(`${file.name} tải lên thành công!`);
+      }
       return false; // Ngăn chặn upload mặc định của Ant Design
+
     } catch (error) {
       message.error(`${file.name} tải lên thất bại.`);
       console.error("Error uploading file:", error);
@@ -133,12 +133,6 @@ const ProductManager = () => {
     setFileList([]); // Xóa fileList khi ảnh bị xóa
     setUrl(null); // Đặt lại URL nếu cần
   }
-
-  const onChangeImage = () => {
-    setFileList([]); // Xóa fileList khi ảnh bị xóa
-    setUrl(null); // Đặt lại URL nếu cần
-  }
-
 
   const handleDetailProduct = (product: Product) => {
     setItemProduct(product);
@@ -186,10 +180,11 @@ const ProductManager = () => {
     try {
       const values = await form.validateFields();
       const { name, code, description, idCategory, idBrand, idOrigin, idMaterial } = values;
+      const image = url;
       const token = Cookies.get("accessToken");
 
       if (token && editingProduct) {
-        await updateProduct(editingProduct.id, { name, code, description, idCategory, idBrand, idOrigin, idMaterial }, token);
+        await updateProduct(editingProduct.id, { name, code, description, idCategory, idBrand, idOrigin, idMaterial, image }, token);
         toast.success('Cật Nhật Thành Công');
         handleUpdateCancel();
         refreshProducts();
@@ -689,7 +684,7 @@ const ProductManager = () => {
         brands={brands}
         categories={categories}
         materials={materials}
-        // onRemove={onChangeImage}
+        onRemove={onRemove}
         handleUpload={handleUpload}
         fileList={fileList}
         normFile={normFile}

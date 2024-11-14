@@ -47,14 +47,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
             >
                 <Form.Item label={<Text strong>Ảnh bìa:</Text>} name="image">
                     <Image.PreviewGroup>
-                        {/* <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             <Image
                                 width={80}
-                                src={image}
+                                src={product.image}
                                 alt="Product Image"
                                 style={{ borderRadius: '5px', cursor: 'pointer' }}
                             />
-                        </div> */}
+                        </div>
                     </Image.PreviewGroup>
                     {/* <Upload
                         listType="picture-card"

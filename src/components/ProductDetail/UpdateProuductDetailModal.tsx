@@ -31,7 +31,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
     sizes,
     colors,
     products,
-    // fileList
+    fileList
 }) => {
     useEffect(() => {
         if (productDetail) {
@@ -41,7 +41,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                // fileList: productDetail.images
+                fileList: productDetail.images
             });
         }
     }, [productDetail, form])
@@ -89,7 +89,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
               )}
             </div>
           </Image.PreviewGroup> */}
-                    <Upload
+                    {/* <Upload
                         listType="picture-card"
                         fileList={productDetail.images.map((image) => ({
                             uid: image.url,
@@ -102,7 +102,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                             showPreviewIcon: true,
                             showRemoveIcon: true,
                         }}
-                    />
+                    /> */}
                 </Form.Item>
                 <Form.Item
                     name="price"

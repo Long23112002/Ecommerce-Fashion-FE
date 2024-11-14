@@ -20,6 +20,7 @@ import { RcFile, UploadFile } from "antd/es/upload";
 import ModalViewProductDetail from "../../../../components/ProductDetail/ModalViewProductDetail";
 import { FileImageOutlined } from "@ant-design/icons";
 import UpdateProductDetailModal from "../../../../components/ProductDetail/UpdateProuductDetailModal";
+import Product from "../../../../types/Product";
 
 const ManageProductDetail = () => {
     const [form] = Form.useForm();
@@ -46,6 +47,9 @@ const ManageProductDetail = () => {
 
     const [sizes, setSizes] = useState<Size[]>([]);
     const [isSizeLoading, setIsSizeLoading] = useState<boolean>(false);
+
+    const [productList, setProductList] = useState<Product[]>([]);
+    const [isProductListLoading, setProductListLoading] = useState<boolean>(false);
 
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
@@ -89,6 +93,18 @@ const ManageProductDetail = () => {
         }
     };
 
+    const fetchProducts = async () => {
+        setProductListLoading(true);
+        try {
+            const response = await fetchAllSizes();
+            setProductList(response.data);
+        } catch (error) {
+            console.error("Error fetching products: ", error);
+        }
+        finally {
+            setProductListLoading(false);
+        }
+    };
 
     const showAddModal = () => {
         form.resetFields();
@@ -151,7 +167,7 @@ const ManageProductDetail = () => {
                 form.setFieldsValue({
                     price: productDetail.price,
                     quantity: productDetail.quantity,
-                    images: productDetail.images,
+                    // images: productDetail.images,
 
                 })
                 setEditingProductDetail(productDetailItem);
@@ -161,6 +177,10 @@ const ManageProductDetail = () => {
             setIsItemUpdateOpen(true);
         }
     }
+    const handleUpdateCancel = () => {
+        setIsItemUpdateOpen(false);
+      };
+
     const handleUpdateOk = async () => {
         try {
           const values = await form.validateFields();
@@ -170,7 +190,7 @@ const ManageProductDetail = () => {
           if (token && editingProductDetail) {
             await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor }, token);
             toast.success('Cật Nhật Thành Công');
-            // handleUpdateCancel();
+            handleUpdateCancel();
             refreshProductdetails();
           } else {
             toast.error("Authorization failed");
@@ -385,16 +405,17 @@ const ManageProductDetail = () => {
                 onCancel={handleDetailCancel}
                 productDetail={productDetail}
             />
-            {/* <UpdateProductDetailModal 
+            <UpdateProductDetailModal 
              isModalOpen= {isItemUpdateOpen}
-             handleOk= {}
-             handleCancel= {}
+             handleOk= {handleUpdateOk}
+             handleCancel= {handleUpdateCancel}
              form= {form}
              productDetail= {productDetail}
-             sizes= {}
-             colors= {}
-             products= {}
-            /> */}
+             sizes= {sizes}
+             colors= {colors}
+             products= {productList}
+             fileList={fileList}
+            />
         </div>
     )
 }
