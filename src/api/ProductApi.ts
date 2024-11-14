@@ -3,8 +3,11 @@
 import { BASE_API } from "../constants/BaseApi";
 import Cookies from 'js-cookie';
 import axiosInstance, { PageableRequest } from "./AxiosInstance";
+import {toast} from "react-toastify";
+import {getErrorMessage} from "../pages/Error/getErrorMessage";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product`
+const API_SERVICE_UPLOAD_URL = `http://ecommerce-fashion.site:9099`;
 
 interface ProductData {
     name: string;
@@ -14,27 +17,35 @@ interface ProductData {
     idBrand: number;
     idOrigin: number;
     idMaterial: number;
+    image: string | null;
 }
 
-interface ProductParams {
-    code?: string,
-    idBrand?: number,
-    idCategory?: number,
-    idMaterial?: number,
-    idOrigin?: number,
-    keyword?: string
+export interface ProductParams {
+    keyword?: string | null,
+    idBrand?: number | null,
+    idOrigin?: number | null,
+    idCategory?: number | null,
+    idMaterial?: number | null,
+    idColors?: number[] | null,
+    idSizes?: number[] | null,
+    maxPrice?: number | null,
+    minPrice?: number | null
 }
 
-export const getAllProduct = async (params?: ProductParams, pageable?: PageableRequest) => {
+export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
     const { data } = await axiosInstance({
         method: 'GET',
         url: `${BASE_API}/api/v1/product`,
-        params: { params, ...pageable }
+        params: { ...query.params, ...query.pageable },
+        paramsSerializer: {
+            indexes: null,
+        }
     });
-    return data
-}
+    return data;
+};
 
-export const getProductById = async (id: number) => {
+
+export const getProductById = async (id: number | string) => {
     const token = Cookies.get("accessToken");
     const config = {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
@@ -101,3 +112,90 @@ export const addProduct = async (productData: ProductData) => {
         throw error;
     }
 }
+
+export const downloadTemplate = async () => {
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/export-sample-file`, {
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Mẫu_nhập_sản_phẩm.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.info("Tải file mẫu thành công");
+    } catch (error) {
+        toast.error(getErrorMessage(error));
+    }
+};
+
+export const historyImport = async ( page: number,size: number) => {
+    try {
+        const response = await axiosInstance.get(`${API_SERVICE_UPLOAD_URL}/api/v1/files`, {
+            params: {
+                size,
+                page,
+            },
+        })
+        return response.data
+    } catch (error) {
+        toast.error(getErrorMessage(error));
+    }
+}
+
+export const exportProduct = async (
+    pageSize: number,
+    page: number,
+    keyword?: string,
+    idOrigin?: number,
+    idBrand?: number,
+    idMaterial?: number,
+    idCategory?: number) => {
+
+    const params = {
+        size: pageSize,
+        page: page,
+        keyword: keyword || '',
+        idOrigin: idOrigin || '',
+        idBrand: idBrand || '',
+        idMaterial: idMaterial || '',
+        idCategory: idCategory || '',
+    };
+
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/export`, {
+            params,
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Dữ_Liệu_Sản_Phẩm.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        toast.error(getErrorMessage(error));
+    }
+}
+
+
+export const importProduct = async (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await axiosInstance.post(`${API_BASE_URL}/import`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+       toast.error(getErrorMessage(error));
+    }
+};

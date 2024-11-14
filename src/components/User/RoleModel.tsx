@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {Button, Form, Input, Modal, Select, Spin} from 'antd';
 import {fetchAllPermission} from '../../api/PermissionApi.ts';
 import {Role} from "../../types/role.ts";
-
+/* eslint-disable */
 interface RoleModelProps {
     isModalOpen: boolean;
     handleOk: () => void;

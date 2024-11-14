@@ -1,8 +1,10 @@
-import { Card, CardContent, CardMedia, Skeleton, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Skeleton, Stack, Typography } from '@mui/material';
 import React from 'react';
 import { useIsMobile } from '../../hook/useSize';
 import Product from '../../types/Product';
 import Link from '../Link';
+import ColorRadio from '../ColorRadio';
+import { Color } from '../../pages/Admin/Attributes/color/color';
 
 interface IProps {
     product?: Product;
@@ -18,7 +20,7 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
             sx={{
                 fontWeight: 700,
                 fontSize: !isMobile ? '1.1rem' : '0.9rem',
-                pb: !isMobile ? '0.8rem' : 0,
+                mb: 1,
             }}
         >
             {price.toLocaleString('vi-VN')}đ
@@ -28,6 +30,18 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
     const handlePrice = () => {
         return renderPrice(product?.minPrice || 0);
     };
+
+    const handleColor = (): Color[] => {
+        const colors = new Set<string>();
+        product?.productDetails.forEach(pd => {
+            if (colors.size < 5) {
+                const colorStr = JSON.stringify(pd.color);
+                colors.add(colorStr);
+            }
+        });
+        return Array.from(colors).map(color => JSON.parse(color));
+    };
+
 
     return (
         <>
@@ -42,8 +56,9 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
                         />
 
                         <CardContent sx={{ flexGrow: 1, padding: '12px' }}>
-                            <Skeleton width="80%" />
+                            <Skeleton width="80%" sx={{ mt: 1 }} />
                             <Skeleton width="60%" sx={{ mt: 1 }} />
+                            <Skeleton variant="circular" width={28} height={28} sx={{ mt: 1 }} />
                         </CardContent>
                     </Card>
                 ) : (
@@ -75,6 +90,17 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
                                     {product.name}
                                 </Typography>
                                 {handlePrice()}
+                                <Box>
+                                    <Stack direction="row" spacing={1} mt={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
+                                        {handleColor().map(c => (
+                                            <ColorRadio
+                                                key={c.id}
+                                                color={c}
+                                                size={25}
+                                            />
+                                        ))}
+                                    </Stack>
+                                </Box>
                             </CardContent>
                         </Card>
                     </Link>

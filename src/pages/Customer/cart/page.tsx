@@ -1,168 +1,109 @@
 import AddIcon from "@mui/icons-material/Add";
+import CancelIcon from "@mui/icons-material/Cancel";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  Typography,
-  TextField,
+  Button, Checkbox, Grid,
+  IconButton, TextField, Typography
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import ProductDetail from "../../../types/ProductDetail";
-import { Cart, CartValueInfos, CartValues } from "../../../types/Cart";
+import { Spin, Tooltip } from "antd";
 import Cookies from "js-cookie";
-import {
-  fetchCartByUserId,
-  createCart,
-  updateCart,
-  deleteCart,
-} from "../../../api/CartApi";
-import LoadingCustom from "../../../../components/Loading/LoadingCustom.js";
-import { toast } from "react-toastify";
-import { debounce } from "lodash";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createOrder } from "../../../api/OrderApi.js";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
+import useCart from "../../../hook/useCart.js";
+import { CartValueInfos, CartValues } from "../../../types/Cart";
+import { OrderDetailValue } from "../../../types/Order.js";
+import ProductDetail from "../../../types/ProductDetail.js";
 
 const CartPage = () => {
-  const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [subToTals, setSubToTals] = useState(0);
-  const [cartValueInfos, setCartValueInfos] = useState<CartValueInfos[]>([]);
-  const [cartValues, setCartValues] = useState<CartValues[]>([]);
+  const navigate = useNavigate()
+  const { cart, modifyCartValues, modifyItemInCart } = useCart()
+  const [moneyTotal, setMoneyTotal] = useState(0);
+  const [selectProductDetails, setSelectProductDetails] = useState<CartValueInfos[]>([]);
+  const [isSelectAll, setIsSelectAll] = useState<boolean>(false)
 
-  const fetchCartData = async () => {
-    const token = Cookies.get("accessToken");
-
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
+  const handleSelectProductDetail = (pd: CartValueInfos) => {
+    const productDetailIds = selectProductDetails.map(spd => spd.productDetail.id)
+    if (productDetailIds.includes(pd.productDetail.id)) {
+      setSelectProductDetails(prev => prev.filter(cart => cart !== pd));
+    } else {
+      setSelectProductDetails(prev => [...prev, pd]);
     }
-    setLoading(true);
+  }
 
-    try {
-      // Fetch cart data
-      const data = await fetchCartByUserId(token);
-
-      // Map cartValueInfos to productDetails
-      const mappedDetails = data.cartValueInfos.map((item: any) => ({
-        id: item.productDetail.id,
-        price: item.productDetail.price,
-        originPrice: item.productDetail.originPrice,
-        product: {
-          name: item.productDetail.product.name,
-        },
-        images: item.productDetail.images || [],
-        size: {
-          name: item.productDetail.size.name,
-        },
-        color: {
-          name: item.productDetail.color.name,
-        },
-        quantity: item.productDetail.quantity,
-      }));
-
-      setProductDetails(mappedDetails);
-      setCartValueInfos(data.cartValueInfos);
-      setCart(data);
-      console.log(data);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu giỏ hàng:", error);
-    } finally {
-      setLoading(false);
+  const handleClearSelectProduct = () => {
+    const selectProductIds = selectProductDetails.map(pd => pd.productDetail.id)
+    const newItem = cart?.cartValues.filter(cart => !selectProductIds.includes(cart.productDetailId))
+    if (newItem) {
+      modifyCartValues(newItem)
     }
-  };
+  }
+
+  const handleQuantityChange = (cart: CartValueInfos, flipValue: number) => {
+    const newQuantity = Math.min(cart.quantity + flipValue, cart.productDetail.quantity);
+    const cartValue: CartValues = {
+      productDetailId: cart.productDetail.id,
+      quantity: newQuantity
+    }
+    modifyItemInCart(cartValue)
+  }
+
+  const handleChangeQuantityInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cart: CartValueInfos) => {
+
+    const newQuantity = Math.min(Number(e.target.value), cart.productDetail.quantity);
+    setSelectProductDetails(prev =>
+      prev.map(item =>
+        item.productDetail.id === cart.productDetail.id ? { ...item, quantity: newQuantity } : item
+      )
+    )
+    const cartValue: CartValues = {
+      productDetailId: cart.productDetail.id,
+      quantity: newQuantity
+    }
+    modifyItemInCart(cartValue)
+  }
+
+  const handleBuy = async () => {
+    if (selectProductDetails.length < 0) return
+    const orderDetails: OrderDetailValue[] = selectProductDetails.map(value => {
+      return {
+        productDetailId: value.productDetail.id,
+        quantity: value.quantity
+      }
+    })
+    const data = await createOrder(orderDetails);
+    Cookies.set('orderId', data.id, { expires: 1 / 6 })
+    navigate('/checkout')
+  }
 
   useEffect(() => {
-    fetchCartData();
-  }, []);
+    const total = selectProductDetails
+      .map(value => {
+        const price = value.productDetail.price
+        const quantity = value.quantity
+        return price * quantity
+      })
+      .reduce((total, money) => total + money, 0)
 
-  const caculatePrice = () => {
-    const subtotal = cartValueInfos.reduce(
-      (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
-      0
-    );
-    const discount = 0;
-    const total = Math.max(0, subtotal - discount);
-
-    setSubToTals(subtotal);
-    setTotalPrice(total);
-  };
+    setMoneyTotal(total)
+  }, [selectProductDetails])
 
   useEffect(() => {
-    caculatePrice();
-  }, [cartValueInfos]);
-
-  const debouncedUpdateCart = debounce(() => {
-    updateCartData();
-  }, 100);
-
-  const handleQuantityChange = (id: number, change: number) => {
-    setCartValueInfos((prevCartValueInfos) => {
-      return prevCartValueInfos.map((pd) => {
-        if (pd.productDetail.id === id) {
-          const newQuantity = (pd.quantity || 0) + change;
-          const maxQuantity = pd.productDetail.quantity ?? 0;
-
-          if (newQuantity > maxQuantity) {
-            toast.error("Số lượng mặt hàng đạt tối đa");
-            return pd;
-          }
-
-          return { ...pd, quantity: Math.max(1, newQuantity) };
-        }
-        return pd;
-      });
-    });
-  };
+    if (cart?.cartValueInfos) {
+      setSelectProductDetails(cart.cartValueInfos)
+    }
+  }, [cart])
 
   useEffect(() => {
-    if (cartValueInfos.length > 0) {
-      debouncedUpdateCart();
+    if (!cart?.cartValueInfos) return
+    if (isSelectAll) {
+      setSelectProductDetails(cart.cartValueInfos)
+    } else {
+      setSelectProductDetails([])
     }
-  }, [cartValueInfos]);
-
-  const updateCartData = async () => {
-    const token = Cookies.get("accessToken");
-
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
-
-    try {
-      const cartData = {
-        cartValues: cartValueInfos.map((pd) => ({
-          productDetailId: pd.productDetail.id,
-          quantity: pd.quantity,
-        })),
-        userId: cart?.userId,
-      };
-
-      await updateCart(cartData, token);
-      console.log("Giỏ hàng đã được cập nhật", cartData);
-    } catch (error) {
-      console.error("Lỗi khi cập nhật giỏ hàng:", error);
-      console.log("Cập nhật giỏ hàng thất bại");
-    }
-  };
-
-  // const subtotal = cartValueInfos.reduce(
-  //   (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
-  //   0
-  // );
-  // const discount = 0;
-  //   const discount = productDetails.reduce(
-  //     (sum, pd) =>
-  //       pd.originPrice
-  //         ? sum + (pd.originPrice - pd.price) * (pd.quantity || 0)
-  //         : sum,
-  //     0
-  //   );
-  // const shipping = 20000;
-  // const shippingDiscount = 20000;
-  // const total = Math.max(0, subtotal - discount);
+  }, [isSelectAll])
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
@@ -174,12 +115,43 @@ const CartPage = () => {
               backgroundColor: "white",
               borderRadius: 5,
               padding: 2,
+              position: "relative",
             }}
           >
-            <Typography variant="h5" gutterBottom>
-              Giỏ hàng
-            </Typography>
-            {cartValueInfos.map((pd) => (
+            <Box>
+              <Typography variant="h5" gutterBottom>
+                Giỏ hàng
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 4,
+                justifyContent: "space-between",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center"
+                }}
+              >
+                <Checkbox checked={isSelectAll} onChange={() => setIsSelectAll(prev => !prev)} />
+                <Typography variant="body1">Chọn tất cả</Typography>
+              </Box>
+              <Tooltip title="Xóa tất cả">
+                <Button
+                  color="error"
+                  onClick={handleClearSelectProduct}
+                  disabled={selectProductDetails.length === 0}
+                >
+                  Xóa sản phẩm đã chọn
+                </Button>
+              </Tooltip>
+            </Box>
+
+            {cart?.cartValueInfos.map((pd) => (
               <Box
                 key={pd.productDetail.id}
                 sx={{
@@ -189,6 +161,17 @@ const CartPage = () => {
                   paddingBottom: 1,
                 }}
               >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Checkbox
+                    checked={selectProductDetails.map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
+                    onChange={() => handleSelectProductDetail(pd)}
+                  />
+                </div>
                 <img
                   src={pd.productDetail.images?.[0].url}
                   alt={pd.productDetail.product?.name}
@@ -210,9 +193,15 @@ const CartPage = () => {
                     className="mt-3"
                     component="div"
                   >
-                    <Typography variant="h6" color="info.main" component="div">
+                    <Typography
+                      variant="h6"
+                      color="info.main"
+                      component="div"
+                    >
                       <b>
-                        {(pd.productDetail.price || 0).toLocaleString("vi-VN")}{" "}
+                        {(pd.productDetail.price || 0).toLocaleString(
+                          "vi-VN"
+                        )}{" "}
                         ₫
                       </b>
                     </Typography>
@@ -224,38 +213,29 @@ const CartPage = () => {
                           color: "gray",
                         }}
                       >
-                        {pd.productDetail.originPrice.toLocaleString("vi-VN")} ₫
+                        {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
+                        ₫
                       </span>
                     )}
                   </Typography>
                 </Box>
-
-                {/* Quantity Management Section */}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <IconButton
-                    onClick={() =>
-                      handleQuantityChange(pd.productDetail.id, -1)
-                    }
+                    onClick={() => handleQuantityChange(pd, -1)}
+                    disabled={pd.quantity <= 1}
                   >
                     <RemoveIcon />
                   </IconButton>
-                  {/* Display the quantity from the cart */}
                   <TextField
                     type="number"
                     value={pd.quantity}
-                    onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value, 10);
-                      if (!isNaN(newQuantity)) {
-                        handleQuantityChange(
-                          pd.productDetail.id,
-                          newQuantity - pd.quantity
-                        );
-                      }
-                    }}
+                    onChange={(e) => handleChangeQuantityInput(e, pd)}
                     sx={{
                       width: 60,
                       textAlign: "center",
-                      "& .MuiInput-underline:before": { borderBottom: "none" },
+                      "& .MuiInput-underline:before": {
+                        borderBottom: "none",
+                      },
                       "& .MuiInput-underline:after": { borderBottom: "none" },
                       "& input": {
                         padding: 0,
@@ -268,13 +248,15 @@ const CartPage = () => {
                       },
                     }}
                     inputProps={{
-                      min: 1,
+                      min: 0,
                       max: pd.productDetail.quantity,
                     }}
                     variant="standard"
                   />
                   <IconButton
-                    onClick={() => handleQuantityChange(pd.productDetail.id, 1)}
+                    onClick={() =>
+                      handleQuantityChange(pd, 1)
+                    }
                   >
                     <AddIcon />
                   </IconButton>
@@ -295,34 +277,10 @@ const CartPage = () => {
               sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
             >
               <Typography>Tổng giá trị sản phẩm</Typography>
-              <Typography>{subToTals.toLocaleString("vi-VN")} ₫</Typography>
+              <Typography>{moneyTotal.toLocaleString("vi-VN")} ₫</Typography>
             </Box>
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
-            >
-              <Typography>Giảm giá</Typography>
-              {/* <Typography color="error">-{discount.toLocaleString('vi-VN')} ₫</Typography> */}
-            </Box>
-            {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
-                            <Typography>Vận chuyển</Typography>
-                            <Typography>{shipping.toLocaleString('vi-VN')} ₫</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
-                            <Typography>Giảm giá vận chuyển</Typography>
-                            <Typography color="error">-{shippingDiscount.toLocaleString('vi-VN')} ₫</Typography>
-                        </Box> */}
-            <Divider sx={{ my: 2 }} />
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
-            >
-              <Typography variant="h6">Tổng thanh toán</Typography>
-              <Typography variant="h6">
-                {totalPrice.toLocaleString("vi-VN")} ₫
-              </Typography>
-            </Box>
-            <Button variant="contained" fullWidth sx={{ mt: 2 }}>
-              Mua hàng (
-              {cartValueInfos.reduce((sum, pd) => sum + (pd.quantity || 0), 0)})
+            <Button variant="contained" onClick={handleBuy} fullWidth sx={{ mt: 2 }}>
+              Mua hàng
             </Button>
           </Box>
         </Grid>

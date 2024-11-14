@@ -216,36 +216,36 @@ const ManagerSize = () => {
         </div>
       ),
     },
-    {
-      title: "Ngày cập nhật",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString() : "N/A",
-    },
+    // {
+    //   title: "Ngày cập nhật",
+    //   dataIndex: "updatedAt",
+    //   key: "updatedAt",
+    //   render: (date) =>
+    //     date ? new Date(date).toLocaleDateString() : "N/A",
+    // },
 
-    {
-      title: "Người cập nhật",
-      dataIndex: "updatedBy",
-      key: "updatedBy",
-      render: (updatedBy) =>
-        updatedBy ? (
-          <div>
-            <img
-              src={updatedBy.avatar}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                marginRight: 10,
-              }}
-            />
-            {updatedBy.fullName}
-          </div>
-        ) : (
-          "N/A"
-        ),
-    },
+    // {
+    //   title: "Người cập nhật",
+    //   dataIndex: "updatedBy",
+    //   key: "updatedBy",
+    //   render: (updatedBy) =>
+    //     updatedBy ? (
+    //       <div>
+    //         <img
+    //           src={updatedBy.avatar}
+    //           style={{
+    //             width: 40,
+    //             height: 40,
+    //             borderRadius: "50%",
+    //             marginRight: 10,
+    //           }}
+    //         />
+    //         {updatedBy.fullName}
+    //       </div>
+    //     ) : (
+    //       "N/A"
+    //     ),
+    // },
     {
       title: "Thao tác",
       key: "actions",

@@ -4,10 +4,9 @@ import axiosInstance from './AxiosInstance';
 
 const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
+
 export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
-    const token = Cookies.get("accessToken");
     const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
         params: {
             size: pageSize,
             page: page,
@@ -76,6 +75,76 @@ export const deleteBrand = async (id: number, token: string) => {
         return response.data;
     } catch (error) {
         console.error("Error deleting brand", error);
+        throw error;
+    }
+};
+export const fetchBrandsByIds = async (ids: number[]) => {
+    const token = Cookies.get("accessToken");
+    try {
+        const responses = await Promise.all(
+            ids.map(id =>
+                axiosInstance.get(`${API_BASE_URL}/${id}`, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+                }).then(res => res.data)
+            )
+        );
+        return responses;
+    } catch (error) {
+        console.error("Error fetching brands by IDs", error);
+        throw error;
+    }
+};
+export const fetchProductsByIds = async (ids: number[]) => {
+    const token = Cookies.get("accessToken");
+    try {
+        const responses = await Promise.all(
+            ids.map(id =>
+                axiosInstance.get(`http://localhost:8888/api/v1/product/${id}`, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+                }).then(res => res.data)
+            )
+        );
+        return responses;
+    } catch (error) {
+        console.error("Error fetching Product by IDs", error);
+        throw error;
+    }
+};
+export const fetchProductDetailsByIds = async (ids: number[]) => {
+    const token = Cookies.get("accessToken");
+    try {
+        const responses = await Promise.all(
+            ids.map(id =>
+                axiosInstance.get(`http://localhost:8888/api/v1/product-detail/${id}`, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+                }).then(res => res.data)
+            )
+        );
+        return responses;
+    } catch (error) {
+        console.error("Error fetching Product by IDs", error);
+        throw error;
+    }
+};
+export const fetchAllProductDetails = async (pageSize: number, page: number, searchName?: string) => {
+    const token = Cookies.get('accessToken');
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        params: {
+            size: pageSize,
+            page: page,
+            ...(searchName && { name: searchName }),
+        },
+    };
+
+    try {
+        const response = await axiosInstance.get(`http://localhost:8888/api/v1/product-detail`, config);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching product details:', error);
         throw error;
     }
 };

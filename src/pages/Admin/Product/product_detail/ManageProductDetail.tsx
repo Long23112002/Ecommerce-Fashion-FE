@@ -2,20 +2,16 @@ import { Button, Form, Image, message, Popconfirm, Table } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { ProductDetail } from "../../../../types/ProductDetail";
 import AddProductDetailModal from "../../../../components/ProductDetail/AddProductDetailModal";
-import { Product } from "../../../../types/Product";
 import { Size } from "../../Attributes/size/size";
 import { Color } from "../../Attributes/color/color";
-import ProductItemModal from "../../../../components/Product/ProductItemModal";
-import { fetchAllProducts } from "../../../../api/ProductApi";
 import { useLocation } from "react-router-dom";
 import ProductModal from "../../../../components/Product/ProductModal";
 import Cookies from 'js-cookie';
-import { addProductDetail, deleteProductDetail, FileImage, getProductDetailById, getProductDetailByIdProduct } from "../../../../api/ProductDetailApi";
+import { addProductDetail, deleteProductDetail, FileImage, getProductDetailById, getProductDetailByIdProduct, updateProductDetail } from "../../../../api/ProductDetailApi";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../../Error/getErrorMessage";
 import { fetchAllColors } from "../../Attributes/color/colorManagament";
 import { fetchAllSizes } from "../../Attributes/size/sizeManagament";
-import { postImage } from "../../../../api/ImageApi";
 import LoadingCustom from "../../../../components/Loading/LoadingCustom";
 import { debounce } from "lodash";
 import createPaginationConfig, { PaginationState } from "../../../../config/paginationConfig";
@@ -23,6 +19,7 @@ import axios from "axios";
 import { RcFile, UploadFile } from "antd/es/upload";
 import ModalViewProductDetail from "../../../../components/ProductDetail/ModalViewProductDetail";
 import { FileImageOutlined } from "@ant-design/icons";
+import UpdateProductDetailModal from "../../../../components/ProductDetail/UpdateProuductDetailModal";
 
 const ManageProductDetail = () => {
     const [form] = Form.useForm();
@@ -34,6 +31,8 @@ const ManageProductDetail = () => {
 
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
     const [isproductDetailsLoading, setIsProductDetailsLoading] = useState<boolean>(false);
+    const [editingProductDetail, setEditingProductDetail] = useState<ProductDetail | null>(null);
+    const [isItemUpdateOpen, setIsItemUpdateOpen] = useState(false);
 
     const [imageList, setImageList] = useState<FileImage[]>([]);
     const [urls, setUrls] = useState<String[]>([]);
@@ -111,7 +110,7 @@ const ManageProductDetail = () => {
                 await addProductDetail({ price, quantity, images, idProduct, idColor, idSize }, token);
                 toast.success('Thêm sản phẩm Thành Công');
                 handleAddCancel();
-                // refreshProducts();
+                refreshProductdetails();
             } else {
                 toast.error("Authorization failed");
             }
@@ -126,7 +125,7 @@ const ManageProductDetail = () => {
             if (token) {
                 await deleteProductDetail(productId, token);
                 toast.success("Xóa Thành Công");
-                refreshProducts();
+                refreshProductdetails();
             } else {
                 toast.error("Authorization failed")
             }
@@ -148,20 +147,39 @@ const ManageProductDetail = () => {
     const showUpdateModal = async (productDetail: ProductDetail | null = null) => {
         if (productDetail) {
             try {
-                const productItem = await getProductDetailById(productDetail.id);
+                const productDetailItem = await getProductDetailById(productDetail.id);
                 form.setFieldsValue({
                     price: productDetail.price,
                     quantity: productDetail.quantity,
                     images: productDetail.images,
 
                 })
-                setEditingProduct(productItem);
+                setEditingProductDetail(productDetailItem);
             } catch (error) {
-                toast.error(error.response?.data?.message || 'Failed to fetch product item');
+                toast.error(error.response?.data?.message || 'Failed to fetch product detail item');
             }
             setIsItemUpdateOpen(true);
         }
     }
+    const handleUpdateOk = async () => {
+        try {
+          const values = await form.validateFields();
+          const { price, quantity, idProduct, idSize, idColor } = values;
+          const token = Cookies.get("accessToken");
+    
+          if (token && editingProductDetail) {
+            await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor }, token);
+            toast.success('Cật Nhật Thành Công');
+            // handleUpdateCancel();
+            refreshProductdetails();
+          } else {
+            toast.error("Authorization failed");
+          }
+        } catch (error: any) {
+          toast.error(getErrorMessage(error))
+        }
+      };
+
 
     const handleUpload = async (file: RcFile): Promise<boolean | void> => {
         const objectId = x.toString();
@@ -203,6 +221,15 @@ const ManageProductDetail = () => {
         }
     };
 
+    const onRemove = (file: UploadFile): boolean => {
+        const updatedImages = productDetail.images.filter((image) => image.url !== file.url);
+        setFileList((prevDetail) => ({
+            ...prevDetail,
+            images: updatedImages,
+        }));
+        return true; // Cho phép xóa file
+    };
+
     const fetchProductDetailsDebounced = useCallback(debounce(async (
         id: number,
         current: number,
@@ -230,30 +257,14 @@ const ManageProductDetail = () => {
         fetchProductDetailsDebounced(id, current, pageSize);
     }
 
-    const refreshProducts = () => {
-        // fetchProductDetailByIdProduct(pagination.current, pagination.pageSize)
+    const refreshProductdetails = () => {
+        fetchProductDetails(x, pagination.current, pagination.pageSize)
     }
-
-    // const fetchProductDetailByIdProduct = async () => {
-    //     setIsProductDetailsLoading(true);
-    //     try {
-    //         const response = await getProductDetailByIdProduct(x);
-    //         setProductDetails(response.data)
-    //     } catch (error) {
-    //         console.log('Loi');
-
-    //     } finally {
-    //         setIsProductDetailsLoading(false)
-    //     }
-    // }
 
     useEffect(() => {
         fetchColors()
         fetchSizes()
-        // fetchProductDetailByIdProduct()
         fetchProductDetails(x, pagination.current, pagination.pageSize)
-        // fetchProductDetails(pagination.current, pagination.pageSize)
-        // console.log(urls);
 
     }, [pagination.current, pagination.pageSize])
 
@@ -271,7 +282,7 @@ const ManageProductDetail = () => {
                         style={{ borderRadius: '10px' }}
                     />
                 ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', color: '#aaa'}}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', color: '#aaa' }}>
                         <FileImageOutlined style={{ fontSize: '24px', marginRight: '8px' }} />
                         {/* <span>No Image</span> */}
                     </div>
@@ -369,10 +380,21 @@ const ManageProductDetail = () => {
                 handleUpload={handleUpload}
             />
             <ModalViewProductDetail
+                onRemove={onRemove}
                 visible={isModalViewOpen}
                 onCancel={handleDetailCancel}
                 productDetail={productDetail}
             />
+            {/* <UpdateProductDetailModal 
+             isModalOpen= {isItemUpdateOpen}
+             handleOk= {}
+             handleCancel= {}
+             form= {form}
+             productDetail= {productDetail}
+             sizes= {}
+             colors= {}
+             products= {}
+            /> */}
         </div>
     )
 }

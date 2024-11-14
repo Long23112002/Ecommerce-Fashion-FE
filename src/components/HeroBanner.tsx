@@ -1,7 +1,7 @@
 import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import React from 'react';
-import { useIsMobile } from '../hook/useSize';
+import { useIsMobile, useUserHeaderSize } from '../hook/useSize';
 // @ts-ignore
 import Slider from 'react-slick';   
 import '../styles/slick-dot.css'
@@ -14,6 +14,7 @@ interface IProps {
 }
 
 const HeroBanner: React.FC<IProps> = ({ images }) => {
+    const headerSize = useUserHeaderSize()
     const defaultImage = "https://t4.ftcdn.net/jpg/04/15/97/33/360_F_415973312_5yg3MrkRdi2SMHyVKbB4h7GgE5HrgUlb.jpg";
 
     const settings = {
@@ -56,12 +57,13 @@ const HeroBanner: React.FC<IProps> = ({ images }) => {
             sx={{
                 backgroundImage: `url(${image || defaultImage})`,
                 backgroundSize: 'cover',
-                height: '60vh',
+                minHeight: `calc(100vh - ${headerSize}px - 1px)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'white',
                 textAlign: 'center',
+                backgroundPosition: 'center',
             }}
         >
         </Box>

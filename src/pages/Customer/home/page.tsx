@@ -1,13 +1,14 @@
 import { Container, Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { getAllProduct } from '../../../api/ProductApi';
+import { getAllProducts } from '../../../api/ProductApi';
 import HeroBanner from '../../../components/HeroBanner';
 import Link from '../../../components/Link';
-import ProductSlider from '../../../components/product/ProductSlider';
 import Product from '../../../types/Product';
 import { PageableRequest } from '../../../api/AxiosInstance';
+import ProductSlider from '../../../components/product/ProductSlider';
 
 const HomePage: React.FC = () => {
+  const [banners, setBanners] = useState<string[]>(['https://marketplace.canva.com/EAFoEJMTGiI/1/0/1600w/canva-beige-aesthetic-new-arrival-fashion-banner-landscape-cNjAcBMeF9s.jpg', 'https://www.picmaker.com/templates/_next/image?url=https%3A%2F%2Fstatic.picmaker.com%2Fscene-prebuilts%2Fthumbnails%2FYCA-0022.png&w=3840&q=75', 'https://img.freepik.com/premium-vector/fashion-week-banner-template-promotion-fashion-banner_122059-223.jpg?semt=ais_hybrid'])
   const [hotProducts, setHotProducts] = useState<Product[]>([]);
   const [hotLoading, setHotLoading] = useState<boolean>(true);
 
@@ -16,15 +17,16 @@ const HomePage: React.FC = () => {
 
   const fetchNewProducts = async () => {
     setNewLoading(true)
-    const pageable: PageableRequest = { sort: 'DESC', sortBy: 'createAt' }
-    const res = await getAllProduct({}, pageable)
+    const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'createAt' }
+    const res = await getAllProducts({ pageable: pageable })
     setNewProducts([...res.data])
     setNewLoading(false)
   }
-  
+
   const fetchHotProducts = async () => {
     setHotLoading(true)
-    const res = await getAllProduct()
+    const pageable: PageableRequest = { page: 0, size: 15 }
+    const res = await getAllProducts({pageable: pageable})
     setHotProducts([...res.data])
     setHotLoading(false)
   }
@@ -36,7 +38,7 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <HeroBanner images={['https://d1csarkz8obe9u.cloudfront.net/posterpreviews/fashion-sale-banner-post-design-template-ea23b5c40dcc214228966e99cd0c3df6_screen.jpg?ts=1628576099','https://www.orchardtaunton.co.uk/app/uploads/2020/03/OSC-Spring-Generic-2020-Website-Fashion-Banner-01.jpg','https://marketplace.canva.com/EAFIMHQ5yhE/1/0/1600w/canva-orange-and-teal-summer-sale-kids-fashion-bright-website-banner-L6kUMOWkkho.jpg']} />
+      <HeroBanner images={banners} />
 
       <Container maxWidth='xl'
         sx={{ my: 4 }}

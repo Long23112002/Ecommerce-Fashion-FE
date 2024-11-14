@@ -17,6 +17,8 @@ import ProductDetail from '../../types/ProductDetail'
 import ColorRadio from '../ColorRadio'
 import SizeButton from '../SizeButton'
 import ImageCarousel from './ImageCarousel'
+import { CartValues } from '../../types/Cart'
+import useCart from '../../hook/useCart'
 
 interface IProps {
     product: Product,
@@ -24,6 +26,7 @@ interface IProps {
 }
 
 const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
+    const cart = useCart()
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [quantity, setQuantity] = useState(1)
@@ -62,11 +65,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
         navigate({ search: params.toString() }, { replace: true });
 
-        const selectedProduct = productDetails.find(
+        const selectedProductDetail = productDetails.find(
             pd => pd.color?.id === selectedColor && pd.size?.id === selectedSize
         );
 
-        setSeletedProductDetail({ ...selectedProduct });
+        setSeletedProductDetail({ ...selectedProductDetail });
     }, [selectedColor, selectedSize, navigate, productDetails]);
 
     useEffect(() => {
@@ -84,6 +87,12 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                 .map(pd => pd.size?.id || -1)
         }
         return []
+    }
+
+    const handleAddToCart = () => {
+        if (!selectedProductDetail?.id) return
+        const cartValues: CartValues = { productDetailId: selectedProductDetail.id, quantity: quantity }
+        cart.addToCart(cartValues)
     }
 
     const arrayColor: Color[] = productDetails?.reduce((acc: Color[], pd) => {
@@ -137,7 +146,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                     <ImageCarousel
-                        images={selectedProductDetail?.images?.map((image: any) => image.url) || []}
+                        images={selectedProductDetail?.images?.map((image) => image.url) || []}
                     />
                 </Grid>
 
@@ -286,6 +295,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                                 size='large'
                                 startIcon={<ShoppingCart />}
                                 sx={{ width: '100%' }}
+                                onClick={handleAddToCart}
                             >
                                 Thêm vào giỏ
                             </Button>

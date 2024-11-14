@@ -13,7 +13,7 @@ export interface FileImage<T = any> extends UploadFile {
 interface ProductDetailData {
     price: number;
     quantity: number;
-    images: String[] | null;
+    images: string[] | null;
     idProduct: number;
     idSize: number;
     idColor: number;
@@ -76,5 +76,15 @@ export const getProductDetailById = async (productDetailId: number) => {
         return response.data;
     } catch (error: any) {
         throw new Error(`Error getting product detail: ${error.response?.data?.message || error.message}`);
+    }
+}
+
+export const updateProductDetail = async (productDetailId: number, productData: ProductDetailData) => {
+    try {
+        const response = await axiosInstance.put(`${API_BASE_URL}/${productDetailId}`, productData)
+        return response.data;
+    } catch (error: any) {
+        console.log("Error update product detail", error);
+        throw error;
     }
 }

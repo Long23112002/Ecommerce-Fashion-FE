@@ -1,12 +1,26 @@
 import { Box, IconButton } from '@mui/material';
-import React, { useState } from 'react';
+import Cookies from 'js-cookie';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchCartByUserId } from '../../api/CartApi';
+import useCart from '../../hook/useCart';
+import { useUserAction } from '../../hook/useUserAction';
 
 const CartIcon: React.FC = () => {
     const navigate = useNavigate()
+    const { modifyCart, totalCart } = useCart()
+    const user = useUserAction().get()
+    useEffect(() => {
+        const token = Cookies.get('accessToken')
+        if (!token) return
 
-    // TODO: TẠO VÀ SỬ DỤNG REDUX
-    const [totalInCart, setTotalInCart] = useState<number>(10)
+        const fetchCart = async () => {
+            const res = await fetchCartByUserId(token)
+            modifyCart(res)
+        }
+        fetchCart()
+    }, [user])
+
 
     return (
         <>
@@ -20,7 +34,7 @@ const CartIcon: React.FC = () => {
                         md: 2
                     }
                 }}
-                onClick={()=>navigate("/cart")}
+                onClick={() => navigate("/cart")}
             >
                 <i className='fa-solid fa-cart-shopping fs-5' />
                 <Box
@@ -34,13 +48,13 @@ const CartIcon: React.FC = () => {
                         backgroundColor: 'red',
                         color: 'white',
                         borderRadius: '50%',
-                        display: totalInCart ? 'flex' : 'none',
+                        display: totalCart ? 'flex' : 'none',
                         justifyContent: 'center',
                         alignItems: 'center',
                         fontSize: 12,
                     }}
                 >
-                    {totalInCart < 10 ? totalInCart : '9+'}
+                    {totalCart}
                 </Box>
             </IconButton>
         </>

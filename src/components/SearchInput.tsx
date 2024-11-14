@@ -11,6 +11,13 @@ interface IProps {
 
 const SearchInput: React.FC<IProps> = ({ onClick, onChange, sx, height }) => {
     const size = height || 45
+
+    const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            onClick?.()
+        }
+    }
+
     return (
         <Box
             sx={{
@@ -28,6 +35,7 @@ const SearchInput: React.FC<IProps> = ({ onClick, onChange, sx, height }) => {
                 placeholder="Bạn tìm gì..."
                 sx={{ ml: 1, flex: 1 }}
                 onChange={onChange}
+                onKeyDown={handleKeydown}
             />
             <IconButton
                 sx={{ marginLeft: 1, height: (size), width: (size) }}
