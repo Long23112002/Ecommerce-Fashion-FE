@@ -1,5 +1,5 @@
 import { BASE_API } from "../constants/BaseApi";
-import { OrderDetailValue } from "../types/Order";
+import { OrderDetailValue, OrderUpdateRequest } from "../types/Order";
 import axiosInstance from "./AxiosInstance";
 import Cookies from "js-cookie";
 
@@ -49,6 +49,31 @@ export const updateAdressOrder = async (request: OrderAddressUpdate) => {
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/update-address/${orderId}`,
         data: { ...request }
+    })
+    return data
+}
+
+export const payOrder = async (request: OrderUpdateRequest) => {
+    const orderId = Cookies.get('orderId')
+    if (!orderId) {
+        throw Error('Người dùng không có đơn hàng')
+    }
+    const { data } = await axiosInstance({
+        method: 'PUT',
+        url: `${BASE_API}/api/v1/orders/payment/${orderId}`,
+        data: { ...request }
+    })
+    return data
+}
+
+export const confirmOrder = async (orderId: number | string, encode: string) => {
+    const { data } = await axiosInstance({
+        method: 'PUT',
+        url: `${BASE_API}/api/v1/orders/confirm`,
+        params: {
+            orderId: orderId,
+            encode: encode
+        }
     })
     return data
 }

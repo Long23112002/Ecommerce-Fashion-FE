@@ -9,20 +9,31 @@ import {
   Paper,
 } from "@mui/material"
 import React, { useState } from 'react'
-import { OrderRequest } from '../../../types/Order'
+import { OrderUpdateRequest } from '../../../types/Order'
+import { payOrder } from "../../../api/OrderApi"
+import { useNavigate } from "react-router-dom"
 
 interface IProps {
-  orderRequest: OrderRequest,
-  setOrderRequest: React.Dispatch<React.SetStateAction<OrderRequest>>
+  orderRequest: OrderUpdateRequest,
+  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
 }
 
-const PaymentInfo: React.FC<IProps> = () => {
+const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
+  const navigate = useNavigate()
   const [value, setValue] = useState<'Tiền mặt' | 'VNPAY'>("Tiền mặt")
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     if (value === 'Tiền mặt' || value === 'VNPAY') {
       setValue(value)
+    }
+  }
+
+  const handlePay = async () => {
+    console.log(orderRequest)
+    const data = await payOrder(orderRequest)
+    if (data) {
+      window.location.assign(data)
     }
   }
 
@@ -92,6 +103,7 @@ const PaymentInfo: React.FC<IProps> = () => {
         sx={{
           py: 1.5,
         }}
+        onClick={handlePay}
       >
         Thanh toán bằng {value}
       </Button>
