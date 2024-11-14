@@ -13,7 +13,7 @@ export interface FileImage<T = any> extends UploadFile {
 interface ProductDetailData {
     price: number;
     quantity: number;
-    images: String[] | null;
+    images: string[] | null;
     idProduct: number;
     idSize: number;
     idColor: number;
