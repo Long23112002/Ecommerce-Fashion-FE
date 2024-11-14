@@ -51,6 +51,7 @@ const AppRoutes = () => {
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
+                <Route path="/customer-order"/>
             </Route>
 
             <Route element={<AdminLayout />}>
