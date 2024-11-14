@@ -37,18 +37,11 @@ export interface Order {
     orderDetails?: OrderDetail[];
 }
 
-export type OrderRequest = {
-    discountId?: number;
-    paymentMethodId: number;
-    phoneNumber: string;
+export interface OrderUpdateRequest {
     fullName: string;
-    email: string;
-    address: string;
-    shipDate?: Date;
-    moneyShip?: number;
-    note?: string;
-    totalMoney: number;
-    orderDetails: OrderDetailValue[];
+    phoneNumber: string;
+    specificAddress: string;
+    note: string;
 }
 
 export type OrderCreateRequest = {

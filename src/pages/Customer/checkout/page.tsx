@@ -1,7 +1,7 @@
 import { Container, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { getOrderById } from '../../../api/OrderApi'
-import Order, { OrderRequest } from '../../../types/Order'
+import Order, { OrderUpdateRequest } from '../../../types/Order'
 import PaymentInfo from './PaymentInfo'
 import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
@@ -11,14 +11,11 @@ const CheckoutPage: React.FC = () => {
 
   const [order, setOrder] = useState<Order>();
 
-  const [orderRequest, setOrderRequest] = useState<OrderRequest>({
+  const [orderRequest, setOrderRequest] = useState<OrderUpdateRequest>({
     fullName: '',
     phoneNumber: '',
-    email: '',
-    paymentMethodId: 0,
-    address: '',
-    totalMoney: 0,
-    orderDetails: [],
+    specificAddress: '',
+    note: ''
   });
 
   useEffect(() => {

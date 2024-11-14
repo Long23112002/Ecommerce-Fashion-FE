@@ -1,714 +1,290 @@
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { Checkbox } from "@mui/material";
+import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  Typography,
-  TextField,
+  Button, Checkbox, Grid,
+  IconButton, TextField, Typography
 } from "@mui/material";
-import { useState, useEffect, useCallback } from "react";
-import ProductDetail from "../../../types/ProductDetail";
-import { Cart, CartValueInfos, CartValues } from "../../../types/Cart";
-import {
-  fetchCartByUserId,
-  createCart,
-  updateCart,
-  deleteCart,
-} from "../../../api/CartApi";
+import { Spin, Tooltip } from "antd";
 import Cookies from "js-cookie";
-import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
-import { toast } from "react-toastify";
-import { debounce } from "lodash";
-import Swal from "sweetalert2";
-import { Popconfirm, Spin } from "antd";
-import { Tooltip } from "antd";
-import { getErrorMessage } from "../../Error/getErrorMessage.js";
-import { createOrder } from "../../../api/OrderApi.js";
-import { OrderDetailValue } from "../../../types/Order.js";
-import { useDispatch } from "react-redux";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createOrder } from "../../../api/OrderApi.js";
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
+import useCart from "../../../hook/useCart.js";
+import { CartValueInfos, CartValues } from "../../../types/Cart";
+import { OrderDetailValue } from "../../../types/Order.js";
+import ProductDetail from "../../../types/ProductDetail.js";
 
 const CartPage = () => {
-  const navigate = useNavigate();
-  const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [cart, setCart] = useState<Cart[]>([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [subToTals, setSubToTals] = useState(0);
-  const [cartValueInfos, setCartValueInfos] = useState<CartValueInfos[]>([]);
-  const [cartValues, setCartValues] = useState<CartValues[]>([]);
-  const [selectedProductDetails, setSelectedProductDetails] = useState<{
-    [key: number]: boolean;
-  }>({});
-  const [selectAll, setSelectAll] = useState(false);
-  const [isCartUpdated, setIsCartUpdated] = useState(false);
-  const [tempQuantity, setTempQuantity] = useState<{ [key: number]: number }>(
-    {}
-  );
+  const navigate = useNavigate()
+  const { cart, modifyCartValues, modifyItemInCart } = useCart()
+  const [moneyTotal, setMoneyTotal] = useState(0);
+  const [selectProductDetails, setSelectProductDetails] = useState<CartValueInfos[]>([]);
+  const [isSelectAll, setIsSelectAll] = useState<boolean>(false)
 
-  const selectedProductCount = Object.values(selectedProductDetails).filter(
-    Boolean
-  ).length;
-
-  const caculatePrice = () => {
-    const subtotal = cartValueInfos.reduce((sum, pd) => {
-      if (selectedProductDetails[pd.productDetail.id]) {
-        return sum + (pd.productDetail.price || 0) * (pd.quantity || 0);
-      }
-
-      return sum;
-    }, 0);
-
-    const discount = 0;
-    const total = Math.max(0, subtotal - discount);
-    setSubToTals(subtotal);
-    setTotalPrice(total);
-  };
-
-  const checkProductAvailability = (productDetailId: number) => {
-    const product = cartValueInfos.find(
-      (pd) => pd.productDetail.id === productDetailId
-    );
-  
-    if (product && product.productDetail.quantity === 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Sản phẩm đã hết hàng",
-        text: "Sản phẩm này sẽ được xóa khỏi giỏ hàng.",
-      })
-      handleRemoveProduct(productDetailId);
-      return false;
+  const handleSelectProductDetail = (pd: CartValueInfos) => {
+    const productDetailIds = selectProductDetails.map(spd => spd.productDetail.id)
+    if (productDetailIds.includes(pd.productDetail.id)) {
+      setSelectProductDetails(prev => prev.filter(cart => cart !== pd));
+    } else {
+      setSelectProductDetails(prev => [...prev, pd]);
     }
-    return true;
-  };
+  }
 
-  const handleSelectProductDetail = (id: number) => {
-
-    if (!checkProductAvailability(id)) {
-      return;
+  const handleClearSelectProduct = () => {
+    const selectProductIds = selectProductDetails.map(pd => pd.productDetail.id)
+    const newItem = cart?.cartValues.filter(cart => !selectProductIds.includes(cart.productDetailId))
+    if (newItem) {
+      modifyCartValues(newItem)
     }
+  }
 
-      setSelectedProductDetails((prev) => ({
-        ...prev,
-        [id]: !prev[id],
-      }));
-      handleQuantityChange(id, 0);
-    
-  };
-
-  const handleSelectAll = () => {
-    const newSelectAll = !selectAll;
-    setSelectAll(newSelectAll);
-
-    const newSelectedProductDetails = cartValueInfos.reduce((acc, pd) => {
-      acc[pd.productDetail.id] = newSelectAll;
-      handleQuantityChange(pd.productDetail.id, 0);
-      return acc;
-    }, {} as { [key: number]: boolean });
-
-    setSelectedProductDetails(newSelectedProductDetails);
-  };
-
-  useEffect(() => {
-    caculatePrice();
-  }, [selectedProductDetails, cartValueInfos]);
-
-  const fetchCartData = async () => {
-    const token = Cookies.get("accessToken");
-
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
+  const handleQuantityChange = (cart: CartValueInfos, flipValue: number) => {
+    const newQuantity = Math.min(cart.quantity + flipValue, cart.productDetail.quantity);
+    const cartValue: CartValues = {
+      productDetailId: cart.productDetail.id,
+      quantity: newQuantity
     }
-    setLoading(true);
+    modifyItemInCart(cartValue)
+  }
 
-    try {
-      const data = await fetchCartByUserId(token);
-      const productDetailOrder = data.cartValues.map(
-        (item) => item.productDetailId
-      );
+  const handleChangeQuantityInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cart: CartValueInfos) => {
 
-      const sortedCartValueInfos = data.cartValueInfos.sort((a, b) => {
-        return (
-          productDetailOrder.indexOf(a.productDetail.id) -
-          productDetailOrder.indexOf(b.productDetail.id)
-        );
-      });
-      console.log(data);
-      const mappedDetails = data.cartValueInfos.map((item: any) => ({
-        id: item.productDetail.id,
-        price: item.productDetail.price,
-        originPrice: item.productDetail.originPrice,
-        product: {
-          name: item.productDetail.product.name,
-        },
-        images: item.productDetail.images || [],
-        size: {
-          name: item.productDetail.size.name,
-        },
-        color: {
-          name: item.productDetail.color.name,
-        },
-        quantity: item.productDetail.quantity,
-      }));
-
-      setProductDetails(mappedDetails);
-      setCartValueInfos(sortedCartValueInfos);
-      setCart(data);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu giỏ hàng:", error);
-      toast.error(getErrorMessage(error));
-    } finally {
-      setLoading(false);
+    const newQuantity = Math.min(Number(e.target.value), cart.productDetail.quantity);
+    setSelectProductDetails(prev =>
+      prev.map(item =>
+        item.productDetail.id === cart.productDetail.id ? { ...item, quantity: newQuantity } : item
+      )
+    )
+    const cartValue: CartValues = {
+      productDetailId: cart.productDetail.id,
+      quantity: newQuantity
     }
-  };
-
-  useEffect(() => {
-    fetchCartData();
-  }, []);
-
-  // const caculatePrice = () => {
-  //   const subtotal = cartValueInfos.reduce(
-  //     (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
-  //     0
-  //   );
-  //   const discount = 0;
-  //   const total = Math.max(0, subtotal - discount);
-
-  //   setSubToTals(subtotal);
-  //   setTotalPrice(total);
-  // };
-
-  // useEffect(() => {
-  //   caculatePrice();
-  // }, [cartValueInfos]);
-
-  const updateCartData = async () => {
-    const token = Cookies.get("accessToken");
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
-
-    try {
-      const cartData = {
-        cartValues: cartValueInfos.map((pd) => ({
-          productDetailId: pd.productDetail.id,
-          quantity: pd.quantity,
-        })),
-        userId: cart?.userId,
-      };
-
-      await updateCart(cartData, token);
-      console.log("Giỏ hàng đã được cập nhật", cartData);
-    } catch (error) {
-      console.error("Lỗi khi cập nhật giỏ hàng:", error);
-      toast.error(getErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const debouncedUpdateCartData = debounce(() => {
-    if (isCartUpdated) {
-      updateCartData();
-    }
-  }, 1000);
-
-  // useEffect(() => {
-  //   debouncedUpdateCartData();
-  // }, [cartValueInfos]);
-
-  const handleQuantityChange = (id: number, change: number) => {
-
-    if (!checkProductAvailability(id)) {
-      return;
-    }
-
-    setCartValueInfos((prevCartValueInfos) => {
-      const updatedCartValueInfos = prevCartValueInfos.map((pd) => {
-        if (pd.productDetail.id === id) {
-          const newQuantity = (pd.quantity || 0) + change;
-          const maxQuantity = pd.productDetail.quantity ?? 0;
-
-          if (isNaN(newQuantity)) {
-            return pd;
-          }
-
-          if (newQuantity > maxQuantity) {
-            Swal.fire({
-              icon: "error",
-              text: `Rất tiếc, bạn chỉ có thể mua tối đa ${maxQuantity} mặt hàng này`,
-            });
-            return { ...pd, quantity: maxQuantity };
-          }
-
-          if (newQuantity <= 0) {
-            Swal.fire({
-              title: "Xóa sản phẩm?",
-              text: "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonText: "Có",
-              cancelButtonText: "Hủy",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                setCartValueInfos((prevInfos) =>
-                  prevInfos.filter((item) => item.productDetail.id !== id)
-                );
-              } else {
-                setCartValueInfos((prevInfos) =>
-                  prevInfos.map((item) =>
-                    item.productDetail.id === id ? { ...item, quantity: 1 } : item
-                  )
-                );
-              }
-            });
-            return pd;
-          }
-
-          return { ...pd, quantity: Math.max(0, newQuantity) };
-        }
-        return pd;
-      });
-      setCartValueInfos(updatedCartValueInfos);
-      setCartValues(
-        updatedCartValueInfos.map((pd) => ({
-          productDetailId: pd.productDetail.id!,
-          quantity: pd.quantity,
-        }))
-      );
-
-      console.log(updatedCartValueInfos);
-      setIsCartUpdated(true);
-      return updatedCartValueInfos;
-    });
-    debouncedUpdateCartData();
-  };
-
-  const handleQuantityBlur = (id: number, quantity: number) => {
-    if (quantity === 0 || isNaN(quantity)) {
-      Swal.fire({
-        title: "Bạn có muốn xóa sản phẩm khỏi giỏ hàng không?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Xóa",
-        cancelButtonText: "Hủy",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          handleRemoveProduct(id);
-        } else {
-          setCartValueInfos((prevCartValueInfos) =>
-            prevCartValueInfos.map((pd) =>
-              pd.productDetail.id === id
-                ? { ...pd, quantity: tempQuantity[id] || 1 }
-                : pd
-            )
-          );
-        }
-      });
-    }
-  };
-
-  // useEffect(() => {
-  //   if (cartValueInfos.length > 0) {
-  //     updateCartData();
-  //   }
-  // }, [cartValueInfos]);
-
-  const handleRemoveProduct = async (id: number) => {
-    const token = Cookies.get("accessToken");
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
-
-    try {
-      const updatedCartValueInfos = cartValueInfos.filter(
-        (item) => item.productDetail.id !== id
-      );
-
-      setCartValueInfos(updatedCartValueInfos);
-
-      const cartData = {
-        cartValues: updatedCartValueInfos.map((pd) => ({
-          productDetailId: pd.productDetail.id,
-          quantity: pd.quantity,
-        })),
-        userId: cart?.userId,
-      };
-
-      await updateCart(cartData, token);
-      console.log("Giỏ hàng đã được cập nhật", cartData);
-    } catch (error) {
-      console.error("Lỗi khi xóa sản phẩm:", error);
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  const handleClearCart = async () => {
-    const token = Cookies.get("accessToken");
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
-
-    Swal.fire({
-      title: "Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const updatedCartValueInfos = [];
-          setCartValueInfos(updatedCartValueInfos);
-
-          const cartData = {
-            cartValues: updatedCartValueInfos.map((pd) => ({
-              productDetailId: pd.productDetail.id,
-              quantity: pd.quantity,
-            })),
-            userId: cart?.userId,
-          };
-
-          await updateCart(cartData, token);
-          setTotalPrice(0);
-          toast.success("Xóa thành công");
-        } catch (error) {
-          console.error("Lỗi khi xóa toàn bộ giỏ hàng:", error);
-          toast.error(getErrorMessage(error));
-        }
-      }
-    });
-  };
-
-  // const subtotal = cartValueInfos.reduce(
-  //   (sum, pd) => sum + (pd.productDetail.price || 0) * (pd.quantity || 0),
-  //   0
-  // );
-  // const discount = 0;
-  //   const discount = productDetails.reduce(
-  //     (sum, pd) =>
-  //       pd.originPrice
-  //         ? sum + (pd.originPrice - pd.price) * (pd.quantity || 0)
-  //         : sum,
-  //     0
-  //   );
-  // const shipping = 20000;
-  // const shippingDiscount = 20000;
-  // const total = Math.max(0, subtotal - discount);
+    modifyItemInCart(cartValue)
+  }
 
   const handleBuy = async () => {
-    if (cartValueInfos.length < 0) return;
-    const orderDetails: OrderDetailValue[] = cartValueInfos.map((value) => {
+    if (selectProductDetails.length < 0) return
+    const orderDetails: OrderDetailValue[] = selectProductDetails.map(value => {
       return {
         productDetailId: value.productDetail.id,
-        quantity: value.quantity,
-      };
-    });
+        quantity: value.quantity
+      }
+    })
     const data = await createOrder(orderDetails);
-    Cookies.set("orderId", data.id, { expires: 1 / 6 });
-    navigate("/checkout");
-  };
+    Cookies.set('orderId', data.id, { expires: 1 / 6 })
+    navigate('/checkout')
+  }
+
+  useEffect(() => {
+    const total = selectProductDetails
+      .map(value => {
+        const price = value.productDetail.price
+        const quantity = value.quantity
+        return price * quantity
+      })
+      .reduce((total, money) => total + money, 0)
+
+    setMoneyTotal(total)
+  }, [selectProductDetails])
+
+  useEffect(() => {
+    if (cart?.cartValueInfos) {
+      setSelectProductDetails(cart.cartValueInfos)
+    }
+  }, [cart])
+
+  useEffect(() => {
+    if (!cart?.cartValueInfos) return
+    if (isSelectAll) {
+      setSelectProductDetails(cart.cartValueInfos)
+    } else {
+      setSelectProductDetails([])
+    }
+  }, [isSelectAll])
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
-      <Spin spinning={loading} indicator={<LoadingCustom />}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Box
+            className="shadow-section"
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 5,
+              padding: 2,
+              position: "relative",
+            }}
+          >
+            <Box>
+              <Typography variant="h5" gutterBottom>
+                Giỏ hàng
+              </Typography>
+            </Box>
             <Box
-              className="shadow-section"
               sx={{
-                backgroundColor: "white",
-                borderRadius: 5,
-                padding: 2,
-                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                mb: 4,
+                justifyContent: "space-between",
               }}
             >
-              <Box>
-                <Typography variant="h5" gutterBottom>
-                  Giỏ hàng
-                </Typography>
-              </Box>
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  mb: 2,
-                  justifyContent: "space-between",
+                  alignItems: "center"
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Checkbox 
-                  checked={selectAll} 
-                  onChange={handleSelectAll} 
-                  disabled={cartValueInfos.length === 0}
-                  />
-                  <Typography variant="body1">Sản phẩm</Typography>
-                </Box>
-                <Tooltip title="Xóa tất cả">
-                  <Button
-                    color="error"
-                    onClick={handleClearCart}
-                    disabled={cartValueInfos.length === 0}
-                  >
-                    XÓA TẤT CẢ
-                  </Button>
-                </Tooltip>
+                <Checkbox checked={isSelectAll} onChange={() => setIsSelectAll(prev => !prev)} />
+                <Typography variant="body1">Chọn tất cả</Typography>
               </Box>
+              <Tooltip title="Xóa tất cả">
+                <Button
+                  color="error"
+                  onClick={handleClearSelectProduct}
+                  disabled={selectProductDetails.length === 0}
+                >
+                  Xóa sản phẩm đã chọn
+                </Button>
+              </Tooltip>
+            </Box>
 
-              {cartValueInfos.map((pd) => (
-                <Box
-                  key={pd.productDetail.id}
-                  sx={{
-                    display: "flex",
-                    my: 2,
-                    borderBottom: "1px solid #ccc",
-                    paddingBottom: 1,
+            {cart?.cartValueInfos.map((pd) => (
+              <Box
+                key={pd.productDetail.id}
+                sx={{
+                  display: "flex",
+                  my: 2,
+                  borderBottom: "1px solid #ccc",
+                  paddingBottom: 1,
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
                   }}
                 >
-                  <div
+                  <Checkbox
+                    checked={selectProductDetails.map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
+                    onChange={() => handleSelectProductDetail(pd)}
+                  />
+                </div>
+                <img
+                  src={pd.productDetail.images?.[0].url}
+                  alt={pd.productDetail.product?.name}
+                  style={{ width: 100, height: 100, objectFit: "cover" }}
+                />
+                <Box sx={{ ml: 2, flexGrow: 1 }}>
+                  <Typography variant="h5">
+                    {pd.productDetail.product?.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
+                  </Typography>
+                  <Typography
+                    color="text.secondary"
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
                     }}
+                    className="mt-3"
+                    component="div"
                   >
-                    <Checkbox
-                      checked={
-                        selectedProductDetails[pd.productDetail.id] || false
-                      }
-                      onChange={() =>
-                        handleSelectProductDetail(pd.productDetail.id)
-                      }
-                    />
-                  </div>
-                  <img
-                    src={pd.productDetail.images?.[0].url}
-                    alt={pd.productDetail.product?.name}
-                    style={{ width: 100, height: 100, objectFit: "cover" }}
+                    <Typography
+                      variant="h6"
+                      color="info.main"
+                      component="div"
+                    >
+                      <b>
+                        {(pd.productDetail.price || 0).toLocaleString(
+                          "vi-VN"
+                        )}{" "}
+                        ₫
+                      </b>
+                    </Typography>
+                    {pd.productDetail.originPrice && (
+                      <span
+                        style={{
+                          textDecoration: "line-through",
+                          marginLeft: "20px",
+                          color: "gray",
+                        }}
+                      >
+                        {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
+                        ₫
+                      </span>
+                    )}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <IconButton
+                    onClick={() => handleQuantityChange(pd, -1)}
+                    disabled={pd.quantity <= 1}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                  <TextField
+                    type="number"
+                    value={pd.quantity}
+                    onChange={(e) => handleChangeQuantityInput(e, pd)}
                     sx={{
                       width: 60,
                       textAlign: "center",
-                      "& .MuiInput-underline:before": { borderBottom: "none" },
+                      "& .MuiInput-underline:before": {
+                        borderBottom: "none",
+                      },
                       "& .MuiInput-underline:after": { borderBottom: "none" },
                       "& input": {
                         padding: 0,
                         textAlign: "center",
                       },
                       "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                        {
-                          WebkitAppearance: "none",
-                          margin: 0,
-                        },
+                      {
+                        WebkitAppearance: "none",
+                        margin: 0,
+                      },
                     }}
                     inputProps={{
-                      min: 1,
+                      min: 0,
                       max: pd.productDetail.quantity,
                     }}
                     variant="standard"
                   />
-                  <Box sx={{ ml: 2, flexGrow: 1 }}>
-                    <Typography variant="h5">
-                      {pd.productDetail.product?.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
-                    </Typography>
-                    <Typography
-                      color="text.secondary"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                      className="mt-3"
-                      component="div"
-                    >
-                      <Typography
-                        variant="h6"
-                        color="info.main"
-                        component="div"
-                      >
-                        <b>
-                          {(pd.productDetail.price || 0).toLocaleString(
-                            "vi-VN"
-                          )}{" "}
-                          ₫
-                        </b>
-                      </Typography>
-                      {pd.productDetail.originPrice && (
-                        <span
-                          style={{
-                            textDecoration: "line-through",
-                            marginLeft: "20px",
-                            color: "gray",
-                          }}
-                        >
-                          {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
-                          ₫
-                        </span>
-                      )}
-                    </Typography>
-                  </Box>
-                  <Tooltip title="Xóa">
-                    <IconButton
-                      className="remove-icon"
-                      onClick={() => handleRemoveProduct(pd.productDetail.id)}
-                      sx={{
-                        position: "absolute",
-                        left: -50,
-                        borderRadius: "50%",
-                        width: "25px",
-                        height: "25px",
-                        backgroundColor: "#f8f9fa",
-                        color: "gray",
-                        transform: "translateY(150%)",
-                      }}
-                    >
-                      <CancelIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <IconButton
-                      onClick={() =>
-                        handleQuantityChange(pd.productDetail.id, -1)
-                      }
-                      // disabled={pd.quantity <= 1}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                    <TextField
-                      type="number"
-                      value={pd.quantity}
-                      onChange={(e) => {
-                        const newQuantity = parseInt(e.target.value, 10);
-                        if (!isNaN(newQuantity)) {
-                          handleQuantityChange(
-                            pd.productDetail.id,
-                            newQuantity - pd.quantity
-                          );
-                        } else {
-                          setCartValueInfos((prevCartValueInfos) =>
-                            prevCartValueInfos.map((item) =>
-                              item.productDetail.id === pd.productDetail.id
-                                ? { ...item, quantity: 0 } // hoặc một giá trị mặc định
-                                : item
-                            )
-                          );
-                        }
-                      }}
-                      onFocus={() =>
-                        setTempQuantity((prev) => ({
-                          ...prev,
-                          [pd.productDetail.id]: pd.quantity,
-                        }))
-                      }
-                      onBlur={() =>
-                        handleQuantityBlur(pd.productDetail.id, pd.quantity)
-                      }
-                      sx={{
-                        width: 60,
-                        textAlign: "center",
-                        "& .MuiInput-underline:before": {
-                          borderBottom: "none",
-                        },
-                        "& .MuiInput-underline:after": { borderBottom: "none" },
-                        "& input": {
-                          padding: 0,
-                          textAlign: "center",
-                        },
-                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                          {
-                            WebkitAppearance: "none",
-                            margin: 0,
-                          },
-                      }}
-                      inputProps={{
-                        min: 0,
-                        max: pd.productDetail.quantity,
-                      }}
-                      variant="standard"
-                    />
-                    <IconButton
-                      onClick={() =>
-                        handleQuantityChange(pd.productDetail.id, 1)
-                      }
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </Box>
+                  <IconButton
+                    onClick={() =>
+                      handleQuantityChange(pd, 1)
+                    }
+                  >
+                    <AddIcon />
+                  </IconButton>
                 </Box>
-              ))}
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box
-              className="shadow-section"
-              sx={{ backgroundColor: "white", borderRadius: 5, padding: 2 }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Chi tiết đơn hàng
-              </Typography>
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
-              >
-                <Typography>Tổng giá trị sản phẩm</Typography>
-                <Typography>{subToTals.toLocaleString("vi-VN")} ₫</Typography>
               </Box>
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
-              >
-                <Typography>Giảm giá</Typography>
-                {/* <Typography color="error">-{discount.toLocaleString('vi-VN')} ₫</Typography> */}
-              </Box>
-              {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
-                            <Typography>Vận chuyển</Typography>
-                            <Typography>{shipping.toLocaleString('vi-VN')} ₫</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 1 }}>
-                            <Typography>Giảm giá vận chuyển</Typography>
-                            <Typography color="error">-{shippingDiscount.toLocaleString('vi-VN')} ₫</Typography>
-                        </Box> */}
-              <Divider sx={{ my: 2 }} />
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
-              >
-                <Typography variant="h6">Tổng thanh toán</Typography>
-                <Typography variant="h6">
-                  {totalPrice.toLocaleString("vi-VN")} ₫
-                </Typography>
-              </Box>
-              <Button
-                variant="contained"
-                onClick={handleBuy}
-                fullWidth
-                sx={{ mt: 2 }}
-                disabled={selectedProductCount === 0}
-              >
-                Mua hàng
-                {/* (
-                {cartValueInfos.reduce(
-                  (sum, pd) => sum + (pd.quantity|| 0),
-                  0
-                )}
-                ) */}
-              </Button>
-            </Box>
-          </Grid>
+            ))}
+          </Box>
         </Grid>
-      </Spin>
+        <Grid item xs={12} md={4}>
+          <Box
+            className="shadow-section"
+            sx={{ backgroundColor: "white", borderRadius: 5, padding: 2 }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Chi tiết đơn hàng
+            </Typography>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", my: 1 }}
+            >
+              <Typography>Tổng giá trị sản phẩm</Typography>
+              <Typography>{moneyTotal.toLocaleString("vi-VN")} ₫</Typography>
+            </Box>
+            <Button variant="contained" onClick={handleBuy} fullWidth sx={{ mt: 2 }}>
+              Mua hàng
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

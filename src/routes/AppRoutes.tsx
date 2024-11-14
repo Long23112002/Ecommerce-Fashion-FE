@@ -31,6 +31,7 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
+import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
 
 
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
+                <Route path="/checkout/status" element={<ConfirmCheckout />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
@@ -80,8 +82,10 @@ const AppRoutes = () => {
                 </Route>
             </Route>
 
+
             {/* Route xử lý lỗi */}
             <Route path="/403" element={<ForbiddenPage />} />
+
         </Routes>
     );
 };

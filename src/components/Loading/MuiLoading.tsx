@@ -2,10 +2,11 @@ import { Box, CircularProgress } from '@mui/material'
 import React from 'react'
 
 interface IProps {
-    height?: string
+    height?: string,
+    size?: number
 }
 
-const MuiLoading: React.FC<IProps> = ({ height }) => {
+const MuiLoading: React.FC<IProps> = ({ height, size }) => {
     return (
         <Box
             sx={{
@@ -15,7 +16,7 @@ const MuiLoading: React.FC<IProps> = ({ height }) => {
                 height: height ? height : '100%',
             }}
         >
-            <CircularProgress />
+            <CircularProgress size={size} />
         </Box>
     )
 }

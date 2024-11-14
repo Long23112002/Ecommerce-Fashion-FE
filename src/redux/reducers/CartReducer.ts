@@ -1,37 +1,54 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CartValueInfos, CartValues } from '../../types/Cart';
+import { Cart, CartValueInfos, CartValues } from '../../types/Cart';
 
-interface CartState {
-    cartValues: CartValues[];
-    totalPrice: number;
-    totalQuantity: number;
-  }
-  
-  const initialState: CartState = {
-    cartValues: [],
-    totalPrice: 0,
-    totalQuantity: 0,
-  };
+const initialState: Cart = {
+  id: -1,
+  userId: -1,
+  cartValueInfos: [],
+  cartValues: [],
+};
 
-
-const cartSlice = createSlice({
+const CartReducer = createSlice({
+  initialState: initialState,
   name: 'cart',
-  initialState,
   reducers: {
-    addItemToCart(state,action){
-      const newItem = action.payload;
-      const existingItem = state.cartValues.find(item => item.productDetailId === newItem.productDetail.id);
-      state.totalQuantity = state.totalQuantity + 1;
-      if(existingItem){
-        existingItem.quantity += newItem.quantity;
-        state.totalQuantity += newItem.quantity;
+    setCart: (state, action: PayloadAction<Cart>) => {
+      const { payload } = action
+      if (!payload || payload.id == -1) return
+      state.id = action.payload.id;
+      state.userId = action.payload.userId;
+      state.cartValueInfos = action.payload.cartValueInfos;
+      state.cartValues = action.payload.cartValues;
+    },
+    addItemToCart: (state, action: PayloadAction<CartValues>) => {
+      const newItem = action.payload
+      const item = state.cartValues.find(cart => cart.productDetailId == newItem.productDetailId)
+      const { cartValues } = state
+      if (item) {
+        item.quantity += newItem.quantity
       } else {
-        state.cartValues.push(newItem);
-        state.totalQuantity += newItem.quantity;
+        cartValues.push(newItem)
       }
-      
-      state.totalPrice += newItem.productDetail.price * newItem.quantity;
+    },
+    setItemInCart: (state, action: PayloadAction<CartValues>) => {
+      const newItem = action.payload
+      const item = state.cartValues.find(cart => cart.productDetailId == newItem.productDetailId)
+      if (item) {
+        item.quantity = newItem.quantity
+      }
+    },
+    setCartValues: (state, action: PayloadAction<CartValues[]>) => {
+      const newItems = action.payload
+      state.cartValues = newItems
     }
   }
 });
-export default cartSlice.reducer;
+
+export const cartSelector = (state: { cart: Cart }) => state.cart;
+export const totalCartSelector = (state: { cart: Cart }) => {
+  return state.cart.cartValues
+    .map(cart => cart.quantity)
+    .reduce((total, quantity) => total += quantity, 0);
+}
+export const { addItemToCart, setCart, setItemInCart, setCartValues } = CartReducer.actions
+export default CartReducer.reducer;
