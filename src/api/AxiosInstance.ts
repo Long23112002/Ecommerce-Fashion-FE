@@ -16,7 +16,7 @@ const refreshAxiosInstance = axios.create({
     },
 });
 
-export const refreshToken = async (): Promise<string> => {
+export const refreshToken = async (): Promise<any> => {
     const refreshToken = Cookies.get('refreshToken');
     const response = await refreshAxiosInstance.post(`/api/v1/auth/refresh-token`, {}, {
         headers: {
@@ -59,7 +59,6 @@ axiosInstance.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 const newToken = await refreshToken();
-                console.log('New Token:', newToken);
                 originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
             } catch (err) {
