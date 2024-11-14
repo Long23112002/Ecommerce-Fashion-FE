@@ -32,7 +32,7 @@ import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
-import CustomerOrder from '../pages/Customer/customer-order/customer-order.tsx';
+import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder';
 
 
 
