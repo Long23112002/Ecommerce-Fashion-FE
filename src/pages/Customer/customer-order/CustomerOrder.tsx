@@ -1,85 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { Segmented, Tabs, Card, Spin } from 'antd';
+import { Tabs, Card, Spin, Row, Col,Divider } from 'antd';
 import type { TabsProps } from 'antd';
-import { Container } from '@mui/material';
-import axiosInstance from '../../../api/AxiosInstance';
-import { BASE_API } from '../../../constants/BaseApi';
-import { User } from '../../../types/User';
+import { Container,Typography,Grid, useTheme } from '@mui/material';
+import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
+import OrderDetailCard from './CustomerOrderCard';
+import { fetchOrdersByUserId } from '../../../api/CustomerOrderApi.js';
+import Order from '../../../types/Order.js';
+import Cookies from "js-cookie"
+import { toast } from 'react-toastify';
+import { OrderStatus, OrderStatusLabel } from '../../../enum/OrderStatusEnum.js';
+import OrderTabContent from './OrderTabContent.js';
 
-const { TabPane } = Tabs;
-
-// Tạo các trạng thái đơn hàng
-const orderStatuses = [
-  'PENDING',
-  'CANCEL',
-  'SHIPPING',
-  'SUCCESS',
-  'DRAFT',
-  'REFUND',
-];
-
-// Component nội dung Tab cho từng trạng thái đơn hàng
-const OrderTabContent: React.FC<{ status: string }> = ({ status }) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any[]>([]);
-
-  useEffect(() => {
-    setLoading(true);
-    axiosInstance
-      .get(`${BASE_API}/api/v1/orders?status=${status}&user=9`)
-      .then((response) => {
-        setData(response.data.data);
-        setLoading(false);
-        console.log(data);
-        
-      })
-      .catch((error) => {
-        console.error('Error fetching orders:', error);
-        setLoading(false);
-      });
-  }, [status]);
-
-  if (loading) {
-    return <Spin size="large" />;
-  }
-
-  return (
-    <div>
-      {data.length === 0 ? (
-        <h5 className='text-center'>Quý khách chưa có đơn hàng nào</h5>
-      ) : (
-        data.map((order) => (
-          <Card key={order.id} title={`Order ID: ${order.id}`} style={{ margin: 10 }}>
-            <p>Status: {order.status}</p>
-            <p>Details: {order.details}</p>
-          </Card>
-        ))
-      )}
-    </div>
-  );
-};
-
-// Hàm xử lý sự thay đổi tab
 const onChange = (key: string) => {
   console.log('Active tab key:', key);
 };
 
 const CustomerOrder: React.FC = () => {
-  const [alignValue, setAlignValue] = useState<Align>('center');
+  const items = Object.values(OrderStatus).map((status) => ({
+    key: status,
+    label: OrderStatusLabel[status],
+    children: <OrderTabContent status={status} />,
+  }));
   return (
     <Container>
       <Tabs
-      centered
+        centered
         defaultActiveKey="1"
         onChange={onChange}
         size="large"
         indicator={{ size: (origin) => origin - 20, align: "center" }}
+        className='mt-3'
+        style={{
+          fontWeight:"500",
+          color:"#333",
+        }}
+        items={items}
       >
-        {orderStatuses.map((status, index) => (
-          <TabPane tab={status} key={index + 1}>
+        {/* {Object.values(OrderStatus).map((status) => (
+          <TabPane tab={OrderStatusLabel[status]} key={status} className='mt-5'>
             <OrderTabContent status={status} />
           </TabPane>
-        ))}
+        ))} */}
       </Tabs>
     </Container>
   );
