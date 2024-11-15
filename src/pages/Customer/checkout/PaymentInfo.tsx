@@ -11,15 +11,16 @@ import {
 import React, { useState } from 'react'
 import { toast } from "react-toastify"
 import { payOrder } from "../../../api/OrderApi"
-import { default as PaymentMethod, default as PaymentMethodEnum } from "../../../enum/PaymentMethod"
-import { OrderUpdateRequest } from '../../../types/Order'
+import PaymentMethodEnum from "../../../enum/PaymentMethodEnum"
+import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 
 interface IProps {
+  order: Order,
   orderRequest: OrderUpdateRequest,
   setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
 }
 
-const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
+const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodEnum>(PaymentMethodEnum.CASH)
 
   const isValidPaymentMethod = (value: string): boolean => {
@@ -29,16 +30,46 @@ const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     if (isValidPaymentMethod(value)) {
-      console.log(value)
       setPaymentMethod(value as PaymentMethodEnum)
     }
   }
 
+  const validate = () => {
+    const phoneRegex = /^(84|0[3|5|7|8|9])[0-9]{8}$/;
+    if (!orderRequest.fullName.trim()) {
+      toast.error('Tên không được để trống')
+      return false
+    }
+    else if (!phoneRegex.test(orderRequest.phoneNumber)) {
+      toast.error('Số điện thoại không hợp lệ')
+      return false
+    }
+    else if (!orderRequest.specificAddress.trim()) {
+      toast.error('Địa chỉ không được để trống')
+      return false
+    }
+    return true;
+  };
+
+  const handleVNPayPayment = async () => {
+    const data = await payOrder(orderRequest)
+    if (data) {
+      window.location.assign(data)
+    }
+  }
+
   const handlePay = async () => {
+    if (order.status !== OrderStatus.DRAFT) {
+      toast.error("Đơn hàng không thể giao dịch được nữa")
+      return
+    }
+    if (!validate()) return
     try {
-      const data = await payOrder(orderRequest)
-      if (data) {
-        window.location.assign(data)
+      if (paymentMethod == PaymentMethodEnum.VNPAY) {
+        await handleVNPayPayment()
+      }
+      else if (paymentMethod == PaymentMethodEnum.CASH) {
+
       }
     } catch (error: any) {
       toast.error(error.response.data.message)

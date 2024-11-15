@@ -19,6 +19,9 @@ import SizeButton from '../SizeButton'
 import ImageCarousel from './ImageCarousel'
 import { CartValues } from '../../types/Cart'
 import useCart from '../../hook/useCart'
+import { OrderDetailValue } from '../../types/Order'
+import Cookies from 'js-cookie'
+import { createOrder } from '../../api/OrderApi'
 
 interface IProps {
     product: Product,
@@ -93,6 +96,17 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         if (!selectedProductDetail?.id) return
         const cartValues: CartValues = { productDetailId: selectedProductDetail.id, quantity: quantity }
         cart.addToCart(cartValues)
+    }
+
+    const handleBuy = async () => {
+        if (!selectedProductDetail) return
+        const orderDetail: OrderDetailValue[] = [{
+            productDetailId: selectedProductDetail.id,
+            quantity: quantity
+        }]
+        const data = await createOrder(orderDetail);
+        Cookies.set('orderId', data.id, { expires: 1 / 6 })
+        navigate('/checkout')
     }
 
     const arrayColor: Color[] = productDetails?.reduce((acc: Color[], pd) => {
@@ -307,6 +321,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                                 size='large'
                                 startIcon={<ShoppingBasket />}
                                 sx={{ width: '100%' }}
+                                onClick={handleBuy}
                             >
                                 Mua ngay
                             </Button>
