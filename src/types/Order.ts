@@ -1,4 +1,5 @@
-import { UserData } from "../api/AuthApi";
+import PaymentMethodEnum from "../enum/PaymentMethod";
+import Address from "./Address";
 import OrderDetail from "./OrderDetail";
 import { User } from "./User";
 
@@ -27,10 +28,12 @@ export interface Order {
     discountId: number;
     user: User;
     status: OrderStatus;
+    paymentMethod: PaymentMethodEnum;
+    moneyShip: number;
     phoneNumber: string;
     totalMoney: number;
     shipdate?: Date;
-    address: string;
+    address: Address;
     note: string;
     createdAt: number;
     updatedAt: number;
