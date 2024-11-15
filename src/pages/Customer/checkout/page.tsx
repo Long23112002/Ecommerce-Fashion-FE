@@ -1,25 +1,23 @@
 import { Container, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { getOrderById } from '../../../api/OrderApi'
-import Order, { OrderRequest } from '../../../types/Order'
+import Order, { OrderUpdateRequest } from '../../../types/Order'
 import PaymentInfo from './PaymentInfo'
 import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
+import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 
 const CheckoutPage: React.FC = () => {
 
   const [order, setOrder] = useState<Order>();
-
-  const [orderRequest, setOrderRequest] = useState<OrderRequest>({
+  const [orderRequest, setOrderRequest] = useState<OrderUpdateRequest>({
     fullName: '',
     phoneNumber: '',
-    email: '',
-    paymentMethodId: 0,
-    address: '',
-    totalMoney: 0,
-    orderDetails: [],
+    specificAddress: '',
+    note: ''
   });
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     setOrderRequest(prev => ({
@@ -36,6 +34,7 @@ const CheckoutPage: React.FC = () => {
 
 
   useEffect(() => {
+    setLoading(true)
     const id = Cookies.get('orderId')
     if (!id) return
     const callGetOrderById = async () => {
@@ -43,6 +42,7 @@ const CheckoutPage: React.FC = () => {
       setOrder({ ...data })
     }
     callGetOrderById()
+    setLoading(false)
   }, [])
 
   return (
@@ -60,6 +60,7 @@ const CheckoutPage: React.FC = () => {
                 setOrder={setOrder}
                 orderRequest={orderRequest}
                 setOrderRequest={setOrderRequest}
+                setLoading={setLoading}
               />
               <PaymentInfo
                 orderRequest={orderRequest}
@@ -72,6 +73,7 @@ const CheckoutPage: React.FC = () => {
           </Grid>
         </Container>
       }
+      {loading && <MuiLoadingScreen />}
     </>
   )
 }

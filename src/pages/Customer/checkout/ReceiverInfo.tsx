@@ -5,18 +5,19 @@ import { getAllDistrictByProvinceId, getAllProvinces, getAllWardByDistrictId } f
 import { OrderAddressUpdate, updateAdressOrder } from '../../../api/OrderApi'
 import { userSelector } from '../../../redux/reducers/UserReducer'
 import District from '../../../types/District'
-import Order, { OrderRequest } from '../../../types/Order'
+import Order, { OrderUpdateRequest } from '../../../types/Order'
 import Province from '../../../types/Province'
 import Ward from '../../../types/Ward'
 
 interface IProps {
   order: Order,
   setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
-  orderRequest: OrderRequest,
-  setOrderRequest: React.Dispatch<React.SetStateAction<OrderRequest>>
+  orderRequest: OrderUpdateRequest,
+  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest }) => {
+const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading }) => {
 
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -43,15 +44,6 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
     if (value) {
       setSelectedWard({ ...value })
     }
-  }
-
-  const handleSpecificAddress = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    setSpecificAddress(value)
-    setOrderRequest(prev => ({
-      ...prev,
-      address: `${value || ''}-${selectedWard?.WardName || ''}-${selectedDistrict?.DistrictName || ''}-${selectedProvince?.ProvinceName || ''}`
-    }))
   }
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -102,21 +94,21 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
       address: `${specificAddress || ''}-${selectedWard?.WardName || ''}-${selectedDistrict?.DistrictName || ''}-${selectedProvince?.ProvinceName || ''}`
     }))
 
-    if (!selectedDistrict?.DistrictID) return
-
+    if (!selectedDistrict || !selectedProvince) return
     const callUpdateAdressOrder = async () => {
+      setLoading(true)
       const request: OrderAddressUpdate = {
-        provinceID: selectedDistrict.DistrictID,
-        provinceName: selectedDistrict.DistrictName,
+        provinceID: selectedProvince?.ProvinceID,
+        provinceName: selectedProvince?.ProvinceName,
         districtID: selectedDistrict.DistrictID,
         districtName: selectedDistrict.DistrictName,
         wardCode: selectedWard.WardCode,
         wardName: selectedWard.WardName
       }
       const data = await updateAdressOrder(request)
-      setOrder({...data})
+      setOrder({ ...data })
+      setLoading(false)
     }
-
     callUpdateAdressOrder()
   }, [selectedWard])
 
@@ -165,15 +157,6 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         sx={{ mb: 3 }}
         onChange={handleChange}
       />
-      <TextField
-        id="email"
-        size='small'
-        label="Email"
-        fullWidth
-        value={orderRequest.email}
-        sx={{ mb: 3 }}
-        onChange={handleChange}
-      />
       <Autocomplete
         size='small'
         disablePortal
@@ -209,14 +192,15 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         label="Địa chỉ cụ thể"
         fullWidth
-        value={specificAddress}
-        onChange={handleSpecificAddress}
+        value={orderRequest.specificAddress}
+        onChange={handleChange}
         sx={{ mb: 3 }}
       />
       <TextField
         id='note'
         size='small'
         label="Ghi chú"
+        value={orderRequest.note}
         fullWidth
         multiline
         rows={3}

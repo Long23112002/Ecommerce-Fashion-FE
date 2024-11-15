@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
-import Order, { OrderRequest } from '../../../types/Order';
+import Order from '../../../types/Order';
 import ProductDetail from '../../../types/ProductDetail';
 
 interface IProps {
@@ -57,7 +57,7 @@ const ProductDetailItem: React.FC<{ pd: ProductDetail }> = ({ pd }) => {
             <Grid item xs={4} sm={3}>
                 <Box
                     component="img"
-                    src={pd.images[0].url}
+                    src={pd.images[0].url || ''}
                     alt={pd.product.name}
                     sx={{
                         height: 100,
