@@ -13,10 +13,11 @@ interface IProps {
   order: Order,
   setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
   orderRequest: OrderUpdateRequest,
-  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
+  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest }) => {
+const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading }) => {
 
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -93,21 +94,21 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
       address: `${specificAddress || ''}-${selectedWard?.WardName || ''}-${selectedDistrict?.DistrictName || ''}-${selectedProvince?.ProvinceName || ''}`
     }))
 
-    if (!selectedDistrict?.DistrictID) return
-
+    if (!selectedDistrict || !selectedProvince) return
     const callUpdateAdressOrder = async () => {
+      setLoading(true)
       const request: OrderAddressUpdate = {
-        provinceID: selectedDistrict.DistrictID,
-        provinceName: selectedDistrict.DistrictName,
+        provinceID: selectedProvince?.ProvinceID,
+        provinceName: selectedProvince?.ProvinceName,
         districtID: selectedDistrict.DistrictID,
         districtName: selectedDistrict.DistrictName,
         wardCode: selectedWard.WardCode,
         wardName: selectedWard.WardName
       }
       const data = await updateAdressOrder(request)
-      setOrder({...data})
+      setOrder({ ...data })
+      setLoading(false)
     }
-
     callUpdateAdressOrder()
   }, [selectedWard])
 

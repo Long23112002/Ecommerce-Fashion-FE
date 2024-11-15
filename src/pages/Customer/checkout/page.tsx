@@ -6,17 +6,18 @@ import PaymentInfo from './PaymentInfo'
 import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
+import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 
 const CheckoutPage: React.FC = () => {
 
   const [order, setOrder] = useState<Order>();
-
   const [orderRequest, setOrderRequest] = useState<OrderUpdateRequest>({
     fullName: '',
     phoneNumber: '',
     specificAddress: '',
     note: ''
   });
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     setOrderRequest(prev => ({
@@ -33,6 +34,7 @@ const CheckoutPage: React.FC = () => {
 
 
   useEffect(() => {
+    setLoading(true)
     const id = Cookies.get('orderId')
     if (!id) return
     const callGetOrderById = async () => {
@@ -40,6 +42,7 @@ const CheckoutPage: React.FC = () => {
       setOrder({ ...data })
     }
     callGetOrderById()
+    setLoading(false)
   }, [])
 
   return (
@@ -57,6 +60,7 @@ const CheckoutPage: React.FC = () => {
                 setOrder={setOrder}
                 orderRequest={orderRequest}
                 setOrderRequest={setOrderRequest}
+                setLoading={setLoading}
               />
               <PaymentInfo
                 orderRequest={orderRequest}
@@ -69,6 +73,7 @@ const CheckoutPage: React.FC = () => {
           </Grid>
         </Container>
       }
+      {loading && <MuiLoadingScreen />}
     </>
   )
 }
