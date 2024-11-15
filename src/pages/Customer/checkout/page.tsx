@@ -63,6 +63,7 @@ const CheckoutPage: React.FC = () => {
                 setLoading={setLoading}
               />
               <PaymentInfo
+                order={order}
                 orderRequest={orderRequest}
                 setOrderRequest={setOrderRequest}
               />
