@@ -4,15 +4,17 @@ import { debounce } from "lodash";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { deleteOrder, fetchAllOrders, updateStateOrder ,getOrderById} from "../../../api/OrderApi.ts";
+import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById } from "../../../api/OrderApi.ts";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/order.ts";
 import { getErrorMessage } from "../../Error/getErrorMessage.ts";
 import OrderDetailModal from "../../../components/Order/OrderDetailModal.js";
+import { useNavigate } from 'react-router-dom';
 const { Option } = Select;
 
 const ManagerOrder = () => {
+    const navigate = useNavigate();
     const [form] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
     // const [editingBrand, setEditingOrder] = useState<Order | null>(null);
@@ -109,7 +111,7 @@ const ManagerOrder = () => {
                     name: brandDetails.name
                 });
                 // setEditingOrder(brandDetails);
-            } catch (error:any) {
+            } catch (error: any) {
                 toast.error(error.response?.data?.message || 'Failed to fetch brand details');
             }
         } else {
@@ -254,6 +256,9 @@ const ManagerOrder = () => {
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Popconfirm>
+                    <Button onClick={() => navigate(`/admin/order/${record.id}`)} style={{ marginLeft: 8 }} className="btn-outline-primary">
+                    <i className="fa-regular fa-eye"></i>
+                    </Button>
                 </div>
             ),
         }

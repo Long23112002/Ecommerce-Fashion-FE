@@ -1,0 +1,143 @@
+import React, { useEffect, useState } from "react";
+import { Form, Input, Typography, Table, Row, Col } from 'antd';
+import { Order, OrderStatusLabel } from '../../types/Order';
+import { getOrderById } from "../../api/OrderApi";
+import { useParams } from "react-router-dom";
+import LoadingCustom from "../../components/Loading/LoadingCustom";
+import { getErrorMessage } from "../../pages/Error/getErrorMessage";
+import { toast } from "react-toastify";
+
+const { Text } = Typography;
+
+const OrderDetailPage: React.FC = () => {
+    const [loading, setLoading] = useState(true);
+    const { orderId } = useParams<{ orderId: string }>();
+    const [order, setOrder] = useState<Order | null>(null);
+
+    useEffect(() => {
+        const fetchOrderDetails = async () => {
+            setLoading(true);
+            try {
+                const parsedOrderId = Number(orderId);
+                if (isNaN(parsedOrderId)) {
+                    console.error("ID đơn hàng không hợp lệ:", orderId);
+                    return;
+                }
+                const orderData = await getOrderById(parsedOrderId);
+                setOrder(orderData);
+            } catch (error) {
+                toast.error(getErrorMessage(error));
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrderDetails();
+    }, [orderId]);
+
+    const orderItemColumns = [
+        {
+            title: 'ID Sản Phẩm',
+            dataIndex: ['productDetail', 'id'],
+            key: 'productDetailId',
+        },
+        {
+            title: 'Hình Ảnh',
+            dataIndex: ['productDetail', 'images'],
+            key: 'images',
+            render: (images: { url: string }[]) => (
+                images && images.length > 0 ? (
+                    <img src={images[0].url} alt="Product" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+                ) : null
+            ),
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            render: (price: number) => `${price.toLocaleString()}₫`,
+        },
+        {
+            title: 'Số Lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+        },
+        {
+            title: 'Tổng Tiền',
+            dataIndex: 'totalMoney',
+            key: 'totalMoney',
+            render: (totalMoney: number) => `${totalMoney.toLocaleString()}₫`,
+        }
+    ];
+
+    if (loading) {
+        return <LoadingCustom />;
+    }
+
+    if (!order) {
+        return null;
+    }
+
+    return (
+        <div style={{ padding: '24px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <Text strong style={{ fontSize: '18px' }}>Chi tiết Đơn Hàng</Text>
+                <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>Mã Đơn: {order.id}</div>
+            </div>
+            <Form
+                layout="vertical"
+                initialValues={{
+                    orderCode: order.id,
+                    orderDate: new Date(order.createdAt).toLocaleDateString(),
+                    status: OrderStatusLabel[order.status],
+                    phoneNumber: order.phoneNumber,
+                    address: order.address,
+                    totalMoney: order.totalMoney.toLocaleString() + "₫"
+                }}
+            >
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Mã Đơn Hàng:</Text>} name="orderCode">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Ngày Đặt Hàng:</Text>} name="orderDate">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Trạng Thái:</Text>} name="status">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Số Điện Thoại:</Text>} name="phoneNumber">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Địa Chỉ Giao Hàng:</Text>} name="address">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label={<Text strong>Tổng Tiền:</Text>} name="totalMoney">
+                            <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                <Text strong style={{ fontSize: '28px' }}>Danh Sách Sản Phẩm</Text>
+            </div>
+            <Table
+                columns={orderItemColumns}
+                dataSource={order.orderDetails || []}
+                rowKey="id"
+                pagination={false}
+            />
+        </div>
+    );
+};
+
+export default OrderDetailPage;

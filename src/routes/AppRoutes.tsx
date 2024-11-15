@@ -31,6 +31,7 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
+import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 
 
 
@@ -73,6 +74,7 @@ const AppRoutes = () => {
                 <Route path="/admin/discount/edit/:discountId" element={<UpdateDiscount />} />
                 <Route path="/admin/discount/add" element={<AddDiscount />} />
                 <Route path="/admin/order" element={<ManagerOrder />} />
+                <Route path="/admin/order/:orderId" element={<OrderDetailPage/>} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />
