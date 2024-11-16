@@ -10,6 +10,7 @@ import Cookies from "js-cookie"
 import { toast } from 'react-toastify';
 import { OrderStatus, OrderStatusLabel } from '../../../enum/OrderStatusEnum.js';
 import OrderTabContent from './OrderTabContent.js';
+import "./CssOrder.css"
 
 const onChange = (key: string) => {
   console.log('Active tab key:', key);
@@ -29,7 +30,7 @@ const CustomerOrder: React.FC = () => {
         onChange={onChange}
         size="large"
         indicator={{ size: (origin) => origin - 20, align: "center" }}
-        className='mt-3'
+        className='mt-3 custom-tabs'
         style={{
           fontWeight:"500",
           color:"#333",

@@ -43,25 +43,25 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
         className="centered-spin"
       >
         {data.length === 0 ? (
-          <Container style={{ textAlign: "center" }} className="mt-5">
+          <Container style={{ textAlign: "center", paddingTop:"65px" }} className="mt-5">
             <img
-              src="http://ecommerce-fashion.site:9099/hi8UbqWiYx-No_Data.png"
+              src="http://ecommerce-fashion.site:9099/kGJ2QWVkJn-nodtaaa.png"
               alt="NoData"
               style={{
-                width: 100,
-                height: 100,
+                width: 150,
+                height: 150,
                 objectFit: "cover",
               }}
               className="mt-5"
             />
-            <h5 className="text-center mt-5">Quý khách chưa có đơn hàng nào</h5>
+            <h4 className="text-center mt-5">Quý khách chưa có đơn hàng nào</h4>
           </Container>
         ) : (
           data.map((order) => (
             <Card
               key={order.id}
               title={`Mã đơn hàng: ${order.id}`}
-              style={{ margin: 10, cursor: "pointer" }}
+              style={{ margin: 10, cursor: "pointer"}}
               extra={
                 <h6 className="text-danger">
                   {OrderStatusLabel[order.status]}

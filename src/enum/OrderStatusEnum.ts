@@ -3,7 +3,6 @@ export enum OrderStatus {
     CANCEL = 'CANCEL',
     SHIPPING = 'SHIPPING',
     SUCCESS = 'SUCCESS',
-    DRAFT = 'DRAFT',
     REFUND = 'REFUND',
   }
 
@@ -12,6 +11,5 @@ export enum OrderStatus {
     [OrderStatus.CANCEL]: "ĐÃ HỦY",
     [OrderStatus.SHIPPING]: "ĐANG GIAO",
     [OrderStatus.SUCCESS]: "THÀNH CÔNG",
-    [OrderStatus.DRAFT]: "BẢN NHÁP",
     [OrderStatus.REFUND]: "HOÀN HÀNG",
   };
