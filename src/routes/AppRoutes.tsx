@@ -33,6 +33,7 @@ import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
+import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder';
 
 
 
@@ -55,6 +56,7 @@ const AppRoutes = () => {
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
+                <Route path="/customer-order" element={<CustomerOrder/>}/>
             </Route>
 
             <Route element={<AdminLayout />}>

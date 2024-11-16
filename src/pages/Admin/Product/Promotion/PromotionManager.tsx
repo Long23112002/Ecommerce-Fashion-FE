@@ -294,6 +294,7 @@ const ManagerPromotion = () => {
                 className="btn-outline-warning"
                 onClick={() => showModal(record)}
                 style={{ marginRight: 8 }}
+                disabled={isPromotionEnded}
               >
                 <i className="fa-solid fa-pen-to-square"></i>
               </Button>
