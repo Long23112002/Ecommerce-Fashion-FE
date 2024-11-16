@@ -211,7 +211,7 @@ const ProductManager = () => {
 
       if (token && editingProduct) {
         await updateProduct(editingProduct.id, { name, code, description, idCategory, idBrand, idOrigin, idMaterial, image }, token);
-        toast.success('Cật Nhật Thành Công');
+        toast.success('Cập Nhật Thành Công');
         handleUpdateCancel();
         refreshProducts();
       } else {
