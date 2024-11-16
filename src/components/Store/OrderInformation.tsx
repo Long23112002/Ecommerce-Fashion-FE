@@ -54,6 +54,13 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 onFinish={onFinish}
 
             >
+                  <Form.Item
+                    name="createAt"
+                    label="Ngày tạo"
+                >
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+                
                 <Form.Item label="Mã hóa đơn" name="codeOrder">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
@@ -79,6 +86,13 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
+                    name=""
+                    label="Tổng tiền"
+                >
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item
                     name="idColor"
                     label="Voucher"
                     rules={[
@@ -99,13 +113,6 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                             </Select.Option>
                         ))}
                     </Select>
-                </Form.Item>
-
-                <Form.Item
-                    name="createAt"
-                    label="Ngày tạo"
-                >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item

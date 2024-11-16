@@ -1,20 +1,24 @@
-import { Button, Divider, Image, Table } from 'antd'
+import { Button, Divider, FormInstance, Image, Table } from 'antd'
 import React, { useState } from 'react'
 import Product from '../../types/Product';
 import LoadingCustom from '../Loading/LoadingCustom';
 import { FileImageOutlined } from '@ant-design/icons';
 import ProductDetail from '../../types/ProductDetail';
+import AddQuantityModal from './AddQuantityModal';
 
 interface ProductProps {
+    form: FormInstance;
     products: ProductDetail[];
     loading?: boolean;
+    showModalAddQuantity: () => void;
 }
 
 const ListProduct: React.FC<ProductProps> = ({
     products,
-    loading
+    loading,
+    showModalAddQuantity
 }) => {
-
+    
     const columns = [
         {
             title: 'Mã sản phẩm',
@@ -71,7 +75,7 @@ const ListProduct: React.FC<ProductProps> = ({
             render: (_: any, record: any) => (
                 <>
                     <Button
-                        // onClick={() => showUpdateModal(record)}
+                        onClick={() => showModalAddQuantity()}
                         style={{ margin: '0 4px' }} className="btn-outline-primary">
                         <i className="fa-solid fa-circle-plus"></i>
                     </Button>
@@ -93,6 +97,7 @@ const ListProduct: React.FC<ProductProps> = ({
                 rowKey="id"
                 expandable={{ childrenColumnName: 'children' }}
             />
+
         </>
     )
 }

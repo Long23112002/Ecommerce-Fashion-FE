@@ -12,6 +12,7 @@ import Product from "../../../types/Product";
 import { getAllProductDetails } from "../../../api/ProductDetailApi";
 import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
+import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 
 const SellingAtStore = () => {
     const [form] = Form.useForm();
@@ -25,19 +26,48 @@ const SellingAtStore = () => {
     const [products, setProducts] = useState<ProductDetail[]>([]);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
 
-    const fetchVouchersDebounced = useCallback(
-        debounce(async (current: number, pageSize: number) => {
-            setLoadingVouchers(true);
-            try {
-                const response = await fetchAllVouchers(pageSize, current - 1);
-                setVouchers(response.data);
-            } catch (error) {
-                console.error("Error fetching vouchers:", error);
-            } finally {
-                setLoadingVouchers(false);
-            }
-        }, 500), []);
+    const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
 
+
+    // const fetchVouchersDebounced = useCallback(
+    //     debounce(async (current: number, pageSize: number) => {
+    //         setLoadingVouchers(true);
+    //         try {
+    //             const response = await fetchAllVouchers(pageSize, current - 1);
+    //             setVouchers(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching vouchers:", error);
+    //         } finally {
+    //             setLoadingVouchers(false);
+    //         }
+    //     }, 500), []);
+
+    const showAddQuantityModal = () => {
+        form.resetFields();
+        setIsOpenModalAddQuantity(true);
+    }
+    const handleAddQuantityCancel = () => {
+        setIsOpenModalAddQuantity(false);
+    };
+    const handleAddQuantityOk = async () => {
+        // try {
+        //     const values = await form.validateFields();
+        //     const { price, quantity, idColor, idSize } = values;
+        //     const images = imageList;
+        //     const token = Cookies.get("accessToken");
+        //     const idProduct = product.id;
+        //     if (token) {
+        //         await addProductDetail({ price, quantity, images, idProduct, idColor, idSize }, token);
+        //         toast.success('Thêm sản phẩm Thành Công');
+        //         handleAddCancel();
+        //         refreshProductdetails();
+        //     } else {
+        //         toast.error("Authorization failed");
+        //     }
+        // } catch (error: any) {
+        //     toast.error(getErrorMessage(error))
+        // }
+    };
     const fetchListProduct = async () => {
         setLoadingProducts(true)
         const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'createAt' }
@@ -70,8 +100,10 @@ const SellingAtStore = () => {
                     <ListOrderDraft />
                     <ListOrderDetail />
                     <ListProduct
+                        form={form}
                         products={products}
-                        loading={loadingProducts} />
+                        loading={loadingProducts}
+                        showModalAddQuantity={showAddQuantityModal} />
                 </Col>
 
                 <Col flex={1}>
@@ -83,7 +115,12 @@ const SellingAtStore = () => {
                 </Col>
             </Row>
 
-
+            <AddQuantityModal
+            isModalOpen={isOpenModalAddQuantity}
+            form={form}
+            handleCancel={handleAddQuantityCancel}
+            // handleOk={}
+            />
 
         </div >
     )
