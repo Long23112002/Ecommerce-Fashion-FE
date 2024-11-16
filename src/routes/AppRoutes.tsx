@@ -32,6 +32,7 @@ import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
+import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
 
 
 
@@ -56,6 +57,7 @@ const AppRoutes = () => {
             </Route>
 
             <Route element={<AdminLayout />}>
+                <Route path="/admin/store" element={<SellingAtStore />} />
                 <Route path="/admin/product/" element={<ProductManager />} />
                 <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
                 <Route path="/admin/user/role" element={<ManagerRole />} />
