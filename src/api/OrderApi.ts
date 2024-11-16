@@ -66,13 +66,14 @@ export const payOrder = async (request: OrderUpdateRequest) => {
     return data
 }
 
-export const confirmOrder = async (orderId: number | string, encode: string) => {
+export const confirmOrder = async (orderId: number | string, encode: string, status: string) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/confirm`,
         params: {
             orderId: orderId,
-            encode: encode
+            encode: encode,
+            status: status
         }
     })
     return data

@@ -1,39 +1,78 @@
 import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  Paper,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  FormControl,
   Typography,
-  Button,
-  Box,
-  Paper,
 } from "@mui/material"
 import React, { useState } from 'react'
-import { OrderUpdateRequest } from '../../../types/Order'
+import { toast } from "react-toastify"
 import { payOrder } from "../../../api/OrderApi"
-import { useNavigate } from "react-router-dom"
+import PaymentMethodEnum from "../../../enum/PaymentMethodEnum"
+import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 
 interface IProps {
+  order: Order,
   orderRequest: OrderUpdateRequest,
   setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
 }
 
-const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
-  const navigate = useNavigate()
-  const [value, setValue] = useState<'Tiền mặt' | 'VNPAY'>("Tiền mặt")
+const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodEnum>(PaymentMethodEnum.CASH)
+
+  const isValidPaymentMethod = (value: string): boolean => {
+    return Object.values(PaymentMethodEnum).includes(value as PaymentMethodEnum);
+  }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    if (value === 'Tiền mặt' || value === 'VNPAY') {
-      setValue(value)
+    if (isValidPaymentMethod(value)) {
+      setPaymentMethod(value as PaymentMethodEnum)
+    }
+  }
+
+  const validate = () => {
+    const phoneRegex = /^(84|0[3|5|7|8|9])[0-9]{8}$/;
+    if (!orderRequest.fullName.trim()) {
+      toast.error('Tên không được để trống')
+      return false
+    }
+    else if (!phoneRegex.test(orderRequest.phoneNumber)) {
+      toast.error('Số điện thoại không hợp lệ')
+      return false
+    }
+    else if (!orderRequest.specificAddress.trim()) {
+      toast.error('Địa chỉ không được để trống')
+      return false
+    }
+    return true;
+  };
+
+  const handleVNPayPayment = async () => {
+    const data = await payOrder(orderRequest)
+    if (data) {
+      window.location.assign(data)
     }
   }
 
   const handlePay = async () => {
-    console.log(orderRequest)
-    const data = await payOrder(orderRequest)
-    if (data) {
-      window.location.assign(data)
+    if (order.status !== OrderStatus.DRAFT) {
+      toast.error("Đơn hàng không thể giao dịch được nữa")
+      return
+    }
+    if (!validate()) return
+    try {
+      if (paymentMethod == PaymentMethodEnum.VNPAY) {
+        await handleVNPayPayment()
+      }
+      else if (paymentMethod == PaymentMethodEnum.CASH) {
+
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.message)
     }
   }
 
@@ -55,10 +94,10 @@ const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
       </Typography>
 
       <FormControl component="fieldset" fullWidth>
-        <RadioGroup value={value} onChange={handleChange}>
+        <RadioGroup value={paymentMethod} onChange={handleChange}>
           <Paper variant="outlined" sx={{ mb: 1, p: 2 }}>
             <FormControlLabel
-              value="Tiền mặt"
+              value={PaymentMethodEnum.CASH}
               control={<Radio />}
               label={
                 <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
@@ -76,7 +115,7 @@ const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
 
           <Paper variant="outlined" sx={{ mb: 2, p: 2 }}>
             <FormControlLabel
-              value="VNPAY"
+              value={PaymentMethodEnum.VNPAY}
               control={<Radio />}
               label={
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
@@ -94,6 +133,27 @@ const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
               sx={{ margin: 0, width: "100%" }}
             />
           </Paper>
+
+          {/* <Paper variant="outlined" sx={{ mb: 2, p: 2 }}>
+            <FormControlLabel
+              value={PaymentMethodEnum.BANK_TRANSFER}
+              control={<Radio />}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                  <Typography>Mã QR</Typography>
+                  <Box sx={{ ml: "auto" }}>
+                    <img
+                      src="https://play-lh.googleusercontent.com/22cJzF0otG-EmmQgILMRTWFPnx0wTCSDY9aFaAmOhHs30oNHxi63KcGwUwmbR76Msko"
+                      alt="VNPAY logo"
+                      width={40}
+                      height={40}
+                    />
+                  </Box>
+                </Box>
+              }
+              sx={{ margin: 0, width: "100%" }}
+            />
+          </Paper> */}
         </RadioGroup>
       </FormControl>
 
@@ -105,7 +165,7 @@ const PaymentInfo: React.FC<IProps> = ({ orderRequest, setOrderRequest }) => {
         }}
         onClick={handlePay}
       >
-        Thanh toán bằng {value}
+        Thanh toán
       </Button>
     </Box>
   )

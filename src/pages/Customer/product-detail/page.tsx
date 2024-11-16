@@ -2,13 +2,13 @@ import { Container } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getAllProducts, getProductById } from '../../../api/ProductApi'
-import ProductOverview from '../../../components/product/ProductOverview'
-import ProductReviews from '../../../components/product/ProductReviews'
+import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
+import NotFound from '../../../components/NotFound'
+import ProductOverview from '../../../components/Product/ProductOverview'
+import ProductReviews from '../../../components/Product/ProductReviews'
 import ProductSlider from '../../../components/product/ProductSlider'
 import Product from '../../../types/Product'
 import ProductDetail from '../../../types/ProductDetail'
-import MuiLoading from '../../../components/Loading/MuiLoading'
-import NotFound from '../../../components/NotFound'
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams()
@@ -53,7 +53,7 @@ const ProductDetailPage: React.FC = () => {
                         :
                         <NotFound />
                     :
-                    <MuiLoading />
+                    <MuiLoadingScreen />
             }
         </>
 

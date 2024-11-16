@@ -3,6 +3,7 @@ import MuiLoading from '../components/Loading/MuiLoading'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import { confirmOrder } from '../api/OrderApi';
+import MuiLoadingScreen from '../components/Loading/MuiLoadingScreen';
 
 const ConfirmCheckout = () => {
     const navigate = useNavigate()
@@ -11,22 +12,25 @@ const ConfirmCheckout = () => {
     useEffect(() => {
         const orderId = searchParams.get('vnp_TxnRef')
         const encode = searchParams.get('vnp_OrderInfo')
-        if (!orderId || !encode) return;
+        const status = searchParams.get('vnp_TransactionStatus')
+        if (!orderId || !encode || !status) return;
         const callConfirmOrder = async () => {
             try {
-                await confirmOrder(orderId, encode)
+                await confirmOrder(orderId, encode, status)
                 toast.success("Bạn đã thanh toán thành công")
-                navigate("/")
             } catch (error: any) {
-                toast.error(error)
-                throw error
+                const message = error.response.data.message;
+                toast.error(message || "Giao dịch thất bại")
+            }
+            finally {
+                navigate("/")
             }
         }
         callConfirmOrder()
     }, [])
 
     return (
-        <MuiLoading height='90vh' size={70} />
+        <MuiLoadingScreen />
     )
 }
 
