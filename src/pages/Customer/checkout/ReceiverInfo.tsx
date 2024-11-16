@@ -5,18 +5,20 @@ import { getAllDistrictByProvinceId, getAllProvinces, getAllWardByDistrictId } f
 import { OrderAddressUpdate, updateAdressOrder } from '../../../api/OrderApi'
 import { userSelector } from '../../../redux/reducers/UserReducer'
 import District from '../../../types/District'
-import Order, { OrderUpdateRequest } from '../../../types/Order'
+import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 import Province from '../../../types/Province'
 import Ward from '../../../types/Ward'
+import { toast } from 'react-toastify'
 
 interface IProps {
   order: Order,
   setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
   orderRequest: OrderUpdateRequest,
-  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
+  setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest }) => {
+const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading }) => {
 
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -25,17 +27,19 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
   const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null)
   const [wards, setWards] = useState<Ward[]>([])
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
-  const [specificAddress, setSpecificAddress] = useState<string>('')
 
   const handleSelectProvince = (_: any, value: Province | null) => {
-    if (value) {
+    if (value && (!selectedProvince || selectedProvince.ProvinceID != value.ProvinceID)) {
       setSelectedProvince({ ...value })
+      setSelectedDistrict(null)
+      setSelectedWard(null)
     }
   }
 
   const handleSelectDistrict = (_: any, value: District | null) => {
-    if (value) {
+    if (value && (selectedProvince && selectedDistrict?.DistrictID != value.DistrictID)) {
       setSelectedDistrict({ ...value })
+      setSelectedWard(null)
     }
   }
 
@@ -52,6 +56,34 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
       [id]: value
     }))
   }
+
+  useEffect(() => {
+    const { provinceID, provinceName, districtID, districtName, wardCode, wardName, specificAddress } = order.address
+    const province: Province = {
+      ProvinceID: provinceID,
+      ProvinceName: provinceName
+    }
+    const district: District = {
+      DistrictID: districtID,
+      DistrictName: districtName
+    }
+    const ward: Ward = {
+      WardCode: wardCode,
+      WardName: wardName
+    }
+    if (province.ProvinceID)
+      setSelectedProvince(province)
+    if (district.DistrictID)
+      setSelectedDistrict(district)
+    if (ward.WardCode)
+      setSelectedWard(ward)
+    setOrderRequest(prev => ({
+      ...prev,
+      fullName: order.fullName || '',
+      specificAddress: specificAddress || '',
+      note: order.note || ''
+    }))
+  }, [order.id])
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -86,28 +118,22 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
   }, [selectedDistrict])
 
   useEffect(() => {
-    if (!selectedWard?.WardCode) return
-
-    setOrderRequest(prev => ({
-      ...prev,
-      address: `${specificAddress || ''}-${selectedWard?.WardName || ''}-${selectedDistrict?.DistrictName || ''}-${selectedProvince?.ProvinceName || ''}`
-    }))
-
-    if (!selectedDistrict?.DistrictID) return
-
+    if (order.status !== OrderStatus.DRAFT) return
+    if (!selectedDistrict || !selectedProvince || !selectedWard) return
     const callUpdateAdressOrder = async () => {
+      setLoading(true)
       const request: OrderAddressUpdate = {
-        provinceID: selectedDistrict.DistrictID,
-        provinceName: selectedDistrict.DistrictName,
+        provinceID: selectedProvince?.ProvinceID,
+        provinceName: selectedProvince?.ProvinceName,
         districtID: selectedDistrict.DistrictID,
         districtName: selectedDistrict.DistrictName,
         wardCode: selectedWard.WardCode,
         wardName: selectedWard.WardName
       }
       const data = await updateAdressOrder(request)
-      setOrder({...data})
+      setOrder({ ...data })
+      setLoading(false)
     }
-
     callUpdateAdressOrder()
   }, [selectedWard])
 
@@ -121,7 +147,6 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
       }));
     }
   }, [user]);
-
 
   return (
     <Box
@@ -160,6 +185,7 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         disablePortal
         options={provinces}
+        value={selectedProvince}
         getOptionLabel={(option) => option.ProvinceName}
         fullWidth
         renderInput={(params) => <TextField {...params} label="Tỉnh/Thành phố" />}
@@ -170,6 +196,7 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         disablePortal
         options={districts}
+        value={selectedDistrict}
         getOptionLabel={(option) => option.DistrictName}
         fullWidth
         renderInput={(params) => <TextField {...params} label="Quận/Huyện" />}
@@ -180,6 +207,7 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         disablePortal
         options={wards}
+        value={selectedWard}
         getOptionLabel={(option) => option.WardName}
         fullWidth
         renderInput={(params) => <TextField {...params} label="Xã/Phường" />}

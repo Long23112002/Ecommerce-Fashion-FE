@@ -1,4 +1,5 @@
-import { UserData } from "../api/AuthApi";
+import PaymentMethodEnum from "../enum/PaymentMethodEnum";
+import Address from "./Address";
 import OrderDetail from "./OrderDetail";
 import { User } from "./User";
 
@@ -25,12 +26,16 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
 export interface Order {
     id: number;
     discountId: number;
-    user: User;
+    user: User|null;
     status: OrderStatus;
+    paymentMethod: PaymentMethodEnum;
+    fullName: string,
+    finalPrice: number;
+    moneyShip: number;
     phoneNumber: string;
     totalMoney: number;
     shipdate?: Date;
-    address: string;
+    address: Address;
     note: string;
     createdAt: number;
     updatedAt: number;

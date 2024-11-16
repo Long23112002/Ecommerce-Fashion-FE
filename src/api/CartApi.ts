@@ -13,7 +13,7 @@ export const fetchCartByUserId = async (token: string) => {
         throw new Error("Token không hợp lệ hoặc không có");
     }
 
-    const decodedToken: { userId: number } = jwtDecode(token); // Thay đổi kiểu dữ liệu nếu cần
+    const decodedToken: { userId: number } = jwtDecode(token);
     const userId = decodedToken.userId;
 
     const config = {
@@ -22,10 +22,10 @@ export const fetchCartByUserId = async (token: string) => {
 
     try {
         const response = await axiosInstance.get(`${CART_API_URL}/${userId}`, config);
-        return response.data; // Đảm bảo kiểu trả về
+        return response.data;
     } catch (error) {
         console.error("Lỗi khi lấy giỏ hàng theo ID người dùng", error);
-        throw error; // Ném lại lỗi để xử lý tiếp ở nơi khác
+        throw error;
     }
 };
 
