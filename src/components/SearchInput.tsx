@@ -3,13 +3,14 @@ import { Box, IconButton, InputBase, SxProps } from '@mui/material'
 import React from 'react'
 
 interface IProps {
+    value?: string,
     onClick?: () => any,
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => any,
     sx?: SxProps,
     height?: number
 }
 
-const SearchInput: React.FC<IProps> = ({ onClick, onChange, sx, height }) => {
+const SearchInput: React.FC<IProps> = ({ value, onClick, onChange, sx, height }) => {
     const size = height || 45
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -33,6 +34,7 @@ const SearchInput: React.FC<IProps> = ({ onClick, onChange, sx, height }) => {
         >
             <InputBase
                 placeholder="Bạn tìm gì..."
+                value={value || ''}
                 sx={{ ml: 1, flex: 1 }}
                 onChange={onChange}
                 onKeyDown={handleKeydown}

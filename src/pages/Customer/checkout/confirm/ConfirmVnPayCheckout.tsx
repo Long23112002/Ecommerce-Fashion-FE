@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
-import MuiLoading from '../components/Loading/MuiLoading'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify';
-import { confirmOrder } from '../api/OrderApi';
-import MuiLoadingScreen from '../components/Loading/MuiLoadingScreen';
+import { confirmOrder, TransactionRequest } from '../../../../api/OrderApi';
+import PaymentMethodEnum from '../../../../enum/PaymentMethodEnum';
+import MuiLoadingScreen from '../../../../components/Loading/MuiLoadingScreen';
 
-const ConfirmCheckout = () => {
+const ConfirmVnPayCheckout: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams();
 
@@ -16,7 +16,13 @@ const ConfirmCheckout = () => {
         if (!orderId || !encode || !status) return;
         const callConfirmOrder = async () => {
             try {
-                await confirmOrder(orderId, encode, status)
+                const data: TransactionRequest = {
+                    orderId: orderId, 
+                    confirmationCode: encode,
+                    status: status,
+                    paymentMethod: PaymentMethodEnum.VNPAY
+                }
+                await confirmOrder(data)
                 toast.success("Bạn đã thanh toán thành công")
             } catch (error: any) {
                 const message = error.response.data.message;
@@ -34,4 +40,4 @@ const ConfirmCheckout = () => {
     )
 }
 
-export default ConfirmCheckout
+export default ConfirmVnPayCheckout

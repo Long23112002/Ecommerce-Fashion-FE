@@ -29,7 +29,8 @@ export interface ProductParams {
     idColors?: number[] | null,
     idSizes?: number[] | null,
     maxPrice?: number | null,
-    minPrice?: number | null
+    minPrice?: number | null,
+    swallowEmpty?: boolean;
 }
 
 export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {

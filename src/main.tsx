@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import store from './redux/store.ts'
 import './styles/style.css'
 import ScrollToTop from './hook/ScrollToTop.tsx'
+import MuiLoadingScreen from './components/Loading/MuiLoadingScreen.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

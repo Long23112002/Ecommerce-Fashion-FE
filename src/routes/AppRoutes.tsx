@@ -31,7 +31,7 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
-import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
+import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
 
 
 
@@ -48,7 +48,7 @@ const AppRoutes = () => {
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
-                <Route path="/checkout/status" element={<ConfirmCheckout />} />
+                <Route path="/checkout/status" element={<ConfirmVnPayCheckout />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />

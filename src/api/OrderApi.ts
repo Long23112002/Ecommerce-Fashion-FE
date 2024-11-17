@@ -1,4 +1,5 @@
 import { BASE_API } from "../constants/BaseApi";
+import PaymentMethodEnum from "../enum/PaymentMethodEnum";
 import { OrderDetailValue, OrderUpdateRequest } from "../types/Order";
 import axiosInstance from "./AxiosInstance";
 import Cookies from "js-cookie";
@@ -19,6 +20,13 @@ export interface OrderAddressUpdate {
     districtName: string;
     wardCode: string;
     wardName: string;
+}
+
+export interface TransactionRequest {
+    orderId: string|number;
+    confirmationCode: string;
+    status: string|number;
+    paymentMethod: PaymentMethodEnum;
 }
 
 export const createOrder = async (orderDetails: OrderDetailValue[]) => {
@@ -66,15 +74,11 @@ export const payOrder = async (request: OrderUpdateRequest) => {
     return data
 }
 
-export const confirmOrder = async (orderId: number | string, encode: string, status: string) => {
+export const confirmOrder = async (request: TransactionRequest) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/confirm`,
-        params: {
-            orderId: orderId,
-            encode: encode,
-            status: status
-        }
+        data: request
     })
     return data
 }

@@ -1,6 +1,6 @@
 import { Container, Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { getAllProducts } from '../../../api/ProductApi';
+import { getAllProducts, ProductParams } from '../../../api/ProductApi';
 import HeroBanner from '../../../components/HeroBanner';
 import Link from '../../../components/Link';
 import Product from '../../../types/Product';
@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
   const fetchHotProducts = async () => {
     setHotLoading(true)
     const pageable: PageableRequest = { page: 0, size: 15 }
-    const res = await getAllProducts({pageable: pageable})
+    const res = await getAllProducts({ pageable: pageable })
     setHotProducts([...res.data])
     setHotLoading(false)
   }

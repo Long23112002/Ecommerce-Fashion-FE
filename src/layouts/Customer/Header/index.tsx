@@ -20,14 +20,22 @@ import {
     Toolbar, Typography
 } from '@mui/material';
 import { Button, Dropdown, MenuProps } from "antd";
+import { useNavigate } from 'react-router-dom';
 
-const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
+// const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
+const categories = [
+    { name: 'Sản phẩm mới', link: 'sort=newest' },
+    { name: 'Sản phẩm hot', link: '' },
+    { name: 'Áo', link: 'idCategory=1' },
+    { name: 'Quần', link: 'idCategory=5' }
+];
 const headerHeight = 55; // min = 15 nếu không thì bị vỡ do avatar
 
 const UserHeader: React.FC = () => {
     const userAction = useUserAction();
     const user = useSelector(userSelector);
-
+    const navigate = useNavigate()
+    const [search, setSearch] = useState<string>('')
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
@@ -46,6 +54,14 @@ const UserHeader: React.FC = () => {
         { key: '2', label: <Link to='/user-info' color='black'>Trung tâm hỗ trợ</Link> },
         { key: '3', label: <Link to='/' color='black' onClick={logout}>Đăng xuất</Link> },
     ];
+
+    const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    const handleSearch = () => {
+        navigate(`/filter?keyword=${search}`)
+    }
 
     useEffect(() => {
         const userData = getUserData();
@@ -88,7 +104,7 @@ const UserHeader: React.FC = () => {
 
                         <Box sx={{ display: { xs: 'none', lg: 'flex' }, gap: 3.5 }}>
                             {categories.map((category) => (
-                                <Link to={`/filter/${category.toLowerCase()}`} key={category}>
+                                <Link to={`/filter?${category.link}`} key={category.name}>
                                     <Typography
                                         variant="button"
                                         sx={{
@@ -97,14 +113,20 @@ const UserHeader: React.FC = () => {
                                             ":hover": { color: '#1E90FF' }
                                         }}
                                     >
-                                        {category}
+                                        {category.name}
                                     </Typography>
                                 </Link>
                             ))}
                         </Box>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <SearchInput sx={{ display: { xs: 'none', lg: 'flex' } }} height={Math.min(headerHeight - 5, 37)} />
+                            <SearchInput
+                                value={search}
+                                onChange={handleChangeSearch}
+                                onClick={handleSearch}
+                                sx={{ display: { xs: 'none', lg: 'flex' } }}
+                                height={Math.min(headerHeight - 5, 37)}
+                            />
                             <CartIcon />
                             {/* <Notification invisible={false} /> */}
 
@@ -155,7 +177,7 @@ const UserHeader: React.FC = () => {
                     <SearchInput height={45} sx={{ display: 'flex', mb: 3 }} />
                     <List>
                         {categories.map((category, index) => (
-                            <Link to={`/filter/${category.toLowerCase()}`} key={index} color='black'>
+                            <Link to={`/filter?${category.link}`} key={category.name} color='black'>
                                 <ListItem
                                     sx={{
                                         borderRadius: '12px',
@@ -163,7 +185,7 @@ const UserHeader: React.FC = () => {
                                         mb: 1
                                     }}
                                 >
-                                    <ListItemText primary={category} primaryTypographyProps={{
+                                    <ListItemText primary={category.name} primaryTypographyProps={{
                                         component: "span",
                                         fontSize: '18px',
                                         fontWeight: 500

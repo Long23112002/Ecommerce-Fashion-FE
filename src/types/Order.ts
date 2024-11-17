@@ -47,6 +47,7 @@ export interface OrderUpdateRequest {
     phoneNumber: string;
     specificAddress: string;
     note: string;
+    paymentMethod: PaymentMethodEnum;
 }
 
 export type OrderCreateRequest = {

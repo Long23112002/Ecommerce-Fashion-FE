@@ -36,8 +36,8 @@ const ProductSlider: React.FC<IProps> = ({
         nextArrow: <Arrow direction="right" />,
         prevArrow: <Arrow direction="left" />,
         responsive: [
-            { breakpoint: 1200, settings: { slidesToShow: 4, slidesToScroll: 4 } },
-            { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 2 } },
+            { breakpoint: 1200, settings: { slidesToShow: 4, slidesToScroll: 4, dots: false } },
+            { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 2, dots: false } },
         ],
     };
 
