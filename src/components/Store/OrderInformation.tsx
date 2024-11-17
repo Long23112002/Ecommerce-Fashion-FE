@@ -1,8 +1,9 @@
-import { Button, Form, FormInstance, Input, Layout, Select, Space } from "antd";
+import { Button, Form, FormInstance, Input, Layout, Popconfirm, Select, Space } from "antd";
 import { Discount } from "../../types/discount";
 import { User } from "../../types/User";
 import { Voucher } from "../../types/voucher";
 import OrderDetailListTable from "./ListOrderDraft";
+import Order from "../../types/Order";
 
 interface OrderInformationProps {
     // onFill: () => void;
@@ -10,6 +11,8 @@ interface OrderInformationProps {
     users: User[];
     form: FormInstance;
     // showModalUser: () => void;
+    order: Order | null;
+    handleCancel: (e: any) => void;
 }
 
 const layout = {
@@ -26,24 +29,23 @@ const onFinish = (values: any) => {
     console.log(values);
 };
 
-const handleCancel = (values: any) => {
-    console.log(values);
-};
 
 const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
     vouchers,
     users,
     // showModalUser,
+    order,
+    handleCancel
 }) => {
     return (
         <div
             style={{
-                border: '1px solid black', // Viền màu đen
-                padding: '15px',          // Khoảng cách bên trong
-                borderRadius: '8px',      // Bo góc
-                width: '320px',           // Đặt chiều rộng cụ thể cho form
-                marginLeft: 'auto',       // Đẩy form sang phải
+                border: '1px solid black',
+                padding: '15px',
+                borderRadius: '8px',
+                width: '320px',
+                marginLeft: 'auto',
                 paddingRight: 30
             }}
         >
@@ -52,21 +54,30 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 {...layout}
                 name="control-hooks"
                 onFinish={onFinish}
-
+                initialValues={{
+                    createdAt: order?.createdAt
+                        ? new Date(Number(order.createdAt)).toLocaleDateString()
+                        : "",
+                    id: order?.id || "",
+                    fullName: order?.fullName || "",
+                    totalMoney: order?.totalMoney || "",
+                    finalPrice: order?.finalPrice || ""
+                }}
             >
-                  <Form.Item
-                    name="createAt"
+                <Form.Item
+                    name="createdAt"
                     label="Ngày tạo"
                 >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }}
+                    />
                 </Form.Item>
-                
-                <Form.Item label="Mã hóa đơn" name="codeOrder">
+
+                <Form.Item label="Mã hóa đơn" name="id">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item
-                    name="quantity"
+                    name="fullName"
                     label="Tên khách"
                     rules={[
                         {
@@ -86,7 +97,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
-                    name=""
+                    name="totalMoney"
                     label="Tổng tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
@@ -116,7 +127,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
-                    name=""
+                    name="finalPrice"
                     label="Thành tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
@@ -127,9 +138,17 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                         <Button type="primary" htmlType="submit">
                             Thanh toán
                         </Button>
-                        <Button htmlType="button" onClick={handleCancel}>
-                            Hủy đơn
-                        </Button>
+
+                        <Popconfirm
+                            title="Bạn chắc chắn muốn xóa hóa đơn này?"
+                            onConfirm={() => handleCancel(order)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <Button >
+                                Hủy đơn
+                            </Button>
+                        </Popconfirm>
                     </Space>
                 </Form.Item>
             </Form>

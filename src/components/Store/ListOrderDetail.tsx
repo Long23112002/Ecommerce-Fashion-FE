@@ -1,80 +1,106 @@
-import { Button, Col, Divider, Popconfirm, Row, Table, Tooltip } from 'antd'
+import { Button, Col, Divider, Image, Popconfirm, Row, Table, Tooltip } from 'antd'
 import React, { useState } from 'react'
 import LoadingCustom from '../Loading/LoadingCustom'
+import OrderDetail from '../../types/OrderDetail'
+import createPaginationConfig from '../../config/paginationConfig';
+import { FileImageOutlined } from '@ant-design/icons';
 
-const ListOrderDetail = () => {
-    const [loading, setLoading] = useState(true);
+interface ListOrderDetailProps {
+    orderDetailList: OrderDetail[];
+    handleDelete: (e: any) => void;
+}
+const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
+    orderDetailList,
+    handleDelete
+}) => {
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
+    };
 
     const columns = [
         {
+            title: 'STT',
+            key: 'index',
+            render: (_: any, __: any, index: number) => index + 1,
+        },
+        {
+            title: 'Hình ảnh',
+            dataIndex: 'productDetail',
+            key: 'productDetail',
+            render: (productDetail: any): any => (
+                productDetail.product.image ? (
+                    <Image
+                        width={60}
+                        src={productDetail.product.image}
+                        alt="image"
+                        style={{ borderRadius: '10px' }}
+                    />
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', color: '#aaa' }}>
+                        <FileImageOutlined style={{ fontSize: '24px', marginRight: '8px' }} />
+                    </div>
+                )
+            ),
+        },
+        {
             title: 'Tên sản phẩm',
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'productDetail',
+            key: 'productDetail',
+            render: (productDetail: any) => productDetail.product.name
         },
         {
             title: 'Màu sắc',
-            dataIndex: 'code',
-            key: 'code',
+            dataIndex: 'productDetail',
+            key: 'productDetail',
+            render: (productDetail: any) => productDetail.color.name
         },
         {
             title: 'Kích cỡ',
-            dataIndex: 'code',
-            key: 'code',
+            dataIndex: 'productDetail',
+            key: 'productDetail',
+            render: (productDetail: any) => productDetail.size.name
         },
         {
             title: 'Đơn giá',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'price',
+            key: 'price',
+            render: (price: number) => formatCurrency(price),
         },
         {
             title: 'Số lượng',
-            dataIndex: 'category',
-            key: 'category',
+            dataIndex: 'quantity',
+            key: 'quantity',
+        },
+        {
+            title: 'Tổng tiền',
+            dataIndex: 'totalMoney',
+            key: 'totalMoney',
+            render: (totalMoney: number) => formatCurrency(totalMoney),
         },
         {
             title: 'Thao tác',
-            dataIndex: 'category',
-            key: 'category',
+            key: 'actions',
+            render: (_: any, record: any) => (
+                <div>
+                    <Popconfirm
+                        title="Bạn chắc chắn muốn xóa mặt hàng này?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button className="btn-outline-danger">
+                            <i className="fa-solid fa-trash-can"></i>
+                        </Button>
+                    </Popconfirm>
+                </div>
+            )
         },
-        // {
-        //     title: 'Thao tác',
-        //     key: 'actions',
-        //     render: (_, record) => (
-        //         <>
-        //             <Row>
-        //                 <Col span={6} order={2}>
-        //                     <Tooltip title="Cập nhật sản phẩm " >
-        //                         <Button 
-        //                         // onClick={() => showUpdateModal(record)}
-        //                          style={{ margin: '0 4px' }} className="btn-outline-primary">
-        //                             <i className="fa-solid fa-pen-to-square"></i>
-        //                         </Button>
-        //                     </Tooltip>
-        //                 </Col>
-        //                 <Col span={6} order={3} >
-        //                     <Tooltip title="Xóa sản phẩm " >
-        //                         <Popconfirm
-        //                             title="Bạn chắc chắn muốn xóa Sản phẩm này?"
-        //                             // onConfirm={() => handleDelete(record.id)}
-        //                             okText="Có"
-        //                             cancelText="Hủy"
-        //                         >
-        //                             <Button className="btn-outline-danger" style={{ margin: '0 4px' }}>
-        //                                 <i className="fa-solid fa-trash-can"></i>
-        //                             </Button>
-        //                         </Popconfirm>
-        //                     </Tooltip>
-        //                 </Col>
-        //             </Row>
-        //         </ >
-        //     ),
-        // }
     ]
     return (
         <>
             <Divider orientation="left">Danh sách hóa đơn chi tiết</Divider>
             <Table
-                // dataSource={products}
+                dataSource={orderDetailList}
                 columns={columns}
                 // loading={{
                 //     spinning: loading,
