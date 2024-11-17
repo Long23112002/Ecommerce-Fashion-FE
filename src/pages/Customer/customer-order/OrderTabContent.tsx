@@ -8,8 +8,10 @@ import { fetchOrdersByUserId } from "../../../api/CustomerOrderApi.js";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/Order.js";
+import { useNavigate } from "react-router-dom";
 
 const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<Order[]>([]);
 
@@ -34,6 +36,10 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
     fetchData();
   }, [status]);
 
+  const handleNavigate = (order: Order) => {
+    navigate(`/customer-order/${order.id}`, { state: { order } });
+  };
+
   return (
     <Container className="mt-5">
       <Spin
@@ -43,7 +49,10 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
         className="centered-spin"
       >
         {data.length === 0 ? (
-          <Container style={{ textAlign: "center", paddingTop:"65px" }} className="mt-5">
+          <Container
+            style={{ textAlign: "center", paddingTop: "65px" }}
+            className="mt-5"
+          >
             <img
               src="http://ecommerce-fashion.site:9099/kGJ2QWVkJn-nodtaaa.png"
               alt="NoData"
@@ -60,8 +69,9 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
           data.map((order) => (
             <Card
               key={order.id}
+              onClick={()=>handleNavigate(order)}
               title={`Mã đơn hàng: ${order.id}`}
-              style={{ margin: 10, cursor: "pointer"}}
+              style={{ margin: 10, cursor: "pointer" }}
               extra={
                 <h6 className="text-danger">
                   {OrderStatusLabel[order.status]}
