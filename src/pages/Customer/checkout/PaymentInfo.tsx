@@ -8,11 +8,14 @@ import {
   RadioGroup,
   Typography,
 } from "@mui/material"
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from "react-toastify"
 import { payOrder } from "../../../api/OrderApi"
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum"
 import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
+import { useNavigate } from "react-router-dom"
+import useLoadingScreen from "../../../hook/useLoadingScreen"
+import useCart from "../../../hook/useCart"
 
 interface IProps {
   order: Order,
@@ -21,7 +24,9 @@ interface IProps {
 }
 
 const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodEnum>(PaymentMethodEnum.CASH)
+  const navigate = useNavigate()
+  const { setLoadingScreen } = useLoadingScreen();
+  const {reload} = useCart();
 
   const isValidPaymentMethod = (value: string): boolean => {
     return Object.values(PaymentMethodEnum).includes(value as PaymentMethodEnum);
@@ -30,7 +35,10 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     if (isValidPaymentMethod(value)) {
-      setPaymentMethod(value as PaymentMethodEnum)
+      setOrderRequest(prev => ({
+        ...prev,
+        paymentMethod: value as PaymentMethodEnum
+      }))
     }
   }
 
@@ -58,6 +66,15 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
     }
   }
 
+  const handleCashPayment = async () => {
+    setLoadingScreen(true)
+    await payOrder(orderRequest)
+    reload()
+    setLoadingScreen(false)
+    toast.success("Đặt hàng thành công")
+    navigate("/")
+  }
+
   const handlePay = async () => {
     if (order.status !== OrderStatus.DRAFT) {
       toast.error("Đơn hàng không thể giao dịch được nữa")
@@ -65,11 +82,12 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
     }
     if (!validate()) return
     try {
-      if (paymentMethod == PaymentMethodEnum.VNPAY) {
-        await handleVNPayPayment()
+      const paymentMethod = orderRequest.paymentMethod
+      if (paymentMethod == PaymentMethodEnum.CASH) {
+        await handleCashPayment()
       }
-      else if (paymentMethod == PaymentMethodEnum.CASH) {
-
+      else if (paymentMethod == PaymentMethodEnum.VNPAY) {
+        await handleVNPayPayment()
       }
     } catch (error: any) {
       toast.error(error.response.data.message)
@@ -94,7 +112,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       </Typography>
 
       <FormControl component="fieldset" fullWidth>
-        <RadioGroup value={paymentMethod} onChange={handleChange}>
+        <RadioGroup value={orderRequest.paymentMethod} onChange={handleChange}>
           <Paper variant="outlined" sx={{ mb: 1, p: 2 }}>
             <FormControlLabel
               value={PaymentMethodEnum.CASH}
