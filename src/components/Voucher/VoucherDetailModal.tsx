@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Form, Input, Avatar, Typography } from 'antd';
 import { Voucher } from '../../types/voucher.ts';
+import { StatusDiscount } from "../../types/discount.ts";
 
 interface VoucherDetailModalProps {
     visible: boolean;
@@ -31,6 +32,9 @@ const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ visible, onCanc
                 initialValues={{
                     code: voucher.code,
                     discount: voucher.discount?.name || "No discount",
+                    startDate: voucher.discount.startDate,
+                    endDate: voucher.discount.endDate,
+                    status: voucher.discount.discountStatus,
                     createAt: new Date(voucher.createAt).toLocaleDateString(),
                     updateAt: voucher.updateAt ? new Date(voucher.updateAt).toLocaleDateString() : "Không có",
                     createBy: voucher.createBy?.fullName || "Không rõ",
@@ -45,6 +49,17 @@ const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ visible, onCanc
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
+                <Form.Item label={<Text strong>Ngày Bắt Đầu:</Text>} name="startDate">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Ngày Kết Thúc:</Text>} name="endDate">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
+
+                <Form.Item label={<Text strong>Trạng Thái:</Text>} name="status">
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                </Form.Item>
                 <Form.Item label={<Text strong>Ngày tạo :</Text>} name="createAt">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>

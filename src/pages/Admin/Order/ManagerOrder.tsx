@@ -1,23 +1,24 @@
-import { Button, Form, Select, Popconfirm, Table, Tag } from 'antd';
+import { Button, Form, Select, Popconfirm, Table, Tag, Tabs } from 'antd';
 import Cookies from "js-cookie";
 import { debounce } from "lodash";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { deleteOrder, fetchAllOrders, updateStateOrder ,getOrderById} from "../../../api/OrderApi.ts";
+import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById } from "../../../api/OrderApi.ts";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/order.ts";
 import { getErrorMessage } from "../../Error/getErrorMessage.ts";
-import OrderDetailModal from "../../../components/Order/OrderDetailModal.js";
+import { useNavigate } from 'react-router-dom';
+import { TabPane } from 'react-bootstrap';
 const { Option } = Select;
 
 const ManagerOrder = () => {
+    const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
     // const [editingBrand, setEditingOrder] = useState<Order | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [detailOrder, setDetailOrder] = useState<Order | null>(null);
+
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState<Order[]>([]);
     const [pagination, setPagination] = useState<PaginationState>({
@@ -87,6 +88,7 @@ const ManagerOrder = () => {
             setLoading(false);
         }
     };
+
     const handleFilterChange = (changedValues: any, allValues: any) => {
         setFilterParams({
             ...filterParams,
@@ -101,33 +103,6 @@ const ManagerOrder = () => {
         }));
     };
 
-    const showModal = async (order: Order | null = null) => {
-        if (order) {
-            try {
-                const brandDetails = await getOrderById(order.id);
-                form.setFieldsValue({
-                    name: brandDetails.name
-                });
-                // setEditingOrder(brandDetails);
-            } catch (error:any) {
-                toast.error(error.response?.data?.message || 'Failed to fetch brand details');
-            }
-        } else {
-            form.resetFields();
-            // setEditingOrder(null);
-        }
-        setIsModalOpen(true);
-    };
-
-    const handleViewDetails = (order: Order) => {
-        setDetailOrder(order);
-        setIsDetailModalOpen(true);
-    };
-
-    const handleDetailCancel = () => {
-        setIsDetailModalOpen(false);
-        setDetailOrder(null);
-    };
 
     const handleDelete = async (orderId: number) => {
         try {
@@ -189,6 +164,9 @@ const ManagerOrder = () => {
                     case OrderStatus.REFUND:
                         color = "grey";
                         break;
+                    case OrderStatus.PENDING_AT_STORE:
+                        color = "Navy";
+                        break;
                     default:
                         color = "grey";
                 }
@@ -204,11 +182,11 @@ const ManagerOrder = () => {
                                     await handleStatusChange(record.id, newStatus);
                                 }
                             }}
-                            style={{ width: 120 }}
+                            style={{ width: 140 }}
                             disabled={isStatusSuccess}
                         >
                             {Object.keys(OrderStatusLabel).map((key) => (
-                                <Option key={key} value={key}>
+                                <Option key={key} value={key} >
                                     <Tag color={key === status ? color : "default"} style={{ marginRight: 10 }}>
                                         {OrderStatusLabel[key as OrderStatus] || "Không xác định"}
                                     </Tag>
@@ -224,12 +202,31 @@ const ManagerOrder = () => {
             title: 'Phương thức thanh toán',
             dataIndex: 'paymentMethod',
             key: 'paymentMethod',
-            render: (paymentMethod) => paymentMethod.paymentMethod,
+            render: (paymentMethod) => paymentMethod,
         },
         {
             title: 'Địa chỉ giao hàng',
             dataIndex: 'address',
             key: 'address',
+            render: (address) => {
+                if (!address) return 'Không rõ';
+
+                const {
+                    provinceName,
+                    districtName,
+                    wardName,
+                    specificAddress,
+                } = address;
+
+                const displayAddress = [
+                    specificAddress || 'Không rõ',
+                    wardName || 'Không rõ',
+                    districtName || 'Không rõ',
+                    provinceName || 'Không rõ',
+                ].join(', ');
+
+                return displayAddress;
+            }
         },
         {
             title: 'Tổng tiền',
@@ -241,8 +238,8 @@ const ManagerOrder = () => {
             key: 'actions',
             render: (_, record) => (
                 <div>
-                    <Button onClick={() => handleViewDetails(record)} style={{ marginRight: 8 }} className="btn-outline-primary">
-                        <i className="fa-solid fa-eye"></i>
+                    <Button onClick={() => navigate(`/admin/order/${record.id}`)} style={{ marginRight: 8 }} className="btn-outline-primary">
+                        <i className="fa-regular fa-eye"></i>
                     </Button>
                     <Popconfirm
                         title="Bạn chắc chắn muốn xóa đơn hàng này?"
@@ -254,6 +251,7 @@ const ManagerOrder = () => {
                             <i className="fa-solid fa-trash-can"></i>
                         </Button>
                     </Popconfirm>
+
                 </div>
             ),
         }
@@ -262,27 +260,61 @@ const ManagerOrder = () => {
     return (
         <div className="text-center" style={{ marginLeft: 20, marginRight: 20 }}>
             <h1 className="text-danger">Quản Lý Đơn Hàng</h1>
-            <Form
-                layout="inline"
-                onValuesChange={handleFilterChange}
-                style={{ display: 'flex', justifyContent: 'flex-end' }}
-                className="mt-2 mb-2"
+            <Tabs
+                activeKey={filterParams.status || "ALL"}
+                onChange={(key) => {
+                    setFilterParams({
+                        ...filterParams,
+                        status: key === "ALL" ? "" : key,
+                    });
+                    setPagination((prev) => ({ ...prev, current: 1 }));
+                }}
+                style={{
+                    marginBottom: 16,
+                    fontWeight: "bold",
+                }}
+                tabBarStyle={{
+                    display: "flex",
+                    justifyContent: "space-between", // Căn đều các tab, mỗi tab chiếm không gian đều
+                    fontSize: "20px", // Cỡ chữ cho tab
+                    fontWeight: "bold",
+                    width: "100%", // Đảm bảo tabBar chiếm toàn bộ chiều ngang
+                }}
             >
-                <Form.Item name="status" label="Trạng thái" style={{ marginLeft: 20, marginRight: 70 }}>
-                    <Select placeholder="Chọn trạng thái">
-                        {Object.keys(OrderStatusLabel).map((key) => (
-                            <Option key={key} value={key}>
-                                {OrderStatusLabel[key as OrderStatus]}
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-            </Form>
-            <OrderDetailModal
-                visible={isDetailModalOpen}
-                onCancel={handleDetailCancel}
-                order={detailOrder}
-            />
+                <TabPane
+                    tab={
+                        <div
+                            style={{
+                                textAlign: "center", 
+                                width: "100%", 
+                                fontSize: "20px", 
+                                
+                            }}
+                        >
+                            Tất cả
+                        </div>
+                    }
+                    key="ALL"
+                />
+                {Object.keys(OrderStatusLabel)
+                    .filter((key) => key !== OrderStatus.DRAFT)
+                    .map((key) => (
+                        <TabPane
+                            tab={
+                                <div
+                                    style={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                        fontSize: "20px", // Thử thay đổi trực tiếp ở đây
+                                    }}
+                                >
+                                    {OrderStatusLabel[key as OrderStatus]}
+                                </div>
+                            }
+                            key={key}
+                        />
+                    ))}
+            </Tabs>
             <Table
                 dataSource={orders}
                 columns={columns}
