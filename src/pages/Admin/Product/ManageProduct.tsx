@@ -607,15 +607,15 @@ const ProductManager = () => {
       <h1 className='text-danger'>Quản lý sản phẩm</h1>
 
       <Space direction="vertical"
-          style={{ display: "flex", color: "white" }}
-          className="mt-3 mb-3"
+        style={{ display: "flex", color: "white" }}
+        className="mt-3 mb-3"
+      >
+        <Dropdown.Button
+          menu={menuProps}
         >
-          <Dropdown.Button
-            menu={menuProps}
-          >
-            Thêm sản phẩm
-          </Dropdown.Button>
-        </Space>
+          Thêm sản phẩm
+        </Dropdown.Button>
+      </Space>
 
       <Form
         layout="inline"

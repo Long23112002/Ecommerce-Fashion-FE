@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Typography, Table, Row, Col } from 'antd';
+import { Form, Input, Typography, Table, Row, Col, Button } from 'antd';
 import { Order, OrderStatusLabel } from '../../types/Order';
 import { getOrderById } from "../../api/OrderApi";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingCustom from "../../components/Loading/LoadingCustom";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage";
 import { toast } from "react-toastify";
@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 const { Text } = Typography;
 
 const OrderDetailPage: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const { orderId } = useParams<{ orderId: string }>();
     const [order, setOrder] = useState<Order | null>(null);
@@ -76,12 +77,19 @@ const OrderDetailPage: React.FC = () => {
     if (!order) {
         return null;
     }
+    const fullAddress = `${order.address.specificAddress} , ${order.address.wardName} , ${order.address.districtName} , ${order.address.provinceName}`;
 
     return (
         <div style={{ padding: '24px' }}>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <Text strong style={{ fontSize: '18px' }}>Chi tiết Đơn Hàng</Text>
-                <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>Mã Đơn: {order.id}</div>
+                <Text strong style={{ fontSize: '28px' }}>Chi tiết Đơn Hàng</Text>
+                <Button onClick={() => navigate('/admin/order')} style={{
+                    "position": "relative",
+                    "right": "760px",
+                    "bottom": "12px",
+                }}>
+                    <i className="fa-solid fa-reply-all"></i>
+                </Button>
             </div>
             <Form
                 layout="vertical"
@@ -90,7 +98,7 @@ const OrderDetailPage: React.FC = () => {
                     orderDate: new Date(order.createdAt).toLocaleDateString(),
                     status: OrderStatusLabel[order.status],
                     phoneNumber: order.phoneNumber,
-                    address: order.address,
+                    address: fullAddress,
                     totalMoney: order.totalMoney.toLocaleString() + "₫"
                 }}
             >
