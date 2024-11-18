@@ -262,30 +262,14 @@ const OrderStatusCustomer = () => {
           </Typography>
         </Grid>
 
+        <Divider style={{ margin: "10px 0" }} className="" />
+
         <div className="mt-8 text-gray-600 text-sm">
           <p>
             Nếu hàng nhận được có vấn đề, bạn có thể gửi yêu cầu Trả hàng/Hoàn
             tiền trước <span className="text-gray-900">...</span>
           </p>
         </div>
-
-        <Grid
-                container
-                justifyContent="flex-end"
-                alignItems="center"
-                className="mt-3"
-              >
-                <Grid item style={{ marginRight: 10 }}>
-                  <Typography variant="h6" color="text.secondary">
-                    Thành tiền:
-                  </Typography>
-                </Grid>
-                <Grid item style={{ marginRight: 20 }}>
-                  <Typography variant="h6" color="error">
-                    {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
-                  </Typography>
-                </Grid>
-              </Grid>
 
               {order.status === OrderStatus.PENDING &&
                 order.paymentMethod === PaymentMethodEnum.CASH && (
