@@ -4,13 +4,13 @@ import OrderDetail from "./OrderDetail";
 import { User } from "./User";
 
 export enum OrderStatus {
-    NOPE = "",
     PENDING = "PENDING",
     CANCEL = "CANCEL",
     SHIPPING = "SHIPPING",
     SUCCESS = "SUCCESS",
     DRAFT = "DRAFT",
-    REFUND = "REFUND"
+    REFUND = "REFUND",
+    PENDING_AT_STORE = "PENDING_AT_STORE"
 }
 
 export const OrderStatusLabel: Record<OrderStatus, string> = {
@@ -20,7 +20,7 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
     [OrderStatus.SUCCESS]: "Thành công",
     [OrderStatus.DRAFT]: "Nháp",
     [OrderStatus.REFUND]: "Hoàn tiền",
-    [OrderStatus.NOPE]: "Không xác Định"
+    [OrderStatus.PENDING_AT_STORE]: "Tại Quầy",
 };
 
 export interface Order {

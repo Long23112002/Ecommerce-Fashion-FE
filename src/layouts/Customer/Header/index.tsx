@@ -49,7 +49,7 @@ const UserHeader: React.FC = () => {
 
     const items: MenuProps['items'] = [
         { key: '0', label: <Link to='/user-info' color='black'>Thông tin tài khoản</Link> },
-        { key: '1', label: <Link to='/user-info' color='black'>Đơn hàng của tôi</Link> },
+        { key: '1', label: <Link to='/customer-order' color='black'>Đơn hàng của tôi</Link> },
         { key: '2', label: <Link to='/user-info' color='black'>Trung tâm hỗ trợ</Link> },
         { key: '3', label: <Link to='/' color='black' onClick={logout}>Đăng xuất</Link> },
     ];

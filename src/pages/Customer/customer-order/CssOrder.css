@@ -1,0 +1,31 @@
+.custom-tabs .ant-tabs-tab {
+  background-color: transparent;
+  color: #555;
+  padding: 30px 40px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 20px;
+}
+
+.custom-tabs .ant-tabs-tab-active {
+  border-radius: 4px;
+  color: #000000;
+}
+
+.custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #444 !important;
+}
+
+.custom-tabs .ant-tabs-tab:hover {
+  color: #d3a67d;
+}
+
+.custom-tabs .ant-tabs-nav-list {
+  gap: 100px;
+}
+
+.custom-tabs .ant-tabs-ink-bar {
+  background-color: #444 !important;
+  height: 1px;
+  transition: width 0.3s ease;
+  width: 200px !important;
+}

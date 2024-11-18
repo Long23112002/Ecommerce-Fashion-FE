@@ -37,7 +37,15 @@ const VoucherModel: React.FC<VoucherModelProps> = ({
         };
         loadDiscounts();
     }, []);
-
+    useEffect(() => {
+        if (mode === 'update' && voucher) {
+            form.setFieldsValue({
+                discountId: voucher.discount?.id || '',
+            });
+        } else if (mode === 'add') {
+            form.resetFields();
+        }
+    }, [voucher, mode, form]);
     return (
         <Modal
             title={mode === 'add' ? 'Add Voucher' : 'Update Voucher'}

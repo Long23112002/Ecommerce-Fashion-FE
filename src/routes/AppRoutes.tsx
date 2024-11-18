@@ -33,8 +33,6 @@ import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
 
-
-
 const AppRoutes = () => {
     return (
         <Routes>
@@ -54,8 +52,9 @@ const AppRoutes = () => {
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
             </Route>
-
             <Route element={<AdminLayout />}>
+                <Route path="/admin/statistics" element={<Statistics />} />
+                <Route path="/admin/store" element={<SellingAtStore />} />
                 <Route path="/admin/product/" element={<ProductManager />} />
                 <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
                 <Route path="/admin/user/role" element={<ManagerRole />} />
@@ -75,6 +74,7 @@ const AppRoutes = () => {
                 <Route path="/admin/discount/edit/:discountId" element={<UpdateDiscount />} />
                 <Route path="/admin/discount/add" element={<AddDiscount />} />
                 <Route path="/admin/order" element={<ManagerOrder />} />
+                <Route path="/admin/order/:orderId" element={<OrderDetailPage />} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />
