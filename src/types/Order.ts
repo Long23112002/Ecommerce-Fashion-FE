@@ -26,10 +26,11 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
 export interface Order {
     id: number;
     discountId: number;
-    user: User | null;
+    user: User|null;
     status: OrderStatus;
     paymentMethod: PaymentMethodEnum;
     fullName: string,
+    discountAmount: number,
     finalPrice: number;
     moneyShip: number;
     phoneNumber: string;
@@ -48,6 +49,7 @@ export interface OrderUpdateRequest {
     phoneNumber: string;
     specificAddress: string;
     note: string;
+    paymentMethod: PaymentMethodEnum;
 }
 
 export type OrderCreateRequest = {

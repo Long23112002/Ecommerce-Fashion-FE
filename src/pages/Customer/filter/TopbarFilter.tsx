@@ -1,5 +1,5 @@
 import { Box, Grid, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SearchInput from '../../../components/SearchInput';
 import { ISelectedFilter } from './page';
 
@@ -11,6 +11,10 @@ interface IProps {
 const TopbarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) => {
 
     const [search, setSearch] = useState<string>('')
+
+    useEffect(()=>{
+        setSearch(selectedFilter.keyword)
+    },[selectedFilter])
 
     const handleChangeSort = (event: SelectChangeEvent<any>) => {
         setSelectedFilter(prev => ({
@@ -43,6 +47,7 @@ const TopbarFilter: React.FC<IProps> = ({ selectedFilter, setSelectedFilter }) =
             <Grid container alignItems="center" columnSpacing={5} rowSpacing={2}>
                 <Grid item xs={12} md={8}>
                     <SearchInput
+                        value={search}
                         onChange={handleChangeSearch}
                         onClick={handleSearch}
                         height={33}
