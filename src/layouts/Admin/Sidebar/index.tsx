@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, Sidebar as SidebarPro, SubMenu } from "react-pro-sidebar";
 import MenuItem from "./MenuItem";
 import { Box, IconButton, useMediaQuery } from "@mui/material";
-import { DesktopOutlined } from "@ant-design/icons";
+import {DesktopOutlined, PieChartOutlined} from "@ant-design/icons";
 
 interface IProps {
   collapse: boolean;
@@ -81,6 +81,12 @@ const AdminSidebar: React.FC<IProps> = ({
           },
         }}
       >
+        <MenuItem
+            to="/admin/statistics"
+            icon={<PieChartOutlined /> }
+        >
+         Tổng quan
+        </MenuItem>
         <SubMenu
           label="Quản lí người dùng"
           icon={<i className="fa-solid fa-file-signature fs-5" />}

@@ -35,6 +35,7 @@ import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
 import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder';
 import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
+import Statistics from "../pages/Admin/Statistics/Statistics";
 
 
 
@@ -57,8 +58,8 @@ const AppRoutes = () => {
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
             </Route>
-
             <Route element={<AdminLayout />}>
+                <Route path="/admin/statistics" element={<Statistics />} />
                 <Route path="/admin/store" element={<SellingAtStore />} />
                 <Route path="/admin/product/" element={<ProductManager />} />
                 <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
