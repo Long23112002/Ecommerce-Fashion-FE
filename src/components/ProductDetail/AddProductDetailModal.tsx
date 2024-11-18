@@ -95,7 +95,7 @@ const AddProductDetailModal: React.FC<AddProductDetailModalProps> = ({
                         },
                     ]}
                 >
-                    <Input placeholder="Nhập số lượng" />
+                    <Input placeholder="Nhập giá bán" />
                 </Form.Item>
 
                 <Form.Item

@@ -31,10 +31,12 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
+import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
 import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder';
 import OrderStatusCustomer from '../pages/Customer/customer-order/OrderDetailView.tsx';
-
+import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
+import Statistics from "../pages/Admin/Statistics/Statistics";
 
 
 const AppRoutes = () => {
@@ -57,9 +59,11 @@ const AppRoutes = () => {
                 </Route>
                 <Route path="/customer-order" element={<CustomerOrder/>}/>
                 <Route path="/customer-order/:id" element={<OrderStatusCustomer/>}/>
-            </Route>
 
+            </Route>
             <Route element={<AdminLayout />}>
+                <Route path="/admin/statistics" element={<Statistics />} />
+                <Route path="/admin/store" element={<SellingAtStore />} />
                 <Route path="/admin/product/" element={<ProductManager />} />
                 <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
                 <Route path="/admin/user/role" element={<ManagerRole />} />
@@ -79,6 +83,7 @@ const AppRoutes = () => {
                 <Route path="/admin/discount/edit/:discountId" element={<UpdateDiscount />} />
                 <Route path="/admin/discount/add" element={<AddDiscount />} />
                 <Route path="/admin/order" element={<ManagerOrder />} />
+                <Route path="/admin/order/:orderId" element={<OrderDetailPage />} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />
