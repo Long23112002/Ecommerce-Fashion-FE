@@ -32,6 +32,9 @@ import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
 import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
+import Statistics from '../pages/Admin/Statistics/Statistics.tsx';
+import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
+import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 
 const AppRoutes = () => {
     return (
