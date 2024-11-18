@@ -19,6 +19,15 @@ interface ProductDetailData {
     idColor: number;
 }
 
+export interface ProductParams {
+    keyword?: string | null,
+    idProduct?: number | null,
+    idColors?: number | null,
+    idSizes?: number | null,
+    maxPrice?: number | null,
+    minPrice?: number | null
+}
+
 export const getDetailByIdProduct = async (id: number | string, pageable?: PageableRequest) => {
     const { data } = await axiosInstance({
         method: 'GET',
@@ -88,3 +97,15 @@ export const updateProductDetail = async (productDetailId: number, productData: 
         throw error;
     }
 }
+
+export const getAllProductDetails = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${API_BASE_URL}/all`,
+        params: { ...query.params, ...query.pageable },
+        paramsSerializer: {
+            indexes: null,
+        }
+    });
+    return data;
+};
