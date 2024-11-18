@@ -77,7 +77,7 @@ const OrderDetailPage: React.FC = () => {
     if (!order) {
         return null;
     }
-    const fullAddress = `${order.address.specificAddress} , ${order.address.wardName} , ${order.address.districtName} , ${order.address.provinceName}`;
+    const fullAddress = `${order.address?.specificAddress || 'Không có'} , ${order.address?.wardName || ''} , ${order.address?.districtName|| ''} , ${order.address?.provinceName|| ''}`;
 
     return (
         <div style={{ padding: '24px' }}>

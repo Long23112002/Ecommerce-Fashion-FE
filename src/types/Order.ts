@@ -20,7 +20,7 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
     [OrderStatus.SUCCESS]: "Thành công",
     [OrderStatus.DRAFT]: "Nháp",
     [OrderStatus.REFUND]: "Hoàn tiền",
-    [OrderStatus.PENDING_AT_STORE]: "Cửa hàng đang xử lý",
+    [OrderStatus.PENDING_AT_STORE]: "Tại Quầy",
 };
 
 export interface Order {
