@@ -21,7 +21,7 @@ export const useUserAction = () => {
                 onSuccess()
             }
             if (isUserAdmin(userData)) {
-                navigate("/admin/user/role");
+                navigate("/admin/statistics");
             } else {
                 navigate("/")
             }

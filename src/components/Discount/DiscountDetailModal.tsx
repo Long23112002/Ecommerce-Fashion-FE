@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Avatar, Typography, Table, Row, Col } from 'antd';
+import { Form, Input, Avatar, Typography, Table, Row, Col, Button } from 'antd';
 import { Discount } from '../../types/discount.js';
 import ProductDetail from '../../types/ProductDetail.js'
 import { getDiscountById } from "../../api/DiscountApi.ts";
 import { fetchProductDetailsByIds } from "../../api/BrandApi.ts";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingCustom from "../../components/Loading/LoadingCustom.js";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
 import { toast } from "react-toastify";
 const { Text } = Typography;
 
 const DiscountDetailModal: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const { discountId } = useParams<{ discountId: string }>();
     const [discount, setDiscount] = useState<Discount | null>(null);
@@ -91,6 +92,13 @@ const DiscountDetailModal: React.FC = () => {
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <Text strong style={{ fontSize: '18px' }}>Chi tiết Khuyến Mãi</Text>
                 <div style={{ fontSize: '24px', color: '#d4af37', fontWeight: 'bold' }}>{discount.name}</div>
+                <Button onClick={() => navigate('/admin/discount')} style={{
+                    "position": "relative",
+                    "right": "640px",
+                    "bottom": "42px",
+                }}>
+                    <i className="fa-solid fa-reply-all"></i>
+                </Button>
             </div>
             <Form
                 layout="vertical"
@@ -99,8 +107,8 @@ const DiscountDetailModal: React.FC = () => {
                     type: discount.type,
                     value: discount.value,
                     maxValue: discount.maxValue,
-                    startDate: new Date(discount.startDate).toLocaleDateString(),
-                    endDate: discount.endDate ? new Date(discount.endDate).toLocaleDateString() : "Không có",
+                    startDate: discount.startDate,
+                    endDate: discount.endDate,
                     status: discount.discountStatus,
                     createAt: new Date(discount.createAt).toLocaleDateString(),
                     updateAt: discount.updateAt ? new Date(discount.updateAt).toLocaleDateString() : "Không có",

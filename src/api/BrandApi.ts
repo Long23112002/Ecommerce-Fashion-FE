@@ -5,16 +5,17 @@ import axiosInstance from './AxiosInstance';
 const API_BASE_URL = `${BASE_API}/api/v1/brand`;
 
 
-export const fetchAllBrands = async (pageSize: number, page: number, searchName?: string) => {
+export const fetchAllBrands = async (pageSize: number = 15, page: number = 0, searchName?: string) => {
     const config = {
         params: {
             size: pageSize,
             page: page,
-            ...(searchName && { name: searchName }) // Include searchName if provided
+            ...(searchName && { name: searchName })
         }
     };
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}`, config);
+        console.log(response)
         return response.data;
     } catch (error) {
         console.error("Error fetching brands", error);

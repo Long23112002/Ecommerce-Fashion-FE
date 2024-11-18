@@ -6,13 +6,14 @@ import TopbarFilter from './TopbarFilter'
 import { getAllProducts } from '../../../api/ProductApi'
 import MuiLoading from '../../../components/Loading/MuiLoading'
 import ProductCard from '../../../components/product/ProductCard'
+import { useSearchParams } from 'react-router-dom'
 
 export interface ISelectedFilter {
     keyword: string,
     idBrand: number | null,
-    idOrigin: number | null, 
+    idOrigin: number | null,
     idCategory: number | null,
-    idMaterial: number | null, 
+    idMaterial: number | null,
     idColors: number[],
     idSizes: number[],
     minPrice: number,
@@ -38,32 +39,51 @@ const getSort = (sort: 'newest' | 'name' | 'price-asc' | 'price-desc'): { sort: 
 }
 
 const FilterPage: React.FC = () => {
+    const [searchParams, setSearchParams] = useSearchParams()
 
+    const validSortValues: ISelectedFilter["sort"][] = ["name", "newest", "price-asc", "price-desc"];
+    const sortParam = searchParams.get("sort");
+    const sort = validSortValues.includes(sortParam as ISelectedFilter["sort"]) ? (sortParam as ISelectedFilter["sort"]) : 'newest';
+    
     const [selectedFilter, setSelectedFilter] = useState<ISelectedFilter>({
-        keyword: '',
-        idBrand: null,
-        idOrigin: null,
-        idCategory: null,
-        idMaterial: null,
-        idColors: [],
-        idSizes: [],
-        minPrice: 0,
-        maxPrice: 2000000,
-        sort: 'newest'
+        keyword: searchParams.get("keyword") || '',
+        idBrand: searchParams.get("idBrand") ? Number(searchParams.get("idBrand")) : null,
+        idOrigin: searchParams.get("idOrigin") ? Number(searchParams.get("idOrigin")) : null,
+        idCategory: searchParams.get("idCategory") ? Number(searchParams.get("idCategory")) : null,
+        idMaterial: searchParams.get("idMaterial") ? Number(searchParams.get("idMaterial")) : null,
+        idColors: searchParams.get("idColors") ? searchParams.get("idColors")!.split(',').map(Number) : [],
+        idSizes: searchParams.get("idSizes") ? searchParams.get("idSizes")!.split(',').map(Number) : [],
+        minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : 0,
+        maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : 2000000,
+        sort: sort
     })
     const [products, setProduct] = useState<Product[]>([]);
     const [loading, setLoading] = useState<boolean>(true)
 
     const fetchProducts = async () => {
         setLoading(true)
-        const res = await getAllProducts({params:{...selectedFilter}, pageable: {...getSort(selectedFilter.sort)}});
+        const res = await getAllProducts({ params: { ...selectedFilter }, pageable: { ...getSort(selectedFilter.sort) } });
         setProduct([...res.data])
         setLoading(false)
     }
-
+    
     useEffect(() => {
+        const { keyword, idBrand, idCategory, idColors, idMaterial, idOrigin, idSizes, minPrice, maxPrice, sort } = selectedFilter;
+        const queryParams: any = {};
+        if (keyword) queryParams.keyword = keyword;
+        if (idBrand) queryParams.idBrand = idBrand;
+        if (idCategory) queryParams.idCategory = idCategory;
+        if (idColors && idColors.length > 0) queryParams.idColors = idColors.join(',');
+        if (idMaterial) queryParams.idMaterial = idMaterial;
+        if (idOrigin) queryParams.idOrigin = idOrigin;
+        if (idSizes && idSizes.length > 0) queryParams.idSizes = idSizes.join(',');
+        if (minPrice !== undefined) queryParams.minPrice = minPrice;
+        if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
+        if (sort) queryParams.sort = sort;
+
+        setSearchParams(queryParams, { replace: true });
         fetchProducts()
-    }, [selectedFilter])
+    }, [selectedFilter]);
 
     return (
         <Container

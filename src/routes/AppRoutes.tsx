@@ -31,10 +31,10 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
-import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
 import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
-import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder.tsx';
-
+import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
+import Statistics from '../pages/Admin/Statistics/Statistics.tsx';
+import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 
 
 const AppRoutes = () => {
@@ -50,15 +50,14 @@ const AppRoutes = () => {
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
-                <Route path="/checkout/status" element={<ConfirmCheckout />} />
+                <Route path="/checkout/status" element={<ConfirmVnPayCheckout />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
-                <Route path="/customer-order" element={<CustomerOrder/>}/>
             </Route>
-
             <Route element={<AdminLayout />}>
+                <Route path="/admin/statistics" element={<Statistics />} />
                 <Route path="/admin/store" element={<SellingAtStore />} />
                 <Route path="/admin/product/" element={<ProductManager />} />
                 <Route path="/admin/product-detail/" element={<ManageProductDetail />} />
@@ -79,6 +78,7 @@ const AppRoutes = () => {
                 <Route path="/admin/discount/edit/:discountId" element={<UpdateDiscount />} />
                 <Route path="/admin/discount/add" element={<AddDiscount />} />
                 <Route path="/admin/order" element={<ManagerOrder />} />
+                <Route path="/admin/order/:orderId" element={<OrderDetailPage />} />
                 <Route element={<UserInfoLayout page='admin' />}>
                     <Route path="/admin/user-info" element={<UserInfoPage />} />
                     <Route path="/admin/change-password" element={<ChangePasswordPage />} />
