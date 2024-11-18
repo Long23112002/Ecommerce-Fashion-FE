@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Steps, Button } from "antd";
+import { Steps } from "antd";
 import {
   FileTextOutlined,
   DollarOutlined,
@@ -16,7 +16,7 @@ import {
 } from "../../../types/Order";
 import "./OrderStatus.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Card, Container, Divider, Grid, Typography } from "@mui/material";
+import { Box, Card, Container, Divider, Grid, Typography,Button } from "@mui/material";
 import dayjs from "dayjs";
 import { Row, Col } from "antd";
 import OrderDetailCard from "./CustomerOrderCard";
@@ -24,7 +24,8 @@ import { fetchOrderDetails } from "../../../api/CustomerOrderApi";
 import { Text } from "recharts";
 import { OrderMeThodLabel } from "../../../enum/OrderStatusEnum";
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum";
-import OrderPaymentDetails from './OrderPaymentDetails';
+import OrderPaymentDetails from "./OrderPaymentDetails";
+import { handleCancelOrder } from "./OrderTabContent";
 const OrderStatusCustomer = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -87,34 +88,46 @@ const OrderStatusCustomer = () => {
       description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
       icon: <SyncOutlined />,
     },
+    {
+      title: OrderStatusLabel[OrderStatus.CANCEL],
+      description: statusTimeMap[OrderStatus.CANCEL] || "Hủy đơn",
+      icon: <SyncOutlined />,
+    },
   ];
 
-  const getCurrentStep = (status: OrderStatus): number => {
+  const getCurrentSteps = (status: OrderStatus) => {
+    if (status === OrderStatus.CANCEL) {
+      // Show step 0 (Pending) and then go directly to step 4 (Canceled)
+      return [0, 4];
+    }
+    // If not canceled, show the normal progression (Pending -> Shipping -> Success -> Refund)
     switch (status) {
       case OrderStatus.PENDING:
-        return 0;
+        return [0];
       case OrderStatus.SHIPPING:
-        return 1;
+        return [0, 1];
       case OrderStatus.SUCCESS:
-        return 2;
+        return [0, 1, 2];
       case OrderStatus.REFUND:
-        return 3;
+        return [0, 1, 2, 3];
       default:
-        return 0;
+        return [0];
     }
   };
 
-  const currentStep = getCurrentStep(currentOrderStatus);
+  const currentStep = getCurrentSteps(currentOrderStatus);
 
   return (
-    <Container className="bg-white" style={{
-      height:"100vh"
-    }}>
+    <Container
+      className="bg-white"
+      style={{
+        height: "100vh",
+      }}
+    >
       <div className="max-w-5xl mx-auto p-4 font-sans">
-      <Row justify="space-between" align="middle" className="mt-3 mb-3">
+        <Row justify="space-between" align="middle" className="mt-3 mb-3">
           <Button
-            type="text"
-            className="flex items-center text-gray-600 px-0"
+            className="flex items-center text-dark"
             onClick={() => navigate("/customer-order")}
             style={{
               transition: "background-color 0.2s ease, color 0.2s ease",
@@ -136,18 +149,21 @@ const OrderStatusCustomer = () => {
               MÃ ĐƠN HÀNG: <b>{order.id}</b>
             </span>
             <span className="mx-2 text-gray-300 mx-4">|</span>
-            <b className="text-danger font-semibold" style={{ textTransform: "uppercase" }}>
+            <b
+              className="text-danger font-semibold"
+              style={{ textTransform: "uppercase" }}
+            >
               {OrderStatusLabel[currentOrderStatus]}
             </b>
           </div>
         </Row>
 
-        <Divider style={{ margin: '10px 0' }} className="mb-5"/>
+        <Divider style={{ margin: "10px 0" }} className="mb-5" />
 
-        <Steps 
-        current={currentStep} 
-        items={steps} 
-        className="custom-steps"
+        <Steps
+          current={currentStep.length - 1}
+          items={steps.filter((_, index) => currentStep.includes(index))}
+          className="custom-steps"
         />
 
         <div className="w-full overflow-hidden mt-5 mb-5">
@@ -176,28 +192,35 @@ const OrderStatusCustomer = () => {
         </div>
 
         <Grid container spacing={3}>
-  <Grid item xs={12} md={6}>
-    {/* Delivery Address */}
-    <div className="mt-8">
-      <h4 className="text-lg font-semibold">Địa chỉ nhận hàng</h4>
-      <p className="text-gray-700 mt-4">
-        <b>{order.fullName}</b> <br />
-        (+84) {order.phoneNumber} <br />
-        {order.address.specificAddress}, {order.address.wardName},{" "}
-        {order.address.districtName}, {order.address.provinceName}
-      </p>
-    </div>
-  </Grid>
+          <Grid item xs={12} md={6}>
+            {/* Delivery Address */}
+            <div className="mt-8">
+              <h4 className="text-lg font-semibold">Địa chỉ nhận hàng</h4>
+              <p className="text-gray-700 mt-4">
+                <b>{order.fullName}</b> <br />
+                (+84) {order.phoneNumber} <br />
+                {order.address.specificAddress}, {order.address.wardName},{" "}
+                {order.address.districtName}, {order.address.provinceName}
+              </p>
+            </div>
+          </Grid>
 
-  <Grid item xs={12} md={6}>
-            <OrderPaymentDetails order={order}/>
-  </Grid>
-</Grid>
+          <Grid item xs={12} md={6}>
+            <OrderPaymentDetails order={order} />
+          </Grid>
+        </Grid>
 
         {order.paymentMethod === PaymentMethodEnum.CASH && (
-          <div className="mt-4 p-4 border border-yellow-400 bg-yellow-50 rounded">
+          <div
+            className="mt-4 p-4 bg-yellow-50 rounded"
+            style={{
+              border: "1px solid rgba(224, 168, 0, .4)",
+            }}
+          >
             <Text className="text-gray-600">
-              {`Vui lòng thanh toán ${order.totalMoney.toLocaleString("vi-VN")} ₫ khi nhận hàng.`}
+              {`Vui lòng thanh toán ${order.totalMoney.toLocaleString(
+                "vi-VN"
+              )} ₫ khi nhận hàng.`}
             </Text>
           </div>
         )}
@@ -226,32 +249,106 @@ const OrderStatusCustomer = () => {
             ))}
           </Row>
         </div>
-        
-              {order.orderDetails?.map((detail:any) => (
-                <OrderDetailCard
-                  key={detail.id}
-                  order={order}
-                  detail={detail}
-                />
-              ))}
-              <Grid container justifyContent="flex-end" className="mt-5">
-                <Typography variant="h6" color="text.secondary">
-                  Thành tiền:
-                </Typography>
-                <Typography
-                  variant="h6"
-                  color="error"
-                  style={{ marginLeft: 8 }}
-                >
-                  {`${order.totalMoney.toLocaleString("vi-VN")} ₫`}
-                </Typography>
+
+        {order.orderDetails?.map((detail: any) => (
+          <OrderDetailCard key={detail.id} order={order} detail={detail} />
+        ))}
+        <Grid container justifyContent="flex-end" className="mt-5">
+          <Typography variant="h6" color="text.secondary">
+            Thành tiền:
+          </Typography>
+          <Typography variant="h6" color="error" style={{ marginLeft: 8 }}>
+            {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
+          </Typography>
+        </Grid>
+
+        <div className="mt-8 text-gray-600 text-sm">
+          <p>
+            Nếu hàng nhận được có vấn đề, bạn có thể gửi yêu cầu Trả hàng/Hoàn
+            tiền trước <span className="text-gray-900">...</span>
+          </p>
+        </div>
+
+        <Grid
+                container
+                justifyContent="flex-end"
+                alignItems="center"
+                className="mt-3"
+              >
+                <Grid item style={{ marginRight: 10 }}>
+                  <Typography variant="h6" color="text.secondary">
+                    Thành tiền:
+                  </Typography>
+                </Grid>
+                <Grid item style={{ marginRight: 20 }}>
+                  <Typography variant="h6" color="error">
+                    {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
+                  </Typography>
+                </Grid>
               </Grid>
 
-        {/* <div className="mt-8 text-gray-600 text-sm">
-        <p>
-          Nếu hàng nhận được có vấn đề, bạn có thể gửi yêu cầu Trả hàng/Hoàn tiền trước <span className="text-gray-900">17-11-2024</span>
-        </p>
-      </div> */}
+              {order.status === OrderStatus.PENDING &&
+                order.paymentMethod === PaymentMethodEnum.CASH && (
+                  <Grid
+                    container
+                    justifyContent="flex-end"
+                    style={{ marginTop: 20 }}
+                  >
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={(e) => {
+                          handleCancelOrder(order.id,navigate);
+                        }}
+                        style={{ marginTop: 10 }}
+                      >
+                        Hủy đơn hàng
+                      </Button>
+                    </Grid>
+                  </Grid>
+                )}
+
+              {order.status === OrderStatus.SUCCESS && (
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Đánh giá
+                    </Button>
+                  </Grid>
+                </Grid>
+              )}
+               {order.status === OrderStatus.SUCCESS && (
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Yêu cầu trả hàng/hoàn tiền
+                    </Button>
+                  </Grid>
+                </Grid>
+              )}
 
         {/* <div className="mt-6 flex justify-between gap-4">
         <Button type="primary" className="bg-red-500 hover:bg-red-600 flex-1">

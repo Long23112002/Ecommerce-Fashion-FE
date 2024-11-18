@@ -4,7 +4,6 @@ import { OrderMeThodLabel } from "../../../enum/OrderStatusEnum";
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum";
 
 const OrderPaymentDetails = ({ order }: { order: any }) => {
-  // Create data for the table
   const rows = [
     {
       label: "Tổng tiền hàng",
@@ -12,16 +11,16 @@ const OrderPaymentDetails = ({ order }: { order: any }) => {
     },
     {
       label: "Giảm giá",
-      value: order?.discountId ? `${order?.discountId?.toLocaleString("vi-VN")} ₫` : "N/A",
+      value: order?.discountId ? `- ${order?.discountId?.toLocaleString("vi-VN")} ₫` : "0 ₫",
     },
     {
       label: "Phí vận chuyển",
-      value: order?.moneyShip ? `${order?.moneyShip?.toLocaleString("vi-VN")} ₫` : "N/A",
+      value: order?.moneyShip ? `${order?.moneyShip?.toLocaleString("vi-VN")} ₫` : "0 ₫",
     },
     {
       label: "Thành tiền",
-      value: order?.finalPrice ? `${order?.finalPrice?.toLocaleString("vi-VN")} ₫` : "N/A",
-      isTotal: true, // Indicating the final price row
+      value: order?.finalPrice ? `${order?.finalPrice?.toLocaleString("vi-VN")} ₫` : "0 ₫",
+      isTotal: true,
     },
     {
       label: "Phương thức thanh toán",
@@ -48,8 +47,8 @@ const OrderPaymentDetails = ({ order }: { order: any }) => {
                     component="th"
                     scope="row"
                     sx={{
-                      borderRight: "2px dashed #ccc", // Add vertical dashed line
-                      paddingLeft: "10px", // Space between text and vertical line
+                      borderRight: "2px dashed #ccc",
+                      paddingLeft: "10px",
                     }}
                   >
                     {row.label}
