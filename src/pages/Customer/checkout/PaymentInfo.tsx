@@ -15,6 +15,7 @@ import PaymentMethodEnum from "../../../enum/PaymentMethodEnum"
 import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 import { useNavigate } from "react-router-dom"
 import useLoadingScreen from "../../../hook/useLoadingScreen"
+import useCart from "../../../hook/useCart"
 
 interface IProps {
   order: Order,
@@ -25,6 +26,7 @@ interface IProps {
 const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
   const navigate = useNavigate()
   const { setLoadingScreen } = useLoadingScreen();
+  const {reload} = useCart();
 
   const isValidPaymentMethod = (value: string): boolean => {
     return Object.values(PaymentMethodEnum).includes(value as PaymentMethodEnum);
@@ -67,6 +69,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
   const handleCashPayment = async () => {
     setLoadingScreen(true)
     await payOrder(orderRequest)
+    reload()
     setLoadingScreen(false)
     toast.success("Đặt hàng thành công")
     navigate("/")

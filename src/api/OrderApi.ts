@@ -23,9 +23,9 @@ export interface OrderAddressUpdate {
 }
 
 export interface TransactionRequest {
-    orderId: string|number;
+    orderId: string | number;
     confirmationCode: string;
-    status: string|number;
+    status: string | number;
     paymentMethod: PaymentMethodEnum;
 }
 
@@ -57,6 +57,21 @@ export const updateAdressOrder = async (request: OrderAddressUpdate) => {
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/update-address/${orderId}`,
         data: { ...request }
+    })
+    return data
+}
+
+export const updateDiscountOrder = async (discountId: number | string) => {
+    const orderId = Cookies.get('orderId')
+    if (!orderId) {
+        throw Error('Người dùng không có đơn hàng')
+    }
+    const { data } = await axiosInstance({
+        method: 'PUT',
+        url: `${BASE_API}/api/v1/orders/update-discount/${orderId}`,
+        params: {
+            discountId: discountId
+        }
     })
     return data
 }

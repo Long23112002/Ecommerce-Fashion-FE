@@ -71,7 +71,10 @@ const CheckoutPage: React.FC = () => {
               />
             </Grid>
             <Grid item sm={12} md={5.5}>
-              <ProductOrderInfo order={order} />
+              <ProductOrderInfo
+                order={order}
+                setOrder={setOrder}
+              />
             </Grid>
           </Grid>
         </Container>

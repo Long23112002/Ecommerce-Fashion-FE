@@ -47,12 +47,8 @@ export const getAllProducts = async (query: { params?: ProductParams; pageable?:
 
 
 export const getProductById = async (id: number | string) => {
-    const token = Cookies.get("accessToken");
-    const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
-    };
     try {
-        const response = await axiosInstance.get(`${API_BASE_URL}/${id}`, config);
+        const response = await axiosInstance.get(`${API_BASE_URL}/${id}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching product by ID", error);

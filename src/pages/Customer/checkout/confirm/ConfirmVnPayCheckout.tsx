@@ -4,10 +4,12 @@ import { toast } from 'react-toastify';
 import { confirmOrder, TransactionRequest } from '../../../../api/OrderApi';
 import PaymentMethodEnum from '../../../../enum/PaymentMethodEnum';
 import MuiLoadingScreen from '../../../../components/Loading/MuiLoadingScreen';
+import useCart from '../../../../hook/useCart';
 
 const ConfirmVnPayCheckout: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams();
+    const { reload } = useCart();
 
     useEffect(() => {
         const orderId = searchParams.get('vnp_TxnRef')
@@ -17,12 +19,13 @@ const ConfirmVnPayCheckout: React.FC = () => {
         const callConfirmOrder = async () => {
             try {
                 const data: TransactionRequest = {
-                    orderId: orderId, 
+                    orderId: orderId,
                     confirmationCode: encode,
                     status: status,
                     paymentMethod: PaymentMethodEnum.VNPAY
                 }
                 await confirmOrder(data)
+                reload()
                 toast.success("Bạn đã thanh toán thành công")
             } catch (error: any) {
                 const message = error.response.data.message;

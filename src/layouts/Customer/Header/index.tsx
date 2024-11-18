@@ -22,7 +22,6 @@ import {
 import { Button, Dropdown, MenuProps } from "antd";
 import { useNavigate } from 'react-router-dom';
 
-// const categories = ['Sản phẩm mới', 'Sản phẩm hot', 'Áo', 'Quần'];
 const categories = [
     { name: 'Sản phẩm mới', link: 'sort=newest' },
     { name: 'Sản phẩm hot', link: '' },

@@ -30,6 +30,7 @@ export interface Order {
     status: OrderStatus;
     paymentMethod: PaymentMethodEnum;
     fullName: string,
+    discountAmount: number,
     finalPrice: number;
     moneyShip: number;
     phoneNumber: string;
