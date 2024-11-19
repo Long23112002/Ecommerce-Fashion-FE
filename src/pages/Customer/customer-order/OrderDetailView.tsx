@@ -15,7 +15,7 @@ import {
   Order,
 } from "../../../types/Order";
 import "./OrderStatus.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   Box,
   Card,
@@ -29,7 +29,6 @@ import dayjs from "dayjs";
 import { Row, Col } from "antd";
 import OrderDetailCard from "./CustomerOrderCard";
 import { fetchOrderDetails } from "../../../api/CustomerOrderApi";
-import { Text } from "recharts";
 import { OrderMeThodLabel } from "../../../enum/OrderStatusEnum";
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum";
 import OrderPaymentDetails from "./OrderPaymentDetails";
@@ -38,25 +37,21 @@ import { toast } from "react-toastify";
 const OrderStatusCustomer = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { order } = location.state;
+  const { id } = useParams<{ id:any}>();
+  const {orders} = location.state;
+  const [order, setOrders] = useState<Order>();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // const [order, setOrder] = useState<Order>();
-  // const [loading, setLoading] = useState<boolean>(true);
-
-  // const getOrderDetails = async () => {
-  //   try {
-  //     const orderData = await fetchOrderDetails(orderId);
-  //     setOrder(orderData);
-  //     setLoading(false);
-  //   } catch (err) {
-  //     console.error('Không thể tải dữ liệu đơn hàng');
-  //     setLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   getOrderDetails();
-  // },[orderId]);
+  const getOrderDetails = async () => {
+    try {
+      const orderData = await fetchOrderDetails(id);
+      setOrders(orderData);
+      setLoading(false);
+    } catch (err) {
+      console.error('Không thể tải dữ liệu đơn hàng');
+      setLoading(false);
+    }
+  };
 
   const createdAt = order?.createdAt
     ? dayjs(order.createdAt).format("HH:mm DD-MM-YYYY")
@@ -65,12 +60,16 @@ const OrderStatusCustomer = () => {
     ? dayjs(order.updatedAt).format("HH:mm DD-MM-YYYY")
     : "";
 
-  const [currentOrderStatus, setCurrentOrderStatus] = useState<OrderStatus>(
-    order?.status
-  );
+    const currentOrderStatus = order?.status ?? OrderStatus.PENDING;
+
+
+  useEffect(() => {
+    getOrderDetails();
+  },[currentOrderStatus]);
+
 
   const statusTimeMap: { [key: string]: string } = {};
-  order.orderLogs?.forEach((log: OrderLog) => {
+  order?.orderLogs?.forEach((log: OrderLog) => {
     statusTimeMap[log.newValue] = dayjs(log.createdAt).format(
       "HH:mm DD-MM-YYYY"
     );
@@ -79,7 +78,7 @@ const OrderStatusCustomer = () => {
   const steps = [
     {
       title: OrderStatusLabel[OrderStatus.PENDING],
-      description: createdAt || "Đang chờ xử lý",
+      description: statusTimeMap[OrderStatus.PENDING] || createdAt || "Đang chờ xử lý",
       icon: <FileTextOutlined />,
     },
     {
@@ -97,6 +96,15 @@ const OrderStatusCustomer = () => {
       description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
       icon: <SyncOutlined />,
     },
+  ];
+
+
+  const cancelSteps = [
+    {
+      title: OrderStatusLabel[OrderStatus.PENDING],
+      description: createdAt || "Đang chờ xử lý",
+      icon: <FileTextOutlined />,
+    },
     {
       title: OrderStatusLabel[OrderStatus.CANCEL],
       description: statusTimeMap[OrderStatus.CANCEL] || "Hủy đơn",
@@ -104,27 +112,24 @@ const OrderStatusCustomer = () => {
     },
   ];
 
-  const getCurrentSteps = (status: OrderStatus) => {
-    if (status === OrderStatus.CANCEL) {
-      // Show step 0 (Pending) and then go directly to step 4 (Canceled)
-      return [0, 4];
-    }
-    // If not canceled, show the normal progression (Pending -> Shipping -> Success -> Refund)
+  const getCurrentStep = (status: OrderStatus) => {
     switch (status) {
       case OrderStatus.PENDING:
-        return [0];
+        return 0;
       case OrderStatus.SHIPPING:
-        return [0, 1];
+        return 1;
       case OrderStatus.SUCCESS:
-        return [0, 1, 2];
+        return 2;
       case OrderStatus.REFUND:
-        return [0, 1, 2, 3];
+        return 3;
+        case OrderStatus.CANCEL:
+        return 1;
       default:
-        return [0];
+        return 0;
     }
   };
 
-  const currentStep = getCurrentSteps(currentOrderStatus);
+  const currentStep = getCurrentStep(currentOrderStatus);
 
   return (
     <Container
@@ -155,7 +160,7 @@ const OrderStatusCustomer = () => {
           </Button>
           <div className="text-sm">
             <span className="font-semibold">
-              MÃ ĐƠN HÀNG: <b>{order.id}</b>
+              MÃ ĐƠN HÀNG: <b>{order?.id}</b>
             </span>
             <span className="mx-2 text-gray-300 mx-4">|</span>
             <b
@@ -169,11 +174,19 @@ const OrderStatusCustomer = () => {
 
         <Divider style={{ margin: "10px 0" }} className="mb-5" />
 
-        <Steps
-          current={currentStep.length - 1}
-          items={steps.filter((_, index) => currentStep.includes(index))}
-          className="custom-steps"
-        />
+        {currentOrderStatus === OrderStatus.CANCEL ? (
+          <Steps
+            current={currentStep}
+            items={cancelSteps}
+            className="custom-steps"
+          />
+        ) : (
+          <Steps
+            current={currentStep}
+            items={steps}
+            className="custom-steps"
+          />
+        )}
 
         <div className="w-full overflow-hidden mt-5 mb-5">
           <Row
@@ -206,10 +219,10 @@ const OrderStatusCustomer = () => {
             <div className="mt-8">
               <h4 className="text-lg font-semibold">Địa chỉ nhận hàng</h4>
               <p className="text-gray-700 mt-4">
-                <b>{order.fullName}</b> <br />
-                (+84) {order.phoneNumber} <br />
-                {order.address.specificAddress}, {order.address.wardName},{" "}
-                {order.address.districtName}, {order.address.provinceName}
+                <b>{order?.fullName}</b> <br />
+                (+84) {order?.phoneNumber} <br />
+                {order?.address.specificAddress}, {order?.address.wardName},{" "}
+                {order?.address.districtName}, {order?.address.provinceName}
               </p>
             </div>
           </Grid>
@@ -219,18 +232,18 @@ const OrderStatusCustomer = () => {
           </Grid>
         </Grid>
 
-        {order.paymentMethod === PaymentMethodEnum.CASH && (
+        {order?.paymentMethod === PaymentMethodEnum.CASH && (
           <div
             className="mt-4 p-4 bg-yellow-50 rounded"
             style={{
               border: "1px solid rgba(224, 168, 0, .4)",
             }}
           >
-            <Text className="text-gray-600">
+            <span className="text-gray-600">
               {`Vui lòng thanh toán ${order.totalMoney.toLocaleString(
                 "vi-VN"
               )} ₫ khi nhận hàng.`}
-            </Text>
+            </span>
           </div>
         )}
 
@@ -259,7 +272,7 @@ const OrderStatusCustomer = () => {
           </Row>
         </div>
 
-        {order.orderDetails?.map((detail: any) => (
+        {order?.orderDetails?.map((detail: any) => (
           <OrderDetailCard key={detail.id} order={order} detail={detail} />
         ))}
         <Grid container justifyContent="flex-end" className="mt-5">
@@ -267,7 +280,7 @@ const OrderStatusCustomer = () => {
             Thành tiền:
           </Typography>
           <Typography variant="h6" color="error" style={{ marginLeft: 8 }}>
-            {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
+            {`${order?.finalPrice.toLocaleString("vi-VN")} ₫`}
           </Typography>
         </Grid>
 
@@ -280,15 +293,15 @@ const OrderStatusCustomer = () => {
           </p>
         </div>
 
-        {order.status === OrderStatus.PENDING &&
-          order.paymentMethod === PaymentMethodEnum.CASH && (
+        {order?.status === OrderStatus.PENDING &&
+          order?.paymentMethod === PaymentMethodEnum.CASH && (
             <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
               <Grid item>
                 <Button
                   variant="contained"
                   color="error"
                   onClick={(e) => {
-                    handleCancelOrder(order.id, navigate);
+                    handleCancelOrder(order?.id, navigate);
                   }}
                   style={{ marginTop: 10 }}
                 >
@@ -298,7 +311,7 @@ const OrderStatusCustomer = () => {
             </Grid>
           )}
 
-        {order.status === OrderStatus.SUCCESS && (
+        {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
@@ -315,32 +328,55 @@ const OrderStatusCustomer = () => {
           </Grid>
         )}
 
-        {order.status === OrderStatus.CANCEL ||
-          (order.status === OrderStatus.SUCCESS && (
-            <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const productId =
-                      order.orderDetails?.[0]?.productDetail?.product?.id;
-                    if (productId !== undefined) {
-                      handleBuyAgain(productId, navigate);
-                    } else {
-                      toast.error("Product ID không khả dụng");
-                    }
-                  }}
-                  style={{ marginTop: 10 }}
-                >
-                  Mua lại
-                </Button>
-              </Grid>
+        {order?.status === OrderStatus.CANCEL && (
+          <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="inherit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const productId =
+                    order?.orderDetails?.[0]?.productDetail?.product?.id;
+                  if (productId !== undefined) {
+                    handleBuyAgain(productId, navigate);
+                  } else {
+                    toast.error("Product ID không khả dụng");
+                  }
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Mua lại
+              </Button>
             </Grid>
-          ))}
+          </Grid>
+        )}
 
-        {order.status === OrderStatus.SUCCESS && (
+        {order?.status === OrderStatus.SUCCESS && (
+          <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="inherit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const productId =
+                    order?.orderDetails?.[0]?.productDetail?.product?.id;
+                  if (productId !== undefined) {
+                    handleBuyAgain(productId, navigate);
+                  } else {
+                    toast.error("Product ID không khả dụng");
+                  }
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Mua lại
+              </Button>
+            </Grid>
+          </Grid>
+        )}
+
+        {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
