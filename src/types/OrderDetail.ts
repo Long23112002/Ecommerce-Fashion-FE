@@ -11,6 +11,7 @@ type OrderDetail = {
     createdAt: Date;
     updatedAt: Date;
     deleted: boolean;
+    code: string;
 }
 
 export default OrderDetail

@@ -14,7 +14,7 @@ import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
 import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 import Order from "../../../types/Order";
-import { createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder } from "../../../api/StoreApi";
+import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder } from "../../../api/StoreApi";
 import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
@@ -42,45 +42,56 @@ const SellingAtStore = () => {
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
+    const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
-    // const fetchVouchersDebounced = useCallback(
-    //     debounce(async (current: number, pageSize: number) => {
-    //         setLoadingVouchers(true);
-    //         try {
-    //             const response = await fetchAllVouchers(pageSize, current - 1);
-    //             setVouchers(response.data);
-    //         } catch (error) {
-    //             console.error("Error fetching vouchers:", error);
-    //         } finally {
-    //             setLoadingVouchers(false);
-    //         }
-    //     }, 500), []);
+    const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
 
-    const showAddQuantityModal = () => {
+    const fetchVouchersDebounced = useCallback(
+        debounce(async () => {
+            setLoadingVouchers(true);
+            try {
+                const response = await fetchAllVouchers();
+                setVouchers(response.data);
+            } catch (error) {
+                console.error("Error fetching vouchers:", error);
+            } finally {
+                setLoadingVouchers(false);
+            }
+        }, 500), []);
+
+    const showAddQuantityModal = (idProductDetail: number) => {
         form.resetFields();
+        setCurrentProductDetailId(idProductDetail);
         setIsOpenModalAddQuantity(true);
     }
     const handleAddQuantityCancel = () => {
         setIsOpenModalAddQuantity(false);
     };
     const handleAddQuantityOk = async () => {
-        // try {
-        //     const values = await form.validateFields();
-        //     const { price, quantity, idColor, idSize } = values;
-        //     const images = imageList;
-        //     const token = Cookies.get("accessToken");
-        //     const idProduct = product.id;
-        //     if (token) {
-        //         await addProductDetail({ price, quantity, images, idProduct, idColor, idSize }, token);
-        //         toast.success('Thêm sản phẩm Thành Công');
-        //         handleAddCancel();
-        //         refreshProductdetails();
-        //     } else {
-        //         toast.error("Authorization failed");
-        //     }
-        // } catch (error: any) {
-        //     toast.error(getErrorMessage(error))
-        // }
+        const idOrder = order?.id;
+        if (idOrder == null) {
+            toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
+        } else {
+            try {
+                const values = await form.validateFields();
+                const { quantity } = values;
+                const token = Cookies.get("accessToken");
+                if (token) {
+                    await addProductToOrderDetail({ idOrder, idProductDetail: currentProductDetailId, quantity });
+                    toast.success('Thêm sản phẩm Thành Công');
+                    handleAddQuantityCancel()
+
+                    await refreshOrderDetails();
+                    fetchListOrderDetail(order);
+                    // refreshOrderDetails();
+                } else {
+                    toast.error("Authorization failed");
+                }
+            } catch (error: any) {
+                toast.error(getErrorMessage(error))
+            }
+        }
+
     };
 
     const handleDeleteOrder = async (order: Order | null) => {
@@ -89,8 +100,20 @@ const SellingAtStore = () => {
             if (token && order) {
                 await deleteOrder(order.id, token);
                 toast.success("Xóa hóa đơn thành công");
+
+                // Đặt lại tất cả các giá trị của form về initialValues.
                 form.resetFields();
+
+                // đặt lại một hoặc nhiều giá trị cụ thể trong form, vượt qua initialValues.
+                form.setFieldsValue({
+                    createdAt: "",
+                    code: "",
+                    idVoucher: ""
+                });
+
                 fetchListOrderDraft()
+                setVouchers([]);
+
                 // refreshOrderDetails();
             } else {
                 toast.error("Xác thực thất bại");
@@ -154,7 +177,9 @@ const SellingAtStore = () => {
     const handleOrder = (order: Order) => {
         setOrder(order);
         form.setFieldsValue(order)
+        refreshOrderDetails()
         fetchListOrderDetail(order)
+        fetchVouchersDebounced()
     }
 
     const fetchListOrderDetail = async (order: Order | null) => {
@@ -220,7 +245,7 @@ const SellingAtStore = () => {
                 isModalOpen={isOpenModalAddQuantity}
                 form={form}
                 handleCancel={handleAddQuantityCancel}
-            // handleOk={}
+                handleOk={handleAddQuantityOk}
             />
 
         </div >
