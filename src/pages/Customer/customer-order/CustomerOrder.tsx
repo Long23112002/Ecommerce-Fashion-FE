@@ -23,7 +23,9 @@ const CustomerOrder: React.FC = () => {
     children: <OrderTabContent status={status} />,
   }));
   return (
-    <Container>
+    <Container className='bg-white' style={{
+      height:"100vh"
+    }}>
       <Tabs
         centered
         defaultActiveKey="1"

@@ -31,10 +31,14 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
+// import ConfirmCheckout from '../pages/ConfirmCheckout.tsx';
+import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder';
+import OrderStatusCustomer from '../pages/Customer/customer-order/OrderDetailView.tsx';
 import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
 import Statistics from '../pages/Admin/Statistics/Statistics.tsx';
 import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
 import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
+
 
 const AppRoutes = () => {
     return (
@@ -54,6 +58,9 @@ const AppRoutes = () => {
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />
                 </Route>
+                <Route path="/customer-order" element={<CustomerOrder/>}/>
+                <Route path="/customer-order/:id" element={<OrderStatusCustomer/>}/>
+
             </Route>
             <Route element={<AdminLayout />}>
                 <Route path="/admin/statistics" element={<Statistics />} />
