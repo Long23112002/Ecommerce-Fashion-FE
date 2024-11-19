@@ -44,6 +44,10 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
     navigate(`/customer-order/${order.id}`, { state: { order } });
   };
 
+  const handleBuyAgain = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
+
   const handleCancelOrder = async (orderId: number) => {
     const token = Cookies.get("accessToken");
     if (!token) {
@@ -166,7 +170,36 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                   </Grid>
                 </Grid>
               )}
-               {order.status === OrderStatus.SUCCESS && (
+
+              {order.status === OrderStatus.CANCEL || order.status === OrderStatus.SUCCESS && (
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const productId =
+                          order.orderDetails?.[0]?.productDetail?.product?.id;
+                        if (productId !== undefined) {
+                          handleBuyAgain(productId);
+                        } else {
+                          toast.error("Product ID không khả dụng");
+                        }
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Mua lại
+                    </Button>
+                  </Grid>
+                </Grid>
+              )}
+
+              {order.status === OrderStatus.SUCCESS && (
                 <Grid
                   container
                   justifyContent="flex-end"
@@ -213,5 +246,11 @@ export const handleCancelOrder = async (
   }
 };
 
+export const handleBuyAgain = (
+  productId: number,
+  navigate: (path: string) => void
+) => {
+  navigate(`/product/${productId}`);
+};
 
 export default OrderTabContent;

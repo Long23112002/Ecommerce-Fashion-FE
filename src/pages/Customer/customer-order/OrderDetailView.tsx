@@ -16,7 +16,15 @@ import {
 } from "../../../types/Order";
 import "./OrderStatus.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Box, Card, Container, Divider, Grid, Typography,Button } from "@mui/material";
+import {
+  Box,
+  Card,
+  Container,
+  Divider,
+  Grid,
+  Typography,
+  Button,
+} from "@mui/material";
 import dayjs from "dayjs";
 import { Row, Col } from "antd";
 import OrderDetailCard from "./CustomerOrderCard";
@@ -25,7 +33,8 @@ import { Text } from "recharts";
 import { OrderMeThodLabel } from "../../../enum/OrderStatusEnum";
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum";
 import OrderPaymentDetails from "./OrderPaymentDetails";
-import { handleCancelOrder } from "./OrderTabContent";
+import { handleBuyAgain, handleCancelOrder } from "./OrderTabContent";
+import { toast } from "react-toastify";
 const OrderStatusCustomer = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -271,68 +280,82 @@ const OrderStatusCustomer = () => {
           </p>
         </div>
 
-              {order.status === OrderStatus.PENDING &&
-                order.paymentMethod === PaymentMethodEnum.CASH && (
-                  <Grid
-                    container
-                    justifyContent="flex-end"
-                    style={{ marginTop: 20 }}
-                  >
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={(e) => {
-                          handleCancelOrder(order.id,navigate);
-                        }}
-                        style={{ marginTop: 10 }}
-                      >
-                        Hủy đơn hàng
-                      </Button>
-                    </Grid>
-                  </Grid>
-                )}
+        {order.status === OrderStatus.PENDING &&
+          order.paymentMethod === PaymentMethodEnum.CASH && (
+            <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={(e) => {
+                    handleCancelOrder(order.id, navigate);
+                  }}
+                  style={{ marginTop: 10 }}
+                >
+                  Hủy đơn hàng
+                </Button>
+              </Grid>
+            </Grid>
+          )}
 
-              {order.status === OrderStatus.SUCCESS && (
-                <Grid
-                  container
-                  justifyContent="flex-end"
-                  style={{ marginTop: 20 }}
+        {order.status === OrderStatus.SUCCESS && (
+          <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Đánh giá
+              </Button>
+            </Grid>
+          </Grid>
+        )}
+
+        {order.status === OrderStatus.CANCEL ||
+          (order.status === OrderStatus.SUCCESS && (
+            <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="inherit"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const productId =
+                      order.orderDetails?.[0]?.productDetail?.product?.id;
+                    if (productId !== undefined) {
+                      handleBuyAgain(productId, navigate);
+                    } else {
+                      toast.error("Product ID không khả dụng");
+                    }
+                  }}
+                  style={{ marginTop: 10 }}
                 >
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      style={{ marginTop: 10 }}
-                    >
-                      Đánh giá
-                    </Button>
-                  </Grid>
-                </Grid>
-              )}
-               {order.status === OrderStatus.SUCCESS && (
-                <Grid
-                  container
-                  justifyContent="flex-end"
-                  style={{ marginTop: 20 }}
-                >
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      style={{ marginTop: 10 }}
-                    >
-                      Yêu cầu trả hàng/hoàn tiền
-                    </Button>
-                  </Grid>
-                </Grid>
-              )}
+                  Mua lại
+                </Button>
+              </Grid>
+            </Grid>
+          ))}
+
+        {order.status === OrderStatus.SUCCESS && (
+          <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Yêu cầu trả hàng/hoàn tiền
+              </Button>
+            </Grid>
+          </Grid>
+        )}
 
         {/* <div className="mt-6 flex justify-between gap-4">
         <Button type="primary" className="bg-red-500 hover:bg-red-600 flex-1">
