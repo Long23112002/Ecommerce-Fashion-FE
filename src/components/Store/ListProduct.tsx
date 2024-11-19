@@ -10,7 +10,7 @@ interface ProductProps {
     form: FormInstance;
     products: ProductDetail[];
     loading?: boolean;
-    showModalAddQuantity: () => void;
+    showModalAddQuantity: (e: any) => void;
 }
 
 const ListProduct: React.FC<ProductProps> = ({
@@ -75,7 +75,7 @@ const ListProduct: React.FC<ProductProps> = ({
             render: (_: any, record: any) => (
                 <>
                     <Button
-                        onClick={() => showModalAddQuantity()}
+                        onClick={() => showModalAddQuantity(record.id)}
                         style={{ margin: '0 4px' }} className="btn-outline-primary">
                         <i className="fa-solid fa-circle-plus"></i>
                     </Button>

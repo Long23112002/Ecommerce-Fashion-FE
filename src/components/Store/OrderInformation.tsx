@@ -4,6 +4,7 @@ import { User } from "../../types/User";
 import { Voucher } from "../../types/voucher";
 import OrderDetailListTable from "./ListOrderDraft";
 import Order from "../../types/Order";
+import { useEffect } from "react";
 
 interface OrderInformationProps {
     // onFill: () => void;
@@ -38,6 +39,13 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     order,
     handleCancel
 }) => {
+    // useEffect(() => {
+    //     // Đảm bảo form luôn đồng bộ với `order` khi nó thay đổi
+    //     if (order) {
+    //         form.setFieldsValue(order);
+    //     }
+    // }, [order, form]);
+
     return (
         <div
             style={{
@@ -56,9 +64,9 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 onFinish={onFinish}
                 initialValues={{
                     createdAt: order?.createdAt
-                        ? new Date(Number(order.createdAt)).toLocaleDateString()
+                        ? new Date(order.createdAt).toLocaleDateString()
                         : "",
-                    id: order?.id || "",
+                    code: order?.code || "",
                     fullName: order?.fullName || "",
                     totalMoney: order?.totalMoney || "",
                     finalPrice: order?.finalPrice || ""
@@ -72,19 +80,19 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     />
                 </Form.Item>
 
-                <Form.Item label="Mã hóa đơn" name="id">
+                <Form.Item label="Mã hóa đơn" name="code">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item
                     name="fullName"
                     label="Tên khách"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Tên khách hàng không được trống",
-                        },
-                    ]}
+                    // rules={[
+                    //     {
+                    //         required: true,
+                    //         message: "Tên khách hàng không được trống",
+                    //     },
+                    // ]}
                 >
                     <Input placeholder="Nhập tên khách hàng" />
                 </Form.Item>
@@ -104,7 +112,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
-                    name="idColor"
+                    name="idVoucher"
                     label="Voucher"
                     rules={[
                         {

@@ -271,6 +271,9 @@ const PromotionScheduled: React.FC = () => {
   const location = useLocation();
   const selectedPromotion = location.state;
 
+  const isPromotionEnded =
+          selectedPromotion.statusPromotionEnum === StatusPromotionEnum.ENDED;
+
   useEffect(() => {
     const selectedPromotion = location.state;
     if (selectedPromotion && selectedPromotion.productDetailList) {
@@ -452,7 +455,7 @@ const PromotionScheduled: React.FC = () => {
                     color: "white",
                   }}
                   onClick={addProductDetailsToPromotion}
-                  disabled={false}
+                  disabled={isPromotionEnded}
                 >
                   Lưu
                 </Button>

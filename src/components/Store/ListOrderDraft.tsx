@@ -32,7 +32,7 @@ const ListOrderDraft: React.FC<ListOrderDraftProps> = ({
                                     style={style}
                                     onClick={() => handleOrder(order)}
                                 >
-                                    {order.id}
+                                    {order.code}
                                 </Button>
                             </Col>
                         ))}
