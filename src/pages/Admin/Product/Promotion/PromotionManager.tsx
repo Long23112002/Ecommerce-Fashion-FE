@@ -274,7 +274,6 @@ const ManagerPromotion = () => {
                 className="btn-outline-primary"
                 onClick={() => applyPromotion(record)}
                 style={{ marginRight: 8 }}
-                disabled={isPromotionEnded}
               >
                 <i className="fa-solid fa-clipboard-check"></i>
               </Button>

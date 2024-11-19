@@ -43,6 +43,7 @@ export interface Order {
     orderDetails?: OrderDetail[];
     code: string;
     staffId: number;
+    orderLogs?: OrderLog[];
 }
 
 export interface OrderUpdateRequest {
@@ -61,5 +62,13 @@ export type OrderDetailValue = {
     productDetailId: number,
     quantity: number
 }
+
+export interface OrderLog {
+    id: number;
+    oldStatus: string;
+    newValue: string;
+    createdAt: number;
+    updatedAt: number;
+  }
 
 export default Order
