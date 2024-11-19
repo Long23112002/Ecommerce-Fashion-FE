@@ -2,12 +2,14 @@ import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import Order from '../../../types/Order';
 import ProductDetail from '../../../types/ProductDetail';
+import VoucherSelector from './VoucherSelector';
 
 interface IProps {
     order: Order
+    setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
 }
 
-const ProductOrderInfo: React.FC<IProps> = ({ order }) => {
+const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
     return (
         <Box
             className='shadow-section-2'
@@ -21,6 +23,8 @@ const ProductOrderInfo: React.FC<IProps> = ({ order }) => {
             <Typography variant='h6' mb={2} fontWeight="bold">Thông tin sản phẩm</Typography>
             {order.orderDetails?.map(od => <ProductDetailItem key={od.id} pd={od.productDetail} />)}
 
+            <VoucherSelector order={order} setOrder={setOrder} />
+
             <Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography>Tổng giá trị sản phẩm: </Typography>
@@ -32,7 +36,7 @@ const ProductOrderInfo: React.FC<IProps> = ({ order }) => {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography>Giảm giá: </Typography>
-                    <Typography variant="body1">{ }</Typography>
+                    <Typography variant="body1">{order.discountAmount.toLocaleString('vi-VN') + ' đ'}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography variant='h5'>Tổng thanh toán: </Typography>

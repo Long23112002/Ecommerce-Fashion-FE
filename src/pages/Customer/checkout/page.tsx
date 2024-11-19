@@ -7,6 +7,7 @@ import ProductOrderInfo from './ProductOrderInfo'
 import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
 import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
+import PaymentMethodEnum from '../../../enum/PaymentMethodEnum'
 
 const CheckoutPage: React.FC = () => {
 
@@ -15,7 +16,8 @@ const CheckoutPage: React.FC = () => {
     fullName: '',
     phoneNumber: '',
     specificAddress: '',
-    note: ''
+    note: '',
+    paymentMethod: PaymentMethodEnum.CASH
   });
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -69,7 +71,10 @@ const CheckoutPage: React.FC = () => {
               />
             </Grid>
             <Grid item sm={12} md={5.5}>
-              <ProductOrderInfo order={order} />
+              <ProductOrderInfo
+                order={order}
+                setOrder={setOrder}
+              />
             </Grid>
           </Grid>
         </Container>

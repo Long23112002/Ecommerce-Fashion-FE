@@ -4,13 +4,13 @@ import OrderDetail from "./OrderDetail";
 import { User } from "./User";
 
 export enum OrderStatus {
-    NOPE = "",
     PENDING = "PENDING",
     CANCEL = "CANCEL",
     SHIPPING = "SHIPPING",
     SUCCESS = "SUCCESS",
     DRAFT = "DRAFT",
-    REFUND = "REFUND"
+    REFUND = "REFUND",
+    PENDING_AT_STORE = "PENDING_AT_STORE"
 }
 
 export const OrderStatusLabel: Record<OrderStatus, string> = {
@@ -20,7 +20,7 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
     [OrderStatus.SUCCESS]: "Thành công",
     [OrderStatus.DRAFT]: "Nháp",
     [OrderStatus.REFUND]: "Hoàn tiền",
-    [OrderStatus.NOPE]: "Không xác Định"
+    [OrderStatus.PENDING_AT_STORE]: "Tại Quầy",
 };
 
 export interface Order {
@@ -30,6 +30,7 @@ export interface Order {
     status: OrderStatus;
     paymentMethod: PaymentMethodEnum;
     fullName: string,
+    discountAmount: number,
     finalPrice: number;
     moneyShip: number;
     phoneNumber: string;
@@ -40,6 +41,7 @@ export interface Order {
     createdAt: number;
     updatedAt: number;
     orderDetails?: OrderDetail[];
+    orderLogs?: OrderLog[];
 }
 
 export interface OrderUpdateRequest {
@@ -47,6 +49,7 @@ export interface OrderUpdateRequest {
     phoneNumber: string;
     specificAddress: string;
     note: string;
+    paymentMethod: PaymentMethodEnum;
 }
 
 export type OrderCreateRequest = {
@@ -57,5 +60,13 @@ export type OrderDetailValue = {
     productDetailId: number,
     quantity: number
 }
+
+export interface OrderLog {
+    id: number;
+    oldStatus: string;
+    newValue: string;
+    createdAt: number;
+    updatedAt: number;
+  }
 
 export default Order
