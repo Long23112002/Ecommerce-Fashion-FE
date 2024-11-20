@@ -4,6 +4,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import {useLocation, useNavigate} from "react-router-dom";
 import {checkSumPayment, payOrder} from "../../../api/OrderApi";
 import {toast} from "react-toastify";
+import useCart from "../../../hook/useCart";
 
 
 const { Title, Text } = Typography
@@ -15,6 +16,7 @@ const { Title, Text } = Typography
     const location = useLocation();
     const [checkSum , setCheckSum] = useState(false)
     const { order, orderRequest } = location.state || {}
+     const {reload} = useCart();
 
 
 
@@ -93,29 +95,32 @@ const { Title, Text } = Typography
          navigate("/")
      }
 
-
      useEffect(() => {
          const checkPaymentStatus = async () => {
-             const result = await checkSumPayment(order?.totalMoney, `DH${order?.id}`);
+             const result = await checkSumPayment(order?.finalPrice, `DH${order?.id}`);
              if (result === true) {
-                 await payOrder(orderRequest)
-                 toast.success("Đã thanh toán thành công")
-                 setCheckSum(true)
+                 await payOrder(orderRequest);
+                 toast.success("Đã thanh toán thành công");
+                 reload()
+                 setCheckSum(true);
+                 clearInterval(intervalId);
              }
          };
+
          const intervalId = setInterval(checkPaymentStatus, 5000);
 
          return () => clearInterval(intervalId);
      }, [order, navigate]);
 
 
+
     const handelBack = () => {
         navigate('/checkout')
     }
 
-    const formatNumber = (num:any) => num.toString().padStart(2, '0');
+    const formatNumber = (num:any) => num?.toString().padStart(2, '0');
 
-    const formatPrice = (price:any) => price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const formatPrice = (price:any) => price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
 
     return (
