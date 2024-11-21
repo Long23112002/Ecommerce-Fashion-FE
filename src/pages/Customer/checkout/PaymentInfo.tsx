@@ -68,11 +68,11 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
 
   const handleCashPayment = async () => {
     setLoadingScreen(true)
-    await payOrder(orderRequest)
+    // await payOrder(orderRequest)
     reload()
     setLoadingScreen(false)
-    toast.success("Đặt hàng thành công")
-    navigate("/")
+    // toast.success("Đặt hàng thành công")
+    navigate("/checkout/qr", { state: { order, orderRequest } });
   }
 
   const handlePay = async () => {
@@ -185,6 +185,8 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       >
         Thanh toán
       </Button>
+
+
     </Box>
   )
 }

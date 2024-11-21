@@ -153,12 +153,14 @@ const CartPage = () => {
 
             {cart?.cartValueInfos.map((pd) => (
               <Box
+                  onClick={ () => navigate(`/product/${pd.productDetail.product.id}`)}
                 key={pd.productDetail.id}
                 sx={{
                   display: "flex",
                   my: 2,
                   borderBottom: "1px solid #ccc",
                   paddingBottom: 1,
+                  cursor:'pointer'
                 }}
               >
                 <div

@@ -47,6 +47,15 @@ export default function ModalHistoryImport({ isModalOpen, onClose }: ModalHistor
         total: 20,
         totalPage: 4,
     });
+    // const [showResult, setShowResult] = useState(false);
+    //
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         setShowResult(true);
+    //     }, 5000);
+    //
+    //     return () => clearTimeout(timer);
+    // }, [process]);
 
 
 
@@ -85,6 +94,26 @@ export default function ModalHistoryImport({ isModalOpen, onClose }: ModalHistor
             fetchHistory(pagination.current, pagination.pageSize);
         }
     }, [pagination.current, pagination.pageSize]);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isModalOpen) {
+            const inProcessRecords = history.filter(record => record.status === 'IN_PROCESS');
+
+            if (inProcessRecords.length > 0) {
+
+                interval = setInterval(() => {
+                    fetchHistory(pagination.current, pagination.pageSize);
+                }, 5000);
+
+                return () => clearInterval(interval);
+            }
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [history, isModalOpen, pagination.current, pagination.pageSize]);
 
     const columns: ColumnsType<DataType> = [
         {
