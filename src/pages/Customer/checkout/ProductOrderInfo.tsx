@@ -40,7 +40,7 @@ const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
                     <Typography variant='h5'>Tổng thanh toán: </Typography>
-                    <Typography variant="h6">{order.finalPrice.toLocaleString('vi-VN') + ' đ'}</Typography>
+                    <Typography variant="h6">{order.payAmount.toLocaleString('vi-VN') + ' đ'}</Typography>
                 </Box>
             </Box>
 

@@ -164,6 +164,12 @@ const AdminSidebar: React.FC<IProps> = ({
           </MenuItem>
         </SubMenu>
         <MenuItem
+          to="/admin/order"
+          icon={<i className="fa-solid fa-file-invoice fs-5" />}
+        >
+          Đơn hàng
+        </MenuItem>
+        <MenuItem
           to="/admin/chat"
           icon={<i className="fa-solid fa-message fs-5" />}
         >

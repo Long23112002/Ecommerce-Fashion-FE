@@ -69,7 +69,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     code: order?.code || "",
                     fullName: order?.fullName || "",
                     totalMoney: order?.totalMoney || "",
-                    finalPrice: order?.finalPrice || ""
+                    payAmount: order?.payAmount || ""
                 }}
             >
                 <Form.Item
@@ -135,7 +135,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
-                    name="finalPrice"
+                    name="payAmount"
                     label="Thành tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />

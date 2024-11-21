@@ -122,7 +122,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                 </Grid>
                 <Grid item style={{ marginRight: 20 }}>
                   <Typography variant="h6" color="error">
-                    {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
+                    {`${order.payAmount.toLocaleString("vi-VN")} ₫`}
                   </Typography>
                 </Grid>
               </Grid>

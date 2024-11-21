@@ -280,7 +280,7 @@ const OrderStatusCustomer = () => {
             Thành tiền:
           </Typography>
           <Typography variant="h6" color="error" style={{ marginLeft: 8 }}>
-            {`${order?.finalPrice.toLocaleString("vi-VN")} ₫`}
+            {`${order?.payAmount.toLocaleString("vi-VN")} ₫`}
           </Typography>
         </Grid>
 
