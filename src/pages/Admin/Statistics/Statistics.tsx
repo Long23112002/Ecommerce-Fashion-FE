@@ -130,7 +130,6 @@ const Statistics: React.FC = () => {
                         }
                     </>
                 }
-
             </Card>
 
             <Tabs

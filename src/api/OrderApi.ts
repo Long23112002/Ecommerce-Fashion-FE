@@ -127,7 +127,6 @@ export const updateStateOrder = async (id: number, orderChangeState: any) => {
     }
 };
 
-export default updateStateOrder;
 export const deleteOrder = async (orderId: number, token: string) => {
     try {
         const response = await axiosInstance.delete(`${BASE_URL}/${orderId}`, {
@@ -137,6 +136,21 @@ export const deleteOrder = async (orderId: number, token: string) => {
         });
         return response.data;
     } catch (error) {
+        console.error('Lỗi khi xóa đơn hàng:', error);
+        throw error;
+    }
+}
+
+export  const checkSumPayment = async (amount:number , description:string) =>{
+    try {
+        const response = await  axiosInstance.get(`${BASE_URL}/checksum`, {
+            params: {
+                amount: amount,
+                description: description
+            }
+        })
+        return response.data
+    }catch (error) {
         console.error('Lỗi khi xóa đơn hàng:', error);
         throw error;
     }

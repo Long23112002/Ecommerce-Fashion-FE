@@ -8,6 +8,7 @@ import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
 import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 import PaymentMethodEnum from '../../../enum/PaymentMethodEnum'
+import PaymentQRComponent from "./PaymentQRComponent";
 
 const CheckoutPage: React.FC = () => {
 
