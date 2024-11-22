@@ -1,8 +1,5 @@
-
-
-import { BASE_API } from "../constants/BaseApi";
-import Cookies from 'js-cookie';
-import axiosInstance, { PageableRequest } from "./AxiosInstance";
+import {BASE_API} from "../constants/BaseApi";
+import axiosInstance, {PageableRequest} from "./AxiosInstance";
 import {toast} from "react-toastify";
 import {getErrorMessage} from "../pages/Error/getErrorMessage";
 
@@ -186,12 +183,11 @@ export const importProduct = async (file: File): Promise<any> => {
     formData.append('file', file);
 
     try {
-        const response = await axiosInstance.post(`${API_BASE_URL}/import`, formData, {
+        return await axiosInstance.post(`${API_BASE_URL}/import`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        return response.data;
     } catch (error) {
        toast.error(getErrorMessage(error));
     }

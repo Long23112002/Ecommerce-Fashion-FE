@@ -1,6 +1,4 @@
 import { Box } from '@mui/material'
-import { useSelector } from 'react-redux'
-import { loadingScreenSelector } from '../../redux/reducers/LoadingScreenReducer'
 import MuiLoading from './MuiLoading'
 
 const MuiLoadingScreen = () => {

@@ -31,7 +31,8 @@ export interface Order {
     paymentMethod: PaymentMethodEnum;
     fullName: string,
     discountAmount: number,
-    finalPrice: number;
+    revenueAmount: number;
+    payAmount: number;
     moneyShip: number;
     phoneNumber: string;
     totalMoney: number;

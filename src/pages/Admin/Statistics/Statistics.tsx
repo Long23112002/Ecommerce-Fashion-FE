@@ -115,13 +115,21 @@ const Statistics: React.FC = () => {
                 }
                 style={{ marginBottom: '24px' }}
             >
-                <Typography.Title level={2} style={{ marginBottom: '8px' }}>
-                    {currentDayRevenue?.today.revenue.toLocaleString()} VND
-                </Typography.Title>
-                <Typography.Text type="secondary">
-                    {!currentDayRevenue ? '' : currentDayRevenue?.increase < 0 ? '-' : '+'}
-                    {currentDayRevenue?.increase.toLocaleString()}% from yesterday
-                </Typography.Text>
+                {
+                    currentDayRevenue &&
+                    <>
+                        <Typography.Title level={2} style={{ marginBottom: '8px' }}>
+                            {currentDayRevenue.today.revenue.toLocaleString()} VND
+                        </Typography.Title>
+                        {
+                            currentDayRevenue.increase != 0 &&
+                            <Typography.Text type={currentDayRevenue?.increase > 0 ? 'success' : 'danger'}>
+                                {currentDayRevenue?.increase > 0 && '+'}
+                                {currentDayRevenue?.increase.toLocaleString()}% from yesterday
+                            </Typography.Text>
+                        }
+                    </>
+                }
             </Card>
 
             <Tabs
