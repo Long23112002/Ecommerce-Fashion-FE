@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react'
 import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'
-import { getAllProducts } from '../../../api/ProductApi'
+import { getAllProducts, ProductParams } from '../../../api/ProductApi'
 import MuiLoading from '../../../components/Loading/MuiLoading'
 import ProductCard from '../../../components/product/ProductCard'
 import { useSearchParams } from 'react-router-dom'
+import { PageableRequest } from '../../../api/AxiosInstance'
 
 export interface ISelectedFilter {
     keyword: string,
@@ -44,7 +45,7 @@ const FilterPage: React.FC = () => {
     const validSortValues: ISelectedFilter["sort"][] = ["name", "newest", "price-asc", "price-desc"];
     const sortParam = searchParams.get("sort");
     const sort = validSortValues.includes(sortParam as ISelectedFilter["sort"]) ? (sortParam as ISelectedFilter["sort"]) : 'newest';
-    
+
     const [selectedFilter, setSelectedFilter] = useState<ISelectedFilter>({
         keyword: searchParams.get("keyword") || '',
         idBrand: searchParams.get("idBrand") ? Number(searchParams.get("idBrand")) : null,
@@ -62,11 +63,19 @@ const FilterPage: React.FC = () => {
 
     const fetchProducts = async () => {
         setLoading(true)
-        const res = await getAllProducts({ params: { ...selectedFilter }, pageable: { ...getSort(selectedFilter.sort) } });
+        const max = selectedFilter.maxPrice || 2000000
+        const params: ProductParams = {
+            ...selectedFilter,
+            maxPrice: max >= 2000000 ? null : max
+        }
+        const pageable: PageableRequest = {
+            ...getSort(selectedFilter.sort)
+        }
+        const res = await getAllProducts({ params, pageable });
         setProduct([...res.data])
         setLoading(false)
     }
-    
+
     useEffect(() => {
         const { keyword, idBrand, idCategory, idColors, idMaterial, idOrigin, idSizes, minPrice, maxPrice, sort } = selectedFilter;
         const queryParams: any = {};

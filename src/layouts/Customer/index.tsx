@@ -4,6 +4,7 @@ import UserHeader from './Header';
 import { Box } from '@mui/material';
 import Chat from '../../components/chat';
 import { useUserHeaderSize } from '../../hook/useSize';
+import Footer from './Footer';
 
 const UserLayout: React.FC = () => {
     const headerSize = useUserHeaderSize()
@@ -30,6 +31,7 @@ const UserLayout: React.FC = () => {
                     }}
                 >
                     <Outlet />
+                    {/* <Footer /> */}
                     <Box
                         component='span'
                         sx={{

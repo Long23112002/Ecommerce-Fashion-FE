@@ -37,6 +37,7 @@ import Statistics from '../pages/Admin/Statistics/Statistics.tsx';
 import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder.tsx';
 import OrderStatusCustomer from '../pages/Customer/customer-order/OrderDetailView.tsx';
+import PaymentQRComponent from "../pages/Customer/checkout/PaymentQRComponent";
 
 
 const AppRoutes = () => {
@@ -53,6 +54,7 @@ const AppRoutes = () => {
                 <Route path='/cart' element={<CartPage />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
                 <Route path="/checkout/status" element={<ConfirmVnPayCheckout />} />
+                <Route path="/checkout/qr" element={<PaymentQRComponent />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
                     <Route path="/change-password" element={<ChangePasswordPage />} />

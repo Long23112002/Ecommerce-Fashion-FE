@@ -19,7 +19,7 @@ const OrderPaymentDetails = ({ order }: { order: any }) => {
     },
     {
       label: "Thành tiền",
-      value: order?.finalPrice ? `${order?.finalPrice?.toLocaleString("vi-VN")} ₫` : "0 ₫",
+      value: order?.payAmount ? `${order?.payAmount?.toLocaleString("vi-VN")} ₫` : "0 ₫",
       isTotal: true,
     },
     {
