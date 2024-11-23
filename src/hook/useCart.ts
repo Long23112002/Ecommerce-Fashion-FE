@@ -54,8 +54,8 @@ const useCart = () => {
         dispatch(setItemInCart(item))
     }
 
-    const reload = () => {
-        fetchCart();
+    const reload = async () => {
+        await fetchCart();
     }
 
     useEffect(() => {
