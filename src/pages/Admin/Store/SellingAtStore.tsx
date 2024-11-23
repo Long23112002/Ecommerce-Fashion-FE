@@ -14,14 +14,20 @@ import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
 import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 import Order from "../../../types/Order";
-import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder } from "../../../api/StoreApi";
+import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderSuccess } from "../../../api/StoreApi";
 import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
 import OrderDetail from "../../../types/OrderDetail";
-import { deleteOrder } from "../../../api/OrderApi";
+import { deleteOrder, getOrderById } from "../../../api/OrderApi";
+import { getAllUsers, UserParam } from "../../../api/UserApi";
+import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
+import { PaginationState } from "../../../config/paginationConfig";
+import { makeSlug } from "../../../utils/slug";
 
 const SellingAtStore = () => {
+    const [formAddQuantity] = Form.useForm();
+    const [formOrder] = Form.useForm();
     const [form] = Form.useForm();
 
     const [vouchers, setVouchers] = useState<Voucher[]>([]); // State for voucher details
@@ -29,11 +35,27 @@ const SellingAtStore = () => {
 
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
+    const [filterParams, setFilterParams] = useState<UserParam>({
+        page: 0,
+        size: 5,
+        phone: '',
+        email: '',
+        fullName: '',
+        gender: '',
+    });
+
+    const [pagination, setPagination] = useState<PaginationState>({
+        current: 0,
+        pageSize: 5,
+        total: 20,
+        totalPage: 4,
+    });
 
     const [products, setProducts] = useState<ProductDetail[]>([]);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
 
     const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
+    const [isOpenModalChooseGuest, setIsOpenModalChooseGuest] = useState(false);
 
     const [orderDraftList, setOrderDraftList] = useState<Order[]>([]);
     const [loadingOrderDraftList, setLoaingOrderDraftList] = useState(true);
@@ -45,6 +67,45 @@ const SellingAtStore = () => {
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
+
+    const formatCurrency = (value: number | null | undefined): string => {
+        if (!value) return "0";
+        return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+            .format(value); 
+    };
+
+    const fetchUsers = async (params = filterParams) => {
+        setLoadingUsers(true);
+        try {
+            const response = await getAllUsers({
+                ...params,
+                page: params.page - 1,
+            });
+            setUsers(response.data);
+            setPagination({
+                current: response.metaData.page + 1,
+                pageSize: response.metaData.size,
+                total: response.metaData.total,
+                totalPage: response.metaData.totalPage,
+            });
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    const handleFilterChange = (changedValues: any) => {
+        setFilterParams(prevParams => ({
+            ...prevParams,
+            ...changedValues,
+            email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
+            phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
+            fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
+            page: 1
+        }));
+    };
+
 
     const fetchVouchersDebounced = useCallback(
         debounce(async () => {
@@ -60,7 +121,7 @@ const SellingAtStore = () => {
         }, 500), []);
 
     const showAddQuantityModal = (idProductDetail: number) => {
-        form.resetFields();
+        formAddQuantity.resetFields();
         setCurrentProductDetailId(idProductDetail);
         setIsOpenModalAddQuantity(true);
     }
@@ -73,17 +134,29 @@ const SellingAtStore = () => {
             toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
         } else {
             try {
-                const values = await form.validateFields();
+                const values = await formAddQuantity.validateFields();
                 const { quantity } = values;
                 const token = Cookies.get("accessToken");
                 if (token) {
                     await addProductToOrderDetail({ idOrder, idProductDetail: currentProductDetailId, quantity });
+
+                    const response = await getOrderById(idOrder);
+                    setOrder(response)
                     toast.success('Thêm sản phẩm Thành Công');
                     handleAddQuantityCancel()
 
                     await refreshOrderDetails();
-                    fetchListOrderDetail(order);
-                    // refreshOrderDetails();
+                    // Cập nhật giá trị của form bằng dữ liệu mới từ order
+                    formOrder.setFieldsValue({
+                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0", // Cập nhật totalMoney
+                        code: response.code,
+                        createdAt: response.createdAt
+                            ? new Date(response.createdAt).toLocaleDateString()
+                            : "",
+                            
+                    });
+
+                    // formOrder.setFieldsValue(order)
                 } else {
                     toast.error("Authorization failed");
                 }
@@ -94,6 +167,25 @@ const SellingAtStore = () => {
 
     };
 
+    const formInfor = (order: Order | null) => {
+        if (order) {
+            formOrder.setFieldsValue({
+                createdAt: order.createdAt,
+                code: order.code,
+                idVoucher: order.discountId,
+                totalMoney: order.totalMoney
+            })
+        } else {
+            formOrder.setFieldsValue({
+                createdAt: "",
+                code: "",
+                idVoucher: "",
+                totalMoney: "",
+                fullName: ""
+            })
+        }
+    }
+
     const handleDeleteOrder = async (order: Order | null) => {
         try {
             const token = Cookies.get("accessToken");
@@ -101,20 +193,11 @@ const SellingAtStore = () => {
                 await deleteOrder(order.id, token);
                 toast.success("Xóa hóa đơn thành công");
 
-                // Đặt lại tất cả các giá trị của form về initialValues.
-                form.resetFields();
-
-                // đặt lại một hoặc nhiều giá trị cụ thể trong form, vượt qua initialValues.
-                form.setFieldsValue({
-                    createdAt: "",
-                    code: "",
-                    idVoucher: ""
-                });
-
+                formInfor(null)
                 fetchListOrderDraft()
                 setVouchers([]);
+                fetchListOrderDetail(null)
 
-                // refreshOrderDetails();
             } else {
                 toast.error("Xác thực thất bại");
             }
@@ -137,10 +220,40 @@ const SellingAtStore = () => {
             toast.error(getErrorMessage(error))
         }
     }
+    const handlePay = async (order: Order) => {
+        try {
+            const token = Cookies.get("accessToken");
+            if (token && order) {
+                await updateOrderSuccess(order.id);
+                toast.success("Thanh toán hóa đơn thành công");
+
+                // Đặt lại tất cả các giá trị của form về initialValues.
+                setOrder(null);
+                formOrder.resetFields();
+
+                fetchListOrderDraft();
+                fetchListProduct();
+                setOrderDetailList([])
+
+            } else {
+                toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
+            }
+        } catch (error) {
+            toast.error(getErrorMessage(error))
+        }
+
+    }
+    const handleCancel = () => {
+        setIsOpenModalChooseGuest(false)
+    }
+    const showModalChooseGuest = () => {
+        setIsOpenModalChooseGuest(true);
+        // fetchUsers()
+    };
 
     const fetchListProduct = async () => {
         setLoadingProducts(true)
-        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'createAt' }
+        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
         const res = await getAllProductDetails({ pageable: pageable })
         setProducts([...res.data])
         setLoadingProducts(false)
@@ -153,6 +266,7 @@ const SellingAtStore = () => {
         setLoaingOrderDraftList(true)
         const res = await getAllOrderPendingAtStore()
         setOrderDraftList([...res.data])
+        // setOrderDetailList([])
     }
 
     const handleCreateOrderDraft = async () => {
@@ -174,10 +288,13 @@ const SellingAtStore = () => {
     }
 
 
-    const handleOrder = (order: Order) => {
-        setOrder(order);
-        form.setFieldsValue(order)
-        refreshOrderDetails()
+    const handleOrder = async (order: Order) => {
+        // setOrderDetailList([])
+        await new Promise((resolve) => {
+            setOrder(order);
+            resolve(true);
+        });
+        formOrder.setFieldsValue(order)
         fetchListOrderDetail(order)
         fetchVouchersDebounced()
     }
@@ -188,14 +305,17 @@ const SellingAtStore = () => {
             const res = await getOrderDetailByIdOrder(order.id);
             setOrderDetailList([...res.data])
             setLoaingOrderDetailList(false)
+        } else {
+            setOrderDetailList([]);
         }
     }
 
     useEffect(() => {
         fetchListProduct()
         fetchListOrderDraft()
+        fetchUsers()
 
-    }, [loadingOrderDraftList])
+    }, [loadingOrderDraftList, filterParams])
 
     return (
         <div
@@ -233,21 +353,30 @@ const SellingAtStore = () => {
                 <Col flex={1}>
                     <OrderInformation
                         order={order}
-                        form={form}
+                        form={formOrder}
                         vouchers={vouchers}
                         users={users}
                         handleCancel={handleDeleteOrder}
+                        showModalUser={showModalChooseGuest}
+                        handlePay={handlePay}
                     />
                 </Col>
             </Row>
 
             <AddQuantityModal
                 isModalOpen={isOpenModalAddQuantity}
-                form={form}
+                form={formAddQuantity}
                 handleCancel={handleAddQuantityCancel}
                 handleOk={handleAddQuantityOk}
             />
 
+            <ModalChooseGuest
+                isModalOpen={isOpenModalChooseGuest}
+                // chooseThisGuest={}
+                handleCancel={handleCancel}
+                loading={loadingUsers}
+                handleFilterChange={handleFilterChange}
+            />
         </div >
     )
 

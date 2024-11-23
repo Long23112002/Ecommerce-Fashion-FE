@@ -31,13 +31,14 @@ import UpdateDiscount from '../components/Discount/UpdateDiscount.tsx';
 import ManagerOrder from '../pages/Admin/Order/ManagerOrder.tsx';
 import ForbiddenPage from "../pages/Error/ForbiddenPage.tsx";
 import CheckoutPage from '../pages/Customer/checkout/page.tsx';
+import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
 import ConfirmVnPayCheckout from '../pages/Customer/checkout/confirm/ConfirmVnPayCheckout.tsx';
 import Statistics from '../pages/Admin/Statistics/Statistics.tsx';
-import SellingAtStore from '../pages/Admin/Store/SellingAtStore.tsx';
 import OrderDetailPage from '../components/Order/OrderDetailPage.tsx';
 import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder.tsx';
 import OrderStatusCustomer from '../pages/Customer/customer-order/OrderDetailView.tsx';
 import PaymentQRComponent from "../pages/Customer/checkout/PaymentQRComponent";
+
 
 const AppRoutes = () => {
     return (

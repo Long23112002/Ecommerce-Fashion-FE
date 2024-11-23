@@ -34,14 +34,19 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
     const handleColor = (): Color[] => {
         const colors = new Set<string>();
         product?.productDetails.forEach(pd => {
-            if (colors.size < 5) {
+            if (colors.size < 5 && pd.color) {
                 const colorStr = JSON.stringify(pd.color);
                 colors.add(colorStr);
             }
         });
-        return Array.from(colors).map(color => JSON.parse(color||'{}'));
+        return Array.from(colors).map(color => {
+            try {
+                return JSON.parse(color);
+            } catch (error) {
+                return null;
+            }
+        }).filter(color => color !== null);
     };
-
 
     return (
         <>
