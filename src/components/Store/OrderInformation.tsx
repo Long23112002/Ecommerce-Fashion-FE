@@ -14,6 +14,7 @@ interface OrderInformationProps {
     showModalUser: () => void;
     order: Order | null;
     handleCancel: (e: any) => void;
+    handlePay: (e: any) => void;
 }
 
 const layout = {
@@ -37,8 +38,12 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     users,
     showModalUser,
     order,
-    handleCancel
+    handleCancel,
+    handlePay
 }) => {
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
     
     return (
         <div
@@ -56,15 +61,15 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 {...layout}
                 name="control-hooks"
                 onFinish={onFinish}
-                initialValues={{
-                    createdAt: order?.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString()
-                        : "",
-                    code: order?.code || "",
-                    fullName: order?.fullName || "",
-                    totalMoney: order?.totalMoney || "",
-                    payAmount: order?.payAmount || ""
-                }}
+                // initialValues={{
+                //     createdAt: order?.createdAt
+                //         ? new Date(order.createdAt).toLocaleDateString()
+                //         : "",
+                //     code: order?.code || "",
+                //     fullName: order?.fullName || "",
+                //     totalMoney: order?.totalMoney || 0,
+                //     payAmount: order?.payAmount || ""
+                // }}
             >
                 <Form.Item
                     name="createdAt"
@@ -102,7 +107,10 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     name="totalMoney"
                     label="Tổng tiền"
                 >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    <Input 
+                    disabled 
+                    size="large" style={{ fontSize: '16px', color: '#000' }} 
+                    />
                 </Form.Item>
 
                 <Form.Item
@@ -128,7 +136,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     </Select>
                 </Form.Item>
 
-                <Form.Item
+                {/* <Form.Item
                     label="Thành tiền"
                     dependencies={['totalMoney', 'idVoucher']}
                     shouldUpdate={(prevValues, currentValues) =>
@@ -150,7 +158,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                             />
                         );
                     }}
-                </Form.Item>
+                </Form.Item> */}
 
                 {/* <Form.Item
                     name="payAmount"
@@ -161,7 +169,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
 
                 <Form.Item {...tailLayout}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
                             Thanh toán
                         </Button>
 
