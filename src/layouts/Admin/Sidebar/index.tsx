@@ -159,9 +159,6 @@ const AdminSidebar: React.FC<IProps> = ({
             collapse={collapse}>
             Danh mục
           </MenuItem>
-          <MenuItem to="/admin/special-attributes" collapse={collapse}>
-            Thuộc tính đặc biệt
-          </MenuItem>
         </SubMenu>
         <MenuItem
           to="/admin/order"
