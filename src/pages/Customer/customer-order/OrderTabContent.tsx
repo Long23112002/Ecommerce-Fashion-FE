@@ -21,10 +21,10 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
 
   const fetchData = async () => {
     const token = Cookies.get("accessToken");
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
+    // if (!token) {
+    //   toast.error("Lỗi xác thực");
+    //   return;
+    // }
     setLoading(true);
     try {
       const response = await fetchOrdersByUserId(token, status);
@@ -50,12 +50,12 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
 
   const handleCancelOrder = async (orderId: number) => {
     const token = Cookies.get("accessToken");
-    if (!token) {
-      toast.error("Lỗi xác thực");
-      return;
-    }
+    // if (!token) {
+    //   toast.error("Lỗi xác thực");
+    //   return;
+    // }
     try {
-      await cancelOrder(orderId, OrderStatus.CANCEL, token);
+      await cancelOrder(orderId, OrderStatus.CANCEL);
       toast.success("Đơn hàng đã được hủy thành công.");
       fetchData();
     } catch (error) {
@@ -122,7 +122,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                 </Grid>
                 <Grid item style={{ marginRight: 20 }}>
                   <Typography variant="h6" color="error">
-                    {`${order.finalPrice.toLocaleString("vi-VN")} ₫`}
+                    {`${order.payAmount.toLocaleString("vi-VN")} ₫`}
                   </Typography>
                 </Grid>
               </Grid>
@@ -171,33 +171,60 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                 </Grid>
               )}
 
-              {order.status === OrderStatus.CANCEL || order.status === OrderStatus.SUCCESS && (
-                <Grid
-                  container
-                  justifyContent="flex-end"
-                  style={{ marginTop: 20 }}
-                >
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="inherit"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const productId =
-                          order.orderDetails?.[0]?.productDetail?.product?.id;
-                        if (productId !== undefined) {
-                          handleBuyAgain(productId);
-                        } else {
-                          toast.error("Product ID không khả dụng");
-                        }
-                      }}
-                      style={{ marginTop: 10 }}
-                    >
-                      Mua lại
-                    </Button>
+              {(order.status === OrderStatus.CANCEL) && (
+                  <Grid
+                    container
+                    justifyContent="flex-end"
+                    style={{ marginTop: 20 }}
+                  >
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const productId =
+                            order.orderDetails?.[0]?.productDetail?.product?.id;
+                          if (productId !== undefined) {
+                            handleBuyAgain(productId);
+                          } else {
+                            toast.error("Product ID không khả dụng");
+                          }
+                        }}
+                        style={{ marginTop: 10 }}
+                      >
+                        Mua lại
+                      </Button>
+                    </Grid>
                   </Grid>
-                </Grid>
-              )}
+                )}
+                {(order.status === OrderStatus.SUCCESS) && (
+                  <Grid
+                    container
+                    justifyContent="flex-end"
+                    style={{ marginTop: 20 }}
+                  >
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const productId =
+                            order.orderDetails?.[0]?.productDetail?.product?.id;
+                          if (productId !== undefined) {
+                            handleBuyAgain(productId);
+                          } else {
+                            toast.error("Product ID không khả dụng");
+                          }
+                        }}
+                        style={{ marginTop: 10 }}
+                      >
+                        Mua lại
+                      </Button>
+                    </Grid>
+                  </Grid>
+                )}
 
               {order.status === OrderStatus.SUCCESS && (
                 <Grid
@@ -237,7 +264,7 @@ export const handleCancelOrder = async (
     return;
   }
   try {
-    await cancelOrder(orderId, OrderStatus.CANCEL, token);
+    await cancelOrder(orderId, OrderStatus.CANCEL);
     toast.success("Đơn hàng đã được hủy thành công.");
     navigate("/customer-order");
   } catch (error) {

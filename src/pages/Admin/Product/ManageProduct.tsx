@@ -534,11 +534,13 @@ const ProductManager = () => {
 
   const handleUploads = async (file: File) => {
     try {
-      await importProduct(file);
-      setIsVisible(true);
+      const res = await importProduct(file);
+      if(res.status === 200){
+        setIsVisible(true);
+      }
       fetchProducts(pagination.current, pagination.pageSize);
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      console.log(error)
     }
   };
 

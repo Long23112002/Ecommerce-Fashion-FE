@@ -31,7 +31,8 @@ export interface Order {
     paymentMethod: PaymentMethodEnum;
     fullName: string,
     discountAmount: number,
-    finalPrice: number;
+    revenueAmount: number;
+    payAmount: number;
     moneyShip: number;
     phoneNumber: string;
     totalMoney: number;
@@ -41,6 +42,8 @@ export interface Order {
     createdAt: number;
     updatedAt: number;
     orderDetails?: OrderDetail[];
+    code: string;
+    staffId: number;
     orderLogs?: OrderLog[];
 }
 

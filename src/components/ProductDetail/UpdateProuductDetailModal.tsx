@@ -8,6 +8,7 @@ import { Size } from "../../pages/Admin/Attributes/size/size";
 import { Color } from "../../pages/Admin/Attributes/color/color";
 import ProductDetail from "../../types/ProductDetail";
 import Product from "../../types/Product";
+import { Typography } from "@mui/material";
 
 interface UpdateProductDetailModalProps {
     isModalOpen: boolean;
@@ -74,7 +75,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         >
             <Form form={form} layout="vertical"
             >
-                <Form.Item label={<Text strong>Danh sách ảnh:</Text>} name="images">
+                <Form.Item label='Danh sách ảnh:' name="images">
                     {/* <Image.PreviewGroup>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {productDetail.images.map((image, index) => (

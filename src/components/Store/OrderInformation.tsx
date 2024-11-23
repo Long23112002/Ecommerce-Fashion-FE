@@ -4,15 +4,17 @@ import { User } from "../../types/User";
 import { Voucher } from "../../types/voucher";
 import OrderDetailListTable from "./ListOrderDraft";
 import Order from "../../types/Order";
+import { useEffect } from "react";
 
 interface OrderInformationProps {
     // onFill: () => void;
     vouchers: Voucher[];
     users: User[];
     form: FormInstance;
-    // showModalUser: () => void;
+    showModalUser: () => void;
     order: Order | null;
     handleCancel: (e: any) => void;
+    handlePay: (e: any) => void;
 }
 
 const layout = {
@@ -34,10 +36,15 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
     vouchers,
     users,
-    // showModalUser,
+    showModalUser,
     order,
-    handleCancel
+    handleCancel,
+    handlePay
 }) => {
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
+    
     return (
         <div
             style={{
@@ -54,15 +61,15 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 {...layout}
                 name="control-hooks"
                 onFinish={onFinish}
-                initialValues={{
-                    createdAt: order?.createdAt
-                        ? new Date(Number(order.createdAt)).toLocaleDateString()
-                        : "",
-                    id: order?.id || "",
-                    fullName: order?.fullName || "",
-                    totalMoney: order?.totalMoney || "",
-                    finalPrice: order?.finalPrice || ""
-                }}
+                // initialValues={{
+                //     createdAt: order?.createdAt
+                //         ? new Date(order.createdAt).toLocaleDateString()
+                //         : "",
+                //     code: order?.code || "",
+                //     fullName: order?.fullName || "",
+                //     totalMoney: order?.totalMoney || 0,
+                //     payAmount: order?.payAmount || ""
+                // }}
             >
                 <Form.Item
                     name="createdAt"
@@ -72,25 +79,25 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     />
                 </Form.Item>
 
-                <Form.Item label="Mã hóa đơn" name="id">
+                <Form.Item label="Mã hóa đơn" name="code">
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item
                     name="fullName"
                     label="Tên khách"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Tên khách hàng không được trống",
-                        },
-                    ]}
+                // rules={[
+                //     {
+                //         required: true,
+                //         message: "Tên khách hàng không được trống",
+                //     },
+                // ]}
                 >
                     <Input placeholder="Nhập tên khách hàng" />
                 </Form.Item>
                 <Form.Item {...tailLayout}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" onClick={showModalUser}>
                             Chọn khách hàng
                         </Button>
                     </Space>
@@ -100,11 +107,14 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     name="totalMoney"
                     label="Tổng tiền"
                 >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    <Input 
+                    disabled 
+                    size="large" style={{ fontSize: '16px', color: '#000' }} 
+                    />
                 </Form.Item>
 
                 <Form.Item
-                    name="idColor"
+                    name="idVoucher"
                     label="Voucher"
                     rules={[
                         {
@@ -126,16 +136,40 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     </Select>
                 </Form.Item>
 
-                <Form.Item
-                    name="finalPrice"
+                {/* <Form.Item
+                    label="Thành tiền"
+                    dependencies={['totalMoney', 'idVoucher']}
+                    shouldUpdate={(prevValues, currentValues) =>
+                        prevValues.totalMoney !== currentValues.totalMoney || prevValues.idVoucher !== currentValues.idVoucher
+                    }
+                >
+                    {({ getFieldValue }) => {
+                        const totalMoney = getFieldValue('totalMoney') || 0;
+                        const idVoucher = getFieldValue('idVoucher');
+                        const discount = vouchers.find(voucher => voucher.id === idVoucher)?.discountAmount || 0;
+                        const payAmount = totalMoney - discount;
+
+                        return (
+                            <Input
+                                disabled
+                                value={payAmount > 0 ? payAmount : 0}
+                                size="large"
+                                style={{ fontSize: '16px', color: '#000' }}
+                            />
+                        );
+                    }}
+                </Form.Item> */}
+
+                {/* <Form.Item
+                    name="payAmount"
                     label="Thành tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item {...tailLayout}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
                             Thanh toán
                         </Button>
 

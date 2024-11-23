@@ -3,11 +3,14 @@ import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContaine
 import { CalendarOutlined } from '@ant-design/icons';
 import { Card, Tabs, Table, Row, Col, Space, Typography, DatePicker, Select } from 'antd';
 import moment from 'moment';
+import { getCurrentDayRevenue, getMonthRevenueData, getSoldProducts, getYearRevenueData } from '../../../api/StatisticApi';
+import RevenueTooltip from './RevenueTooltip';
+import SoldTooltip from './SoldTooltip';
 
 const { Option } = Select;
 
 interface RevenueData {
-    month: string;
+    name: string;
     revenue: number;
 }
 
@@ -21,18 +24,17 @@ interface InventoryData {
     quantity: number;
 }
 
-interface DailyRevenue {
-    day: string;
-    revenue: number;
+interface CurrentDayReport {
+    increase: number;
+    today: RevenueData;
+    yesterday: RevenueData;
 }
 
-const productSalesData: ProductSalesData[] = [
-    { product: 'Product A', sales: 300 },
-    { product: 'Product B', sales: 450 },
-    { product: 'Product C', sales: 200 },
-    { product: 'Product D', sales: 380 },
-    { product: 'Product E', sales: 270 },
-];
+interface SoldProduct {
+    id: number,
+    name: string,
+    quantity: number
+}
 
 const inventoryData: InventoryData[] = [
     { product: 'Product A', quantity: 100 },
@@ -42,56 +44,47 @@ const inventoryData: InventoryData[] = [
     { product: 'Product E', quantity: 90 },
 ];
 
-const currentDayRevenue: number = 1500;
-
 const Statistics: React.FC = () => {
-    const [selectedPeriod, setSelectedPeriod] = useState<string>('month');
-    const [selectedMonth, setSelectedMonth] = useState<moment.Moment | null>(null);
+    const [selectedPeriod, setSelectedPeriod] = useState<string>('year');
+    const [selectedMonth, setSelectedMonth] = useState<moment.Moment>();
     const [selectedYear, setSelectedYear] = useState<string>('2024');
-    const [selectedWeek, setSelectedWeek] = useState<number>(1);
-    const [dailyRevenueData, setDailyRevenueData] = useState<DailyRevenue[]>([]);
+    const [dailyRevenueData, setDailyRevenueData] = useState<RevenueData[]>([]);
     const [yearlyRevenueData, setYearlyRevenueData] = useState<RevenueData[]>([]);
+    const [currentDayRevenue, setCurrentDayRevenue] = useState<CurrentDayReport>();
+    const [productSalesData, setProductSalesData] = useState<SoldProduct[]>([])
 
-    const generateDailyRevenueData = (week: number) => {
-        const startDate = moment().month(selectedMonth?.month()).startOf('month').add(week - 1, 'weeks');
-        const newData: DailyRevenue[] = [];
-        for (let i = 0; i < 7; i++) {
-            newData.push({
-                day: startDate.add(i, 'days').format('DD/MM'),
-                revenue: Math.floor(Math.random() * 1000) + 1000,
-            });
+    useEffect(() => {
+        const fetchCurrentDayRevenue = async () => {
+            const data = await getCurrentDayRevenue();
+            setCurrentDayRevenue(data);
+        };
+        fetchCurrentDayRevenue();
+    }, []);
+
+    useEffect(() => {
+        if (selectedPeriod === 'year') {
+            const fetchYearRevenueData = async () => {
+                const res = await getYearRevenueData(selectedYear);
+                setYearlyRevenueData(res.data);
+            };
+            fetchYearRevenueData();
         }
-        setDailyRevenueData(newData);
-    };
+    }, [selectedPeriod, selectedYear]);
 
+    useEffect(() => {
+        const fetchMonthRevenueData = async () => {
+            const year = selectedMonth ? selectedMonth.year() : undefined;
+            const month = selectedMonth ? selectedMonth.month() + 1 : undefined;
+            const res = await getMonthRevenueData(year, month);
+            setDailyRevenueData(res.data);
+        };
+        fetchMonthRevenueData();
+    }, [selectedPeriod, selectedMonth]);
 
-    const generateYearlyRevenueData = (year: string) => {
-        const newData: RevenueData[] = [];
-        const months = moment.monthsShort();
-        for (let i = 0; i < 12; i++) {
-            newData.push({
-                month: months[i],
-                revenue: Math.floor(Math.random() * 5000) + 5000,
-            });
-        }
-        setYearlyRevenueData(newData);
-    };
-
-
-    const getFilteredData = (period: string) => {
-        switch (period) {
-            case 'week':
-                return dailyRevenueData;
+    const getFilteredData = () => {
+        switch (selectedPeriod) {
             case 'month':
-                if (selectedMonth) {
-                    return [
-                        {
-                            month: selectedMonth.format('MMM'),
-                            revenue: Math.floor(Math.random() * 5000) + 5000,
-                        },
-                    ];
-                }
-                return [];
+                return dailyRevenueData;
             case 'year':
                 return yearlyRevenueData;
             default:
@@ -99,20 +92,17 @@ const Statistics: React.FC = () => {
         }
     };
 
+    const filteredData = getFilteredData();
 
     useEffect(() => {
-        if (selectedPeriod === 'year') {
-            generateYearlyRevenueData(selectedYear);
+        const fetch = async () => {
+            const year = selectedMonth ? selectedMonth.year() : undefined;
+            const month = selectedMonth ? selectedMonth.month() + 1 : undefined;
+            const res = await getSoldProducts(year, month)
+            setProductSalesData([...res])
         }
-    }, [selectedPeriod, selectedYear]);
-
-    useEffect(() => {
-        if (selectedMonth) {
-            setDailyRevenueData([]);
-        }
-    }, [selectedMonth]);
-
-    const filteredData = getFilteredData(selectedPeriod);
+        fetch()
+    }, [selectedMonth])
 
     return (
         <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -125,25 +115,32 @@ const Statistics: React.FC = () => {
                 }
                 style={{ marginBottom: '24px' }}
             >
-                <Typography.Title level={2} style={{ marginBottom: '8px' }}>
-                    {currentDayRevenue.toLocaleString()} VND
-                </Typography.Title>
-                <Typography.Text type="secondary">+20.1% from yesterday</Typography.Text>
+                {
+                    currentDayRevenue &&
+                    <>
+                        <Typography.Title level={2} style={{ marginBottom: '8px' }}>
+                            {currentDayRevenue.today.revenue.toLocaleString()} VND
+                        </Typography.Title>
+                        {
+                            currentDayRevenue.increase != 0 &&
+                            <Typography.Text type={currentDayRevenue?.increase > 0 ? 'success' : 'danger'}>
+                                {currentDayRevenue?.increase > 0 && '+'}
+                                {currentDayRevenue?.increase.toLocaleString()}% from yesterday
+                            </Typography.Text>
+                        }
+                    </>
+                }
             </Card>
 
             <Tabs
-                defaultActiveKey="month"
+                defaultActiveKey="year"
                 type="card"
                 style={{ marginBottom: '24px' }}
-                onChange={(key) => setSelectedPeriod(key)}
+                onChange={setSelectedPeriod}
             >
-                {['week', 'month', 'year'].map((period) => (
+                {['month', 'year'].map((period) => (
                     <Tabs.TabPane
-                        tab={
-                            period === 'week' ? 'Doanh thu tuần này' :
-                                period === 'month' ? 'Doanh thu tháng này' :
-                                    'Doanh thu năm nay'
-                        }
+                        tab={period === 'month' ? 'Doanh thu tháng này' : 'Doanh thu năm nay'}
                         key={period}
                     >
                         <Card>
@@ -155,32 +152,13 @@ const Statistics: React.FC = () => {
                                     style={{ marginBottom: '16px' }}
                                 />
                             )}
-                            {period === 'week' && (
-                                <Select
-                                    value={selectedWeek}
-                                    onChange={(week) => {
-                                        setSelectedWeek(week);
-                                        generateDailyRevenueData(week);
-                                    }}
-                                    style={{ width: 120, marginBottom: '16px' }}
-                                >
-                                    {Array.from({ length: 4 }, (_, index) => (
-                                        <Option key={index + 1} value={index + 1}>
-                                            Tuần {index + 1}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            )}
                             {period === 'year' && (
                                 <Select
                                     value={selectedYear}
-                                    onChange={(year) => {
-                                        setSelectedYear(year);
-                                        generateYearlyRevenueData(year);
-                                    }}
+                                    onChange={setSelectedYear}
                                     style={{ width: 120, marginBottom: '16px' }}
                                 >
-                                    {['2023', '2024', '2025'].map((year) => (
+                                    {['2023', '2024'].map((year) => (
                                         <Option key={year} value={year}>
                                             {year}
                                         </Option>
@@ -189,15 +167,11 @@ const Statistics: React.FC = () => {
                             )}
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={filteredData}>
-                                    <XAxis dataKey={selectedPeriod === 'week' ? "day" : "month"} />
+                                    <XAxis dataKey="name" />
                                     <YAxis />
                                     <Tooltip
-                                        contentStyle={{
-                                            background: 'white',
-                                            border: '1px solid #ccc',
-                                            borderRadius: '5px',
-                                        }}
                                         labelStyle={{ fontWeight: 'bold' }}
+                                        content={<RevenueTooltip />}
                                     />
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <Bar dataKey="revenue" fill="#8884d8" />
@@ -222,36 +196,20 @@ const Statistics: React.FC = () => {
                             <DatePicker
                                 picker="month"
                                 value={selectedMonth}
-                                onChange={(date) => setSelectedMonth(date)}
+                                onChange={setSelectedMonth}
                                 style={{ width: 180 }}
                             />
-                            <Select
-                                value={selectedYear}
-                                onChange={(year) => setSelectedYear(year)}
-                                style={{ width: 120 }}
-                            >
-                                {['2023', '2024', '2025'].map((year) => (
-                                    <Option key={year} value={year}>
-                                        {year}
-                                    </Option>
-                                ))}
-                            </Select>
                         </Space>
 
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={productSalesData}>
-                                <XAxis dataKey="product" />
                                 <YAxis />
                                 <Tooltip
-                                    contentStyle={{
-                                        background: 'white',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '5px',
-                                    }}
+                                    content={<SoldTooltip />}
                                     labelStyle={{ fontWeight: 'bold' }}
                                 />
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <Bar dataKey="sales" fill="#8884d8" />
+                                <Bar dataKey="quantity" fill="#8884d8" />
                             </BarChart>
                         </ResponsiveContainer>
                     </Card>
@@ -266,26 +224,6 @@ const Statistics: React.FC = () => {
                         }
                         style={{ height: '100%' }}
                     >
-                        <Space style={{ marginBottom: '16px' }}>
-                            <DatePicker
-                                picker="month"
-                                value={selectedMonth}
-                                onChange={(date) => setSelectedMonth(date)}
-                                style={{ width: 180 }}
-                            />
-                            <Select
-                                value={selectedYear}
-                                onChange={(year) => setSelectedYear(year)}
-                                style={{ width: 120 }}
-                            >
-                                {['2023', '2024', '2025'].map((year) => (
-                                    <Option key={year} value={year}>
-                                        {year}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Space>
-
                         <Table
                             dataSource={inventoryData}
                             columns={[

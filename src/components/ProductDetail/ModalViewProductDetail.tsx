@@ -1,5 +1,5 @@
 import { Avatar, Button, Form, Image, Input, Modal, Typography, Upload, UploadFile } from "antd";
-import { ProductDetail } from "../../types/ProductDetail";
+import ProductDetail from "../../types/ProductDetail";
 import { CloseOutlined } from "@ant-design/icons";
 
 interface ModalViewProductDetailProps {
@@ -63,7 +63,7 @@ const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible
           </Image.PreviewGroup> */}
           <Upload
             listType="picture-card"
-            fileList={productDetail.images.map((image) => ({
+            fileList={productDetail.images?.map((image) => ({
               uid: image.url,
               name: image.url,
               status: 'done',
