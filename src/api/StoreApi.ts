@@ -62,3 +62,11 @@ export const addProductToOrderDetail = async (orderDetailData: OrderDetailData) 
         throw error;
     }
 }
+
+export const updateOrderSuccess = async (id: number | string) => {
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${BASE_API}/api/v1/orders/store/${id}`
+    })
+    return data
+}
