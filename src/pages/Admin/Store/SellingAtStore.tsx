@@ -374,7 +374,6 @@ const SellingAtStore = () => {
                 isModalOpen={isOpenModalChooseGuest}
                 // chooseThisGuest={}
                 handleCancel={handleCancel}
-                users={users}
                 loading={loadingUsers}
                 handleFilterChange={handleFilterChange}
             />
