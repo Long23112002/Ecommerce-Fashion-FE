@@ -39,7 +39,7 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
                 colors.add(colorStr);
             }
         });
-        return Array.from(colors).map(color => JSON.parse(color));
+        return Array.from(colors).map(color => JSON.parse(color||'{}'));
     };
 
 
