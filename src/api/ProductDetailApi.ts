@@ -39,11 +39,8 @@ export const getDetailByIdProduct = async (id: number | string, pageable?: Pagea
 
 export const addProductDetail = async (productDetailData: ProductDetailData) => {
     const token = Cookies.get("accessToken");
-    const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', }
-    };
     try {
-        const response = await axiosInstance.post(`${API_BASE_URL}`, productDetailData, config)
+        const response = await axiosInstance.post(`${API_BASE_URL}`, productDetailData)
         return response.data;
     } catch (error: any) {
         console.log("Error add product detail", error);

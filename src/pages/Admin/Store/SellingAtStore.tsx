@@ -20,6 +20,10 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
 import OrderDetail from "../../../types/OrderDetail";
 import { deleteOrder } from "../../../api/OrderApi";
+import { getAllUsers, UserParam } from "../../../api/UserApi";
+import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
+import { PaginationState } from "../../../config/paginationConfig";
+import { makeSlug } from "../../../utils/slug";
 
 const SellingAtStore = () => {
     const [form] = Form.useForm();
@@ -29,11 +33,27 @@ const SellingAtStore = () => {
 
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
+    const [filterParams, setFilterParams] = useState<UserParam>({
+        page: 0,
+        size: 5,
+        phone: '',
+        email: '',
+        fullName: '',
+        gender: '',
+    });
+
+    const [pagination, setPagination] = useState<PaginationState>({
+        current: 0,
+        pageSize: 5,
+        total: 20,
+        totalPage: 4,
+    });
 
     const [products, setProducts] = useState<ProductDetail[]>([]);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
 
     const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
+    const [isOpenModalChooseGuest, setIsOpenModalChooseGuest] = useState(false);
 
     const [orderDraftList, setOrderDraftList] = useState<Order[]>([]);
     const [loadingOrderDraftList, setLoaingOrderDraftList] = useState(true);
@@ -45,6 +65,39 @@ const SellingAtStore = () => {
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
+
+    const fetchUsers = async (params = filterParams) => {
+        setLoadingUsers(true);
+        try {
+            const response = await getAllUsers({
+                ...params,
+                page: params.page - 1,
+            });
+            setUsers(response.data);
+            setPagination({
+                current: response.metaData.page + 1,
+                pageSize: response.metaData.size,
+                total: response.metaData.total,
+                totalPage: response.metaData.totalPage,
+            });
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    const handleFilterChange = (changedValues:any) => {
+        setFilterParams(prevParams => ({
+            ...prevParams,
+            ...changedValues,
+            email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
+            phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
+            fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
+            page: 1
+        }));
+    };
+
 
     const fetchVouchersDebounced = useCallback(
         debounce(async () => {
@@ -82,7 +135,7 @@ const SellingAtStore = () => {
                     handleAddQuantityCancel()
 
                     await refreshOrderDetails();
-                    fetchListOrderDetail(order);
+                    // fetchListOrderDetail(order);
                     // refreshOrderDetails();
                 } else {
                     toast.error("Authorization failed");
@@ -138,9 +191,17 @@ const SellingAtStore = () => {
         }
     }
 
+    const handleCancel = () => {
+        setIsOpenModalChooseGuest(false)
+    }
+    const showModalChooseGuest = () => {
+        setIsOpenModalChooseGuest(true);
+        // fetchUsers()
+      };
+
     const fetchListProduct = async () => {
         setLoadingProducts(true)
-        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'createAt' }
+        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
         const res = await getAllProductDetails({ pageable: pageable })
         setProducts([...res.data])
         setLoadingProducts(false)
@@ -153,6 +214,7 @@ const SellingAtStore = () => {
         setLoaingOrderDraftList(true)
         const res = await getAllOrderPendingAtStore()
         setOrderDraftList([...res.data])
+        // setOrderDetailList([])
     }
 
     const handleCreateOrderDraft = async () => {
@@ -174,10 +236,13 @@ const SellingAtStore = () => {
     }
 
 
-    const handleOrder = (order: Order) => {
-        setOrder(order);
+    const handleOrder = async (order: Order) => {
+        // setOrderDetailList([])
+        await new Promise((resolve) => {
+            setOrder(order);
+            resolve(true);
+        });
         form.setFieldsValue(order)
-        refreshOrderDetails()
         fetchListOrderDetail(order)
         fetchVouchersDebounced()
     }
@@ -194,8 +259,8 @@ const SellingAtStore = () => {
     useEffect(() => {
         fetchListProduct()
         fetchListOrderDraft()
-
-    }, [loadingOrderDraftList])
+        fetchUsers()
+    }, [loadingOrderDraftList, filterParams])
 
     return (
         <div
@@ -237,6 +302,7 @@ const SellingAtStore = () => {
                         vouchers={vouchers}
                         users={users}
                         handleCancel={handleDeleteOrder}
+                        showModalUser={showModalChooseGuest}
                     />
                 </Col>
             </Row>
@@ -248,6 +314,14 @@ const SellingAtStore = () => {
                 handleOk={handleAddQuantityOk}
             />
 
+            <ModalChooseGuest
+            isModalOpen={isOpenModalChooseGuest}
+            // chooseThisGuest={}
+            handleCancel={handleCancel}
+            users={users}
+            loading={loadingUsers}
+            handleFilterChange={handleFilterChange}
+            />
         </div >
     )
 

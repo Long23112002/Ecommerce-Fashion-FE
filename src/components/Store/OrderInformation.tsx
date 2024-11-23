@@ -11,7 +11,7 @@ interface OrderInformationProps {
     vouchers: Voucher[];
     users: User[];
     form: FormInstance;
-    // showModalUser: () => void;
+    showModalUser: () => void;
     order: Order | null;
     handleCancel: (e: any) => void;
 }
@@ -35,17 +35,11 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
     vouchers,
     users,
-    // showModalUser,
+    showModalUser,
     order,
     handleCancel
 }) => {
-    // useEffect(() => {
-    //     // Đảm bảo form luôn đồng bộ với `order` khi nó thay đổi
-    //     if (order) {
-    //         form.setFieldsValue(order);
-    //     }
-    // }, [order, form]);
-
+    
     return (
         <div
             style={{
@@ -87,18 +81,18 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 <Form.Item
                     name="fullName"
                     label="Tên khách"
-                    // rules={[
-                    //     {
-                    //         required: true,
-                    //         message: "Tên khách hàng không được trống",
-                    //     },
-                    // ]}
+                // rules={[
+                //     {
+                //         required: true,
+                //         message: "Tên khách hàng không được trống",
+                //     },
+                // ]}
                 >
                     <Input placeholder="Nhập tên khách hàng" />
                 </Form.Item>
                 <Form.Item {...tailLayout}>
                     <Space>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" onClick={showModalUser}>
                             Chọn khách hàng
                         </Button>
                     </Space>
@@ -135,11 +129,35 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
+                    label="Thành tiền"
+                    dependencies={['totalMoney', 'idVoucher']}
+                    shouldUpdate={(prevValues, currentValues) =>
+                        prevValues.totalMoney !== currentValues.totalMoney || prevValues.idVoucher !== currentValues.idVoucher
+                    }
+                >
+                    {({ getFieldValue }) => {
+                        const totalMoney = getFieldValue('totalMoney') || 0;
+                        const idVoucher = getFieldValue('idVoucher');
+                        const discount = vouchers.find(voucher => voucher.id === idVoucher)?.discountAmount || 0;
+                        const payAmount = totalMoney - discount;
+
+                        return (
+                            <Input
+                                disabled
+                                value={payAmount > 0 ? payAmount : 0}
+                                size="large"
+                                style={{ fontSize: '16px', color: '#000' }}
+                            />
+                        );
+                    }}
+                </Form.Item>
+
+                {/* <Form.Item
                     name="payAmount"
                     label="Thành tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item {...tailLayout}>
                     <Space>

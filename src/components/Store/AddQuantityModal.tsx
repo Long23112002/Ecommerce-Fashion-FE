@@ -22,7 +22,7 @@ const AddQuantityModal: React.FC<AddQuantityModalProps> = ({
             await handleOk(values);
 
             // Nếu thành công, reset form và đóng modal
-            form.resetFields();
+            // form.resetFields();
             handleCancel();
         } catch (error: any) {
             // Xử lý khi validation thất bại
