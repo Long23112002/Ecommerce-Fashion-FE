@@ -52,7 +52,7 @@ const ProductDetailQRModal: React.FC<ProductDetailQRModalProps> = ({ record, han
 
             if (details.length > 0) {
                 setSelectedProductDetail(details[0]);
-                setQuantity(1); // Reset quantity to default
+                setQuantity(1);
             } else {
                 setSelectedProductDetail(null);
             }
@@ -96,7 +96,7 @@ const ProductDetailQRModal: React.FC<ProductDetailQRModalProps> = ({ record, han
                     type="primary"
                     onClick={handleDownloadQR}
                     style={{ width: 150 }}
-                    disabled={!selectedProductDetail} // Disable nếu chưa chọn sản phẩm
+                    disabled={!selectedProductDetail}
                 >
                     Tải mã QR
                 </Button>,
@@ -176,7 +176,7 @@ const ProductDetailQRModal: React.FC<ProductDetailQRModalProps> = ({ record, han
                                             onChange={handleQuantityChange}
                                             style={{ width: '100%' }}
                                             placeholder="Số lượng"
-                                            disabled={!selectedProductDetail} // Disable nếu chưa chọn sản phẩm
+                                            disabled={!selectedProductDetail}
                                         />
                                     </Form.Item>
                                 </Col>
