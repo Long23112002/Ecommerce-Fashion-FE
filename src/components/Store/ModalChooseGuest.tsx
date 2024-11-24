@@ -18,13 +18,17 @@ interface ModalChooseGuestProps {
     // chooseThisGuest: (values: any) => void;
     loading?: boolean;
     handleFilterChange: (e: any) => void;
+    filterParams: UserParam; // Nhận filterParams từ cha
+    setFilterParams: (params: any) => void; // Nhận hàm cập nhật filterParams
 }
 const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     isModalOpen,
     // chooseThisGuest,
     handleCancel,
     loading,
-    handleFilterChange
+    handleFilterChange,
+    filterParams,
+    setFilterParams
 }) => {
 
     const [pagination, setPagination] = useState<PaginationState>({
@@ -36,15 +40,7 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
 
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
-    const [filterParams, setFilterParams] = useState<UserParam>({
-        page: 0,
-        size: 5,
-        phone: '',
-        email: '',
-        fullName: '',
-        gender: '',
-    });
-
+   
     const fetchUsers = async (params = filterParams) => {
         setLoadingUsers(true);
         try {
@@ -67,7 +63,7 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     };
 
     useEffect(() => {
-        fetchUsers()
+        fetchUsers(filterParams)
     }, [filterParams]);
 
     const handleTableChange = (newPagination:any) => {
@@ -76,6 +72,8 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
             page: newPagination.current,
             size: newPagination.pageSize
         }));
+        console.log('change');
+        
     };
 
 

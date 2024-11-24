@@ -188,7 +188,7 @@ const ProductManager = () => {
   const handleSearch = (changedValues: Partial<SearchParams>) => {
     setSearchParams((prevParams) => ({
       ...prevParams,
-      ...changedValues, // Chỉ ghi đè các giá trị có trong `changedValues`
+      ...changedValues, 
     }));
 
     // Đặt lại trang hiện tại về 1

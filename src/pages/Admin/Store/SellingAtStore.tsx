@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { debounce } from "lodash";
 import { Voucher } from "../../../types/voucher";
 import { User } from "../../../types/User";
-import ListProduct from "../../../components/Store/ListProduct";
+import ListProduct, { SearchParams } from "../../../components/Store/ListProduct";
 import ListOrderDetail from "../../../components/Store/ListOrderDetail";
 import ListOrderDraft from "../../../components/Store/ListOrderDraft";
 import Product from "../../../types/Product";
@@ -34,7 +34,7 @@ const SellingAtStore = () => {
     const [loadingVouchers, setLoadingVouchers] = useState(true);
 
     const [users, setUsers] = useState<User[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [filterParams, setFilterParams] = useState<UserParam>({
         page: 0,
         size: 5,
@@ -44,15 +44,13 @@ const SellingAtStore = () => {
         gender: '',
     });
 
-    const [pagination, setPagination] = useState<PaginationState>({
-        current: 0,
-        pageSize: 5,
-        total: 20,
-        totalPage: 4,
-    });
-
     const [products, setProducts] = useState<ProductDetail[]>([]);
-    const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+    const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
+    const [searchParams, setSearchParams] = useState<{
+        keyword: string,
+    }>({
+        keyword: ''
+    })
 
     const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
     const [isOpenModalChooseGuest, setIsOpenModalChooseGuest] = useState(false);
@@ -71,28 +69,7 @@ const SellingAtStore = () => {
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
         return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
-            .format(value); 
-    };
-
-    const fetchUsers = async (params = filterParams) => {
-        setLoadingUsers(true);
-        try {
-            const response = await getAllUsers({
-                ...params,
-                page: params.page - 1,
-            });
-            setUsers(response.data);
-            setPagination({
-                current: response.metaData.page + 1,
-                pageSize: response.metaData.size,
-                total: response.metaData.total,
-                totalPage: response.metaData.totalPage,
-            });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        } finally {
-            setLoadingUsers(false);
-        }
+            .format(value);
     };
 
     const handleFilterChange = (changedValues: any) => {
@@ -104,9 +81,22 @@ const SellingAtStore = () => {
             fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
             page: 1
         }));
+        console.log('handleFilterChange');
     };
 
+    const handleSearch = (changedValues: Partial<SearchParams>) => {
+        setSearchParams((prevParams) => ({
+            ...prevParams,
+            ...changedValues, // Chỉ ghi đè các giá trị có trong `changedValues`
+        }));
 
+        // setPagination((prevPagination) => ({
+        //     ...prevPagination,
+        //     current: 1,
+        // }));
+        console.log('handleSearch');
+        
+    };
     const fetchVouchersDebounced = useCallback(
         debounce(async () => {
             setLoadingVouchers(true);
@@ -153,7 +143,7 @@ const SellingAtStore = () => {
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
                             : "",
-                            
+
                     });
 
                     // formOrder.setFieldsValue(order)
@@ -232,7 +222,7 @@ const SellingAtStore = () => {
                 formOrder.resetFields();
 
                 fetchListOrderDraft();
-                fetchListProduct();
+                // fetchListProduct();
                 setOrderDetailList([])
 
             } else {
@@ -251,13 +241,13 @@ const SellingAtStore = () => {
         // fetchUsers()
     };
 
-    const fetchListProduct = async () => {
-        setLoadingProducts(true)
-        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
-        const res = await getAllProductDetails({ pageable: pageable })
-        setProducts([...res.data])
-        setLoadingProducts(false)
-    }
+    // const fetchListProduct = async () => {
+    //     setLoadingProducts(true)
+    //     const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
+    //     const res = await getAllProductDetails({ pageable: pageable })
+    //     setProducts([...res.data])
+    //     setLoadingProducts(false)
+    // }
     const refreshOrderDetails = () => {
         fetchListOrderDetail(order)
     };
@@ -311,11 +301,10 @@ const SellingAtStore = () => {
     }
 
     useEffect(() => {
-        fetchListProduct()
+        // fetchListProduct()
         fetchListOrderDraft()
-        fetchUsers()
 
-    }, [loadingOrderDraftList, filterParams])
+    }, [loadingOrderDraftList])
 
     return (
         <div
@@ -345,9 +334,10 @@ const SellingAtStore = () => {
 
                     <ListProduct
                         form={form}
-                        products={products}
                         loading={loadingProducts}
-                        showModalAddQuantity={showAddQuantityModal} />
+                        showModalAddQuantity={showAddQuantityModal}
+                        // handleSearch={}
+                    />
                 </Col>
 
                 <Col flex={1}>
@@ -376,6 +366,8 @@ const SellingAtStore = () => {
                 handleCancel={handleCancel}
                 loading={loadingUsers}
                 handleFilterChange={handleFilterChange}
+                filterParams={filterParams}
+                setFilterParams={setFilterParams}
             />
         </div >
     )
