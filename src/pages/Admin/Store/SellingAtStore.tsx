@@ -24,11 +24,34 @@ import { getAllUsers, UserParam } from "../../../api/UserApi";
 import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
 import { makeSlug } from "../../../utils/slug";
+import { QrReader } from 'react-qr-reader';
 
 const SellingAtStore = () => {
     const [formAddQuantity] = Form.useForm();
     const [formOrder] = Form.useForm();
     const [form] = Form.useForm();
+    const [scanResult, setScanResult] = useState('');
+
+    const handleResult = (result: any, error: any) => {
+        if (result) {
+            console.log("Kết quả quét:", result);
+            setScanResult(result?.text || "Không tìm thấy nội dung trong QR code");
+        }
+
+        if (error) {
+            console.error("Lỗi quét QR code");
+        }
+    };
+
+    const constraints = {
+        video: {
+            facingMode: 'user',
+            width: { ideal: 300 },
+            height: { ideal: 300 },
+            frameRate: { ideal: 30 },
+            aspectRatio: { ideal: 1.777 },
+        },
+    };
 
     const [vouchers, setVouchers] = useState<Voucher[]>([]); // State for voucher details
     const [loadingVouchers, setLoadingVouchers] = useState(true);
@@ -323,6 +346,11 @@ const SellingAtStore = () => {
                 padding: 15
             }}
         >
+            <QrReader
+                onResult={handleResult}
+                constraints={constraints} // Áp dụng constraints ở đây
+                style={{ width: '100%', maxWidth: '300px' }} // Giới hạn chiều rộng để camera nhỏ
+            />
             <Button
                 className="mt-3 mb-3"
                 style={{ display: "flex", backgroundColor: "black", color: "white" }}
@@ -378,6 +406,8 @@ const SellingAtStore = () => {
             loading={loadingUsers}
             handleFilterChange={handleFilterChange}
             />
+
+
         </div >
     )
 
