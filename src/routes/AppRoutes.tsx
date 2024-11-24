@@ -39,7 +39,6 @@ import CustomerOrder from '../pages/Customer/customer-order/CustomerOrder.tsx';
 import OrderStatusCustomer from '../pages/Customer/customer-order/OrderDetailView.tsx';
 import PaymentQRComponent from "../pages/Customer/checkout/PaymentQRComponent";
 
-
 const AppRoutes = () => {
     return (
         <Routes>

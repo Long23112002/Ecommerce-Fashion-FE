@@ -7,14 +7,21 @@ export const fetchAllDiscounts = async (
   page: number,
   name: string,
   type?: string,
-  status?: string) => {
+  status?: string,
+  idProductDetail?: number[],
+  prices?: number) => {
   const response = await axiosInstance.get(`${BASE_URL}`, {
     params: {
       page,
       size: pageSize,
       name,
       type,
-      status
+      status,
+      idProductDetail,
+      prices
+    },
+    paramsSerializer: {
+      indexes: null,
     }
   });
   return response.data;

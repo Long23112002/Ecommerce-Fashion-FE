@@ -371,12 +371,12 @@ const SellingAtStore = () => {
             />
 
             <ModalChooseGuest
-                isModalOpen={isOpenModalChooseGuest}
-                // chooseThisGuest={}
-                handleCancel={handleCancel}
-                users={users}
-                loading={loadingUsers}
-                handleFilterChange={handleFilterChange}
+            isModalOpen={isOpenModalChooseGuest}
+            // chooseThisGuest={}
+            handleCancel={handleCancel}
+            users={users}
+            loading={loadingUsers}
+            handleFilterChange={handleFilterChange}
             />
         </div >
     )

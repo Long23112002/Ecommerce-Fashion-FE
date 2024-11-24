@@ -6,11 +6,14 @@ import Cookies from "js-cookie";
 
 const BASE_URL = `${BASE_API}/api/v1/orders`;
 
-interface OrderParam {
+export interface OrderParam {
     userId?: string;
     status?: string;
     phoneNumber?: string;
     keyword?: string;
+    day?: number|string;
+    month?: number|string;
+    year?: number|string;
 }
 
 export interface OrderAddressUpdate {
@@ -98,7 +101,7 @@ export const confirmOrder = async (request: TransactionRequest) => {
     return data
 }
 
-export const fetchAllOrders = async (param: OrderParam, page: number, size: number) => {
+export const fetchAllOrders = async (param: OrderParam, page: number = 0, size: number = 15) => {
     try {
         const response = await axiosInstance.get(`${BASE_URL}`, {
             params: {
@@ -106,6 +109,9 @@ export const fetchAllOrders = async (param: OrderParam, page: number, size: numb
                 status: param.status || null,
                 phoneNumber: param.phoneNumber || null,
                 keyword: param.keyword || null,
+                day: param.day,
+                month: param.month,
+                year: param.year,
                 page,
                 size,
             },

@@ -1,21 +1,18 @@
 import AddIcon from "@mui/icons-material/Add";
-import CancelIcon from "@mui/icons-material/Cancel";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Box,
   Button, Checkbox, Grid,
   IconButton, TextField, Typography
 } from "@mui/material";
-import { Spin, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import Cookies from "js-cookie";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrder } from "../../../api/OrderApi.js";
-import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import useCart from "../../../hook/useCart.js";
 import { CartValueInfos, CartValues } from "../../../types/Cart";
 import { OrderDetailValue } from "../../../types/Order.js";
-import ProductDetail from "../../../types/ProductDetail.js";
 
 const CartPage = () => {
   const navigate = useNavigate()
@@ -91,8 +88,12 @@ const CartPage = () => {
   }, [selectProductDetails])
 
   useEffect(() => {
-    if (cart?.cartValueInfos) {
-      setSelectProductDetails(cart.cartValueInfos)
+    const cartValueInfos = cart?.cartValueInfos
+    if (cartValueInfos) {
+      setSelectProductDetails(prev => {
+        const mapProductDetailIds = prev.map(p => p.productDetail.id)
+        return cartValueInfos.filter(value => mapProductDetailIds.includes(value.productDetail.id))
+      })
     }
   }, [cart])
 
@@ -153,14 +154,13 @@ const CartPage = () => {
 
             {cart?.cartValueInfos.map((pd) => (
               <Box
-                  onClick={ () => navigate(`/product/${pd.productDetail.product.id}`)}
                 key={pd.productDetail.id}
                 sx={{
                   display: "flex",
                   my: 2,
                   borderBottom: "1px solid #ccc",
                   paddingBottom: 1,
-                  cursor:'pointer'
+                  cursor: 'pointer'
                 }}
               >
                 <div
@@ -174,52 +174,56 @@ const CartPage = () => {
                     onChange={() => handleSelectProductDetail(pd)}
                   />
                 </div>
-                <img
-                  src={pd.productDetail.images?.[0].url}
-                  alt={pd.productDetail.product?.name}
-                  style={{ width: 100, height: 100, objectFit: "cover" }}
-                />
-                <Box sx={{ ml: 2, flexGrow: 1 }}>
-                  <Typography variant="h5">
-                    {pd.productDetail.product?.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
-                  </Typography>
-                  <Typography
-                    color="text.secondary"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                    className="mt-3"
-                    component="div"
-                  >
+                <Box sx={{ display: 'flex', width: '100%' }}
+                  onClick={() => navigate(`/product/${pd.productDetail.product.id}`)}
+                >
+                  <img
+                    src={pd.productDetail.images?.[0].url}
+                    alt={pd.productDetail.product?.name}
+                    style={{ width: 100, height: 100, objectFit: "cover" }}
+                  />
+                  <Box sx={{ ml: 2, flexGrow: 1 }}>
+                    <Typography variant="h5">
+                      {pd.productDetail.product?.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
+                    </Typography>
                     <Typography
-                      variant="h6"
-                      color="info.main"
+                      color="text.secondary"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      className="mt-3"
                       component="div"
                     >
-                      <b>
-                        {(pd.productDetail.price || 0).toLocaleString(
-                          "vi-VN"
-                        )}{" "}
-                        ₫
-                      </b>
-                    </Typography>
-                    {pd.productDetail.originPrice && (
-                      <span
-                        style={{
-                          textDecoration: "line-through",
-                          marginLeft: "20px",
-                          color: "gray",
-                        }}
+                      <Typography
+                        variant="h6"
+                        color="info.main"
+                        component="div"
                       >
-                        {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
-                        ₫
-                      </span>
-                    )}
-                  </Typography>
+                        <b>
+                          {(pd.productDetail.price || 0).toLocaleString(
+                            "vi-VN"
+                          )}{" "}
+                          ₫
+                        </b>
+                      </Typography>
+                      {pd.productDetail.originPrice && (
+                        <span
+                          style={{
+                            textDecoration: "line-through",
+                            marginLeft: "20px",
+                            color: "gray",
+                          }}
+                        >
+                          {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
+                          ₫
+                        </span>
+                      )}
+                    </Typography>
+                  </Box>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <IconButton

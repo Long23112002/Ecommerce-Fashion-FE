@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchAllDiscounts } from '../../../api/DiscountApi';
 import { Discount } from '../../../types/discount';
 import Order from '../../../types/Order';
-import { formatDateTime } from '../../../utils/formatDateTime';
+import { formatDateTime } from '../../../utils/dateUtils';
 import { updateDiscountOrder } from '../../../api/OrderApi';
 
 interface IProps {
@@ -26,13 +26,15 @@ const VoucherSelector: React.FC<IProps> = ({ order, setOrder }) => {
 
     const handleSelectVoucher = async (id: string | number) => {
         const res = await updateDiscountOrder(id)
-        setOrder({...res})
+        setOrder({ ...res })
         setIsModalOpen(false);
     }
 
     useEffect(() => {
         const callGetDiscount = async () => {
-            const { data } = await fetchAllDiscounts(99, 0, '', undefined, 'ACTIVE')
+            const idProductDetail = order.orderDetails?.map(od => od.productDetail.id);
+            const prices = order.totalMoney
+            const { data } = await fetchAllDiscounts(999, 0, '', undefined, 'ACTIVE', idProductDetail, prices)
             setDiscounts([...data])
         }
         callGetDiscount()
