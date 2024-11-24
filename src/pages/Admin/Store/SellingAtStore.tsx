@@ -32,13 +32,14 @@ const SellingAtStore = () => {
     const [form] = Form.useForm();
     const [scanResult, setScanResult] = useState('');
 
-    const handleResult = (result:any, error:any) => {
-        if (!result) {
-            setScanResult(result?.text);
+    const handleResult = (result: any, error: any) => {
+        if (result) {
+            console.log("Kết quả quét:", result);
+            setScanResult(result?.text || "Không tìm thấy nội dung trong QR code");
         }
 
-        if (!error) {
-            console.error(error);
+        if (error) {
+            console.error("Lỗi quét QR code");
         }
     };
 
