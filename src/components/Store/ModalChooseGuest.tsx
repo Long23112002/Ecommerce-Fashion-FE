@@ -78,7 +78,6 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
         }));
     };
 
-
     const columns = [
         {
             title: 'Tên khách hàng',

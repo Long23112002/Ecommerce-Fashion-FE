@@ -12,13 +12,14 @@ interface OrderDetailData {
 
 
 export const getAllOrderPendingAtStore = async () => {
-    try {
-        const response = await axiosInstance.get(`${BASE_URL}/list-pending`);
-        return response;
-    } catch (error) {
-        console.error("Error fetching orders status PENDING_AT_STORE:", error);
-        throw error;
-    }
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${BASE_URL}/list-pending`,
+        // headers: {
+        //     Authorization: `Bearer ${token}`
+        // }
+    })
+    return data
 };
 
 export const createOrderPendingAtStore = async () => {

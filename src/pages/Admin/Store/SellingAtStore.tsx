@@ -34,7 +34,7 @@ const SellingAtStore = () => {
     const [loadingVouchers, setLoadingVouchers] = useState(true);
 
     const [users, setUsers] = useState<User[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [filterParams, setFilterParams] = useState<UserParam>({
         page: 0,
         size: 5,
@@ -42,13 +42,6 @@ const SellingAtStore = () => {
         email: '',
         fullName: '',
         gender: '',
-    });
-
-    const [pagination, setPagination] = useState<PaginationState>({
-        current: 0,
-        pageSize: 5,
-        total: 20,
-        totalPage: 4,
     });
 
     const [products, setProducts] = useState<ProductDetail[]>([]);
@@ -71,38 +64,40 @@ const SellingAtStore = () => {
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
         return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
-            .format(value); 
+            .format(value);
     };
 
-    const fetchUsers = async (params = filterParams) => {
-        setLoadingUsers(true);
-        try {
-            const response = await getAllUsers({
-                ...params,
-                page: params.page - 1,
-            });
-            setUsers(response.data);
-            setPagination({
-                current: response.metaData.page + 1,
-                pageSize: response.metaData.size,
-                total: response.metaData.total,
-                totalPage: response.metaData.totalPage,
-            });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        } finally {
-            setLoadingUsers(false);
-        }
-    };
+    // const fetchUsers = async (params = filterParams) => {
+    //     setLoadingUsers(true);
+    //     try {
+    //         const response = await getAllUsers({
+    //             ...params,
+    //             page: params.page - 1,
+    //         });
+    //         setUsers(response.data);
+    //         setPagination({
+    //             current: response.metaData.page + 1,
+    //             pageSize: response.metaData.size,
+    //             total: response.metaData.total,
+    //             totalPage: response.metaData.totalPage,
+    //         });
+    //     } catch (error) {
+    //         console.error("Failed to fetch users:", error);
+    //     } finally {
+    //         setLoadingUsers(false);
+    //     }
+    // };
 
     const handleFilterChange = (changedValues: any) => {
         setFilterParams(prevParams => ({
             ...prevParams,
             ...changedValues,
-            email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
-            phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
-            fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
-            page: 1
+            phone: changedValues.phone || '', // Cập nhật giá trị phone
+            page: 1,
+            // email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
+            // phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
+            // fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
+            // page: 1            
         }));
     };
 
@@ -153,7 +148,7 @@ const SellingAtStore = () => {
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
                             : "",
-                            
+
                     });
 
                     // formOrder.setFieldsValue(order)
@@ -265,7 +260,7 @@ const SellingAtStore = () => {
     const fetchListOrderDraft = async () => {
         setLoaingOrderDraftList(true)
         const res = await getAllOrderPendingAtStore()
-        setOrderDraftList([...res.data])
+        setOrderDraftList([...res])
         // setOrderDetailList([])
     }
 
@@ -313,9 +308,9 @@ const SellingAtStore = () => {
     useEffect(() => {
         fetchListProduct()
         fetchListOrderDraft()
-        fetchUsers()
+        // fetchUsers()
 
-    }, [loadingOrderDraftList, filterParams])
+    }, [loadingOrderDraftList])
 
     return (
         <div
