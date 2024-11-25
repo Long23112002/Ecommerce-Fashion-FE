@@ -280,7 +280,7 @@ const ProductManager = () => {
 
       setOrigins(response.data);
     } catch (error) {
-      console.error("Error fetching origins:", error);
+      // console.error("Error fetching origins:", error);
     }
     finally {
       setIsOriginLoading(false);
