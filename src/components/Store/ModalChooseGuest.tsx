@@ -4,6 +4,7 @@ import { User } from "../../types/User";
 import LoadingCustom from "../Loading/LoadingCustom";
 import createPaginationConfig from "../../config/paginationConfig";
 import {getAllUsers, UserParam} from "../../api/UserApi";
+import {QrReader} from "react-qr-reader";
 
 interface PaginationState {
     current: number;      // Trang hiện tại
@@ -27,6 +28,7 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     handleFilterChange
 }) => {
 
+
     const [pagination, setPagination] = useState<PaginationState>({
         current: 0,
         pageSize: 5,
@@ -44,6 +46,8 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
         fullName: '',
         gender: '',
     });
+
+
 
     const fetchUsers = async (params = filterParams) => {
         setLoadingUsers(true);
@@ -79,6 +83,8 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     };
 
 
+
+
     const columns = [
         {
             title: 'Tên khách hàng',
@@ -106,34 +112,40 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     ]
 
     return (
-        <Modal
-            title="Chọn khách hàng"
-            visible={isModalOpen}
-            onCancel={handleCancel}
-        >
-            <Form
-                layout="inline"
-                onValuesChange={handleFilterChange}
-                style={{ display: 'flex', justifyContent: 'flex-end' }}
-                className="mt-2 mb-2"
+        <>
+
+
+            <Modal
+                title="Chọn khách hàng"
+                visible={isModalOpen}
+                onCancel={handleCancel}
             >
-                <Form.Item name="phone" label="Số điện thoại">
-                    <Input placeholder="Tìm kiếm theo số điện thoại" />
-                </Form.Item>
-            </Form>
-            <Table
-                dataSource={users}
-                columns={columns}
-                loading={{
-                    spinning: loading,
-                    indicator: <LoadingCustom />,
-                }}
-                rowKey="id"
-                expandable={{ childrenColumnName: 'children' }}
-                pagination={createPaginationConfig(pagination, setPagination)}
-                onChange={handleTableChange}
-            />
-        </Modal>
+
+                <Form
+                    layout="inline"
+                    onValuesChange={handleFilterChange}
+                    style={{display: 'flex', justifyContent: 'flex-end'}}
+                    className="mt-2 mb-2"
+                >
+                    <Form.Item name="phone" label="Số điện thoại">
+                        <Input placeholder="Tìm kiếm theo số điện thoại"/>
+                    </Form.Item>
+                </Form>
+                <Table
+                    dataSource={users}
+                    columns={columns}
+                    loading={{
+                        spinning: loading,
+                        indicator: <LoadingCustom/>,
+                    }}
+                    rowKey="id"
+                    expandable={{childrenColumnName: 'children'}}
+                    pagination={createPaginationConfig(pagination, setPagination)}
+                    onChange={handleTableChange}
+                />
+            </Modal>
+        </>
+
     )
 }
 
