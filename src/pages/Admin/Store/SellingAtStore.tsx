@@ -67,37 +67,12 @@ const SellingAtStore = () => {
             .format(value);
     };
 
-    // const fetchUsers = async (params = filterParams) => {
-    //     setLoadingUsers(true);
-    //     try {
-    //         const response = await getAllUsers({
-    //             ...params,
-    //             page: params.page - 1,
-    //         });
-    //         setUsers(response.data);
-    //         setPagination({
-    //             current: response.metaData.page + 1,
-    //             pageSize: response.metaData.size,
-    //             total: response.metaData.total,
-    //             totalPage: response.metaData.totalPage,
-    //         });
-    //     } catch (error) {
-    //         console.error("Failed to fetch users:", error);
-    //     } finally {
-    //         setLoadingUsers(false);
-    //     }
-    // };
-
     const handleFilterChange = (changedValues: any) => {
         setFilterParams(prevParams => ({
             ...prevParams,
             ...changedValues,
             phone: changedValues.phone || '', // Cập nhật giá trị phone
-            page: 1,
-            // email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
-            // phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
-            // fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
-            // page: 1            
+            page: 1,            
         }));
     };
 
@@ -371,6 +346,8 @@ const SellingAtStore = () => {
                 handleCancel={handleCancel}
                 loading={loadingUsers}
                 handleFilterChange={handleFilterChange}
+                filterParams={filterParams}
+                setFilterParams={setFilterParams}
             />
         </div >
     )

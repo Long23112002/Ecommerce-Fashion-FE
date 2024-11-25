@@ -18,13 +18,17 @@ interface ModalChooseGuestProps {
     // chooseThisGuest: (values: any) => void;
     loading?: boolean;
     handleFilterChange: (e: any) => void;
+    filterParams: UserParam; // 
+    setFilterParams: (params: any) => void; 
 }
 const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     isModalOpen,
     // chooseThisGuest,
     handleCancel,
     loading,
-    handleFilterChange
+    handleFilterChange,
+    filterParams,
+    setFilterParams
 }) => {
 
     const [pagination, setPagination] = useState<PaginationState>({
@@ -36,14 +40,14 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
 
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
-    const [filterParams, setFilterParams] = useState<UserParam>({
-        page: 0,
-        size: 5,
-        phone: '',
-        email: '',
-        fullName: '',
-        gender: '',
-    });
+    // const [filterParams, setFilterParams] = useState<UserParam>({
+    //     page: 0,
+    //     size: 5,
+    //     phone: '',
+    //     email: '',
+    //     fullName: '',
+    //     gender: '',
+    // });
 
     const fetchUsers = async (params = filterParams) => {
         setLoadingUsers(true);
