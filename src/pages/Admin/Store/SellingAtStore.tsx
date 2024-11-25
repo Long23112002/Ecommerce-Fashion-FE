@@ -24,11 +24,14 @@ import { getAllUsers, UserParam } from "../../../api/UserApi";
 import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
 import { makeSlug } from "../../../utils/slug";
+import { QrReader } from 'react-qr-reader';
+
 
 const SellingAtStore = () => {
     const [formAddQuantity] = Form.useForm();
     const [formOrder] = Form.useForm();
     const [form] = Form.useForm();
+
 
     const [vouchers, setVouchers] = useState<Voucher[]>([]); // State for voucher details
     const [loadingVouchers, setLoadingVouchers] = useState(true);
@@ -50,6 +53,8 @@ const SellingAtStore = () => {
         total: 20,
         totalPage: 4,
     });
+
+
 
     const [products, setProducts] = useState<ProductDetail[]>([]);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
@@ -128,6 +133,7 @@ const SellingAtStore = () => {
     const handleAddQuantityCancel = () => {
         setIsOpenModalAddQuantity(false);
     };
+
     const handleAddQuantityOk = async () => {
         const idOrder = order?.id;
         if (idOrder == null) {
@@ -146,14 +152,13 @@ const SellingAtStore = () => {
                     handleAddQuantityCancel()
 
                     await refreshOrderDetails();
-                    // Cập nhật giá trị của form bằng dữ liệu mới từ order
                     formOrder.setFieldsValue({
-                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0", // Cập nhật totalMoney
+                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
                         code: response.code,
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
                             : "",
-                            
+
                     });
 
                     // formOrder.setFieldsValue(order)
@@ -227,7 +232,6 @@ const SellingAtStore = () => {
                 await updateOrderSuccess(order.id);
                 toast.success("Thanh toán hóa đơn thành công");
 
-                // Đặt lại tất cả các giá trị của form về initialValues.
                 setOrder(null);
                 formOrder.resetFields();
 
@@ -301,6 +305,7 @@ const SellingAtStore = () => {
 
     const fetchListOrderDetail = async (order: Order | null) => {
         if (order) {
+            console.log(order)
             setLoaingOrderDetailList(true)
             const res = await getOrderDetailByIdOrder(order.id);
             setOrderDetailList([...res.data])
@@ -317,15 +322,19 @@ const SellingAtStore = () => {
 
     }, [loadingOrderDraftList, filterParams])
 
+
+
+
     return (
         <div
             style={{
                 padding: 15
             }}
         >
+
             <Button
                 className="mt-3 mb-3"
-                style={{ display: "flex", backgroundColor: "black", color: "white" }}
+                style={{display: "flex", backgroundColor: "black", color: "white"}}
                 type="default"
                 onClick={handleCreateOrderDraft}
             >
@@ -347,7 +356,7 @@ const SellingAtStore = () => {
                         form={form}
                         products={products}
                         loading={loadingProducts}
-                        showModalAddQuantity={showAddQuantityModal} />
+                        showModalAddQuantity={showAddQuantityModal}/>
                 </Col>
 
                 <Col flex={1}>
@@ -359,6 +368,8 @@ const SellingAtStore = () => {
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
                         handlePay={handlePay}
+                        fetchListOrderDetail={fetchListOrderDetail}
+
                     />
                 </Col>
             </Row>
@@ -370,6 +381,14 @@ const SellingAtStore = () => {
                 handleOk={handleAddQuantityOk}
             />
 
+            {/*<div className="container mt-4">*/}
+            {/*    <div className="row justify-content-center">*/}
+            {/*        <div className="col-md-8 col-lg-6">*/}
+            {/*        */}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
+
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}
                 // chooseThisGuest={}
@@ -377,7 +396,9 @@ const SellingAtStore = () => {
                 loading={loadingUsers}
                 handleFilterChange={handleFilterChange}
             />
-        </div >
+
+
+        </div>
     )
 
 }

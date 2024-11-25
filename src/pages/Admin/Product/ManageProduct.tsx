@@ -31,6 +31,7 @@ import axios from 'axios'
 import { DownloadOutlined, EditOutlined, FileImageOutlined, FileOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import Product from '../../../types/Product'
 import ModalHistoryImport from "./components/ModalHistoryImport";
+import ProductDetailQRModal from "./components/ProductDetailQRModal";
 
 
 
@@ -72,6 +73,8 @@ const ProductManager = () => {
   const [isItemAddOpen, setIsItemAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [url, setUrl] = useState<string | null>('');
+  const [isOpenQR, setIsOpenQR] = useState(false);
+
 
   const [file, setFile] = useState<File | null>(null);
 
@@ -277,7 +280,7 @@ const ProductManager = () => {
 
       setOrigins(response.data);
     } catch (error) {
-      console.error("Error fetching origins:", error);
+      // console.error("Error fetching origins:", error);
     }
     finally {
       setIsOriginLoading(false);
@@ -469,20 +472,27 @@ const ProductManager = () => {
         <>
           <Row>
             <Col span={6} order={1}>
+              <Tooltip title="Tải mã QR code" >
+                <Button onClick={() => handleDetailProductQR(record)} style={{ margin: '0 4px' }} className="btn-outline-dark">
+                  <i className="fa-solid fa-qrcode"></i>
+                </Button>
+              </Tooltip>
+            </Col>
+            <Col span={6} order={2}>
               <Tooltip title="Xem chi tiết sản phẩm " >
                 <Button onClick={() => handleDetailProduct(record)} style={{ margin: '0 4px' }} className="btn-outline-warning">
                   <i className="fa-solid fa-eye"></i>
                 </Button>
               </Tooltip>
             </Col>
-            <Col span={6} order={2}>
+            <Col span={6} order={3}>
               <Tooltip title="Cập nhật sản phẩm " >
                 <Button onClick={() => showUpdateModal(record)} style={{ margin: '0 4px' }} className="btn-outline-primary">
                   <i className="fa-solid fa-pen-to-square"></i>
                 </Button>
               </Tooltip>
             </Col>
-            <Col span={6} order={3} >
+            <Col span={6} order={4} >
               <Tooltip title="Xóa sản phẩm " >
                 <Popconfirm
                   title="Bạn chắc chắn muốn xóa Sản phẩm này?"
@@ -496,7 +506,7 @@ const ProductManager = () => {
                 </Popconfirm>
               </Tooltip>
             </Col>
-            <Col span={6} order={4}>
+            <Col span={6} order={5}>
               <Tooltip title="Xem sản phẩm chi tiết " >
                 <Button onClick={() => showViewDetail(record)} className="btn-outline-primary">
                   <i className="fa-solid fa-eye"></i>
@@ -602,6 +612,21 @@ const ProductManager = () => {
   const menuProps = {
     items,
     onClick: handleMenuClick,
+  };
+
+  const [isModalOpens, setIsModalOpens] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<Record<any, any> | null>(null);
+
+  // Mở modal khi nhấn vào nút "Xem chi tiết"
+  const handleDetailProductQR = (record: any) => {
+    setSelectedRecord(record); // Set dữ liệu sản phẩm
+    setIsModalOpens(true); // Mở modal
+  };
+
+  // Đóng modal
+  const handleCloseModal = () => {
+    setIsModalOpens(false);
+    setSelectedRecord(null); // Reset selected record
   };
 
   return (
@@ -819,6 +844,12 @@ const ProductManager = () => {
           </Button>
         </div>
       </Modal>
+
+      <ProductDetailQRModal
+          record={selectedRecord}
+          isOpen={isModalOpens}
+          handleCloseModal={handleCloseModal}
+      />
       <ToastContainer />
 
     </div >

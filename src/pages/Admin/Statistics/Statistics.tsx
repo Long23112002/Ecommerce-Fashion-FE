@@ -7,8 +7,41 @@ import SoldProductChart from './sold/SoldProductChart';
 import InventoryTable from './inventory/InventoryTable';
 
 
+const { Option } = Select;
+
 const Statistics: React.FC = () => {
     const [selectedMonth, setSelectedMonth] = useState<Dayjs>(dayjs());
+
+    const handleDataOrder = (e: any) => {
+        if (selectedPeriod == 'year') {
+            const year = selectedYear;
+            const month = monthStringToNumber(e.activeLabel) || 0;
+            setRevenueRequest({
+                year, month
+            })
+        } else {
+            const year = selectedMonth?.year() || 0;
+            const month = (selectedMonth?.month() || 0) + 1;
+            const day = e.activeLabel;
+            setRevenueRequest({
+                year, month, day
+            })
+        }
+        setOpen(true)
+    }
+
+    const getFilteredData = () => {
+        switch (selectedPeriod) {
+            case 'month':
+                return dailyRevenueData?.data;
+            case 'year':
+                return yearlyRevenueData?.data;
+            default:
+                return [];
+        }
+    };
+
+    const filteredData = getFilteredData();
 
     return (
         <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>

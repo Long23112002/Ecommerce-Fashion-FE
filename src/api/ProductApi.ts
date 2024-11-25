@@ -192,3 +192,23 @@ export const importProduct = async (file: File): Promise<any> => {
        toast.error(getErrorMessage(error));
     }
 };
+
+export const exportQRCode = async (productDetailId: number , qty:number) => {
+    try {
+        const response = await axiosInstance.get(`${BASE_API}/api/v1/qr_code`, {
+            params: { productDetailId , qty },
+            responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `QR_CODE.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Tải mã QR thành công");
+    } catch (error) {
+        toast.error(getErrorMessage(error));
+    }
+};

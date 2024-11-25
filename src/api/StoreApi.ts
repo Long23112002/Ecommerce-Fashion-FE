@@ -1,10 +1,11 @@
 import { BASE_API } from "../constants/BaseApi";
 import axiosInstance from "./AxiosInstance";
+import {toast} from "react-toastify";
 
 const BASE_URL = `${BASE_API}/api/v1/orders`;
 const BASE_URL_DETAIL = `${BASE_API}/api/v1/order-detail`;
 
-interface OrderDetailData {
+export interface OrderDetailData {
     idOrder: number;
     idProductDetail: number;
     quantity: number;
@@ -57,6 +58,7 @@ export const addProductToOrderDetail = async (orderDetailData: OrderDetailData) 
     try {
         const response = await axiosInstance.post(`${BASE_URL_DETAIL}`, orderDetailData)
         return response.data;
+
     } catch (error: any) {
         console.log("Error add product into order detail", error);
         throw error;
