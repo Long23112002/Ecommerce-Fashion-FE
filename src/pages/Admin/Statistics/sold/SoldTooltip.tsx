@@ -1,8 +1,8 @@
 import { Typography } from '@mui/material';
 import React from 'react';
 import { Cell, Pie, PieChart, TooltipProps } from 'recharts';
-import { SoldProductDetail } from '../../../types/Statistic';
-import { getRandomColor } from '../../../utils/colorUtils';
+import { SoldProductDetail } from '../../../../types/Statistic';
+import { getRandomColor } from '../../../../utils/colorUtils';
 
 interface SoldProductDetailWithColor extends SoldProductDetail {
     colorRandom: string;
@@ -57,7 +57,6 @@ const SoldTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }
     return null;
 };
 
-// Custom label cho từng phần của biểu đồ Pie
 const CustomLabel = (props: any) => {
     const { cx, cy, midAngle, outerRadius, id, size, color, sold } = props;
     const RADIAN = Math.PI / 180;

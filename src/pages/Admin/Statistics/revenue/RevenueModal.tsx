@@ -2,11 +2,11 @@ import { Box, Modal, ModalClose, Sheet, Table, Typography } from '@mui/joy';
 import { IconButton, Pagination } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllOrders, OrderParam } from '../../../api/OrderApi';
-import MuiLoading from '../../../components/Loading/MuiLoading';
-import Order from '../../../types/Order';
-import { RevenueRequest } from '../../../types/Statistic';
-import { formatDateTime } from '../../../utils/dateUtils';
+import { fetchAllOrders, OrderParam } from '../../../../api/OrderApi';
+import MuiLoading from '../../../../components/Loading/MuiLoading';
+import Order from '../../../../types/Order';
+import { RevenueRequest } from '../../../../types/Statistic';
+import { formatDateTime } from '../../../../utils/dateUtils';
 
 interface IProps {
     open: boolean;
@@ -107,7 +107,7 @@ const RevenueModal: React.FC<IProps> = ({ open, setOpen, revenueRequest }) => {
                                                 <td>
                                                     {o.revenueAmount.toLocaleString('vi-VN')}đ
                                                 </td>
-                                                <td>{formatDateTime(o.updatedAt)}</td>
+                                                <td>{formatDateTime(o.successAt)}</td>
                                                 <td>
                                                     <IconButton
                                                         color="primary"

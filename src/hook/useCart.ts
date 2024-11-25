@@ -1,11 +1,10 @@
-import { useDispatch, useSelector } from "react-redux"
-import { addItemToCart, cartSelector, setCart as setCartRedux, setCartValues, setItemInCart, totalCartSelector } from "../redux/reducers/CartReducer"
-import { Cart, CartRequest, CartValues } from "../types/Cart"
-import { fetchCartByUserId, updateCart } from "../api/CartApi"
 import Cookies from "js-cookie"
+import { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchCartByUserId, updateCart } from "../api/CartApi"
+import { addItemToCart, cartSelector, setCart as setCartRedux, setCartValues, setItemInCart } from "../redux/reducers/CartReducer"
+import { Cart, CartRequest, CartValues } from "../types/Cart"
 import { useUserAction } from "./useUserAction"
-import { useEffect, useRef, useState } from "react"
-import ProductDetail from "../types/ProductDetail"
 
 const useCart = () => {
     const user = useUserAction().get()

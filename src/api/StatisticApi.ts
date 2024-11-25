@@ -1,5 +1,5 @@
 import { BASE_API } from "../constants/BaseApi";
-import axiosInstance from "./AxiosInstance";
+import axiosInstance, { PageableRequest } from "./AxiosInstance";
 
 const API = `${BASE_API}/api/v1/statistic`
 
@@ -41,6 +41,17 @@ export const getSoldProducts = async (year?: string|number, month?: string|numbe
         params: {
             year: year,
             month: month
+        }
+    })
+    return data
+}
+
+export const getInventoryProducts = async (pageable?: PageableRequest) => {
+    const {data} = await axiosInstance({
+        method: 'GET',
+        url: `${API}/inventory-product`,
+        params: {
+            ...pageable
         }
     })
     return data

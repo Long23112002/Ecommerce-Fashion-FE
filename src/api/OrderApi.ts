@@ -11,9 +11,9 @@ export interface OrderParam {
     status?: string;
     phoneNumber?: string;
     keyword?: string;
-    day?: number|string;
-    month?: number|string;
-    year?: number|string;
+    day?: number | string;
+    month?: number | string;
+    year?: number | string;
 }
 
 export interface OrderAddressUpdate {
@@ -64,7 +64,7 @@ export const updateAdressOrder = async (request: OrderAddressUpdate) => {
     return data
 }
 
-export const updateDiscountOrder = async (discountId: number | string) => {
+export const updateDiscountOrder = async (discountId: number | string | null) => {
     const orderId = Cookies.get('orderId')
     if (!orderId) {
         throw Error('Người dùng không có đơn hàng')
@@ -147,16 +147,16 @@ export const deleteOrder = async (orderId: number, token: string) => {
     }
 }
 
-export  const checkSumPayment = async (amount:number , description:string) =>{
+export const checkSumPayment = async (amount: number, description: string) => {
     try {
-        const response = await  axiosInstance.get(`${BASE_URL}/checksum`, {
+        const response = await axiosInstance.get(`${BASE_URL}/checksum`, {
             params: {
                 amount: amount,
                 description: description
             }
         })
         return response.data
-    }catch (error) {
+    } catch (error) {
         console.error('Lỗi khi xóa đơn hàng:', error);
         throw error;
     }

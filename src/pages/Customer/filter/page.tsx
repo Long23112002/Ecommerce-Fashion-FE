@@ -1,13 +1,13 @@
-import { Box, Container, Grid, Typography } from '@mui/material'
+import { Box, Container, Grid, Pagination, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import Product from '../../../types/Product'
 import SidebarFilter from './SidebarFilter'
 import TopbarFilter from './TopbarFilter'
 import { getAllProducts, ProductParams } from '../../../api/ProductApi'
 import MuiLoading from '../../../components/Loading/MuiLoading'
-import ProductCard from '../../../components/product/ProductCard'
 import { useSearchParams } from 'react-router-dom'
 import { PageableRequest } from '../../../api/AxiosInstance'
+import ProductCard from '../../../components/product/ProductCard'
 
 export interface ISelectedFilter {
     keyword: string,
@@ -19,7 +19,8 @@ export interface ISelectedFilter {
     idSizes: number[],
     minPrice: number,
     maxPrice: number | null,
-    sort: 'newest' | 'name' | 'price-asc' | 'price-desc'
+    sort: 'newest' | 'name' | 'price-asc' | 'price-desc',
+    page: number
 }
 
 const getSort = (sort: 'newest' | 'name' | 'price-asc' | 'price-desc'): { sort: 'ASC' | 'DESC', sortBy: string } => {
@@ -45,6 +46,7 @@ const FilterPage: React.FC = () => {
     const validSortValues: ISelectedFilter["sort"][] = ["name", "newest", "price-asc", "price-desc"];
     const sortParam = searchParams.get("sort");
     const sort = validSortValues.includes(sortParam as ISelectedFilter["sort"]) ? (sortParam as ISelectedFilter["sort"]) : 'newest';
+    const [totalPage, setTotalPage] = useState<number>(0)
 
     const [selectedFilter, setSelectedFilter] = useState<ISelectedFilter>({
         keyword: searchParams.get("keyword") || '',
@@ -56,6 +58,7 @@ const FilterPage: React.FC = () => {
         idSizes: searchParams.get("idSizes") ? searchParams.get("idSizes")!.split(',').map(Number) : [],
         minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : 0,
         maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : 2000000,
+        page: searchParams.get("page") ? Number(searchParams.get("page")) : 1,
         sort: sort
     })
     const [products, setProduct] = useState<Product[]>([]);
@@ -69,15 +72,25 @@ const FilterPage: React.FC = () => {
             maxPrice: max >= 2000000 ? null : max
         }
         const pageable: PageableRequest = {
+            size: 20,
+            page: selectedFilter.page - 1,
             ...getSort(selectedFilter.sort)
         }
         const res = await getAllProducts({ params, pageable });
         setProduct([...res.data])
+        setTotalPage(res.metaData.totalPage)
         setLoading(false)
     }
 
+    const handleChangePage = (page: number) => {
+        setSelectedFilter(prev => ({
+            ...prev,
+            page: page
+        }))
+    }
+
     useEffect(() => {
-        const { keyword, idBrand, idCategory, idColors, idMaterial, idOrigin, idSizes, minPrice, maxPrice, sort } = selectedFilter;
+        const { keyword, idBrand, idCategory, idColors, idMaterial, idOrigin, idSizes, minPrice, maxPrice, sort, page } = selectedFilter;
         const queryParams: any = {};
         if (keyword) queryParams.keyword = keyword;
         if (idBrand) queryParams.idBrand = idBrand;
@@ -89,6 +102,7 @@ const FilterPage: React.FC = () => {
         if (minPrice !== undefined) queryParams.minPrice = minPrice;
         if (maxPrice !== undefined) queryParams.maxPrice = maxPrice;
         if (sort) queryParams.sort = sort;
+        if (page) queryParams.page = page;
 
         setSearchParams(queryParams, { replace: true });
         fetchProducts()
@@ -132,13 +146,18 @@ const FilterPage: React.FC = () => {
                                 (
                                     products.length
                                         ?
-                                        <Grid container spacing={2}>
-                                            {products.map((product) => (
-                                                <Grid item key={product.id} xs={6} sm={4} md={3}>
-                                                    <ProductCard product={product} />
-                                                </Grid>
-                                            ))}
-                                        </Grid>
+                                        <>
+                                            <Grid container spacing={2}>
+                                                {products.map((product) => (
+                                                    <Grid item key={product.id} xs={6} sm={4} md={3}>
+                                                        <ProductCard product={product} />
+                                                    </Grid>
+                                                ))}
+                                            </Grid>
+                                            <Box display="flex" justifyContent="center" mt={2}>
+                                                <Pagination count={totalPage} page={selectedFilter.page} onChange={(_, value) => handleChangePage(value)} />
+                                            </Box>
+                                        </>
                                         :
                                         <Typography>Không có sản phẩm phù hợp</Typography>
                                 )
