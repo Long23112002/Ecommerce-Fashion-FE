@@ -25,7 +25,7 @@ const ConfirmVnPayCheckout: React.FC = () => {
                     paymentMethod: PaymentMethodEnum.VNPAY
                 }
                 await confirmOrder(data)
-                reload()
+                await reload()
                 toast.success("Bạn đã thanh toán thành công")
             } catch (error: any) {
                 const message = error.response.data.message;

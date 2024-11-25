@@ -1,40 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Bar, BarChart, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { CalendarOutlined } from '@ant-design/icons';
-import { Card, Tabs, Table, Row, Col, Space, Typography, DatePicker, Select } from 'antd';
+import { Box } from '@mui/material';
+import { Card, Col, DatePicker, Row, Select, Space, Table, Tabs, Typography } from 'antd';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { getCurrentDayRevenue, getMonthRevenueData, getSoldProducts, getYearRevenueData } from '../../../api/StatisticApi';
+import RevenueModal from './RevenueModal';
 import RevenueTooltip from './RevenueTooltip';
 import SoldTooltip from './SoldTooltip';
-
-const { Option } = Select;
-
-interface RevenueData {
-    name: string;
-    revenue: number;
-}
-
-interface ProductSalesData {
-    product: string;
-    sales: number;
-}
-
-interface InventoryData {
-    product: string;
-    quantity: number;
-}
-
-interface CurrentDayReport {
-    increase: number;
-    today: RevenueData;
-    yesterday: RevenueData;
-}
-
-interface SoldProduct {
-    id: number,
-    name: string,
-    quantity: number
-}
+import { CurrentDayReport, InventoryData, RevenueReport, RevenueRequest, SoldProduct } from '../../../types/Statistic';
+import dayjs, { Dayjs } from 'dayjs';
+import { monthStringToNumber } from '../../../utils/dateUtils';
 
 const inventoryData: InventoryData[] = [
     { product: 'Product A', quantity: 100 },
@@ -44,14 +20,18 @@ const inventoryData: InventoryData[] = [
     { product: 'Product E', quantity: 90 },
 ];
 
+const { Option } = Select;
+
 const Statistics: React.FC = () => {
+    const [open, setOpen] = useState<boolean>(false);
     const [selectedPeriod, setSelectedPeriod] = useState<string>('year');
-    const [selectedMonth, setSelectedMonth] = useState<moment.Moment>();
+    const [selectedMonth, setSelectedMonth] = useState<Dayjs>(dayjs());
     const [selectedYear, setSelectedYear] = useState<string>('2024');
-    const [dailyRevenueData, setDailyRevenueData] = useState<RevenueData[]>([]);
-    const [yearlyRevenueData, setYearlyRevenueData] = useState<RevenueData[]>([]);
+    const [dailyRevenueData, setDailyRevenueData] = useState<RevenueReport>();
+    const [yearlyRevenueData, setYearlyRevenueData] = useState<RevenueReport>();
     const [currentDayRevenue, setCurrentDayRevenue] = useState<CurrentDayReport>();
     const [productSalesData, setProductSalesData] = useState<SoldProduct[]>([])
+    const [revenueRequest, setRevenueRequest] = useState<RevenueRequest>()
 
     useEffect(() => {
         const fetchCurrentDayRevenue = async () => {
@@ -65,7 +45,7 @@ const Statistics: React.FC = () => {
         if (selectedPeriod === 'year') {
             const fetchYearRevenueData = async () => {
                 const res = await getYearRevenueData(selectedYear);
-                setYearlyRevenueData(res.data);
+                setYearlyRevenueData(res);
             };
             fetchYearRevenueData();
         }
@@ -76,23 +56,10 @@ const Statistics: React.FC = () => {
             const year = selectedMonth ? selectedMonth.year() : undefined;
             const month = selectedMonth ? selectedMonth.month() + 1 : undefined;
             const res = await getMonthRevenueData(year, month);
-            setDailyRevenueData(res.data);
+            setDailyRevenueData(res);
         };
         fetchMonthRevenueData();
     }, [selectedPeriod, selectedMonth]);
-
-    const getFilteredData = () => {
-        switch (selectedPeriod) {
-            case 'month':
-                return dailyRevenueData;
-            case 'year':
-                return yearlyRevenueData;
-            default:
-                return [];
-        }
-    };
-
-    const filteredData = getFilteredData();
 
     useEffect(() => {
         const fetch = async () => {
@@ -103,6 +70,37 @@ const Statistics: React.FC = () => {
         }
         fetch()
     }, [selectedMonth])
+
+    const handleDataOrder = (e: any) => {
+        if (selectedPeriod == 'year') {
+            const year = selectedYear;
+            const month = monthStringToNumber(e.activeLabel) || 0;
+            setRevenueRequest({
+                year, month
+            })
+        } else {
+            const year = selectedMonth?.year() || 0;
+            const month = (selectedMonth?.month() || 0) + 1;
+            const day = e.activeLabel;
+            setRevenueRequest({
+                year, month, day
+            })
+        }
+        setOpen(true)
+    }
+
+    const getFilteredData = () => {
+        switch (selectedPeriod) {
+            case 'month':
+                return dailyRevenueData?.data;
+            case 'year':
+                return yearlyRevenueData?.data;
+            default:
+                return [];
+        }
+    };
+
+    const filteredData = getFilteredData();
 
     return (
         <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -145,28 +143,33 @@ const Statistics: React.FC = () => {
                     >
                         <Card>
                             {period === 'month' && (
-                                <DatePicker
-                                    picker="month"
-                                    value={selectedMonth}
-                                    onChange={setSelectedMonth}
-                                    style={{ marginBottom: '16px' }}
-                                />
+                                <Box display='flex' alignItems='center' mb={2} gap={2}>
+                                    <DatePicker
+                                        picker="month"
+                                        value={selectedMonth}
+                                        onChange={setSelectedMonth}
+                                    />
+                                    <Typography>Tổng số doanh thu của tháng: {(dailyRevenueData?.total || 0).toLocaleString('vi-VN')} VNĐ</Typography>
+                                </Box>
                             )}
                             {period === 'year' && (
-                                <Select
-                                    value={selectedYear}
-                                    onChange={setSelectedYear}
-                                    style={{ width: 120, marginBottom: '16px' }}
-                                >
-                                    {['2023', '2024'].map((year) => (
-                                        <Option key={year} value={year}>
-                                            {year}
-                                        </Option>
-                                    ))}
-                                </Select>
+                                <Box display='flex' alignItems='center' mb={2} gap={2}>
+                                    <Select
+                                        value={selectedYear}
+                                        onChange={setSelectedYear}
+                                        style={{ width: 120 }}
+                                    >
+                                        {['2023', '2024'].map((year) => (
+                                            <Option key={year} value={year}>
+                                                {year}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    <Typography>Tổng số doanh thu của năm: {(yearlyRevenueData?.total || 0).toLocaleString('vi-VN')} VNĐ</Typography>
+                                </Box>
                             )}
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={filteredData}>
+                                <BarChart data={filteredData} onClick={handleDataOrder}>
                                     <XAxis dataKey="name" />
                                     <YAxis />
                                     <Tooltip
@@ -209,7 +212,7 @@ const Statistics: React.FC = () => {
                                     labelStyle={{ fontWeight: 'bold' }}
                                 />
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <Bar dataKey="quantity" fill="#8884d8" />
+                                <Bar dataKey="sold" fill="#8884d8" />
                             </BarChart>
                         </ResponsiveContainer>
                     </Card>
@@ -238,12 +241,14 @@ const Statistics: React.FC = () => {
                                     key: 'quantity',
                                 },
                             ]}
-                            pagination={false}
                             rowKey="product"
                         />
                     </Card>
                 </Col>
             </Row>
+
+            <RevenueModal open={open} setOpen={setOpen} revenueRequest={revenueRequest} />
+
         </div>
     );
 };
