@@ -37,7 +37,7 @@ const SellingAtStore = () => {
     const [loadingVouchers, setLoadingVouchers] = useState(true);
 
     const [users, setUsers] = useState<User[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [filterParams, setFilterParams] = useState<UserParam>({
         page: 0,
         size: 5,
@@ -46,16 +46,6 @@ const SellingAtStore = () => {
         fullName: '',
         gender: '',
     });
-
-    const [pagination, setPagination] = useState<PaginationState>({
-        current: 0,
-        pageSize: 5,
-        total: 20,
-        totalPage: 4,
-    });
-
-
-
     const [products, setProducts] = useState<ProductDetail[]>([]);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
 
@@ -76,38 +66,15 @@ const SellingAtStore = () => {
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
         return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
-            .format(value); 
-    };
-
-    const fetchUsers = async (params = filterParams) => {
-        setLoadingUsers(true);
-        try {
-            const response = await getAllUsers({
-                ...params,
-                page: params.page - 1,
-            });
-            setUsers(response.data);
-            setPagination({
-                current: response.metaData.page + 1,
-                pageSize: response.metaData.size,
-                total: response.metaData.total,
-                totalPage: response.metaData.totalPage,
-            });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        } finally {
-            setLoadingUsers(false);
-        }
+            .format(value);
     };
 
     const handleFilterChange = (changedValues: any) => {
         setFilterParams(prevParams => ({
             ...prevParams,
             ...changedValues,
-            email: changedValues.email !== undefined ? makeSlug(changedValues.email || '') : prevParams.email,
-            phone: changedValues.phone !== undefined ? makeSlug(changedValues.phone || '') : prevParams.phone,
-            fullName: changedValues.fullName !== undefined ? makeSlug(changedValues.fullName || '') : prevParams.fullName,
-            page: 1
+            phone: changedValues.phone || '', // Cập nhật giá trị phone
+            page: 1,            
         }));
     };
 
@@ -269,7 +236,7 @@ const SellingAtStore = () => {
     const fetchListOrderDraft = async () => {
         setLoaingOrderDraftList(true)
         const res = await getAllOrderPendingAtStore()
-        setOrderDraftList([...res.data])
+        setOrderDraftList([...res])
         // setOrderDetailList([])
     }
 
@@ -318,9 +285,9 @@ const SellingAtStore = () => {
     useEffect(() => {
         fetchListProduct()
         fetchListOrderDraft()
-        fetchUsers()
+        // fetchUsers()
 
-    }, [loadingOrderDraftList, filterParams])
+    }, [loadingOrderDraftList])
 
 
 
@@ -381,21 +348,14 @@ const SellingAtStore = () => {
                 handleOk={handleAddQuantityOk}
             />
 
-            {/*<div className="container mt-4">*/}
-            {/*    <div className="row justify-content-center">*/}
-            {/*        <div className="col-md-8 col-lg-6">*/}
-            {/*        */}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-
             <ModalChooseGuest
-            isModalOpen={isOpenModalChooseGuest}
-            // chooseThisGuest={}
-            handleCancel={handleCancel}
-            users={users}
-            loading={loadingUsers}
-            handleFilterChange={handleFilterChange}
+                isModalOpen={isOpenModalChooseGuest}
+                // chooseThisGuest={}
+                handleCancel={handleCancel}
+                loading={loadingUsers}
+                handleFilterChange={handleFilterChange}
+                filterParams={filterParams}
+                setFilterParams={setFilterParams}
             />
 
 

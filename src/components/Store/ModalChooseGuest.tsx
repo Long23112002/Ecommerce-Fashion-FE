@@ -4,7 +4,6 @@ import { User } from "../../types/User";
 import LoadingCustom from "../Loading/LoadingCustom";
 import createPaginationConfig from "../../config/paginationConfig";
 import {getAllUsers, UserParam} from "../../api/UserApi";
-import {QrReader} from "react-qr-reader";
 
 interface PaginationState {
     current: number;      // Trang hiện tại
@@ -19,16 +18,18 @@ interface ModalChooseGuestProps {
     // chooseThisGuest: (values: any) => void;
     loading?: boolean;
     handleFilterChange: (e: any) => void;
+    filterParams: UserParam; // 
+    setFilterParams: (params: any) => void; 
 }
 const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     isModalOpen,
     // chooseThisGuest,
     handleCancel,
     loading,
-    handleFilterChange
+    handleFilterChange,
+    filterParams,
+    setFilterParams
 }) => {
-
-
     const [pagination, setPagination] = useState<PaginationState>({
         current: 0,
         pageSize: 5,
@@ -38,16 +39,6 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
 
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
-    const [filterParams, setFilterParams] = useState<UserParam>({
-        page: 0,
-        size: 5,
-        phone: '',
-        email: '',
-        fullName: '',
-        gender: '',
-    });
-
-
 
     const fetchUsers = async (params = filterParams) => {
         setLoadingUsers(true);
@@ -82,9 +73,6 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
         }));
     };
 
-
-
-
     const columns = [
         {
             title: 'Tên khách hàng',
@@ -113,14 +101,11 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
 
     return (
         <>
-
-
             <Modal
                 title="Chọn khách hàng"
                 visible={isModalOpen}
                 onCancel={handleCancel}
             >
-
                 <Form
                     layout="inline"
                     onValuesChange={handleFilterChange}
@@ -145,7 +130,6 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
                 />
             </Modal>
         </>
-
     )
 }
 
