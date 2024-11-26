@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById } from "../../../api/OrderApi.ts";
+import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById, downloadOrderPdf } from "../../../api/OrderApi.ts";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/order.ts";
@@ -238,6 +238,14 @@ const ManagerOrder = () => {
             key: 'actions',
             render: (_, record) => (
                 <div>
+                    {record.status === OrderStatus.SUCCESS && (
+                        <Button
+                            onClick={() => downloadOrderPdf(record.id)}
+                            className="btn-outline-success"
+                        >
+                            <i className="fa-solid fa-download"></i>
+                        </Button>
+                    )}
                     <Button onClick={() => navigate(`/admin/order/${record.id}`)} style={{ marginRight: 8 }} className="btn-outline-primary">
                         <i className="fa-regular fa-eye"></i>
                     </Button>
@@ -285,10 +293,10 @@ const ManagerOrder = () => {
                     tab={
                         <div
                             style={{
-                                textAlign: "center", 
-                                width: "100%", 
-                                fontSize: "20px", 
-                                
+                                textAlign: "center",
+                                width: "100%",
+                                fontSize: "20px",
+
                             }}
                         >
                             Tất cả
