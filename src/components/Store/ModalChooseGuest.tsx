@@ -15,7 +15,7 @@ interface PaginationState {
 interface ModalChooseGuestProps {
     isModalOpen: boolean;
     handleCancel: () => void;
-    // chooseThisGuest: (values: any) => void;
+    chooseThisGuest: (values: any) => void;
     loading?: boolean;
     handleFilterChange: (e: any) => void;
     filterParams: UserParam; // 
@@ -23,7 +23,7 @@ interface ModalChooseGuestProps {
 }
 const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
     isModalOpen,
-    // chooseThisGuest,
+    chooseThisGuest,
     handleCancel,
     loading,
     handleFilterChange,
@@ -90,7 +90,7 @@ const ModalChooseGuest: React.FC<ModalChooseGuestProps> = ({
             render: (_: any, record: any) => (
                 <>
                     <Button
-                        // onClick={() => chooseThisGuest(record.id)}
+                        onClick={() => chooseThisGuest(record.id)}
                         style={{ margin: '0 4px' }} className="btn-outline-primary">
                         <i className="fa-solid fa-circle-plus"></i>
                     </Button>

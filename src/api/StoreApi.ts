@@ -11,6 +11,11 @@ export interface OrderDetailData {
     quantity: number;
 }
 
+export interface OrderUpdateData {
+    idGuest: number;
+    idDiscount: number;
+}
+
 
 export const getAllOrderPendingAtStore = async () => {
     const { data } = await axiosInstance({
@@ -72,4 +77,14 @@ export const updateOrderSuccess = async (id: number | string) => {
         url: `${BASE_API}/api/v1/orders/store/${id}`
     })
     return data
+}
+
+export const updateOrderAtStore = async (id: number, orderUpdateData: OrderUpdateData) => {
+    try {
+        const response = await axiosInstance.put(`${BASE_URL}/store/${id}`, orderUpdateData)
+        return response.data;
+    } catch (error: any) {
+        console.log("Error update order ", error);
+        throw error;
+    }
 }
