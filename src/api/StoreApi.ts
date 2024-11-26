@@ -11,15 +11,21 @@ export interface OrderDetailData {
     quantity: number;
 }
 
+export interface OrderUpdateData {
+    idGuest: number;
+    idDiscount: number;
+}
+
 
 export const getAllOrderPendingAtStore = async () => {
-    try {
-        const response = await axiosInstance.get(`${BASE_URL}/list-pending`);
-        return response;
-    } catch (error) {
-        console.error("Error fetching orders status PENDING_AT_STORE:", error);
-        throw error;
-    }
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${BASE_URL}/list-pending`,
+        // headers: {
+        //     Authorization: `Bearer ${token}`
+        // }
+    })
+    return data
 };
 
 export const createOrderPendingAtStore = async () => {
@@ -71,4 +77,14 @@ export const updateOrderSuccess = async (id: number | string) => {
         url: `${BASE_API}/api/v1/orders/store/${id}`
     })
     return data
+}
+
+export const updateOrderAtStore = async (id: number, orderUpdateData: OrderUpdateData) => {
+    try {
+        const response = await axiosInstance.put(`${BASE_URL}/store/${id}`, orderUpdateData)
+        return response.data;
+    } catch (error: any) {
+        console.log("Error update order ", error);
+        throw error;
+    }
 }
