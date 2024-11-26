@@ -19,7 +19,7 @@ const { Title, Text } = Typography
      const {reload} = useCart();
 
 
-
+     console.log(order)
      const bankImageUrl = [
         {
             id :1,
@@ -97,7 +97,7 @@ const { Title, Text } = Typography
 
      useEffect(() => {
          const checkPaymentStatus = async () => {
-             const result = await checkSumPayment(order?.finalPrice, `DH${order?.id}`);
+             const result = await checkSumPayment(order?.payAmount, `DH${order?.id}`);
              if (result === true) {
                  await payOrder(orderRequest);
                  toast.success("Đã thanh toán thành công");
@@ -195,7 +195,7 @@ const { Title, Text } = Typography
                             <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
                                 <div>
                                     <Text type="secondary">Số tiền thanh toán</Text>
-                                    <Title level={4}>{formatPrice(order?.finalPrice)} VND</Title>
+                                    <Title level={4}>{formatPrice(order?.payAmount)} VND</Title>
                                 </div>
                                 <div>
                                     <Text type="secondary">Tên ngân hàng</Text>
@@ -238,7 +238,7 @@ const { Title, Text } = Typography
                                     }}
                                 />
                                 <img
-                                    src={`https://img.vietqr.io/image/mb-2222013333567-compact2.jpg?amount=${order?.finalPrice}&addInfo=DH${order?.id}&accountName=Nguyễn Phương Nam`}
+                                    src={`https://img.vietqr.io/image/mb-2222013333567-compact2.jpg?amount=${order?.payAmount}&addInfo=DH${order?.id}&accountName=Nguyễn Phương Nam`}
                                     alt="QR Code"
                                     style={{
                                         width: '300px',

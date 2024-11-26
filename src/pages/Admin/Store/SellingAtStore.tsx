@@ -309,7 +309,7 @@ const SellingAtStore = () => {
                 Tạo hóa đơn
             </Button>
             <Row>
-                <Col flex={4}>
+                <Col flex={1}>
                     <ListOrderDraft
                         orderPendingList={orderDraftList}
                         handleOrder={handleOrder}
@@ -347,7 +347,6 @@ const SellingAtStore = () => {
                 handleCancel={handleAddQuantityCancel}
                 handleOk={handleAddQuantityOk}
             />
-
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}
                 // chooseThisGuest={}
@@ -357,8 +356,6 @@ const SellingAtStore = () => {
                 filterParams={filterParams}
                 setFilterParams={setFilterParams}
             />
-
-
         </div>
     )
 
