@@ -173,12 +173,6 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     <div className="card-body">
                         <h5 className="card-title text-center text-dark mb-4">Quét QR Sản Phẩm</h5>
 
-                        <div className="d-flex justify-content-center mb-4">
-                            <span className="me-3 text-dark">VietQR</span>
-                            <span className="me-3 text-dark"><i className="bi bi-globe"></i> website</span>
-                            <span className="text-dark"><i className="bi bi-chat-dots "></i> Zalo</span>
-                        </div>
-
                         <div className="position-relative">
                             <QrReader
                                 onResult={handleResult}
