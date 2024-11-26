@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import type { TableColumnsType, TableProps } from "antd";
 import {
   Button,
@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Product from "./../../types/Product";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import debounce from "lodash/debounce";
 
 interface Product {
   id: number;
@@ -84,7 +85,8 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
   {
     title: "Tên sản phẩm",
     key: "name",
-    render: (record: ProductDetail) => `${record.name} [ ${record.color} - ${record.size} ]`,
+    render: (record: ProductDetail) =>
+      `${record.name} [ ${record.color} - ${record.size} ]`,
   },
   {
     title: "Số lượng",
@@ -107,6 +109,7 @@ const PromotionScheduled: React.FC = () => {
   const [selectedRowKeysDetail, setSelectedRowKeysDetail] = useState<number[]>(
     []
   );
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
 
   const start = () => {
     setLoading(true);
@@ -203,11 +206,11 @@ const PromotionScheduled: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (keyword: string = "") => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(
-        `${BASE_API}/api/v1/product?keyword`
+        `${BASE_API}/api/v1/product?keyword=${keyword}`
       );
 
       const data = await response.data;
@@ -228,6 +231,17 @@ const PromotionScheduled: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((keyword: string) => fetchData(keyword), 1000),
+    []
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    debouncedSearch(value); // Gọi debounce
   };
 
   const fetchProductDetail = async (productIds: number[]) => {
@@ -272,7 +286,7 @@ const PromotionScheduled: React.FC = () => {
   const selectedPromotion = location.state;
 
   const isPromotionEnded =
-          selectedPromotion.statusPromotionEnum === StatusPromotionEnum.ENDED;
+    selectedPromotion.statusPromotionEnum === StatusPromotionEnum.ENDED;
 
   useEffect(() => {
     const selectedPromotion = location.state;
@@ -371,6 +385,14 @@ const PromotionScheduled: React.FC = () => {
         marginBottom: "20px",
       }}
       >Sản phẩm</h5> */}
+            <Form.Item name="keyword">
+              <Input
+                placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..."
+                onChange={handleSearch}
+                allowClear
+              />
+            </Form.Item>
+
             <Table
               rowSelection={rowSelection}
               columns={columnsProduct}
@@ -381,7 +403,7 @@ const PromotionScheduled: React.FC = () => {
               }}
               rowKey="id"
               pagination={{
-                pageSize: 7,
+                pageSize: 5,
               }}
             />
           </Card>
