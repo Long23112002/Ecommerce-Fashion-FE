@@ -342,7 +342,7 @@ const SellingAtStore = () => {
                 Tạo hóa đơn
             </Button>
             <Row>
-                <Col flex={4}>
+                <Col flex={1}>
                     <ListOrderDraft
                         orderPendingList={orderDraftList}
                         handleOrder={handleOrder}
@@ -381,13 +381,6 @@ const SellingAtStore = () => {
                 handleOk={handleAddQuantityOk}
             />
 
-            {/*<div className="container mt-4">*/}
-            {/*    <div className="row justify-content-center">*/}
-            {/*        <div className="col-md-8 col-lg-6">*/}
-            {/*        */}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
 
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}

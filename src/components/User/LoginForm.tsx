@@ -119,7 +119,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
                     <p className="text-muted small text-center">
                         <a className="text_href" onClick={onForgotPassword}>Quên mật khẩu?</a>
                         <span style={{ fontSize: '13px' }}>Chưa có tài khoản? <a className="text_href" onClick={onRegister}>Tạo tài khoản</a></span>
-                        Bằng việc tiếp tục, bạn đã đọc và đồng ý với{' '}
+                         <div> Bằng việc tiếp tục, bạn đã đọc và đồng ý với{' '}</div>
                         <a href="#" className="text_href">điều khoản sử dụng</a> và{' '}
                         <a href="#" className="text_href">chính sách bảo mật thông tin cá nhân</a> của Ecommerce fashion
                     </p>
@@ -128,7 +128,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleCancel, onForgotPassword, o
                     <div style={{ background: "linear-gradient(136deg, rgb(240, 248, 255) -1%, rgb(219, 238, 255) 85%)" }}
                         className="position-relative h-100">
                         <img
-                            src="http://ecommerce-fashion.site:9099/lNFf1ycSXW-imageLogoLogin.png"
+                            src="	https://salt.tikicdn.com/ts/upload/df/48/21/b4d225f471fe06887284e1341751b36e.png"
                             alt="Ecommerce fashion Character"
                             className="position-absolute bottom-50 end-0 w-100"
                         />

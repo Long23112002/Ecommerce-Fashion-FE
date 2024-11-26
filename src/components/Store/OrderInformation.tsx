@@ -86,7 +86,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 quantity: 1
             };
 
-            setLoading(true); // Set loading to true before API call
+            setLoading(true);
             try {
                 await addProductToOrderDetail(requestBody);
                 fetchListOrderDetail(order);
@@ -95,8 +95,8 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 toast.error("Đã xảy ra lỗi khi thêm sản phẩm!");
                 console.error(error);
             } finally {
-                setLoading(false); // Reset loading state after API call
-                setData(""); // Clear data after processing
+                setLoading(false);
+                setData("");
             }
         } else {
             toast.error("Không tìm thấy sản phẩm trong QR Code hoặc hóa đơn!");
@@ -136,10 +136,18 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     return (
         <div
             style={{
-                border: '1px solid black',
-                padding: '15px',
-                borderRadius: '8px',
-                width: '320px',
+                position: "fixed",
+                top: "54%",
+                right: "35px",
+                transform: "translateY(-50%)",
+                width: "320px",
+                maxHeight: "calc(100vh - 40px)",
+                overflowY: "auto",
+                border: "1px solid black",
+                padding: "15px",
+                borderRadius: "8px",
+                backgroundColor: "white",
+                zIndex: 1000,
                 marginLeft: 'auto',
                 paddingRight: 30
             }}
@@ -159,7 +167,9 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 //     payAmount: order?.payAmount || ""
                 // }}
             >
-                <div className="card text-white mb-3">
+                <div className="card text-white mb-3" style={{
+                    marginLeft:'18px'
+                }}>
                     <div className="card-body">
                         <h5 className="card-title text-center text-dark mb-4">Quét QR Sản Phẩm</h5>
 
