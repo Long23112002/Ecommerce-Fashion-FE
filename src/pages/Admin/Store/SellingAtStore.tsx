@@ -14,7 +14,7 @@ import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
 import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 import Order from "../../../types/Order";
-import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderSuccess } from "../../../api/StoreApi";
+import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderAtStore, updateOrderSuccess } from "../../../api/StoreApi";
 import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
@@ -46,8 +46,7 @@ const SellingAtStore = () => {
         fullName: '',
         gender: '',
     });
-    const [products, setProducts] = useState<ProductDetail[]>([]);
-    const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+    const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
     const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
     const [isOpenModalChooseGuest, setIsOpenModalChooseGuest] = useState(false);
@@ -56,12 +55,16 @@ const SellingAtStore = () => {
     const [loadingOrderDraftList, setLoaingOrderDraftList] = useState(true);
 
     const [order, setOrder] = useState<Order | null>(null);
+    const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
+    const [currentGuestId, setCurrentGuestId] = useState<number| null>(null);
+    const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
+    const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
 
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
@@ -74,7 +77,7 @@ const SellingAtStore = () => {
             ...prevParams,
             ...changedValues,
             phone: changedValues.phone || '', // Cập nhật giá trị phone
-            page: 1,            
+            page: 1,
         }));
     };
 
@@ -203,9 +206,8 @@ const SellingAtStore = () => {
                 formOrder.resetFields();
 
                 fetchListOrderDraft();
-                fetchListProduct();
                 setOrderDetailList([])
-
+                setIsOrderSuccess(true);
             } else {
                 toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
             }
@@ -214,21 +216,42 @@ const SellingAtStore = () => {
         }
 
     }
+
+    const chooseThisGuest = (idGuest: number) => {        
+        setCurrentGuestId(idGuest);
+        console.log(currentGuestId);
+        setIsOpenModalChooseGuest(false)
+        handleUpdateOrder();
+
+    }
+
+    const handleUpdateOrder = async () => {
+        try {
+          const  idDiscount = 34;
+
+          if (order) {
+            console.log(currentGuestId);
+            
+            await updateOrderAtStore(order.id, { idGuest: currentGuestId, idDiscount});
+            // handleUpdateCancel();
+            // refreshProducts();
+            setIsUpdateGuestDiscount(true);
+          } else {
+            toast.error("Authorization failed");
+          }
+        } catch (error: any) {
+          toast.error(getErrorMessage(error))
+        }
+      };
+
+
     const handleCancel = () => {
         setIsOpenModalChooseGuest(false)
     }
     const showModalChooseGuest = () => {
         setIsOpenModalChooseGuest(true);
-        // fetchUsers()
     };
 
-    const fetchListProduct = async () => {
-        setLoadingProducts(true)
-        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
-        const res = await getAllProductDetails({ pageable: pageable })
-        setProducts([...res.data])
-        setLoadingProducts(false)
-    }
     const refreshOrderDetails = () => {
         fetchListOrderDetail(order)
     };
@@ -283,14 +306,10 @@ const SellingAtStore = () => {
     }
 
     useEffect(() => {
-        fetchListProduct()
         fetchListOrderDraft()
         // fetchUsers()
 
-    }, [loadingOrderDraftList])
-
-
-
+    }, [loadingOrderDraftList, isUpdateGuestDiscount])
 
     return (
         <div
@@ -298,10 +317,9 @@ const SellingAtStore = () => {
                 padding: 15
             }}
         >
-
             <Button
                 className="mt-3 mb-3"
-                style={{display: "flex", backgroundColor: "black", color: "white"}}
+                style={{ display: "flex", backgroundColor: "black", color: "white" }}
                 type="default"
                 onClick={handleCreateOrderDraft}
             >
@@ -321,9 +339,10 @@ const SellingAtStore = () => {
 
                     <ListProduct
                         form={form}
-                        products={products}
+                        // products={products}
                         loading={loadingProducts}
-                        showModalAddQuantity={showAddQuantityModal}/>
+                        showModalAddQuantity={showAddQuantityModal}
+                        isOrderSuccess={isOrderSuccess} />
                 </Col>
 
                 <Col flex={1}>
@@ -331,7 +350,7 @@ const SellingAtStore = () => {
                         order={order}
                         form={formOrder}
                         vouchers={vouchers}
-                        users={users}
+                        // users={users}
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
                         handlePay={handlePay}
@@ -350,7 +369,7 @@ const SellingAtStore = () => {
 
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}
-                // chooseThisGuest={}
+                chooseThisGuest={chooseThisGuest}
                 handleCancel={handleCancel}
                 loading={loadingUsers}
                 handleFilterChange={handleFilterChange}

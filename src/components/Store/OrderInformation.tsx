@@ -13,13 +13,14 @@ import {getOrderById} from "../../api/OrderApi";
 interface OrderInformationProps {
     // onFill: () => void;
     vouchers: Voucher[];
-    users: User[];
+    // users: User[];
     form: FormInstance;
-    showModalUser: () => void;
+    showModalUser: (e: any) => void;
     order: Order | null;
     handleCancel: (e: any) => void;
     handlePay: (e: any) => void;
     fetchListOrderDetail: (order: any) => void;
+    isUpdateGuestDiscount: boolean;
 }
 
 
@@ -45,12 +46,13 @@ const onFinish = (values: any) => {
 const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
     vouchers,
-    users,
+    // users,
     showModalUser,
     order,
     handleCancel,
     handlePay,
-    fetchListOrderDetail
+    fetchListOrderDetail,
+    isUpdateGuestDiscount
 
 }) => {
     const formatCurrency = (value: number) => {
@@ -247,8 +249,8 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item>
 
                 <Form.Item
-                    name="idVoucher"
-                    label="Voucher"
+                    name="idDiscount"
+                    label="Giảm giá"
                     rules={[
                         {
                             required: false,
