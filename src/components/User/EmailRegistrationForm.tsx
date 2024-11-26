@@ -115,7 +115,7 @@ export default function EmailRegistrationForm({onBack}: { onBack: () => void }) 
             <Col span={12} className="illustration-section">
                 <div style={{textAlign: 'center'}}>
                     <img
-                        src="http://ecommerce-fashion.site:9099/lNFf1ycSXW-imageLogoLogin.png?height=200&width=200"
+                        src="	https://salt.tikicdn.com/ts/upload/df/48/21/b4d225f471fe06887284e1341751b36e.png?height=200&width=200"
                         alt="Ecommerce fashion mascot"
                         style={{maxWidth: '100%', height: 'auto', marginBottom: '20px'}}
                     />
