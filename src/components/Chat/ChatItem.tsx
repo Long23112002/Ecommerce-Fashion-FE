@@ -33,9 +33,9 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply, fetchFi
       const item = focusChatRef.current;
       item?.scrollIntoView();
       const newChat = { ...chat, focus: false };
-      setTimeout(()=>{
+      setTimeout(() => {
         setChatInChats(newChat);
-      },500)
+      }, 500)
     }
   }, [chat]);
 
@@ -59,58 +59,71 @@ const ChatItem: React.FC<IProps> = ({ chat, id, isAdmin, show, setReply, fetchFi
           }}
         />
       )}
-      <Paper
-        ref={focusChatRef}
-        className={chat.focus ? 'focused' : ''}
-        sx={{
-          p: 1.5,
-          m: 1,
-          backgroundColor: chat.createBy == id ? '#5ca8db' : '#E5EFFF',
-          color: chat.createBy == id ? '#fff' : '#000',
-          maxWidth: '70%',
-          wordBreak: 'break-word',
-          position: 'relative',
-          borderRadius: 2,
-          animation: chat.focus ? chat.createBy == id ? 'chat__focus--slideLeft 0.5s forwards' : 'chat__focus--slideRight 0.5s forwards' : 'none',
-        }}
-      >
-        {chat.reply && (
+      {
+        chat.image
+          ?
+          <img src={chat.image} style={{ maxWidth: '70%', minWidth: 100, borderRadius: 10 }} />
+          :
           <Paper
+            ref={focusChatRef}
+            className={chat.focus ? 'focused' : ''}
             sx={{
-              p: 0.5,
-              mb: 1,
-              backgroundColor: chat.createBy === id ? '#308cc9' : '#C4D6F4',
-              boxShadow: 'none',
-              color: chat.createBy === id ? '#fff' : '#000',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              cursor: 'pointer'
+              p: (chat.content?.length || 0) > 0 ? 1.5 : 0,
+              m: 1,
+              backgroundColor: chat.createBy == id ? '#5ca8db' : '#E5EFFF',
+              color: chat.createBy == id ? '#fff' : '#000',
+              maxWidth: '70%',
+              wordBreak: 'break-word',
+              position: 'relative',
+              borderRadius: 2,
+              animation: chat.focus ? chat.createBy == id ? 'chat__focus--slideLeft 0.5s forwards' : 'chat__focus--slideRight 0.5s forwards' : 'none',
             }}
-            onClick={() => fetchFindChatsUntilTarget(chat.reply?.id + '')}
           >
-            <Typography variant='subtitle2'
-              sx={{
-                fontSize: 13
-              }}>
-              {chat.reply.nameCreateBy}
-            </Typography>
-            <Typography variant="body2"
-              sx={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 3,
-                fontSize: 13
-              }}>
-              {chat.reply.content}
+            {chat.reply && (
+              <Paper
+                sx={{
+                  p: 0.5,
+                  mb: 1,
+                  backgroundColor: chat.createBy === id ? '#308cc9' : '#C4D6F4',
+                  boxShadow: 'none',
+                  color: chat.createBy === id ? '#fff' : '#000',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  cursor: 'pointer'
+                }}
+                onClick={() => fetchFindChatsUntilTarget(chat.reply?.id + '')}
+              >
+                <Typography variant='subtitle2'
+                  sx={{
+                    fontSize: 13
+                  }}>
+                  {chat.reply.nameCreateBy}
+                </Typography>
+                {
+                  chat.reply?.image
+                    ?
+                    <img src={chat.reply?.image} style={{ width: 75, aspectRatio: '1/1', borderRadius: 10 }} />
+                    :
+                    <Typography variant="body2"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 3,
+                        fontSize: 13
+                      }}>
+                      {chat.reply.content}
+                    </Typography>
+                }
+              </Paper>
+            )}
+
+            <Typography variant="body2">
+              {chat.content}
             </Typography>
           </Paper>
-        )}
-        <Typography variant="body2">
-          {chat.content}
-        </Typography>
-      </Paper>
+      }
 
       {chat.createBy != id && replyIcon}
     </Box>
