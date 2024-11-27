@@ -69,7 +69,8 @@ const FilterPage: React.FC = () => {
         const max = selectedFilter.maxPrice || 2000000
         const params: ProductParams = {
             ...selectedFilter,
-            maxPrice: max >= 2000000 ? null : max
+            maxPrice: max >= 2000000 ? null : max,
+            allowEmpty: true
         }
         const pageable: PageableRequest = {
             size: 20,
