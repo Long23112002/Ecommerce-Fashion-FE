@@ -27,7 +27,7 @@ export interface ProductParams {
     idSizes?: number[] | null,
     maxPrice?: number | null,
     minPrice?: number | null,
-    swallowEmpty?: boolean;
+    allowEmpty?: boolean;
 }
 
 export const getAllProducts = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
