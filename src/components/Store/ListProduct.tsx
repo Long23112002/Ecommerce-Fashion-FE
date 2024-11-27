@@ -1,24 +1,43 @@
-import { Button, Divider, FormInstance, Image, Table } from 'antd'
-import React, { useState } from 'react'
+import { Button, Divider, Form, FormInstance, Image, Input, Table } from 'antd'
+import React, { useEffect, useState } from 'react'
 import Product from '../../types/Product';
 import LoadingCustom from '../Loading/LoadingCustom';
 import { FileImageOutlined } from '@ant-design/icons';
 import ProductDetail from '../../types/ProductDetail';
 import AddQuantityModal from './AddQuantityModal';
+import { PageableRequest } from '../../api/AxiosInstance';
+import { getAllProductDetails } from '../../api/ProductDetailApi';
+import createPaginationConfig from '../../config/product/paginationConfig';
+import { PaginationState } from '../../config/paginationConfig';
 
 interface ProductProps {
     form: FormInstance;
-    products: ProductDetail[];
     loading?: boolean;
     showModalAddQuantity: (e: any) => void;
+    isOrderSuccess: boolean;
 }
 
 const ListProduct: React.FC<ProductProps> = ({
-    products,
     loading,
-    showModalAddQuantity
+    showModalAddQuantity,
+    isOrderSuccess
 }) => {
-    
+    const [searchParams, setSearchParams] = useState<{
+        keyword: string,
+    }>({
+        keyword: '',
+    })
+    interface SearchParams {
+        keyword?: string;
+    }
+    const [products, setProducts] = useState<ProductDetail[]>([]);
+    const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+    const [pagination, setPagination] = useState<PaginationState>({
+        current: 1,
+        pageSize: 5,
+        total: 20,
+        totalPage: 4
+    })
     const columns = [
         {
             title: 'Mã sản phẩm',
@@ -83,10 +102,42 @@ const ListProduct: React.FC<ProductProps> = ({
             ),
         },
     ]
+    const handleSearch = (changedValues: Partial<SearchParams>) => {
+        console.log('search');
 
+        setSearchParams((prevParams) => ({
+            ...prevParams,
+            ...changedValues,
+        }));
+
+        setPagination((prevPagination) => ({
+            ...prevPagination,
+            current: 1,
+        }));
+    };
+
+    const fetchListProduct = async (params: SearchParams) => {
+        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
+        const res = await getAllProductDetails({ pageable, ...params })
+        setProducts([...res.data])
+        setLoadingProducts(false)
+    }
+    useEffect(() => {
+        fetchListProduct(searchParams);
+    }, [searchParams, pagination.current, isOrderSuccess])
     return (
         <>
             <Divider orientation="left">Danh sách sản phẩm</Divider>
+            <Form
+                layout="inline"
+                onValuesChange={(_, values) => handleSearch(values)}
+                style={{ display: 'flex', justifyContent: 'flex-end' }}
+                className="mt-2 mb-2"
+            >
+                <Form.Item name="keyword">
+                    <Input placeholder="Tên sản phẩm, thương hiệu, nguồn gốc,..." style={{ width: '300px' }} />
+                </Form.Item>
+            </Form>
             <Table
                 dataSource={products}
                 columns={columns}
@@ -95,6 +146,7 @@ const ListProduct: React.FC<ProductProps> = ({
                     indicator: <LoadingCustom />,
                 }}
                 rowKey="id"
+                pagination={createPaginationConfig(pagination, setPagination)}
                 expandable={{ childrenColumnName: 'children' }}
             />
 
