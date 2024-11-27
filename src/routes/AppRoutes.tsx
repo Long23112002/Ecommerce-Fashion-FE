@@ -52,7 +52,6 @@ const AppRoutes = () => {
                 <Route path='/filter' element={<ProductFilterPage />} />
                 <Route path='/cart' element={<CartPage />} />
                 <Route path='/checkout' element={<CheckoutPage />} />
-                <Route path="/checkout/status" element={<ConfirmVnPayCheckout />} />
                 <Route path="/checkout/qr" element={<PaymentQRComponent />} />
                 <Route element={<UserInfoLayout />}>
                     <Route path="/user-info" element={<UserInfoPage />} />
@@ -91,7 +90,8 @@ const AppRoutes = () => {
                 </Route>
             </Route>
 
-
+            {/* Confirm checkout */}
+            <Route path="/checkout/status" element={<ConfirmVnPayCheckout />} />
             {/* Route xử lý lỗi */}
             <Route path="/403" element={<ForbiddenPage />} />
 

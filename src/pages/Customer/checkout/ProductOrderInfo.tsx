@@ -2,7 +2,9 @@ import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import Order from '../../../types/Order';
 import ProductDetail from '../../../types/ProductDetail';
-import VoucherSelector from './VoucherSelector';
+import DiscountSelector from '../../../components/Discount/DiscountSelector';
+import { updateDiscountOrder } from '../../../api/OrderApi';
+import { Discount } from '../../../types/discount';
 
 interface IProps {
     order: Order
@@ -10,6 +12,18 @@ interface IProps {
 }
 
 const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
+
+    const handleSelectVoucher = async (discount: Discount) => {
+        if (!discount.id || discount.id <= 0) return
+        const res = await updateDiscountOrder(discount.id)
+        setOrder({ ...res })
+    }
+
+    const handleCancel = async () => {
+        const res = await updateDiscountOrder(null)
+        setOrder({ ...res })
+    }
+
     return (
         <Box
             className='shadow-section-2'
@@ -23,7 +37,7 @@ const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
             <Typography variant='h6' mb={2} fontWeight="bold">Thông tin sản phẩm</Typography>
             {order.orderDetails?.map(od => <ProductDetailItem key={od.id} pd={od.productDetail} />)}
 
-            <VoucherSelector order={order} setOrder={setOrder} />
+            <DiscountSelector order={order} onSelect={handleSelectVoucher} onCancel={handleCancel} />
 
             <Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
