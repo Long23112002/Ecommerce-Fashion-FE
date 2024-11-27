@@ -9,11 +9,13 @@ import createPaginationConfig, { PaginationState } from "../../../config/discoun
 import { Discount, StatusDiscount, StatusDiscountLable, TypeDiscount, TypeDiscountLabel } from "../../../types/discount.ts";
 import { getErrorMessage } from "../../Error/getErrorMessage.ts";
 import { useNavigate } from 'react-router-dom';
+import { getAllProductDetails } from '../../../api/ProductDetailApi.ts';
 
 const { Option } = Select;
 
 const ManagerDiscount = () => {
     const [loading, setLoading] = useState(true);
+    const [productdetails, setProductdetails] = useState<{ id: number; name: string }[]>([]);
     const [discounts, setDiscounts] = useState<Discount[]>([]);
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
@@ -27,7 +29,9 @@ const ManagerDiscount = () => {
         size: 5,
         name: "",
         type: "",
-        status: ""
+        status: "",
+        idProductDetail: "",
+        Price: "",
     });
 
     const fetchDiscountsDebounced = useCallback(
@@ -39,7 +43,10 @@ const ManagerDiscount = () => {
                     current - 1,
                     filters.name,
                     filters.type,
-                    filters.status
+                    filters.status,
+                    Array.isArray(filters.idProductDetail) ? filters.idProductDetail.join(',') : '',
+                    filters.Price,
+
                 );
                 setDiscounts(response.data);
                 setPagination({
@@ -64,9 +71,12 @@ const ManagerDiscount = () => {
     const handleFilterChange = (changedValues: any, allValues: any) => {
         setFilterParams({
             ...filterParams,
+            ...allValues,
             name: allValues.name || '',
             type: allValues.type || '',
-            status: allValues.status || ''
+            status: allValues.status || '',
+            idProductDetail: Array.isArray(allValues.idProductDetail) ? allValues.idProductDetail : [],
+            Price: allValues.Price || '',
         });
         setPagination((prevPagination) => ({
             ...prevPagination,
@@ -92,7 +102,22 @@ const ManagerDiscount = () => {
     const refreshDiscounts = () => {
         fetchDiscounts(pagination.current, pagination.pageSize);
     };
-
+    useEffect(() => {
+        const fetchProductdetails = async () => {
+            try {
+                const response = await getAllProductDetails();
+                // Chuyển đổi dữ liệu
+                const transformedData = response.data.map((item) => ({
+                    id: item.id, // ID của ProductDetail
+                    name: `${item.product.name} - ${item.color.name} - ${item.size.name}`, // Tên sản phẩm + màu + size
+                }));
+                setProductdetails(transformedData); // Cập nhật state
+            } catch (error) {
+                toast.error(getErrorMessage(error));
+            }
+        };
+        fetchProductdetails();
+    }, []);
     useEffect(() => {
         fetchDiscounts(pagination.current, pagination.pageSize);
     }, [pagination.current, pagination.pageSize, filterParams]);
@@ -201,16 +226,21 @@ const ManagerDiscount = () => {
                 className="mt-2 mb-2"
             >
                 <Form.Item name="name" label="Tên Phiếu">
-                    <Input placeholder="Tìm kiếm theo tên khuyến mãi" />
+                    <Input placeholder="Tìm kiếm theo tên khuyến mãi" allowClear/>
                 </Form.Item>
-                {/* <Form.Item name="startDate" label="Ngày Bắt Đầu">
-                    <DatePicker placeholder="Chọn ngày bắt đầu" />
+                <Form.Item name="idProductDetail" label="Tên Sản Phẩm" style={{width:300}}>
+                    <Select
+                        placeholder="Chọn sản phẩm"
+                        allowClear
+                        mode="multiple"
+                        options={productdetails.map(product => ({
+                            value: product.id,
+                            label: product.name, // Hiển thị tên sản phẩm
+                        }))}
+                    />
                 </Form.Item>
-                <Form.Item name="endDate" label="Ngày Kết Thúc">
-                    <DatePicker placeholder="Chọn ngày kết thúc" />
-                </Form.Item> */}
                 <Form.Item name="type" label="Kiểu">
-                    <Select placeholder="Chọn kiểu">
+                    <Select placeholder="Chọn kiểu" allowClear>
                         {Object.keys(TypeDiscountLabel).map((key) => (
                             <Option key={key} value={key}>
                                 {TypeDiscountLabel[key as TypeDiscount]}
@@ -218,8 +248,11 @@ const ManagerDiscount = () => {
                         ))}
                     </Select>
                 </Form.Item>
+                <Form.Item name="Price" label="Giá tối thiểu" >
+                    <Input placeholder="Nhập giá" type="number"allowClear />
+                </Form.Item>
                 <Form.Item name="status" label="Trạng thái">
-                    <Select placeholder="Chọn trạng thái">
+                    <Select placeholder="Chọn trạng thái" allowClear>
                         {Object.keys(StatusDiscountLable).map((key) => (
                             <Option key={key} value={key}>
                                 {StatusDiscountLable[key as StatusDiscount]}

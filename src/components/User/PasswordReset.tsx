@@ -32,7 +32,7 @@ export default function PasswordReset({onBack}: { onBack: () => void }) {
                     <div style={{background: "linear-gradient(136deg, rgb(240, 248, 255) -1%, rgb(219, 238, 255) 85%)"}}
                          className="col-md-6  d-flex flex-column justify-content-center align-items-center text-white p-4">
                         <img
-                            src="http://ecommerce-fashion.site:9099/lNFf1ycSXW-imageLogoLogin.png"
+                            src="	https://salt.tikicdn.com/ts/upload/df/48/21/b4d225f471fe06887284e1341751b36e.png"
                             alt="Illustration"
                             style={{maxWidth: '150px'}}
                         />
