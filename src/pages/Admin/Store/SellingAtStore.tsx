@@ -56,13 +56,14 @@ const SellingAtStore = () => {
 
     const [order, setOrder] = useState<Order | null>(null);
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+    const [isOrderDetailChange, setIsOrderDetailChange] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
-    const [currentGuestId, setCurrentGuestId] = useState<number| null>(null);
+    const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
     const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
 
@@ -116,12 +117,12 @@ const SellingAtStore = () => {
                 if (token) {
                     await addProductToOrderDetail({ idOrder, idProductDetail: currentProductDetailId, quantity });
 
-                    const response = await getOrderById(idOrder);
-                    setOrder(response)
+                    const response = await getOrderById(order?.id, token); // API lấy hóa đơn mới
+                    setOrder(response);
+
+                    setIsOrderDetailChange(false)
                     toast.success('Thêm sản phẩm Thành Công');
                     handleAddQuantityCancel()
-
-                    await refreshOrderDetails();
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
                         code: response.code,
@@ -131,7 +132,6 @@ const SellingAtStore = () => {
 
                     });
 
-                    // formOrder.setFieldsValue(order)
                 } else {
                     toast.error("Authorization failed");
                 }
@@ -171,8 +171,8 @@ const SellingAtStore = () => {
                 formInfor(null)
                 fetchListOrderDraft()
                 setVouchers([]);
-                fetchListOrderDetail(null)
-
+                // fetchListOrderDetail(null)
+                setOrder(null)
             } else {
                 toast.error("Xác thực thất bại");
             }
@@ -187,7 +187,17 @@ const SellingAtStore = () => {
             if (token) {
                 await deleteOrderDetail(orderDetailId, token);
                 toast.success("Xóa sản phẩm thành công");
-                refreshOrderDetails();
+
+                // Lấy thông tin hóa đơn mới từ API
+                const updatedOrder = await getOrderById(order?.id, token); // API lấy hóa đơn mới
+
+                // Cập nhật trạng thái hóa đơn và làm mới form
+                setOrder(updatedOrder);
+                formOrder.setFieldsValue({
+                    totalMoney: updatedOrder.totalMoney, // Cập nhật tổng tiền
+                });
+
+                setIsOrderDetailChange(false)
             } else {
                 toast.error("Xác thực thất bại");
             }
@@ -217,32 +227,31 @@ const SellingAtStore = () => {
 
     }
 
-    const chooseThisGuest = (idGuest: number) => {        
+    const chooseThisGuest = (idGuest: number) => {
         setCurrentGuestId(idGuest);
         console.log(currentGuestId);
         setIsOpenModalChooseGuest(false)
-        handleUpdateOrder();
-
+        handleUpdateOrder(idGuest);
     }
 
-    const handleUpdateOrder = async () => {
+    const handleUpdateOrder = async (idGuest: number) => {
         try {
-          const  idDiscount = 34;
+            const idDiscount = 34;
 
-          if (order) {
-            console.log(currentGuestId);
-            
-            await updateOrderAtStore(order.id, { idGuest: currentGuestId, idDiscount});
-            // handleUpdateCancel();
-            // refreshProducts();
-            setIsUpdateGuestDiscount(true);
-          } else {
-            toast.error("Authorization failed");
-          }
+            if (order) {
+                console.log("Guest ID:", idGuest);
+                const updatedOrder = await updateOrderAtStore(order.id, { idGuest, idDiscount });
+                setOrder({ ...order, fullName: updatedOrder.fullName });
+
+                handleCancel();
+                setIsUpdateGuestDiscount(true);
+            } else {
+                toast.error("Authorization failed");
+            }
         } catch (error: any) {
-          toast.error(getErrorMessage(error))
+            toast.error(getErrorMessage(error))
         }
-      };
+    };
 
 
     const handleCancel = () => {
@@ -253,7 +262,9 @@ const SellingAtStore = () => {
     };
 
     const refreshOrderDetails = () => {
-        fetchListOrderDetail(order)
+        setOrder(order)
+        // fetchListOrderDetail(order)
+        setIsOrderDetailChange(true)
     };
 
     const fetchListOrderDraft = async () => {
@@ -289,25 +300,44 @@ const SellingAtStore = () => {
             resolve(true);
         });
         formOrder.setFieldsValue(order)
-        fetchListOrderDetail(order)
+        // fetchListOrderDetail(order)
         fetchVouchersDebounced()
+        setIsOrderDetailChange(true)
     }
 
-    const fetchListOrderDetail = async (order: Order | null) => {
-        if (order) {
-            console.log(order)
-            setLoaingOrderDetailList(true)
-            const res = await getOrderDetailByIdOrder(order.id);
-            setOrderDetailList([...res.data])
-            setLoaingOrderDetailList(false)
-        } else {
-            setOrderDetailList([]);
+    const handleQuantityChange = (value: number | null, id: number) => {
+        if (value && value > 0) {
+            const updatedList = orderDetailList.map((item) =>
+                item.id === id ? { ...item, quantity: value } : item
+            );
+            setOrderDetailList(updatedList); // Cập nhật danh sách với số lượng mới
         }
-    }
+    };
+
+    const handleIncreaseQuantity = (id: number) => {
+        const updatedList = orderDetailList.map((item) =>
+            item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+        setOrderDetailList(updatedList);
+    };
+
+    const handleDecreaseQuantity = (id: number) => {
+        const updatedList = orderDetailList.map((item) =>
+            item.id === id && item.quantity > 1
+                ? { ...item, quantity: item.quantity - 1 }
+                : item
+        );
+        setOrderDetailList(updatedList);
+    };
+
 
     useEffect(() => {
         fetchListOrderDraft()
-        // fetchUsers()
+        if (order) {
+            formOrder.setFieldsValue({
+                fullName: order.fullName,
+            });
+        }
 
     }, [loadingOrderDraftList, isUpdateGuestDiscount])
 
@@ -333,8 +363,10 @@ const SellingAtStore = () => {
                         handleOrder={handleOrder}
                     />
                     <ListOrderDetail
-                        orderDetailList={orderDetailList}
+                        // orderDetailList={orderDetailList}
                         handleDelete={handleDeleteOrderDetail}
+                        order={order}
+                        isOrderDetailChange={isOrderDetailChange}
                     />
 
                     <ListProduct
@@ -354,8 +386,8 @@ const SellingAtStore = () => {
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
                         handlePay={handlePay}
-                        fetchListOrderDetail={fetchListOrderDetail}
-
+                        // fetchListOrderDetail={fetchListOrderDetail}
+                        isUpdateGuestDiscount={isUpdateGuestDiscount}
                     />
                 </Col>
             </Row>

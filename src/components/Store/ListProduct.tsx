@@ -104,7 +104,8 @@ const ListProduct: React.FC<ProductProps> = ({
     ]
     const handleSearch = (changedValues: Partial<SearchParams>) => {
         console.log('search');
-
+        console.log(changedValues);
+        
         setSearchParams((prevParams) => ({
             ...prevParams,
             ...changedValues,
@@ -118,13 +119,15 @@ const ListProduct: React.FC<ProductProps> = ({
 
     const fetchListProduct = async (params: SearchParams) => {
         const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
+        console.log('fetchListProduct '+ params.keyword);
+        
         const res = await getAllProductDetails({ pageable, ...params })
         setProducts([...res.data])
         setLoadingProducts(false)
     }
     useEffect(() => {
         fetchListProduct(searchParams);
-    }, [searchParams, pagination.current, isOrderSuccess])
+    }, [searchParams.keyword, pagination.current, isOrderSuccess])
     return (
         <>
             <Divider orientation="left">Danh sách sản phẩm</Divider>

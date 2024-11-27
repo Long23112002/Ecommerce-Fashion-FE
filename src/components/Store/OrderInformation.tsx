@@ -159,15 +159,15 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 {...layout}
                 name="control-hooks"
                 onFinish={onFinish}
-                // initialValues={{
+                initialValues={{
                 //     createdAt: order?.createdAt
                 //         ? new Date(order.createdAt).toLocaleDateString()
                 //         : "",
                 //     code: order?.code || "",
-                //     fullName: order?.fullName || "",
-                //     totalMoney: order?.totalMoney || 0,
+                    fullName: order?.fullName || "",
+                    totalMoney: order?.totalMoney || 0,
                 //     payAmount: order?.payAmount || ""
-                // }}
+                }}
             >
                 <div className="card text-white mb-3" style={{
                     marginLeft:'18px'
