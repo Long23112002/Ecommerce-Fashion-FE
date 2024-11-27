@@ -26,6 +26,7 @@ import { Brand } from "./brand"
 import { Category } from "./Category"
 import { Origin } from "./origin"
 import ProductDetail from "./ProductDetail"
+import { Promotion } from "./Promotion"
 import Review from "./Review"
 
 type Product = {
@@ -41,6 +42,7 @@ type Product = {
     material: Material,
     category: Category,
     rating: number,
-    reviews: Review[]
+    reviews: Review[],
+    promotion: Promotion
 }
 export default Product

@@ -1,10 +1,11 @@
-import { Box, Card, CardContent, CardMedia, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Chip, Skeleton, Stack, Typography } from '@mui/material';
 import React from 'react';
 import { useIsMobile } from '../../hook/useSize';
 import Product from '../../types/Product';
 import Link from '../Link';
 import ColorRadio from '../ColorRadio';
 import { Color } from '../../pages/Admin/Attributes/color/color';
+import { TypePromotionEnum } from '../../enum/TypePromotionEnum';
 
 interface IProps {
     product?: Product;
@@ -14,21 +15,53 @@ interface IProps {
 const ProductCard: React.FC<IProps> = ({ product, loading }) => {
     const isMobile = useIsMobile();
 
-    const renderPrice = (price: number) => (
-        <Typography
-            color="primary"
-            sx={{
-                fontWeight: 700,
-                fontSize: !isMobile ? '1.1rem' : '0.9rem',
-                mb: 1,
-            }}
-        >
-            {price.toLocaleString('vi-VN')}đ
-        </Typography>
-    );
+    const renderPrice = (currentPrice: number | null, priceBefore: number) => {
+        return (
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+            }}>
+                <Typography
+                    color="primary"
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: !isMobile ? '1rem' : '0.8rem',
+                        mb: 1,
+                    }}
+                >
+                    {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')}đ
+                </Typography>
+                {currentPrice &&
+                    <Typography
+                        color="textDisabled"
+                        sx={{
+                            fontWeight: 500,
+                            fontSize: !isMobile ? '0.9rem' : '0.8rem',
+                            mb: 1,
+                            textDecoration: 'line-through'
+                        }}
+                    >
+                        {priceBefore.toLocaleString('vi-VN')}đ
+                    </Typography>
+                }
+            </Box>
+        )
+    }
 
     const handlePrice = () => {
-        return renderPrice(product?.minPrice || 0);
+        const priceBefore = product?.minPrice || 0
+        let currentPrice = null
+        const promotion = product?.promotion
+        if (promotion) {
+            if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
+                currentPrice = priceBefore - ((priceBefore / 100) * promotion.value)
+            }
+            else {
+                currentPrice = priceBefore - (promotion.value)
+            }
+        }
+        return renderPrice(currentPrice, priceBefore);
     };
 
     const handleColor = (): Color[] => {
@@ -47,6 +80,16 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
             }
         }).filter(color => color !== null);
     };
+
+    const getPromotion = () => {
+        if (!product) return
+        const { promotion } = product
+        if (!promotion) return
+        if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
+            return `-${promotion.value}%`
+        }
+        return `-${promotion.value}đ`
+    }
 
     return (
         <>
@@ -81,7 +124,9 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
                                 },
                             }}
                         >
-                            <CardMedia sx={{ paddingTop: '120%' }} image={product.image} />
+                            <CardMedia sx={{ paddingTop: '120%', position: 'relative' }} image={product.image} >
+                                {product.promotion && <Chip label={getPromotion()} color="error" size='small' sx={{ position: 'absolute', top: 10, right: 10 }} />}
+                            </CardMedia>
                             <CardContent sx={{ flexGrow: 1, padding: '12px' }}>
                                 <Typography
                                     noWrap
