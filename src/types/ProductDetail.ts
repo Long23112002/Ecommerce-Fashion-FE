@@ -23,6 +23,7 @@ import { Color } from "../pages/Admin/Attributes/color/color"
 import { Size } from "../pages/Admin/Attributes/size/size"
 import File from "./File"
 import Product from "./Product"
+import { Promotion } from "./Promotion"
 import { User } from "./User"
 
 type ProductDetail = {
@@ -34,7 +35,7 @@ type ProductDetail = {
     createAt: Date,
     updateAt: Date | null,
     createBy: User,
-
+    promotion: Promotion,
     updateBy: User
     product: Product,
     size: Size,

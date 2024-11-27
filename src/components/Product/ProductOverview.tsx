@@ -22,6 +22,7 @@ import useCart from '../../hook/useCart'
 import { OrderDetailValue } from '../../types/Order'
 import Cookies from 'js-cookie'
 import { createOrder } from '../../api/OrderApi'
+import { TypePromotionEnum } from '../../enum/TypePromotionEnum'
 
 interface IProps {
     product: Product,
@@ -123,6 +124,51 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         return acc;
     }, []) || [];
 
+    const getPromotion = () => {
+        if (!selectedProductDetail) return
+        const { promotion } = selectedProductDetail
+        if (!promotion) return
+        if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
+            return `-${promotion.value}%`
+        }
+        return `-${promotion.value}đ`
+    }
+
+    const handlePrice = () => {
+        const priceBefore = product?.minPrice || 0
+        let currentPrice = null
+        const promotion = product?.promotion
+        if (promotion) {
+            if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
+                currentPrice = priceBefore - ((priceBefore / 100) * promotion.value)
+            }
+            else {
+                currentPrice = priceBefore - (promotion.value)
+            }
+        }
+        return renderPrice(currentPrice, priceBefore);
+    };
+
+    const renderPrice = (currentPrice: number | null, priceBefore: number) => {
+        return (
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                mt: 1
+            }}>
+                <Typography variant="h5" color="primary">
+                    {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
+                </Typography>
+                {currentPrice &&
+                    <Typography color="textDisabled" variant="h6" sx={{ mt: 1, textDecoration: 'line-through' }}>
+                        {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
+                    </Typography>
+                }
+            </Box>
+        )
+    }
+
     useEffect(() => {
         setSeletedProductDetail(productDetails[0])
         setColors(arrayColor);
@@ -166,9 +212,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
                 <Grid item xs={12} md={6}>
                     <Typography variant="h4" fontWeight="bold">{product.name}</Typography>
-                    <Typography variant="h5" color="primary" sx={{ mt: 1 }}>
-                        {selectedProductDetail?.price?.toLocaleString('vi-VN')} VNĐ
-                    </Typography>
+                    {handlePrice()}
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                         <Rating name="half-rating-read" value={product.rating} precision={0.5} readOnly />
