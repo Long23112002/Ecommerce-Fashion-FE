@@ -34,6 +34,21 @@ export interface SoldProductDetail {
     sold: number
 }
 
+export interface InventoryProduct {
+    id: number,
+    name: string,
+    quantity: number,
+    productDetails: InventoryProductDetail[]
+}
+
+export interface InventoryProductDetail {
+    id: number,
+    size: string,
+    color: string,
+    quantity: number
+}
+
+
 export interface RevenueRequest {
     day?: number | string;
     month: number | string;

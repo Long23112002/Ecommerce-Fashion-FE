@@ -41,6 +41,7 @@ export interface Order {
     note: string;
     createdAt: number;
     updatedAt: number;
+    successAt: number;
     orderDetails?: OrderDetail[];
     code: string;
     staffId: number;

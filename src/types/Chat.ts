@@ -1,6 +1,7 @@
 type Reply = {
     id?: string,
     content?: string,
+    image?: string,
     createBy?: number,
     createAt?: Date,
     nameCreateBy?: string
@@ -9,7 +10,8 @@ type Reply = {
 type Chat = {
     id?: string,
     idRoom?: string,
-    content?: string,
+    content?: string | null,
+    image?: string | null,
     seen?: boolean,
     createBy?: number,
     createAt?: Date,
