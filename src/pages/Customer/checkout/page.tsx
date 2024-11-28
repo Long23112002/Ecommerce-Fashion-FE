@@ -8,7 +8,6 @@ import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
 import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 import PaymentMethodEnum from '../../../enum/PaymentMethodEnum'
-import PaymentQRComponent from "./PaymentQRComponent";
 
 const CheckoutPage: React.FC = () => {
 
@@ -38,10 +37,12 @@ const CheckoutPage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true)
-    const id = Cookies.get('orderId')
-    if (!id) return
+    const json = Cookies.get('order')
+    if (!json) return
+    const order = JSON.parse(json)
+    if (!order.id) return
     const callGetOrderById = async () => {
-      const data = await getOrderById(id)
+      const data = await getOrderById(order.id)
       setOrder({ ...data })
     }
     callGetOrderById()

@@ -15,12 +15,12 @@ const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
 
     const handleSelectVoucher = async (discount: Discount) => {
         if (!discount.id || discount.id <= 0) return
-        const res = await updateDiscountOrder(discount.id)
+        const res = await updateDiscountOrder(order.id, discount.id)
         setOrder({ ...res })
     }
 
     const handleCancel = async () => {
-        const res = await updateDiscountOrder(null)
+        const res = await updateDiscountOrder(order.id, null)
         setOrder({ ...res })
     }
 

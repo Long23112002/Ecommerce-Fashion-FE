@@ -16,7 +16,7 @@ const { Title, Text } = Typography
     const location = useLocation();
     const [checkSum , setCheckSum] = useState(false)
     const { order, orderRequest } = location.state || {}
-     const {reload} = useCart();
+    //  const {reload} = useCart();
 
 
      console.log(order)
@@ -101,7 +101,7 @@ const { Title, Text } = Typography
              if (result === true) {
                  await payOrder(orderRequest);
                  toast.success("Đã thanh toán thành công");
-                 reload()
+                //  reload()
                  setCheckSum(true);
                  clearInterval(intervalId);
              }
