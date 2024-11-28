@@ -22,7 +22,7 @@ const useCart = () => {
 
     const getCartValues = async (): Promise<CartValues[]> => {
         const token = Cookies.get('accessToken')
-        if (token && (user.id || 0) > 0) {
+        if (token) {
             const res = await fetch(token)
             return res
         } else {
@@ -43,7 +43,7 @@ const useCart = () => {
 
     const reload = async () => {
         const cartValues = await getCartValues()
-        save(cartValues)
+        dispatch(setRedux(cartValues))
     }
 
     const save = async (value: CartValues[]) => {

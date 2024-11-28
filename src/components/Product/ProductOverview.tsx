@@ -23,6 +23,7 @@ import Order, { OrderDetailValue, OrderValue } from '../../types/Order'
 import Cookies from 'js-cookie'
 import { createOrder } from '../../api/OrderApi'
 import { TypePromotionEnum } from '../../enum/TypePromotionEnum'
+import { toast } from 'react-toastify'
 
 interface IProps {
     product: Product,
@@ -94,7 +95,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
     }
 
     const handleAddToCart = () => {
-        if (!selectedProductDetail?.id) return
+        if (!selectedProductDetail?.id || quantity <= 0) return
+        if (selectedProductDetail.quantity < quantity) {
+            toast.error('Số lượng vượt quá sản phẩm')
+            return
+        }
         const cartValues: CartValues = { productDetailId: selectedProductDetail.id, quantity: quantity }
         cart.addToCart(cartValues)
     }
