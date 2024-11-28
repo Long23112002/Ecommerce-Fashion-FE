@@ -19,7 +19,7 @@ import SizeButton from '../SizeButton'
 import ImageCarousel from './ImageCarousel'
 import { CartValues } from '../../types/Cart'
 import useCart from '../../hook/useCart'
-import { OrderDetailValue } from '../../types/Order'
+import Order, { OrderDetailValue, OrderValue } from '../../types/Order'
 import Cookies from 'js-cookie'
 import { createOrder } from '../../api/OrderApi'
 import { TypePromotionEnum } from '../../enum/TypePromotionEnum'
@@ -105,8 +105,17 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
             productDetailId: selectedProductDetail.id,
             quantity: quantity
         }]
-        const data = await createOrder(orderDetail);
-        Cookies.set('orderId', data.id, { expires: 1 / 6 })
+        const res: Order = await createOrder(orderDetail);
+        const data: OrderValue = {
+            id: res.id,
+            orderValues: res.orderDetails?.map(o => {
+                return {
+                    productDetailId: o.productDetail.id,
+                    quantity: o.quantity
+                }
+            }) || []
+        }
+        Cookies.set('order', JSON.stringify(data), { expires: 1 / 6 })
         navigate('/checkout')
     }
 

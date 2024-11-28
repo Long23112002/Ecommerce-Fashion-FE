@@ -60,6 +60,11 @@ export type OrderCreateRequest = {
     orderDetails: OrderDetailValue[]
 }
 
+export type OrderValue = {
+    id: number,
+    orderValues: OrderDetailValue[]
+}
+
 export type OrderDetailValue = {
     productDetailId: number,
     quantity: number

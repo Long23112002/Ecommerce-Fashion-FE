@@ -8,7 +8,7 @@ import District from '../../../types/District'
 import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 import Province from '../../../types/Province'
 import Ward from '../../../types/Ward'
-import { toast } from 'react-toastify'
+import useToast from '../../../hook/useToast'
 
 interface IProps {
   order: Order,
@@ -19,7 +19,7 @@ interface IProps {
 }
 
 const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading }) => {
-
+  const { catchToast } = useToast()
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(null)
@@ -121,18 +121,23 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
     if (order.status !== OrderStatus.DRAFT) return
     if (!selectedDistrict || !selectedProvince || !selectedWard) return
     const callUpdateAdressOrder = async () => {
-      setLoading(true)
-      const request: OrderAddressUpdate = {
-        provinceID: selectedProvince?.ProvinceID,
-        provinceName: selectedProvince?.ProvinceName,
-        districtID: selectedDistrict.DistrictID,
-        districtName: selectedDistrict.DistrictName,
-        wardCode: selectedWard.WardCode,
-        wardName: selectedWard.WardName
+      try {
+        setLoading(true)
+        const request: OrderAddressUpdate = {
+          provinceID: selectedProvince?.ProvinceID,
+          provinceName: selectedProvince?.ProvinceName,
+          districtID: selectedDistrict.DistrictID,
+          districtName: selectedDistrict.DistrictName,
+          wardCode: selectedWard.WardCode,
+          wardName: selectedWard.WardName
+        }
+        const data = await updateAdressOrder(order.id, request)
+        setOrder({ ...data })
+      } catch (error: any) {
+        catchToast(error)
+      } finally {
+        setLoading(false)
       }
-      const data = await updateAdressOrder(request)
-      setOrder({ ...data })
-      setLoading(false)
     }
     callUpdateAdressOrder()
   }, [selectedWard])
