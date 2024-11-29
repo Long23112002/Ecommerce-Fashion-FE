@@ -29,10 +29,11 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
             const response = await fetchAllPermission(params);
             const permissionOptions = response.data.map((perm: any) => {
                 return {
-                    label: perm.name,
+                    label: perm.description,
                     value: perm.id
                 };
             });
+            console.log(permissionOptions)
             setPermissions(permissionOptions);
         } catch (error) {
             console.error('Failed to fetch permissions', error);
