@@ -7,6 +7,7 @@ import axiosInstance from "./AxiosInstance.ts";
 export interface Permission {
     id: number;
     name: string;
+    description: string;
 }
 
 export interface PaginationParam {

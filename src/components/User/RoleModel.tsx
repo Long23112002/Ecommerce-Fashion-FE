@@ -27,10 +27,12 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
                 size: 2000,
             };
             const response = await fetchAllPermission(params);
-            const permissionOptions = response.data.map((perm: any) => ({
-                label: perm.name,
-                value: perm.id,
-            }));
+            const permissionOptions = response.data.map((perm: any) => {
+                return {
+                    label: perm.name,
+                    value: perm.id
+                };
+            });
             setPermissions(permissionOptions);
         } catch (error) {
             console.error('Failed to fetch permissions', error);
@@ -39,10 +41,11 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
         }
     };
 
-    console.log('permissions', searchValue);
 
     useEffect(() => {
-        loadPermissions();
+        loadPermissions().then(res => {
+            console.log(res);
+        });
     }, []);
 
     useEffect(() => {
@@ -51,6 +54,10 @@ const RoleModel: React.FC<RoleModelProps> = ({isModalOpen, handleOk, handleCance
                 name: role.description,
                 permissionIds: role.permissions.map((perm: any) => perm.id),
             });
+            console.log({
+                name: role.description,
+                permissionIds: role.permissions.map((perm: any) => perm.id),
+            })
         } else {
             form.resetFields();
         }

@@ -165,7 +165,7 @@ const ManagerRole = () => {
         },
         {
             title: 'Tên vai trò',
-            dataIndex: 'description',
+            dataIndex: 'name',
             key: 'name',
         },
         {

@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById, downloadOrderPdf } from "../../../api/OrderApi.ts";
+import { deleteOrder, fetchAllOrders, updateStateOrder, downloadOrderPdf } from "../../../api/OrderApi.ts";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/order.ts";
@@ -135,9 +135,9 @@ const ManagerOrder = () => {
         },
         {
             title: 'Tên người dùng',
-            dataIndex: 'user',
-            key: 'user',
-            render: (user) => user.fullName,
+            dataIndex: 'fullName',
+            key: 'fullName',
+            render: (fullName) => fullName|| 'khách lẻ',
         },
         {
             title: 'Trạng thái',
