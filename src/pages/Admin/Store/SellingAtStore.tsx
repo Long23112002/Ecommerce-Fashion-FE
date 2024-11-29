@@ -2,7 +2,7 @@ import { Button, Col, Form, Row } from "antd";
 import OrderInformation from "../../../components/Store/OrderInformation"
 import { fetchAllVouchers } from "../../../api/VoucherApi";
 import { useCallback, useEffect, useState } from "react";
-import { debounce } from "lodash";
+import { debounce, truncate } from "lodash";
 import { Voucher } from "../../../types/voucher";
 import { User } from "../../../types/User";
 import ListProduct from "../../../components/Store/ListProduct";
@@ -104,7 +104,30 @@ const SellingAtStore = () => {
     const handleAddQuantityCancel = () => {
         setIsOpenModalAddQuantity(false);
     };
+    const handleDeleteOrderDetail2 = async (orderDetailId: number) => {
+        try {
+            const token = Cookies.get("accessToken");
+            if (token) {
+                await deleteOrderDetail(orderDetailId, token);
+                toast.success("Xóa sản phẩm thành công");
 
+                // Lấy thông tin hóa đơn mới từ API
+                const updatedOrder = await getOrderById(order?.id, token); // API lấy hóa đơn mới
+
+                // Cập nhật trạng thái hóa đơn và làm mới form
+                setOrder(updatedOrder);
+                formOrder.setFieldsValue({
+                    totalMoney: updatedOrder.totalMoney, // Cập nhật tổng tiền
+                });
+
+                setIsOrderDetailChange(false)
+            } else {
+                toast.error("Xác thực thất bại");
+            }
+        } catch (error) {
+            toast.error(getErrorMessage(error))
+        }
+    }
     const handleAddQuantityOk = async () => {
         const idOrder = order?.id;
         if (idOrder == null) {
@@ -122,16 +145,16 @@ const SellingAtStore = () => {
 
                     // setIsOrderDetailChange(true)
                     toast.success('Thêm sản phẩm Thành Công');
-                    handleAddQuantityCancel()
-                    formOrder.setFieldsValue({
-                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
-                        code: response.code,
-                        createdAt: response.createdAt
-                            ? new Date(response.createdAt).toLocaleDateString()
-                            : "",
-                        quantity: response.quantity,
+                    // handleAddQuantityCancel()
+                    // formOrder.setFieldsValue({
+                    //     totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                    //     code: response.code,
+                    //     createdAt: response.createdAt
+                    //         ? new Date(response.createdAt).toLocaleDateString()
+                    //         : "",
+                    //     quantity: response.quantity,
 
-                    });
+                    // });
                     // setIsOrderDetailChange(false)
 
                 } else {
@@ -149,14 +172,14 @@ const SellingAtStore = () => {
             formOrder.setFieldsValue({
                 createdAt: order.createdAt,
                 code: order.code,
-                idVoucher: order.discountId,
+                // idVoucher: order.discountId,
                 totalMoney: order.totalMoney
             })
         } else {
             formOrder.setFieldsValue({
                 createdAt: "",
                 code: "",
-                idVoucher: "",
+                // idVoucher: "",
                 totalMoney: "",
                 fullName: ""
             })
@@ -214,7 +237,7 @@ const SellingAtStore = () => {
                 await updateOrderSuccess(order.id);
                 toast.success("Thanh toán hóa đơn thành công");
 
-                setOrder(null);
+                setIsOrderDetailChange(true);
                 formOrder.resetFields();
 
                 fetchListOrderDraft();

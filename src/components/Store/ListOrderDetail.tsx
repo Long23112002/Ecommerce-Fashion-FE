@@ -43,7 +43,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             fetchListOrderDetail(order);
         }
         // fetchListOrderDetail(order)
-    }, [order])
+    }, [order, isOrderDetailChange])
 
     const columns = [
         {
