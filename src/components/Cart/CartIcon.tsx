@@ -8,19 +8,11 @@ import { useUserAction } from '../../hook/useUserAction';
 
 const CartIcon: React.FC = () => {
     const navigate = useNavigate()
-    const { modifyCart, totalCart } = useCart()
+    const { total, reload } = useCart()
     const user = useUserAction().get()
     useEffect(() => {
-        const token = Cookies.get('accessToken')
-        if (!token) return
-
-        const fetchCart = async () => {
-            const res = await fetchCartByUserId(token)
-            modifyCart(res)
-        }
-        fetchCart()
+        reload()
     }, [user])
-
 
     return (
         <>
@@ -48,13 +40,13 @@ const CartIcon: React.FC = () => {
                         backgroundColor: 'red',
                         color: 'white',
                         borderRadius: '50%',
-                        display: totalCart ? 'flex' : 'none',
+                        display: total ? 'flex' : 'none',
                         justifyContent: 'center',
                         alignItems: 'center',
                         fontSize: 12,
                     }}
                 >
-                    {totalCart}
+                    {total}
                 </Box>
             </IconButton>
         </>

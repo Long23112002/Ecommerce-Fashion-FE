@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, TextField, Typography } from '@mui/material'
 import { Client } from '@stomp/stompjs'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import { useSelector } from 'react-redux'
 import { userSelector } from '../../redux/reducers/UserReducer'
@@ -20,26 +20,32 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom, reply, setReply }) => {
     const [content, setContent] = useState<string>('')
     const [fileImages, setFileImages] = useState<File[]>([])
     const [previewImages, setPreviewImages] = useState<string[]>([])
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const randomNumber = () => {
         return Math.floor(Math.random() * 1000000000)
     }
 
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     const sendMessage = async (content: string) => {
         if (fileImages.length > 0) {
-            const images = await uploadMutiImage(fileImages, randomNumber(), 'CHAT')
+            let c = 1;
+            const images = await uploadMutiImage(fileImages, randomNumber(), 'CHAT');
             for (const image of images) {
                 await publish(null, image);
+                await sleep(100)
             }
         }
         if (content.trim().length > 0) {
-            await publish(content, null)
+            await publish(content, null);
         }
     };
 
+
     const publish = async (content: string | null, image: string | null) => {
         if (!idRoom || !client || !client.connected) return
-        await client.publish({
+        client.publish({
             destination: `/app/chat.sendMessage/${idRoom}`,
             body: JSON.stringify({
                 idRoom: idRoom,
@@ -62,6 +68,9 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom, reply, setReply }) => {
         const files = e.target.files
         if (files?.length) {
             setFileImages([...files])
+        }
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     }
 
@@ -181,7 +190,7 @@ const ChatInput: React.FC<IProps> = ({ client, idRoom, reply, setReply }) => {
                     tabIndex={-1}
                 >
                     <i className="fa-solid fa-camera fs-4" style={{ color: '#464646' }} />
-                    <input type="file" accept="image/*" multiple onChange={handleImage} style={{ display: 'none' }} />
+                    <input type="file" accept="image/*" multiple onChange={handleImage} style={{ display: 'none' }} ref={fileInputRef} />
                 </IconButton>
                 <Button variant="text"
                     onClick={handleSend}

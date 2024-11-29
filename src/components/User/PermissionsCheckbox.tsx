@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Collapse, Popover, Spin } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { fetchAllPermission } from "../../api/PermissionApi.ts";
+import { fetchAllGroupPermission } from "../../api/PermissionApi.ts";
 
 interface Permission {
     id: number;
@@ -32,7 +32,7 @@ const PermissionsCheckbox: React.FC<PermissionsCheckboxProps> = ({ permissionGro
         setLoading(true);
         try {
             const params = { page, size: 2000 };
-            const response = await fetchAllPermission(params);
+            const response = await fetchAllGroupPermission(params);
 
             if (response && response.data && Array.isArray(response.data)) {
                 setVisiblePermissionGroups(prev => {

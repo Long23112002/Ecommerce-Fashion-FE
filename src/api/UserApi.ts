@@ -73,7 +73,9 @@ export const createUser = async (user: {
     birth: Date;
     avatar: null;
     email: string
+    isCheck: boolean
 }): Promise<ResponseData> => {
+    // eslint-disable-next-line no-useless-catch
     try {
         const url = `${BASE_API}/api/v1/user`;
         const response = await axiosInstance.post(url, user);

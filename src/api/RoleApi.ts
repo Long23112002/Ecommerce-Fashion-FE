@@ -79,9 +79,10 @@ export const updateRole = async (roleId: number, role: RoleRequest, token: strin
             ? `ROLE_${role.name.slice(5).toUpperCase()}`
             : `ROLE_${role.name.toUpperCase()}`;
 
-        const modifiedRole: RoleRequest = {
+        const modifiedRole = {
             name: roleNameWithPrefix,
-            permissionIds: role.permissionIds
+            permissionIds: role.permissionIds,
+            description: role.name
         };
 
         const auth = {
