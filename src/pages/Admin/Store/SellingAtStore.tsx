@@ -120,7 +120,7 @@ const SellingAtStore = () => {
                     const response = await getOrderById(order?.id, token); // API lấy hóa đơn mới
                     setOrder(response);
 
-                    setIsOrderDetailChange(false)
+                    // setIsOrderDetailChange(true)
                     toast.success('Thêm sản phẩm Thành Công');
                     handleAddQuantityCancel()
                     formOrder.setFieldsValue({
@@ -129,8 +129,10 @@ const SellingAtStore = () => {
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
                             : "",
+                        quantity: response.quantity,
 
                     });
+                    // setIsOrderDetailChange(false)
 
                 } else {
                     toast.error("Authorization failed");
@@ -224,8 +226,34 @@ const SellingAtStore = () => {
         } catch (error) {
             toast.error(getErrorMessage(error))
         }
-
     }
+
+    const onChangeQuantity = async (value: number, record: any) => {
+        console.log(value);
+        console.log(record.price * value);
+        console.log(record.productDetail.id);
+        // const idOrder = order?.id;
+        // const idProductDetail = record.productDetail.id;
+        // const quantity = value;
+        // try {
+        //     if (order) {
+        //         await addProductToOrderDetail({ idOrder, idProductDetail, quantity });
+        //         const response = await getOrderById(order?.id);
+        //         setOrder(response);
+        //         setIsOrderDetailChange(true)
+        //         handleAddQuantityCancel()
+        //         formOrder.setFieldsValue({
+        //             totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+        //             code: response.code,
+        //             createdAt: response.createdAt
+        //                 ? new Date(response.createdAt).toLocaleDateString()
+        //                 : "",
+        //         });
+        //     }
+        // } catch (error: any) {
+        //     toast.error(getErrorMessage(error))
+        // }
+    };
 
     const chooseThisGuest = (idGuest: number) => {
         setCurrentGuestId(idGuest);
@@ -322,12 +350,14 @@ const SellingAtStore = () => {
     };
 
     const handleDecreaseQuantity = (id: number) => {
-        const updatedList = orderDetailList.map((item) =>
-            item.id === id && item.quantity > 1
-                ? { ...item, quantity: item.quantity - 1 }
-                : item
-        );
-        setOrderDetailList(updatedList);
+        // const updatedList = orderDetailList.map((item) =>
+        //     item.id === id && item.quantity > 1
+        //         ? { ...item, quantity: item.quantity - 1 }
+        //         : item
+        // );
+        // setOrderDetailList(updatedList);
+        console.log('handleDecreaseQuantity');
+
     };
 
 
@@ -356,8 +386,12 @@ const SellingAtStore = () => {
                 <i className="fa-solid fa-circle-plus"></i>
                 Tạo hóa đơn
             </Button>
-            <Row>
-                <Col flex={1}>
+            <Row style={{ height: "100%", display: "flex" }}>
+                <Col style={{
+                    flex: 1, 
+                    marginRight: "20px", 
+                    overflow: "auto", 
+                }}>
                     <ListOrderDraft
                         orderPendingList={orderDraftList}
                         handleOrder={handleOrder}
@@ -367,6 +401,7 @@ const SellingAtStore = () => {
                         handleDelete={handleDeleteOrderDetail}
                         order={order}
                         isOrderDetailChange={isOrderDetailChange}
+                        onChange={onChangeQuantity}
                     />
 
                     <ListProduct
@@ -377,7 +412,16 @@ const SellingAtStore = () => {
                         isOrderSuccess={isOrderSuccess} />
                 </Col>
 
-                <Col flex={1}>
+                <Col style={{
+                    width: "320px", 
+                    maxHeight: "calc(100vh - 40px)",
+                    overflowY: "auto",
+                    // border: "1px solid black",
+                    padding: "15px",
+                    borderRadius: "8px",
+                    backgroundColor: "white",
+                    zIndex: 1000,
+                }}>
                     <OrderInformation
                         order={order}
                         form={formOrder}

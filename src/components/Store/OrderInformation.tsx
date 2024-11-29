@@ -173,7 +173,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     marginLeft:'18px'
                 }}>
                     <div className="card-body">
-                        <h5 className="card-title text-center text-dark mb-4">Quét QR Sản Phẩm</h5>
+                        <h5 className="card-title text-center text-dark mb-2">Quét QR Sản Phẩm</h5>
 
                         <div className="position-relative">
                             <QrReader

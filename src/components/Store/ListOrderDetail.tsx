@@ -10,22 +10,16 @@ import { getOrderDetailByIdOrder } from '../../api/StoreApi';
 interface ListOrderDetailProps {
     // orderDetailList: OrderDetail[];
     handleDelete: (e: any) => void;
-    handleDecreaseQuantity: (e: any) => void;
-    handleQuantityChange: (e: any) => void;
-    handleIncreaseQuantity: (e: any) => void;
+    onChange: (value: any, e: any) => void;
     order: Order | null;
     isOrderDetailChange: boolean;
-    sizeOrder: number;
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     // orderDetailList,
     handleDelete,
-    handleDecreaseQuantity,
-    handleQuantityChange,
-    handleIncreaseQuantity,
+    onChange,
     order,
     isOrderDetailChange,
-    sizeOrder
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -45,8 +39,11 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     }
 
     useEffect(() => {
-        fetchListOrderDetail(order)
-    }, [isOrderDetailChange, sizeOrder])
+        if (order) {
+            fetchListOrderDetail(order);
+        }
+        // fetchListOrderDetail(order)
+    }, [order])
 
     const columns = [
         {
@@ -103,13 +100,13 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             key: 'quantity',
             render: (quantity: number, record: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Button onClick={() => handleDecreaseQuantity(record.id)}>-</Button>
                     <InputNumber
+                        size="small"
                         min={1}
+                        max={record.productDetail.quantity}
                         value={quantity}
-                        onChange={(value) => handleQuantityChange(value, record.id)}
+                        onChange={(value) => onChange(value, record)}
                     />
-                    <Button onClick={() => handleIncreaseQuantity(record.id)}>+</Button>
                 </div>
             ),
         },
@@ -141,17 +138,24 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     return (
         <>
             <Divider orientation="left">Danh sách hóa đơn chi tiết</Divider>
-            <Table
-                dataSource={orderDetailList}
-                columns={columns}
-                // loading={{
-                //     spinning: loading,
-                //     indicator: <LoadingCustom />,
-                // }}
-                rowKey="id"
-                // pagination={createPaginationConfig(pagination, setPagination)}
-                expandable={{ childrenColumnName: 'children' }}
-            />
+            {orderDetailList.length === 0 ? (
+                <Table
+                    columns={columns}
+                    rowKey="id"
+                    expandable={{ childrenColumnName: 'children' }}
+                />
+            ) :
+                <Table
+                    dataSource={orderDetailList}
+                    columns={columns}
+                    // loading={{
+                    //     spinning: loading,
+                    //     indicator: <LoadingCustom />,
+                    // }}
+                    rowKey="id"
+                    // pagination={createPaginationConfig(pagination, setPagination)}
+                    expandable={{ childrenColumnName: 'children' }}
+                />}
         </>
     )
 }
