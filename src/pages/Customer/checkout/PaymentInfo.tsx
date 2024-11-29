@@ -26,7 +26,7 @@ interface IProps {
 const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
   const navigate = useNavigate()
   const { setLoadingScreen } = useLoadingScreen();
-  const {reload} = useCart();
+  const { removeItemAfterOrder } = useCart();
 
   const isValidPaymentMethod = (value: string): boolean => {
     return Object.values(PaymentMethodEnum).includes(value as PaymentMethodEnum);
@@ -60,7 +60,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
   };
 
   const handleVNPayPayment = async () => {
-    const data = await payOrder(orderRequest)
+    const data = await payOrder(order.id, orderRequest)
     if (data) {
       window.location.assign(data)
     }
@@ -68,10 +68,10 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
 
   const handleCashPayment = async () => {
     setLoadingScreen(true)
-    // await payOrder(orderRequest)
-    reload()
+    await payOrder(order.id, orderRequest)
+    removeItemAfterOrder()
     setLoadingScreen(false)
-    // toast.success("Đặt hàng thành công")
+    toast.success("Đặt hàng thành công")
     navigate("/checkout/qr", { state: { order, orderRequest } });
   }
 

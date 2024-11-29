@@ -3,7 +3,7 @@ import { BASE_API } from '../constants/BaseApi';
 import axiosInstance from './AxiosInstance';
 import { jwtDecode } from 'jwt-decode';
 import { ResponseData } from "../types/responseApi.ts";
-import { CartRequest } from '../types/Cart.ts';
+import { CartRequest, CartValues } from '../types/Cart.ts';
 
 const CART_API_URL = `${BASE_API}/api/v1/carts`;
 
@@ -45,12 +45,37 @@ export const createCart = async (cartData: { items: any[] }) => {
 };
 
 // Update existing cart
-export const updateCart = async (req: CartRequest, token: string) => {
-    const config = {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-    };
+export const updateCart = async (req: CartRequest) => {
     try {
-        const response = await axiosInstance.put(CART_API_URL, req, config);
+        const response = await axiosInstance.put(CART_API_URL, req);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating cart", error);
+        throw error;
+    }
+};
+
+export const validCart = async (req: CartValues[]) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `${CART_API_URL}/valid`,
+            data: req
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating cart", error);
+        throw error;
+    }
+};
+
+export const getCartValueInfos = async (req: CartValues[]) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `${CART_API_URL}/info`,
+            data: req,
+        });
         return response.data;
     } catch (error) {
         console.error("Error updating cart", error);

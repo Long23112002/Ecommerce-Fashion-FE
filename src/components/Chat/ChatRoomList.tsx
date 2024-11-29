@@ -88,6 +88,7 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
 
   const handleDelete = async (id: string) => {
     await callDeleteRoomById(id)
+    await fetchFindAllChatRoom()
   }
 
   useEffect(() => {
