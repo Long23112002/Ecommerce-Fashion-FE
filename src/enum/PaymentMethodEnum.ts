@@ -1,6 +1,6 @@
 enum PaymentMethodEnum {
     VNPAY = 'VNPAY',
-    BANK_TRANSFER = 'BANK_TRANSFER',
+    VIET_QR = 'VIET_QR',
     CASH = 'CASH'
 }
 export default PaymentMethodEnum

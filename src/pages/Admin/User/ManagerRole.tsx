@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {createRole, deleteRole, fetchAllRole, getRoleById, updateRole} from "../../../api/RoleApi.ts";
 import {Button, Form, Popconfirm, Table, Tooltip} from 'antd';
 import PermissionsCheckbox, {PermissionGroup} from "../../../components/User/PermissionsCheckbox.tsx";
-import {assignPermissionToRole, fetchAllPermission} from "../../../api/PermissionApi.ts";
+import {assignPermissionToRole, fetchAllGroupPermission} from "../../../api/PermissionApi.ts";
 import createPaginationConfig, {PaginationState} from "../../../config/paginationConfig.ts";
 import {Role} from "../../../types/role.ts";
 import RoleModel from "../../../components/User/RoleModel.tsx";
@@ -39,7 +39,7 @@ const ManagerRole = () => {
     const fetchPermissions = async () => {
         try {
             const params = {page: 0, size: 2000};
-            const response = await fetchAllPermission(params);
+            const response = await fetchAllGroupPermission(params);
             setPermissions(response.data);
         } catch (error) {
             console.error("Error fetching permissions:", error);
