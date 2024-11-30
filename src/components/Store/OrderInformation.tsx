@@ -11,9 +11,6 @@ import {toast} from "react-toastify";
 import {getOrderById} from "../../api/OrderApi";
 
 interface OrderInformationProps {
-    // onFill: () => void;
-    vouchers: Voucher[];
-    // users: User[];
     form: FormInstance;
     showModalUser: (e: any) => void;
     order: Order | null;
@@ -45,8 +42,6 @@ const onFinish = (values: any) => {
 
 const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
-    vouchers,
-    // users,
     showModalUser,
     order,
     handleCancel,
@@ -267,11 +262,6 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                         allowClear
 
                     >
-                        {vouchers.map(voucher => (
-                            <Select.Option key={voucher.id} value={voucher.id}>
-                                {voucher.code}
-                            </Select.Option>
-                        ))}
                     </Select>
                 </Form.Item>
 

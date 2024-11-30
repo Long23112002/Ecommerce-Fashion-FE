@@ -287,12 +287,12 @@ const ProductManager = () => {
     }
   };
 
-  const handlePopupScrollOrigin = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 50 && !loading) {
-      setPageOrigin((prevPage) => prevPage + 1);
-    }
-  };
+  // const handlePopupScrollOrigin = (e: React.UIEvent<HTMLDivElement>) => {
+  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  //   if (scrollHeight - scrollTop <= clientHeight + 50 && !loading) {
+  //     setPageOrigin((prevPage) => prevPage + 1);
+  //   }
+  // };
 
   const fetchDropDownBrand = async () => {
     setIsBrandLoading(true);
@@ -345,12 +345,12 @@ const ProductManager = () => {
     }
   };
 
-  const handlePopupScrollCategory = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 50 && !loading) {
-      setPageCategory((prevPage) => prevPage + 1);
-    }
-  };
+  // const handlePopupScrollCategory = (e: React.UIEvent<HTMLDivElement>) => {
+  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  //   if (scrollHeight - scrollTop <= clientHeight + 50 && !loading) {
+  //     setPageCategory((prevPage) => prevPage + 1);
+  //   }
+  // };
 
   const navigate = useNavigate();
 
@@ -363,7 +363,7 @@ const ProductManager = () => {
   }
 
   const fetchProductsDebounced = useCallback(debounce(async (current: number, pageSize: number, keyword: string,
-    idOrigin: number, idBrand: number, idMaterial: number, idCategory: number,
+    idOrigin: number, idBrand: number, idMaterial: number, idCategory: number, allowEmpty
   ) => {
     setLoading(true);
     try {
@@ -658,7 +658,7 @@ const ProductManager = () => {
           <Select
             placeholder="Chọn nguồn gốc"
             allowClear
-            onPopupScroll={handlePopupScrollOrigin}
+            // onPopupScroll={handlePopupScrollOrigin}
             loading={isOriginLoading}
             dropdownRender={(menu) => (
               <>
@@ -736,7 +736,7 @@ const ProductManager = () => {
           <Select
             placeholder="Chọn danh mục"
             allowClear
-            onPopupScroll={handlePopupScrollCategory} // Gọi khi cuộn trong dropdown
+            // onPopupScroll={handlePopupScrollCategory} // Gọi khi cuộn trong dropdown
             loading={isCategoryLoading} // Hiển thị trạng thái loading trong select
             dropdownRender={(menu) => (
               <>

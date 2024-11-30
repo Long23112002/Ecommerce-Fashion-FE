@@ -14,7 +14,7 @@ import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
 import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 import Order from "../../../types/Order";
-import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderAtStore, updateOrderSuccess } from "../../../api/StoreApi";
+import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, exportOrder, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderAtStore, updateOrderSuccess } from "../../../api/StoreApi";
 import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
@@ -57,6 +57,7 @@ const SellingAtStore = () => {
     const [order, setOrder] = useState<Order | null>(null);
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [isOrderDetailChange, setIsOrderDetailChange] = useState(false);
+    const [isPay, setIsPay] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
@@ -82,20 +83,6 @@ const SellingAtStore = () => {
         }));
     };
 
-
-    const fetchVouchersDebounced = useCallback(
-        debounce(async () => {
-            setLoadingVouchers(true);
-            try {
-                const response = await fetchAllVouchers();
-                setVouchers(response.data);
-            } catch (error) {
-                console.error("Error fetching vouchers:", error);
-            } finally {
-                setLoadingVouchers(false);
-            }
-        }, 500), []);
-
     const showAddQuantityModal = (idProductDetail: number) => {
         formAddQuantity.resetFields();
         setCurrentProductDetailId(idProductDetail);
@@ -104,30 +91,6 @@ const SellingAtStore = () => {
     const handleAddQuantityCancel = () => {
         setIsOpenModalAddQuantity(false);
     };
-    const handleDeleteOrderDetail2 = async (orderDetailId: number) => {
-        try {
-            const token = Cookies.get("accessToken");
-            if (token) {
-                await deleteOrderDetail(orderDetailId, token);
-                toast.success("Xóa sản phẩm thành công");
-
-                // Lấy thông tin hóa đơn mới từ API
-                const updatedOrder = await getOrderById(order?.id, token); // API lấy hóa đơn mới
-
-                // Cập nhật trạng thái hóa đơn và làm mới form
-                setOrder(updatedOrder);
-                formOrder.setFieldsValue({
-                    totalMoney: updatedOrder.totalMoney, // Cập nhật tổng tiền
-                });
-
-                setIsOrderDetailChange(false)
-            } else {
-                toast.error("Xác thực thất bại");
-            }
-        } catch (error) {
-            toast.error(getErrorMessage(error))
-        }
-    }
     const handleAddQuantityOk = async () => {
         const idOrder = order?.id;
         if (idOrder == null) {
@@ -145,16 +108,10 @@ const SellingAtStore = () => {
 
                     // setIsOrderDetailChange(true)
                     toast.success('Thêm sản phẩm Thành Công');
-                    // handleAddQuantityCancel()
-                    // formOrder.setFieldsValue({
-                    //     totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
-                    //     code: response.code,
-                    //     createdAt: response.createdAt
-                    //         ? new Date(response.createdAt).toLocaleDateString()
-                    //         : "",
-                    //     quantity: response.quantity,
-
-                    // });
+                    handleAddQuantityCancel()
+                    formOrder.setFieldsValue({
+                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                    });
                     // setIsOrderDetailChange(false)
 
                 } else {
@@ -195,7 +152,6 @@ const SellingAtStore = () => {
 
                 formInfor(null)
                 fetchListOrderDraft()
-                setVouchers([]);
                 // fetchListOrderDetail(null)
                 setOrder(null)
             } else {
@@ -210,18 +166,13 @@ const SellingAtStore = () => {
         try {
             const token = Cookies.get("accessToken");
             if (token) {
-                await deleteOrderDetail(orderDetailId, token);
+                const res = await deleteOrderDetail(orderDetailId, token);
                 toast.success("Xóa sản phẩm thành công");
 
-                // Lấy thông tin hóa đơn mới từ API
-                const updatedOrder = await getOrderById(order?.id, token); // API lấy hóa đơn mới
-
-                // Cập nhật trạng thái hóa đơn và làm mới form
-                setOrder(updatedOrder);
+                setOrder(res);
                 formOrder.setFieldsValue({
-                    totalMoney: updatedOrder.totalMoney, // Cập nhật tổng tiền
+                    totalMoney: res?.totalMoney ? formatCurrency(res.totalMoney) : "0",
                 });
-
                 setIsOrderDetailChange(false)
             } else {
                 toast.error("Xác thực thất bại");
@@ -237,12 +188,31 @@ const SellingAtStore = () => {
                 await updateOrderSuccess(order.id);
                 toast.success("Thanh toán hóa đơn thành công");
 
-                setIsOrderDetailChange(true);
                 formOrder.resetFields();
+                formOrder.setFieldsValue({
+                    totalMoney: "0 " + "đ",
+                    fullName: "Khách lẻ"
+                });
 
                 fetchListOrderDraft();
-                setOrderDetailList([])
+                setIsPay(true);
                 setIsOrderSuccess(true);
+                // setIsOrderDetailChange(true);
+                // const response = await exportOrder(order.id);
+                // // Process the byte[] response
+                // const blob = new Blob([response.data], { type: 'application/pdf' });
+                // const fileURL = URL.createObjectURL(blob);
+
+                // // Trigger the download
+                // const link = document.createElement('a');
+                // link.href = fileURL;
+                // link.download = `Invoice_${order.id}.pdf`; // Set the filename
+                // document.body.appendChild(link);
+                // link.click();
+
+                // // Clean up
+                // document.body.removeChild(link);
+                // URL.revokeObjectURL(fileURL);
             } else {
                 toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
             }
@@ -352,7 +322,6 @@ const SellingAtStore = () => {
         });
         formOrder.setFieldsValue(order)
         // fetchListOrderDetail(order)
-        fetchVouchersDebounced()
         setIsOrderDetailChange(true)
     }
 
@@ -411,9 +380,9 @@ const SellingAtStore = () => {
             </Button>
             <Row style={{ height: "100%", display: "flex" }}>
                 <Col style={{
-                    flex: 1, 
-                    marginRight: "20px", 
-                    overflow: "auto", 
+                    flex: 1,
+                    marginRight: "20px",
+                    overflow: "auto",
                 }}>
                     <ListOrderDraft
                         orderPendingList={orderDraftList}
@@ -425,6 +394,7 @@ const SellingAtStore = () => {
                         order={order}
                         isOrderDetailChange={isOrderDetailChange}
                         onChange={onChangeQuantity}
+                        isPay={isPay}
                     />
 
                     <ListProduct
@@ -436,7 +406,7 @@ const SellingAtStore = () => {
                 </Col>
 
                 <Col style={{
-                    width: "320px", 
+                    width: "320px",
                     maxHeight: "calc(100vh - 40px)",
                     overflowY: "auto",
                     // border: "1px solid black",
@@ -448,8 +418,6 @@ const SellingAtStore = () => {
                     <OrderInformation
                         order={order}
                         form={formOrder}
-                        vouchers={vouchers}
-                        // users={users}
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
                         handlePay={handlePay}

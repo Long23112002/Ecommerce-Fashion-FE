@@ -60,7 +60,8 @@ export const fetchAllProducts = async (
     idOrigin?: number,
     idBrand?: number,
     idMaterial?: number,
-    idCategory?: number) => {
+    idCategory?: number,
+    allowEmpty?: boolean) => {
     const params = {
         size: pageSize,
         page: page,
@@ -69,6 +70,7 @@ export const fetchAllProducts = async (
         idBrand: idBrand || '',
         idMaterial: idMaterial || '',
         idCategory: idCategory || '',
+        allowEmpty: true,
     };
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}`, { params });

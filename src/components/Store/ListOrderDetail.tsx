@@ -13,6 +13,7 @@ interface ListOrderDetailProps {
     onChange: (value: any, e: any) => void;
     order: Order | null;
     isOrderDetailChange: boolean;
+    isPay: boolean;
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     // orderDetailList,
@@ -20,6 +21,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     onChange,
     order,
     isOrderDetailChange,
+    isPay
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -42,7 +44,6 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         if (order) {
             fetchListOrderDetail(order);
         }
-        // fetchListOrderDetail(order)
     }, [order, isOrderDetailChange])
 
     const columns = [
@@ -138,7 +139,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     return (
         <>
             <Divider orientation="left">Danh sách hóa đơn chi tiết</Divider>
-            {orderDetailList.length === 0 ? (
+            {isPay === true ? (
                 <Table
                     columns={columns}
                     rowKey="id"

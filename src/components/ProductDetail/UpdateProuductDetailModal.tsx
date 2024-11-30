@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Material } from "../../pages/Admin/Attributes/material/material";
 import { Brand } from "../../types/brand";
 import { Category } from "../../types/Category";
@@ -9,6 +9,7 @@ import { Color } from "../../pages/Admin/Attributes/color/color";
 import ProductDetail from "../../types/ProductDetail";
 import Product from "../../types/Product";
 import { Typography } from "@mui/material";
+import { UploadOutlined } from "@ant-design/icons";
 
 interface UpdateProductDetailModalProps {
     isModalOpen: boolean;
@@ -32,8 +33,10 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
     sizes,
     colors,
     products,
-    fileList
+    fileList: initialFileList
 }) => {
+    const [fileList, setFileList] = useState<UploadFile[]>(initialFileList);
+
     useEffect(() => {
         if (productDetail) {
             form.setFieldsValue({
@@ -42,8 +45,18 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                fileList: productDetail.images
+                image: productDetail.images ? [{ url: productDetail.images }] : [],
             });
+            // setFileList(
+            //     productDetail.images
+            //       ? JSON.parse(productDetail.images).map((image: { url: string }, index: number) => ({
+            //           url: image.url,
+            //           uid: `${index}`, 
+            //           name: `Image ${index + 1}`, 
+            //           status: 'done', 
+            //         }))
+            //       : []
+            //   );
         }
     }, [productDetail, form])
 
@@ -51,11 +64,28 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         form.validateFields()
             .then((values: any) => {
                 console.log('Form values:', values);
-                handleOk(values);  // Gọi hàm xử lý với dữ liệu từ form
+                handleOk(values);  
             })
             .catch((errorInfo: any) => {
                 console.error('Validation failed:', errorInfo);
             });
+    };
+
+    const handleUploadChange = (info: any) => {
+        let updatedFileList = [...info.fileList];
+
+        // Only keep successfully uploaded files
+        updatedFileList = updatedFileList.map(file => {
+            if (file.response) {
+                return {
+                    ...file,
+                    url: file.response.url,
+                };
+            }
+            return file;
+        });
+
+        setFileList(updatedFileList);
     };
 
     return (
@@ -75,35 +105,21 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         >
             <Form form={form} layout="vertical"
             >
-                <Form.Item label='Danh sách ảnh:' name="images">
-                    {/* <Image.PreviewGroup>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {productDetail.images.map((image, index) => (
-                <Image
-                  key={index}
-                  width={80}
-                  src={image.url}
-                  alt={`Product Image ${index + 1}`}
-                  style={{ borderRadius: '5px', cursor: 'pointer' }}
-                />
-              )
-              )}
-            </div>
-          </Image.PreviewGroup> */}
-                    {/* <Upload
+                 <Form.Item label="Danh sách ảnh:" name="images">
+                    <Upload
                         listType="picture-card"
-                        fileList={productDetail.images.map((image) => ({
-                            uid: image.url,
-                            name: image.url,
-                            status: 'done',
-                            url: image.url,
-                        }))}
-                        // onRemove={onRemove}
+                        fileList={fileList}
+                        onChange={handleUploadChange}
+                        action="/upload"
                         showUploadList={{
                             showPreviewIcon: true,
                             showRemoveIcon: true,
                         }}
-                    /> */}
+                    >
+                        {fileList.length < 5 && (
+                            <Button icon={<UploadOutlined />}>Upload</Button>
+                        )}
+                    </Upload>
                 </Form.Item>
                 <Form.Item
                     name="price"
@@ -141,28 +157,6 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                     ]}
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
-
-                <Form.Item
-                    name="idProduct"
-                    label="Sản Phẩm"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng chọn sản phẩm",
-                        },
-                    ]}
-                >
-                    <Select
-                        placeholder="Select product"
-                        allowClear
-                    >
-                        {products.map(product => (
-                            <Select.Option key={product.id} value={product.id}>
-                                {product.name}
-                            </Select.Option>
-                        ))}
-                    </Select>
                 </Form.Item>
 
                 <Form.Item
