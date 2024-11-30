@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { Tooltip } from "antd";
 import Cookies from "js-cookie";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrder } from "../../../api/OrderApi.js";
 import useCart from "../../../hook/useCart.js";
@@ -16,19 +16,34 @@ import useToast from "../../../hook/useToast.js";
 import { CartValueInfos, CartValues } from "../../../types/Cart";
 import Order, { OrderDetailValue, OrderValue } from "../../../types/Order.js";
 
+interface CartValueInfoWithSelected extends CartValueInfos {
+  selected: boolean
+}
+
 const CartPage = () => {
   const navigate = useNavigate()
   const height = useUserHeaderSize()
-  const { cart, getCartValueInfo, save, setItemInCart } = useCart()
+  const { getCartValueInfo, save, setItemInCart } = useCart()
   const { catchToast } = useToast();
   const [moneyTotal, setMoneyTotal] = useState(0);
-  const [selectProductDetails, setSelectProductDetails] = useState<CartValueInfos[]>([]);
-  const [productDetail, setProductDetail] = useState<CartValueInfos[]>([])
+  const [productDetails, setProductDetails] = useState<CartValueInfoWithSelected[]>([])
   const [isSelectAll, setIsSelectAll] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+  const quantityTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const setSelect = (pd: CartValueInfos, selected: boolean): CartValueInfoWithSelected => {
+    return {
+      ...pd,
+      selected
+    }
+  }
+
+  const getSelect = () => {
+    return productDetails.filter(pd => pd.selected)
+  }
 
   const setPdByValue = (cartValue: CartValues) => {
-    setProductDetail(prev => prev.map(p => {
+    setProductDetails(prev => prev.map(p => {
       if (p.productDetail.id === cartValue.productDetailId) {
         return {
           ...p,
@@ -39,29 +54,17 @@ const CartPage = () => {
     }))
   }
 
-  const handleSelectProductDetail = (pd: CartValueInfos) => {
-    const productDetailIds = selectProductDetails.map(spd => spd.productDetail.id)
-    console.log(productDetailIds)
-    if (productDetailIds.includes(pd.productDetail.id)) {
-      setSelectProductDetails(prev => prev.filter(cart => cart !== pd));
-    } else {
-      setSelectProductDetails(prev => [...prev, pd]);
-    }
+  const handleSelectProductDetail = (cart: CartValueInfos) => {
+    setProductDetails(prev => prev.map(pd => {
+      if (pd.productDetail.id == cart.productDetail.id) {
+        return setSelect(pd, !pd.selected)
+      }
+      return pd
+    }))
   }
 
   const handleClearSelectProduct = () => {
-    const selectProductIds = selectProductDetails.map(pd => pd.productDetail.id)
-    const newItem = productDetail.filter(pd => !selectProductIds.includes(pd.productDetail.id))
-    const values: CartValues[] = newItem.map(item => {
-      return {
-        productDetailId: item.productDetail.id,
-        quantity: item.quantity
-      }
-    })
-    if (values) {
-      setProductDetail([...newItem])
-      save(values)
-    }
+    setProductDetails(prev => prev.map(pd => setSelect(pd, false)))
   }
 
   const handleQuantityChange = async (cart: CartValueInfos, flipValue: number) => {
@@ -72,32 +75,38 @@ const CartPage = () => {
         productDetailId: cart.productDetail.id,
         quantity: newQuantity
       }
-      await setItemInCart(cartValue)
-      setPdByValue(cartValue)
+      const { valid } = await setItemInCart(cartValue)
+      if (valid) {
+        setPdByValue(cartValue)
+      } else {
+        const values = await getCartValueInfo()
+        setPdByValue(values)
+      }
     }
     finally {
       setLoading(false)
     }
   }
 
-  const handleChangeQuantityInput = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cart: CartValueInfos) => {
-    const newQuantity = Math.max(Math.min(Number(e.target.value), cart.productDetail.quantity), 1);
-    setSelectProductDetails(prev =>
-      prev.map(item =>
-        item.productDetail.id === cart.productDetail.id ? { ...item, quantity: newQuantity } : item
+  const handleChangeQuantityInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cart: CartValueInfos) => {
+    const value = Math.max(1, Math.min(cart.productDetail.quantity, Number(e.target.value)));
+    setProductDetails((prev) =>
+      prev.map((pd) =>
+        pd.productDetail.id === cart.productDetail.id ? { ...pd, quantity: value } : pd
       )
-    )
-    const cartValue: CartValues = {
-      productDetailId: cart.productDetail.id,
-      quantity: newQuantity
-    }
-    await setItemInCart(cartValue)
-    setPdByValue(cartValue)
-  }
+    );
+    if (quantityTimeout.current) clearTimeout(quantityTimeout.current);
+    quantityTimeout.current = setTimeout(async () => {
+      const cartValue = { productDetailId: cart.productDetail.id, quantity: value };
+      await setItemInCart(cartValue);
+      setPdByValue(cartValue);
+    }, 500);
+  };
 
   const handleBuy = async () => {
-    if (selectProductDetails.length < 0) return
-    const orderDetails: OrderDetailValue[] = selectProductDetails.map(value => {
+    const select = getSelect()
+    if (select.length < 0) return
+    const orderDetails: OrderDetailValue[] = select.map(value => {
       return {
         productDetailId: value.productDetail.id,
         quantity: value.quantity
@@ -117,12 +126,13 @@ const CartPage = () => {
       Cookies.set('order', JSON.stringify(data), { expires: 1 / 6 })
       navigate('/checkout')
     } catch (error: any) {
+      console.log(error)
       catchToast(error)
     }
   }
 
   useEffect(() => {
-    const total = selectProductDetails
+    const total = getSelect()
       .map(value => {
         const price = value.productDetail.price
         const quantity = value.quantity
@@ -131,22 +141,23 @@ const CartPage = () => {
       .reduce((total, money) => total + money, 0)
 
     setMoneyTotal(total)
-  }, [selectProductDetails])
+  }, [productDetails])
 
   useEffect(() => {
     const fetch = async () => {
       const res = await getCartValueInfo();
-      setProductDetail([...res])
+      setProductDetails([...res])
     }
     fetch()
   }, [])
 
   useEffect(() => {
-    if (!productDetail) return
+    if (!productDetails) return
     if (isSelectAll) {
-      setSelectProductDetails(productDetail)
+      setProductDetails(prev => prev.map(pd => setSelect(pd, true)))
     } else {
-      setSelectProductDetails([])
+      setProductDetails(prev => prev.map(pd => setSelect(pd, false)))
+
     }
   }, [isSelectAll])
 
@@ -189,14 +200,14 @@ const CartPage = () => {
                 <Button
                   color="error"
                   onClick={handleClearSelectProduct}
-                  disabled={selectProductDetails.length === 0}
+                  disabled={getSelect().length === 0}
                 >
                   Xóa sản phẩm đã chọn
                 </Button>
               </Tooltip>
             </Box>
 
-            {productDetail.map((pd) => (
+            {productDetails.map((pd) => (
               <Box
                 key={pd.productDetail.id}
                 sx={{
@@ -214,7 +225,7 @@ const CartPage = () => {
                   }}
                 >
                   <Checkbox
-                    checked={selectProductDetails.map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
+                    checked={getSelect().map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
                     onChange={() => handleSelectProductDetail(pd)}
                   />
                 </div>
@@ -282,6 +293,7 @@ const CartPage = () => {
                   <TextField
                     type="number"
                     value={pd.quantity}
+                    disabled={loading}
                     onChange={(e) => handleChangeQuantityInput(e, pd)}
                     sx={{
                       width: 60,
