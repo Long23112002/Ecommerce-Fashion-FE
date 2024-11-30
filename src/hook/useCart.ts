@@ -48,24 +48,18 @@ const useCart = () => {
 
     const save = async (value: CartValues[]) => {
         try {
+            const { valid, cartValues } = await validCarts(value)
             if ((user.id || 0) > 0) {
                 const req: CartRequest = {
                     userId: user.id || 0,
-                    cartValues: value
+                    cartValues: cartValues
                 }
                 await updateCart(req)
             } else {
-                const { valid, cartValues } = await validCart(value)
-                if (valid == false) {
-                    toast.error("Số lượng sản phẩm không đủ")
-                    throw new Error('')
-                }
-                value = cartValues
+                localStorage.setItem('cart', JSON.stringify(cartValues))
             }
-            if (!((user.id || 0) > 0)) {
-                localStorage.setItem('cart', JSON.stringify(value))
-            }
-            dispatch(setRedux(value))
+            dispatch(setRedux(cartValues))
+            return { valid, cartValues }
         } catch (error: any) {
             catchToast(error)
             throw error
@@ -80,7 +74,7 @@ const useCart = () => {
             }
             return v
         })
-        await save(newValues)
+        return await save(newValues)
     }
 
     const removeItemAfterOrder = async () => {
@@ -108,9 +102,19 @@ const useCart = () => {
             )
             : [...currentCart, value];
 
-        await save(newCart);
-        toast.success("Thêm vào giỏ hàng thành công")
+        const { valid } = await save(newCart);
+        if (valid) {
+            toast.success("Thêm vào giỏ hàng thành công")
+        }
     };
+
+    const validCarts = async (values: CartValues[]): Promise<{ valid: boolean, cartValues: CartValues[] }> => {
+        const { valid, cartValues } = await validCart(values)
+        if (valid == false) {
+            toast.error("Số lượng sản phẩm không đủ")
+        }
+        return { valid, cartValues }
+    }
 
     return { cart, reload, total, getCartValueInfo, getCartValues, save, addToCart, setItemInCart, removeItemAfterOrder }
 }
