@@ -72,6 +72,13 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
     removeItemAfterOrder()
     setLoadingScreen(false)
     toast.success("Đặt hàng thành công")
+    navigate("/");
+  }
+
+  const handleVietQrPayment = async () => {
+    setLoadingScreen(true)
+    await payOrder(order.id, orderRequest)
+    setLoadingScreen(false)
     navigate("/checkout/qr", { state: { order, orderRequest } });
   }
 
@@ -83,11 +90,18 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
     if (!validate()) return
     try {
       const paymentMethod = orderRequest.paymentMethod
-      if (paymentMethod == PaymentMethodEnum.CASH) {
-        await handleCashPayment()
-      }
-      else if (paymentMethod == PaymentMethodEnum.VNPAY) {
-        await handleVNPayPayment()
+      switch (paymentMethod) {
+        case PaymentMethodEnum.CASH: {
+          await handleCashPayment()
+          break
+        }
+        case PaymentMethodEnum.VNPAY: {
+          await handleVNPayPayment()
+          break
+        }
+        case PaymentMethodEnum.VIET_QR: {
+          await handleVietQrPayment()
+        }
       }
     } catch (error: any) {
       toast.error(error.response.data.message)
@@ -152,9 +166,9 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
             />
           </Paper>
 
-          {/* <Paper variant="outlined" sx={{ mb: 2, p: 2 }}>
+          <Paper variant="outlined" sx={{ mb: 2, p: 2 }}>
             <FormControlLabel
-              value={PaymentMethodEnum.BANK_TRANSFER}
+              value={PaymentMethodEnum.VIET_QR}
               control={<Radio />}
               label={
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
@@ -171,7 +185,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
               }
               sx={{ margin: 0, width: "100%" }}
             />
-          </Paper> */}
+          </Paper>
         </RadioGroup>
       </FormControl>
 

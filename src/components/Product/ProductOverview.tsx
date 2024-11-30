@@ -292,6 +292,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                             <Button
                                 variant="contained"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                disabled={selectedProductDetail?.quantity == 0}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -310,6 +311,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                             <TextField
                                 variant="outlined"
                                 value={quantity}
+                                disabled={selectedProductDetail?.quantity == 0}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
                                     if (value >= 1 && value <= (selectedProductDetail?.quantity ?? 0)) {
@@ -334,6 +336,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
                             <Button
                                 variant="contained"
+                                disabled={selectedProductDetail?.quantity == 0}
                                 onClick={() => setQuantity(Math.min(selectedProductDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,

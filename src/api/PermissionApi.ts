@@ -1,7 +1,7 @@
 
 /* eslint-disable */
-import {BASE_API} from "../constants/BaseApi.ts";
-import {ResponseData} from "../types/responseApi.ts";
+import { BASE_API } from "../constants/BaseApi.ts";
+import { ResponseData } from "../types/responseApi.ts";
 import axiosInstance from "./AxiosInstance.ts";
 
 export interface Permission {
@@ -20,10 +20,20 @@ export interface PermissionAssign {
     permissionIds: number[];
 }
 
-export const fetchAllPermission = async (params: PaginationParam): Promise<ResponseData> => {
+export const fetchAllGroupPermission = async (params: PaginationParam): Promise<ResponseData> => {
     try {
         const url = `${BASE_API}/api/v1/permission_group`;
-        const response = await axiosInstance.get(url, {params});
+        const response = await axiosInstance.get(url, { params });
+        return response.data as ResponseData;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const fetchAllPermission = async (params: PaginationParam): Promise<ResponseData> => {
+    try {
+        const url = `${BASE_API}/api/v1/permission`;
+        const response = await axiosInstance.get(url, { params });
         return response.data as ResponseData;
     } catch (error) {
         throw error;
