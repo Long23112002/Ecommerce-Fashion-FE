@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Material } from "../../pages/Admin/Attributes/material/material";
-import { Brand } from "../../types/brand";
-import { Category } from "../../types/Category";
-import { Origin } from "../../types/origin";
 import { Modal, Form, Input, Button, Select, UploadFile, Upload } from 'antd';
 import { Size } from "../../pages/Admin/Attributes/size/size";
 import { Color } from "../../pages/Admin/Attributes/color/color";
 import ProductDetail from "../../types/ProductDetail";
 import Product from "../../types/Product";
-import { Typography } from "@mui/material";
 import { UploadOutlined } from "@ant-design/icons";
 
 interface UpdateProductDetailModalProps {
@@ -45,8 +40,10 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                image: productDetail.images ? [{ url: productDetail.images }] : [],
+                images: productDetail.images ? [{ url: productDetail.images }] : [],
             });
+            console.log(productDetail.images);
+
             // setFileList(
             //     productDetail.images
             //       ? JSON.parse(productDetail.images).map((image: { url: string }, index: number) => ({
@@ -58,13 +55,14 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
             //       : []
             //   );
         }
+
     }, [productDetail, form])
 
     const onOk = () => {
         form.validateFields()
             .then((values: any) => {
                 console.log('Form values:', values);
-                handleOk(values);  
+                handleOk(values);
             })
             .catch((errorInfo: any) => {
                 console.error('Validation failed:', errorInfo);
@@ -105,7 +103,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         >
             <Form form={form} layout="vertical"
             >
-                 <Form.Item label="Danh sách ảnh:" name="images">
+                <Form.Item label="Danh sách ảnh:" name="images">
                     <Upload
                         listType="picture-card"
                         fileList={fileList}

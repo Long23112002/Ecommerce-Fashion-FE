@@ -19,7 +19,7 @@ import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
 import OrderDetail from "../../../types/OrderDetail";
-import { deleteOrder, getOrderById } from "../../../api/OrderApi";
+import { deleteOrder, downloadOrderPdf, getOrderById } from "../../../api/OrderApi";
 import { getAllUsers, UserParam } from "../../../api/UserApi";
 import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
@@ -106,7 +106,7 @@ const SellingAtStore = () => {
                     const response = await getOrderById(order?.id, token); // API lấy hóa đơn mới
                     setOrder(response);
 
-                    // setIsOrderDetailChange(true)
+                    setIsOrderDetailChange(true)
                     toast.success('Thêm sản phẩm Thành Công');
                     handleAddQuantityCancel()
                     formOrder.setFieldsValue({
@@ -198,21 +198,8 @@ const SellingAtStore = () => {
                 setIsPay(true);
                 setIsOrderSuccess(true);
                 // setIsOrderDetailChange(true);
-                // const response = await exportOrder(order.id);
-                // // Process the byte[] response
-                // const blob = new Blob([response.data], { type: 'application/pdf' });
-                // const fileURL = URL.createObjectURL(blob);
-
-                // // Trigger the download
-                // const link = document.createElement('a');
-                // link.href = fileURL;
-                // link.download = `Invoice_${order.id}.pdf`; // Set the filename
-                // document.body.appendChild(link);
-                // link.click();
-
-                // // Clean up
-                // document.body.removeChild(link);
-                // URL.revokeObjectURL(fileURL);
+                downloadOrderPdf(order.id);
+                
             } else {
                 toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
             }

@@ -67,6 +67,12 @@ const ManageProductDetail = () => {
         return e && e.fileList;
     };
 
+    const formatCurrency = (value: number | null | undefined): string => {
+        if (!value) return "0";
+        return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+            .format(value);
+    };
+
     const fetchColors = async () => {
         setIsColorLoading(true);
         try {
@@ -186,10 +192,10 @@ const ManageProductDetail = () => {
             const values = await form.validateFields();
             const { price, quantity, idProduct, idSize, idColor } = values;
             const token = Cookies.get("accessToken");
-            const image = urls;
+            const images = urls;
 
             if (token && editingProductDetail) {
-                await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor , image}, token);
+                await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor , images}, token);
                 toast.success('Cật Nhật Thành Công');
                 handleUpdateCancel();
                 refreshProductdetails();
@@ -327,6 +333,7 @@ const ManageProductDetail = () => {
             title: 'Giá bán',
             dataIndex: 'price',
             key: 'price',
+            render: (price: number) => formatCurrency(price),
         },
         {
             title: 'Số lượng',

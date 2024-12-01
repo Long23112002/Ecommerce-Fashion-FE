@@ -11,7 +11,11 @@ interface ModalViewProductDetailProps {
 const { Text } = Typography;
 const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible, onCancel, productDetail, onRemove }) => {
   if (!productDetail) return null;
-
+  const formatCurrency = (value: number | null | undefined): string => {
+    if (!value) return "0";
+    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+      .format(value);
+  };
   return (
     <Modal
       title={
@@ -30,7 +34,7 @@ const ModalViewProductDetail: React.FC<ModalViewProductDetailProps> = ({ visible
       <Form
         layout="vertical"
         initialValues={{
-          price: productDetail?.price,
+          price: formatCurrency(productDetail?.price),
           quantity: productDetail?.quantity,
           images: productDetail?.images,
           createAt: new Date(productDetail.createAt).toLocaleDateString(),
