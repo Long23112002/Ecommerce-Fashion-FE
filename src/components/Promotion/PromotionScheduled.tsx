@@ -35,6 +35,7 @@ import Cookies from "js-cookie";
 import Product from "./../../types/Product";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
 import debounce from "lodash/debounce";
+import { Modal } from "antd";
 
 interface Product {
   id: number;
@@ -323,9 +324,74 @@ const PromotionScheduled: React.FC = () => {
     }
   }, [selectedPromotion]);
 
-  const addProductDetailsToPromotion = async () => {
+  const checkOverlappingProducts = async (promotionId: number, productDetailIds: number[]) => {
+    try {
+      const response = await axiosInstance.get(
+        `${BASE_API}/api/v1/promotion/overlapping-products/${promotionId}`,
+        {
+          params: {
+            productDetailIds: productDetailIds.join(","),
+          },
+        }
+      );
+      return response.data.filter((product: any) => 
+        productDetailIds.includes(product.id)
+      );
+    } catch (error) {
+      console.error("Error checking overlapping products:", error);
+      getErrorMessage(error);
+      return [];
+    }
+  };
+  
+  const addProductDetailsToPromotionWithConfirm = async () => {
     setLoading(true);
-
+    const productDetailIds = selectedRowKeysDetail;
+  
+    const overlappingProducts = await checkOverlappingProducts(
+      selectedPromotion.id,
+      productDetailIds
+    );
+  
+    if (overlappingProducts && overlappingProducts.length > 0) {
+      Modal.confirm({
+        title: "Cảnh báo",
+        content: (
+          <div>
+            <p>Danh sách sản phẩm bạn đang thêm đã có sản phẩm trùng với đợt giảm giá hiện tại.</p>
+            <p>Sản phẩm bị trùng:</p>
+            <ul>
+            {overlappingProducts.map((product: any) => {
+              // Lấy thông tin sản phẩm (tên sản phẩm, kích thước, màu sắc)
+              const productName = product.product?.name || 'Sản phẩm không xác định';
+              const size = product.size?.name || 'Không có kích thước';
+              const color = product.color?.name || 'Không có màu sắc';
+              const displayName = `${productName} [${color} - ${size}]`;
+              const promotionName = product.product?.promotion?.name || "Chưa có đợt giảm giá";
+              return (
+                <li key={product.id}>
+                  <b>{displayName}</b> - Thuộc đợt giảm giá: {promotionName}
+                </li>
+              );
+            })}
+          </ul>
+            <p>Bạn có chắc muốn tiếp tục?</p>
+          </div>
+        ),
+        onOk: async () => {
+          await submitAddProductDetailsToPromotion();
+        },
+        onCancel: () => {
+          setLoading(false);
+          toast.info("Hành động bị hủy bỏ");
+        },
+      });
+    } else {
+      await submitAddProductDetailsToPromotion();
+    }
+  };
+  
+  const submitAddProductDetailsToPromotion = async () => {
     try {
       const token = Cookies.get("accessToken");
       const promotionId = selectedPromotion.id;
@@ -334,7 +400,6 @@ const PromotionScheduled: React.FC = () => {
           `${BASE_API}/api/v1/promotion/${promotionId}`,
           selectedRowKeysDetail
         );
-
         toast.success("Lên lịch giảm giá thành công");
         return response.data;
       } else {
@@ -345,7 +410,6 @@ const PromotionScheduled: React.FC = () => {
       toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
-
       navigate(`/admin/promotion`);
     }
   };
@@ -476,7 +540,7 @@ const PromotionScheduled: React.FC = () => {
                     backgroundColor: "green",
                     color: "white",
                   }}
-                  onClick={addProductDetailsToPromotion}
+                  onClick={addProductDetailsToPromotionWithConfirm}
                   disabled={isPromotionEnded}
                 >
                   Lưu
