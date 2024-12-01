@@ -6,11 +6,14 @@ const useToast = () => {
         if (typeof message == 'string') {
             toast.error(message)
         }
-        else {
+        else if (typeof message == 'object') {
             toast.error(Object.values(message)[0] + '')
         }
+        else if (typeof error.message === 'string') {
+            toast.error(error.message)
+        }
     }
-    return {catchToast}
+    return { catchToast }
 }
 
 export default useToast
