@@ -13,6 +13,7 @@ import {
   Flex,
   Tooltip,
   Card,
+  Spin,
 } from "antd";
 import { Promotion } from "../../types/Promotion";
 import {
@@ -416,6 +417,11 @@ const PromotionScheduled: React.FC = () => {
 
   return (
     <Container>
+      <Spin
+        spinning={loading}
+        indicator={<LoadingCustom />}
+        size="large"
+      >
       <Row gutter={16} className="mt-5 mx-1">
         <Col span={16}>
           <Card
@@ -461,10 +467,6 @@ const PromotionScheduled: React.FC = () => {
               rowSelection={rowSelection}
               columns={columnsProduct}
               dataSource={data}
-              loading={{
-                spinning: loading,
-                indicator: <LoadingCustom />,
-              }}
               rowKey="id"
               pagination={{
                 pageSize: 5,
@@ -580,10 +582,6 @@ const PromotionScheduled: React.FC = () => {
             rowSelection={rowSelectionDetail}
             columns={columnsProductDetail}
             dataSource={productDetails}
-            loading={{
-              spinning: loading,
-              indicator: <LoadingCustom />,
-            }}
             rowKey="id"
             pagination={{
               pageSize: 5,
@@ -591,6 +589,7 @@ const PromotionScheduled: React.FC = () => {
           />
         </Card>
       </Col>
+      </Spin>
     </Container>
   );
 };
