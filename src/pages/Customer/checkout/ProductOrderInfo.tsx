@@ -85,7 +85,7 @@ export const ProductDetailItem: React.FC<{ od: OrderDetail }> = ({ od }) => {
                 <Typography variant='body2' color="text.secondary">Màu: {pd.color.name}</Typography>
                 <Typography variant='body2' color="text.secondary">Kích thước: {pd.size.name}</Typography>
                 <Typography variant='body2' color="primary" fontWeight="bold">
-                    Giá: {pd.price.toLocaleString()} VND
+                    Giá: {od.price.toLocaleString()} VND
                 </Typography>
             </Box>
         </Box>
