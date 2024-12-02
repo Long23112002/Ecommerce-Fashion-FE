@@ -22,6 +22,10 @@ interface CartValueInfoWithSelected extends CartValueInfos {
   selected: boolean
 }
 
+interface CartValueInfoWithSelected extends CartValueInfos {
+  selected: boolean
+}
+
 const CartPage = () => {
   const navigate = useNavigate()
   const height = useUserHeaderSize()

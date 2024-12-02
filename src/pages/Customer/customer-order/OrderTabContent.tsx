@@ -127,8 +127,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                 </Grid>
               </Grid>
 
-              {order.status === OrderStatus.PENDING &&
-                order.paymentMethod === PaymentMethodEnum.CASH && (
+              {order.status === OrderStatus.PENDING && (
                   <Grid
                     container
                     justifyContent="flex-end"
