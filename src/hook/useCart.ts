@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { cartSelector, setCart as setRedux, totalCartSelector } from "../redux/reducers/CartReducer";
 import { userSelector } from "../redux/reducers/UserReducer";
-import { CartRequest, CartValues } from "../types/Cart";
+import { CartRequest, CartValueInfos, CartValues } from "../types/Cart";
 import { fetchCartByUserId, getCartValueInfos, updateCart, validCart } from "../api/CartApi";
 import useToast from "./useToast";
 import { toast } from "react-toastify";
@@ -21,15 +21,19 @@ const useCart = () => {
     }
 
     const getCartValues = async (): Promise<CartValues[]> => {
-        const token = Cookies.get('accessToken')
-        if (token) {
-            const res = await fetch(token)
-            return res
+        if (cart.length != 0) {
+            return cart
         } else {
-            const json = localStorage.getItem('cart')
-            if (json) {
-                const cart: CartValues[] = JSON.parse(json)
-                return Promise.resolve(cart)
+            const token = Cookies.get('accessToken')
+            if (token) {
+                const res = await fetch(token)
+                return res
+            } else {
+                const json = localStorage.getItem('cart')
+                if (json) {
+                    const cart: CartValues[] = JSON.parse(json)
+                    return Promise.resolve(cart)
+                }
             }
         }
         return []
@@ -37,7 +41,15 @@ const useCart = () => {
 
     const getCartValueInfo = async () => {
         const values = await getCartValues()
-        const valueInfos = await getCartValueInfos(values)
+        const req = values.filter(v => v.quantity > 0)
+        const valueInfos: CartValueInfos[] = await getCartValueInfos(req)
+        const newValues: CartValues[] = valueInfos.map(info => {
+            return {
+                quantity: info.quantity,
+                productDetailId: info.productDetail.id
+            }
+        })
+        save(newValues)
         return valueInfos
     }
 
@@ -49,6 +61,9 @@ const useCart = () => {
     const save = async (value: CartValues[]) => {
         try {
             const { valid, cartValues } = await validCarts(value)
+            if (!valid) {
+                return { valid, cartValues }
+            }
             if ((user.id || 0) > 0) {
                 const req: CartRequest = {
                     userId: user.id || 0,
@@ -70,7 +85,10 @@ const useCart = () => {
         const values = await getCartValues();
         const newValues = values.map(v => {
             if (v.productDetailId == value.productDetailId) {
-                v.quantity = value.quantity
+                return {
+                    ...v,
+                    quantity: value.quantity
+                }
             }
             return v
         })

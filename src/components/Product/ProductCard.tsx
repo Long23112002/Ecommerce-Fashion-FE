@@ -88,7 +88,7 @@ const ProductCard: React.FC<IProps> = ({ product, loading }) => {
         if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
             return `-${promotion.value}%`
         }
-        return `-${promotion.value}đ`
+        return `-${promotion.value.toLocaleString('vi-VN')}đ`
     }
 
     return (

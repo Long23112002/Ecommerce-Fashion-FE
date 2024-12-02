@@ -15,6 +15,12 @@ import { useUserHeaderSize } from "../../../hook/useSize.js";
 import useToast from "../../../hook/useToast.js";
 import { CartValueInfos, CartValues } from "../../../types/Cart";
 import Order, { OrderDetailValue, OrderValue } from "../../../types/Order.js";
+import MuiLoading from "../../../components/Loading/MuiLoading.js";
+import { setLoadingScreen } from "../../../redux/reducers/LoadingScreenReducer.js";
+
+interface CartValueInfoWithSelected extends CartValueInfos {
+  selected: boolean
+}
 
 interface CartValueInfoWithSelected extends CartValueInfos {
   selected: boolean
@@ -23,12 +29,13 @@ interface CartValueInfoWithSelected extends CartValueInfos {
 const CartPage = () => {
   const navigate = useNavigate()
   const height = useUserHeaderSize()
-  const { getCartValueInfo, save, setItemInCart } = useCart()
+  const { getCartValueInfo, setItemInCart, save } = useCart()
   const { catchToast } = useToast();
   const [moneyTotal, setMoneyTotal] = useState(0);
   const [productDetails, setProductDetails] = useState<CartValueInfoWithSelected[]>([])
   const [isSelectAll, setIsSelectAll] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [quantityLoading, setQuantityLoading] = useState<boolean>(false)
+  const [productsLoading, setProductsLoading] = useState<boolean>(false)
   const quantityTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const setSelect = (pd: CartValueInfos, selected: boolean): CartValueInfoWithSelected => {
@@ -64,12 +71,20 @@ const CartPage = () => {
   }
 
   const handleClearSelectProduct = () => {
-    setProductDetails(prev => prev.map(pd => setSelect(pd, false)))
+    const productNotSelect = productDetails.filter(pd => !pd.selected)
+    setProductDetails([...productNotSelect])
+    const values: CartValues[] = productNotSelect.map(pd => {
+      return {
+        productDetailId: pd.productDetail.id,
+        quantity: pd.quantity
+      }
+    })
+    save(values)
   }
 
   const handleQuantityChange = async (cart: CartValueInfos, flipValue: number) => {
     try {
-      setLoading(true)
+      setQuantityLoading(true)
       const newQuantity = cart.quantity + flipValue;
       const cartValue: CartValues = {
         productDetailId: cart.productDetail.id,
@@ -78,13 +93,10 @@ const CartPage = () => {
       const { valid } = await setItemInCart(cartValue)
       if (valid) {
         setPdByValue(cartValue)
-      } else {
-        const values = await getCartValueInfo()
-        setPdByValue(values)
       }
     }
     finally {
-      setLoading(false)
+      setQuantityLoading(false)
     }
   }
 
@@ -145,8 +157,13 @@ const CartPage = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await getCartValueInfo();
-      setProductDetails([...res])
+      try {
+        setProductsLoading(true)
+        const res = await getCartValueInfo();
+        setProductDetails(res.map(r => setSelect(r, false)))
+      } finally {
+        setProductsLoading(false)
+      }
     }
     fetch()
   }, [])
@@ -207,131 +224,137 @@ const CartPage = () => {
               </Tooltip>
             </Box>
 
-            {productDetails.map((pd) => (
-              <Box
-                key={pd.productDetail.id}
-                sx={{
-                  display: "flex",
-                  my: 2,
-                  borderBottom: "1px solid #ccc",
-                  paddingBottom: 1,
-                  cursor: 'pointer'
-                }}
-              >
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Checkbox
-                    checked={getSelect().map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
-                    onChange={() => handleSelectProductDetail(pd)}
-                  />
-                </div>
-                <Box sx={{ display: 'flex', width: '100%' }}
-                  onClick={() => navigate(`/product/${pd.productDetail.product.id}`)}
-                >
-                  <img
-                    src={pd.productDetail.images?.[0].url}
-                    alt={pd.productDetail.product?.name}
-                    style={{ width: 100, height: 100, objectFit: "cover" }}
-                  />
-                  <Box sx={{ ml: 2, flexGrow: 1 }}>
-                    <Typography variant="h5">
-                      {pd.productDetail.product?.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
-                    </Typography>
-                    <Typography
-                      color="text.secondary"
+            {
+              !productsLoading
+                ?
+                productDetails.map((pd) => (
+                  <Box
+                    key={pd.productDetail.id}
+                    sx={{
+                      display: "flex",
+                      my: 2,
+                      borderBottom: "1px solid #ccc",
+                      paddingBottom: 1,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div
                       style={{
-                        display: "flex",
+                        display: "inline-flex",
                         alignItems: "center",
                       }}
-                      className="mt-3"
-                      component="div"
                     >
-                      <Typography
-                        variant="h6"
-                        color="info.main"
-                        component="div"
-                      >
-                        <b>
-                          {(pd.productDetail.price || 0).toLocaleString(
-                            "vi-VN"
-                          )}{" "}
-                          ₫
-                        </b>
-                      </Typography>
-                      {pd.productDetail.originPrice && (
-                        <span
+                      <Checkbox
+                        checked={getSelect().map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
+                        onChange={() => handleSelectProductDetail(pd)}
+                      />
+                    </div>
+                    <Box sx={{ display: 'flex', width: '100%' }}
+                      onClick={() => navigate(`/product/${pd.productDetail.product.id}`)}
+                    >
+                      <img
+                        src={pd.productDetail.images?.[0].url}
+                        alt={pd.productDetail.product?.name}
+                        style={{ width: 100, height: 100, objectFit: "cover" }}
+                      />
+                      <Box sx={{ ml: 2, flexGrow: 1 }}>
+                        <Typography variant="h5">
+                          {pd.productDetail.product?.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
                           style={{
-                            textDecoration: "line-through",
-                            marginLeft: "20px",
-                            color: "gray",
+                            display: "flex",
+                            alignItems: "center",
                           }}
+                          className="mt-3"
+                          component="div"
                         >
-                          {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
-                          ₫
-                        </span>
-                      )}
-                    </Typography>
+                          <Typography
+                            variant="h6"
+                            color="info.main"
+                            component="div"
+                          >
+                            <b>
+                              {(pd.productDetail.price || 0).toLocaleString(
+                                "vi-VN"
+                              )}{" "}
+                              ₫
+                            </b>
+                          </Typography>
+                          {pd.productDetail.originPrice && (
+                            <span
+                              style={{
+                                textDecoration: "line-through",
+                                marginLeft: "20px",
+                                color: "gray",
+                              }}
+                            >
+                              {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
+                              ₫
+                            </span>
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center" }} >
+                      <IconButton
+                        onClick={() => handleQuantityChange(pd, -1)}
+                        disabled={pd.quantity <= 1 || quantityLoading}
+                        sx={{
+                          color: quantityLoading ? "#a1a1a1" : "#333333",
+                        }}
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                      <TextField
+                        type="number"
+                        value={pd.quantity}
+                        disabled={quantityLoading}
+                        onChange={(e) => handleChangeQuantityInput(e, pd)}
+                        sx={{
+                          width: 60,
+                          textAlign: "center",
+                          "& .MuiInput-underline:before": {
+                            borderBottom: "none",
+                          },
+                          "& .MuiInput-underline:after": { borderBottom: "none" },
+                          "& input": {
+                            padding: 0,
+                            textAlign: "center",
+                          },
+                          "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            WebkitAppearance: "none",
+                            margin: 0,
+                          },
+                        }}
+                        inputProps={{
+                          min: 0,
+                          max: pd.productDetail.quantity,
+                        }}
+                        variant="standard"
+                      />
+                      <IconButton
+                        onClick={() =>
+                          handleQuantityChange(pd, 1)
+                        }
+                        disabled={quantityLoading}
+                        sx={{
+                          color: quantityLoading ? "#a1a1a1" : "#333333",
+                        }}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center" }} >
-                  <IconButton
-                    onClick={() => handleQuantityChange(pd, -1)}
-                    disabled={pd.quantity <= 1 || loading}
-                    sx={{
-                      color: loading ? "#a1a1a1" : "#333333",
-                    }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <TextField
-                    type="number"
-                    value={pd.quantity}
-                    disabled={loading}
-                    onChange={(e) => handleChangeQuantityInput(e, pd)}
-                    sx={{
-                      width: 60,
-                      textAlign: "center",
-                      "& .MuiInput-underline:before": {
-                        borderBottom: "none",
-                      },
-                      "& .MuiInput-underline:after": { borderBottom: "none" },
-                      "& input": {
-                        padding: 0,
-                        textAlign: "center",
-                      },
-                      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                      {
-                        WebkitAppearance: "none",
-                        margin: 0,
-                      },
-                    }}
-                    inputProps={{
-                      min: 0,
-                      max: pd.productDetail.quantity,
-                    }}
-                    variant="standard"
-                  />
-                  <IconButton
-                    onClick={() =>
-                      handleQuantityChange(pd, 1)
-                    }
-                    disabled={loading}
-                    sx={{
-                      color: loading ? "#a1a1a1" : "#333333",
-                    }}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-            ))}
+                ))
+                :
+                <MuiLoading />
+            }
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>

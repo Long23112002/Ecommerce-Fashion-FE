@@ -145,11 +145,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
             return `-${promotion.value}%`
         }
-        return `-${promotion.value}đ`
+        return `-${promotion.value.toLocaleString('vi-VN')}đ`
     }
 
     const handlePrice = () => {
-        const priceBefore = product?.minPrice || 0
+        const priceBefore = selectedProductDetail?.price || 0
         let currentPrice = null
         const promotion = product?.promotion
         if (promotion) {
