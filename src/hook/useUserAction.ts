@@ -4,6 +4,7 @@ import { handleLogin, handleLogout, storeUserData } from "../api/AuthApi";
 import { clearUser, setUser, userSelector } from "../redux/reducers/UserReducer";
 import { LoginRequest } from "../types/login/request/loginRequest";
 import { useNavigate } from "react-router-dom";
+import { clearCart } from "../redux/reducers/CartReducer";
 
 export const useUserAction = () => {
     const user = useSelector(userSelector);
@@ -50,6 +51,7 @@ export const useUserAction = () => {
 
     const logout = async () => {
         dispatch(clearUser());
+        dispatch(clearCart())
         await handleLogout()
     }
     return { login, save, get, logout }
