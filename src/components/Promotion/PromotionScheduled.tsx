@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import type { TableColumnsType, TableProps } from "antd";
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   Flex,
   Tooltip,
   Card,
+  Spin,
 } from "antd";
 import { Promotion } from "../../types/Promotion";
 import {
@@ -34,6 +35,9 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Product from "./../../types/Product";
 import { getErrorMessage } from "../../pages/Error/getErrorMessage.ts";
+import debounce from "lodash/debounce";
+import { Modal } from "antd";
+import moment from 'moment';
 
 interface Product {
   id: number;
@@ -50,6 +54,7 @@ interface ProductDetail {
   quantity: number;
   price: number;
   product: Product;
+  originPrice: number;
 }
 
 const columnsProduct: ColumnsType<Product> = [
@@ -84,7 +89,8 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
   {
     title: "Tên sản phẩm",
     key: "name",
-    render: (record: ProductDetail) => `${record.name} [ ${record.color} - ${record.size} ]`,
+    render: (record: ProductDetail) =>
+      `${record.name} [ ${record.color} - ${record.size} ]`,
   },
   {
     title: "Số lượng",
@@ -95,7 +101,28 @@ const columnsProductDetail: ColumnsType<ProductDetail> = [
     title: "Đơn giá",
     dataIndex: "price",
     key: "price",
-    render: (price: number) => `${price.toLocaleString("vi-VN")} VNĐ`,
+    render: (price: number, record: any) => {
+      const originalPrice = record.originPrice;
+      if (originalPrice && originalPrice !== price) {
+        return (
+          <div>
+            <span>{price.toLocaleString("vi-VN")} VNĐ</span>
+            <span
+            style={{ 
+              textDecoration: "line-through",
+              color:"gray", 
+              fontSize:"13px" 
+              }}
+               className="mx-2"
+              >
+              {originalPrice.toLocaleString("vi-VN")} VNĐ
+            </span>
+          </div>
+        );
+      } else {
+        return <span>{price.toLocaleString("vi-VN")} VNĐ</span>;
+      }
+    },
   },
 ];
 
@@ -107,6 +134,7 @@ const PromotionScheduled: React.FC = () => {
   const [selectedRowKeysDetail, setSelectedRowKeysDetail] = useState<number[]>(
     []
   );
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
 
   const start = () => {
     setLoading(true);
@@ -203,11 +231,11 @@ const PromotionScheduled: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (keyword: string = "") => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(
-        `${BASE_API}/api/v1/product?keyword`
+        `${BASE_API}/api/v1/product?keyword=${keyword}`
       );
 
       const data = await response.data;
@@ -230,6 +258,17 @@ const PromotionScheduled: React.FC = () => {
     }
   };
 
+  const debouncedSearch = useCallback(
+    debounce((keyword: string) => fetchData(keyword), 1000),
+    []
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    debouncedSearch(value); // Gọi debounce
+  };
+
   const fetchProductDetail = async (productIds: number[]) => {
     try {
       const detailPromises = productIds.map(async (productId) => {
@@ -250,6 +289,7 @@ const PromotionScheduled: React.FC = () => {
         quantity: item.quantity,
         price: item.price,
         product: item.product.id,
+        originPrice: item.originPrice,
       }));
 
       setProductDetails(allProductDetails);
@@ -272,7 +312,7 @@ const PromotionScheduled: React.FC = () => {
   const selectedPromotion = location.state;
 
   const isPromotionEnded =
-          selectedPromotion.statusPromotionEnum === StatusPromotionEnum.ENDED;
+    selectedPromotion.statusPromotionEnum === StatusPromotionEnum.ENDED;
 
   useEffect(() => {
     const selectedPromotion = location.state;
@@ -309,9 +349,122 @@ const PromotionScheduled: React.FC = () => {
     }
   }, [selectedPromotion]);
 
-  const addProductDetailsToPromotion = async () => {
-    setLoading(true);
+  const checkOverlappingProducts = async (
+    promotionId: number,
+    productDetailIds: number[]
+  ) => {
+    try {
+      const response = await axiosInstance.get(
+        `${BASE_API}/api/v1/promotion/overlapping-products/${promotionId}`,
+        {
+          params: {
+            productDetailIds: productDetailIds.join(","),
+          },
+        }
+      );
+      return response.data.filter((product: any) =>
+        productDetailIds.includes(product.id)
+      );
+    } catch (error) {
+      console.error("Error checking overlapping products:", error);
+      getErrorMessage(error);
+      return [];
+    }
+  };
 
+  const addProductDetailsToPromotionWithConfirm = async () => {
+    setLoading(true);
+    const productDetailIds = selectedRowKeysDetail;
+
+    const overlappingProducts = await checkOverlappingProducts(
+      selectedPromotion.id,
+      productDetailIds
+    );
+
+    if (overlappingProducts && overlappingProducts.length > 0) {
+      Modal.confirm({
+        title: "Cảnh báo",
+        content: (
+          <div>
+            <p>
+              Danh sách sản phẩm bạn đang thêm đã có sản phẩm trùng với đợt giảm
+              giá hiện tại.
+            </p>
+            <p>Sản phẩm bị trùng:</p>
+            <ul>
+              {overlappingProducts.map((product: any) => {
+                const productName =
+                  product.product?.name || "Sản phẩm không xác định";
+                const size = product.size?.name || "Không có kích thước";
+                const color = product.color?.name || "Không có màu sắc";
+                const displayName = `${productName} [${color} - ${size}]`;
+                const promotion = product.promotion || {};
+                const promotionName = promotion.id || "Chưa có đợt giảm giá";
+                const promotionValue = promotion.value
+                  ? `${promotion.value}${
+                      promotion.typePromotionEnum ===
+                      TypePromotionEnum.PERCENTAGE_DISCOUNT
+                        ? "%"
+                        : "₫"
+                    }`
+                  : "Không rõ giá trị";
+                const promotionStartDate = promotion.startDate
+                  ? moment(promotion.formattedStartDate, "DD/MM/YYYY HH:mm:ss").format(
+                    " HH:mm:ss, DD-MM-YYYY"
+                  )
+                  : "Không rõ ngày bắt đầu";
+                  console.log(promotion.formattedStartDate);
+                  
+                const promotionEndDate = promotion.endDate
+                  ? moment(promotion.formattedEndDate, "DD/MM/YYYY HH:mm:ss").format(
+                    " HH:mm:ss, DD-MM-YYYY"
+                  )
+                  : "Không rõ ngày kết thúc";
+
+                return (
+                  <li key={product.id}>
+                    <p>
+                      <b>{displayName}</b> - Thuộc đợt giảm giá id:{" "}
+                      {promotionName}
+                    </p>
+                    <p>
+                      Giá trị:{" "}
+                      <b>
+                        <i>- {promotionValue}</i>
+                      </b>
+                    </p>
+                    <p>
+                      Thời gian:{" "}
+                      <b>
+                        <i>
+                          {promotionStartDate} - {promotionEndDate}
+                        </i>
+                      </b>
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+            <p>
+              Tiếp tục sẽ xóa sản phẩm khỏi đợt giảm giá cũ. Bạn có chắc muốn
+              tiếp tục?
+            </p>
+          </div>
+        ),
+        onOk: async () => {
+          await submitAddProductDetailsToPromotion();
+        },
+        onCancel: () => {
+          setLoading(false);
+          toast.info("Hành động bị hủy bỏ");
+        },
+      });
+    } else {
+      await submitAddProductDetailsToPromotion();
+    }
+  };
+
+  const submitAddProductDetailsToPromotion = async () => {
     try {
       const token = Cookies.get("accessToken");
       const promotionId = selectedPromotion.id;
@@ -320,7 +473,6 @@ const PromotionScheduled: React.FC = () => {
           `${BASE_API}/api/v1/promotion/${promotionId}`,
           selectedRowKeysDetail
         );
-
         toast.success("Lên lịch giảm giá thành công");
         return response.data;
       } else {
@@ -331,22 +483,155 @@ const PromotionScheduled: React.FC = () => {
       toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
-
       navigate(`/admin/promotion`);
     }
   };
 
   return (
     <Container>
-      <Row gutter={16} className="mt-5 mx-1">
-        <Col span={16}>
+      <Spin spinning={loading} indicator={<LoadingCustom />} size="large">
+        <Row gutter={16} className="mt-5 mx-1">
+          <Col span={16}>
+            <Card
+              title="Sản phẩm"
+              bordered={true}
+              extra={
+                <Flex align="center" gap="middle">
+                  {hasSelected
+                    ? `Áp dụng cho ${selectedRowKeys.length} sản phẩm`
+                    : ""}
+                  <Tooltip title="Làm mới" placement="topLeft">
+                    <Button
+                      type="default"
+                      style={{
+                        display: "flex",
+                        backgroundColor: "black",
+                        color: "white",
+                      }}
+                      onClick={start}
+                      disabled={!hasSelected}
+                    >
+                      <i className="fa-solid fa-rotate-left"></i>
+                    </Button>
+                  </Tooltip>
+                </Flex>
+              }
+            >
+              {/* <h5
+      style={{
+        textAlign:"center",
+        marginBottom: "20px",
+      }}
+      >Sản phẩm</h5> */}
+              <Form.Item name="keyword">
+                <Input
+                  placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..."
+                  onChange={handleSearch}
+                  allowClear
+                />
+              </Form.Item>
+
+              <Table
+                rowSelection={rowSelection}
+                columns={columnsProduct}
+                dataSource={data}
+                rowKey="id"
+                pagination={{
+                  pageSize: 5,
+                }}
+              />
+            </Card>
+          </Col>
+
+          <Col span={8}>
+            {/* <h5
+      style={{
+        textAlign:"center",
+        marginBottom: "60px",
+      }}
+      >Đợt giảm giá</h5> */}
+            <Card title="Đợt giảm giá" bordered={true}>
+              <Form
+                layout="vertical"
+                initialValues={selectedPromotion}
+                disabled
+              >
+                <Form.Item name="typePromotionEnum" label="Kiểu khuyến mãi">
+                  <Select
+                    placeholder="Chọn kiểu khuyến mãi"
+                    value={selectedPromotion?.typePromotionEnum}
+                  >
+                    {Object.entries(TypePromotionEnum).map(([key, value]) => (
+                      <Select.Option key={value} value={value}>
+                        {TypePromotionLabel[value]}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="value" label="Giá trị">
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    addonAfter={valueSuffix}
+                    value={selectedPromotion?.value}
+                  />
+                </Form.Item>
+
+                <Form.Item name="startDate" label="Ngày bắt đầu">
+                  <Input
+                    style={{ width: "100%" }}
+                    name="startDate"
+                    value={selectedPromotion.startDate}
+                  />
+                </Form.Item>
+
+                <Form.Item name="endDate" label="Ngày kết thúc">
+                  <Input
+                    style={{ width: "100%" }}
+                    name="endDate"
+                    value={selectedPromotion.endDate}
+                  />
+                </Form.Item>
+
+                <Form.Item name="statusPromotionEnum" label="Trạng thái">
+                  <Select
+                    placeholder="Chọn trạng thái khuyến mãi"
+                    value={selectedPromotion?.statusPromotionEnum}
+                    disabled
+                  >
+                    {Object.entries(StatusPromotionEnum).map(([key, value]) => (
+                      <Select.Option key={value} value={value}>
+                        {StatusPromotionLable[value]}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Tooltip title="Lên lịch giảm giá" placement="topLeft">
+                  <Button
+                    type="primary"
+                    style={{
+                      display: "flex",
+                      backgroundColor: "green",
+                      color: "white",
+                    }}
+                    onClick={addProductDetailsToPromotionWithConfirm}
+                    disabled={isPromotionEnded}
+                  >
+                    Lưu
+                  </Button>
+                </Tooltip>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
+        <Col span={24} className="mt-5">
           <Card
-            title="Sản phẩm"
-            bordered={true}
+            title="Thông tin chi tiết sản phẩm"
+            bordered={false}
             extra={
               <Flex align="center" gap="middle">
-                {hasSelected
-                  ? `Áp dụng cho ${selectedRowKeys.length} sản phẩm`
+                {hasSelectedDetail
+                  ? `Áp dụng cho ${selectedRowKeysDetail.length} chi tiết sản phẩm`
                   : ""}
                 <Tooltip title="Làm mới" placement="topLeft">
                   <Button
@@ -356,8 +641,8 @@ const PromotionScheduled: React.FC = () => {
                       backgroundColor: "black",
                       color: "white",
                     }}
-                    onClick={start}
-                    disabled={!hasSelected}
+                    onClick={startDetail}
+                    disabled={!hasSelectedDetail}
                   >
                     <i className="fa-solid fa-rotate-left"></i>
                   </Button>
@@ -365,146 +650,18 @@ const PromotionScheduled: React.FC = () => {
               </Flex>
             }
           >
-            {/* <h5
-      style={{
-        textAlign:"center",
-        marginBottom: "20px",
-      }}
-      >Sản phẩm</h5> */}
             <Table
-              rowSelection={rowSelection}
-              columns={columnsProduct}
-              dataSource={data}
-              loading={{
-                spinning: loading,
-                indicator: <LoadingCustom />,
-              }}
+              rowSelection={rowSelectionDetail}
+              columns={columnsProductDetail}
+              dataSource={productDetails}
               rowKey="id"
               pagination={{
-                pageSize: 7,
+                pageSize: 5,
               }}
             />
           </Card>
         </Col>
-
-        <Col span={8}>
-          {/* <h5
-      style={{
-        textAlign:"center",
-        marginBottom: "60px",
-      }}
-      >Đợt giảm giá</h5> */}
-          <Card title="Đợt giảm giá" bordered={true}>
-            <Form layout="vertical" initialValues={selectedPromotion} disabled>
-              <Form.Item name="typePromotionEnum" label="Kiểu khuyến mãi">
-                <Select
-                  placeholder="Chọn kiểu khuyến mãi"
-                  value={selectedPromotion?.typePromotionEnum}
-                >
-                  {Object.entries(TypePromotionEnum).map(([key, value]) => (
-                    <Select.Option key={value} value={value}>
-                      {TypePromotionLabel[value]}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item name="value" label="Giá trị">
-                <InputNumber
-                  style={{ width: "100%" }}
-                  addonAfter={valueSuffix}
-                  value={selectedPromotion?.value}
-                />
-              </Form.Item>
-
-              <Form.Item name="startDate" label="Ngày bắt đầu">
-                <Input
-                  style={{ width: "100%" }}
-                  name="startDate"
-                  value={selectedPromotion.startDate}
-                />
-              </Form.Item>
-
-              <Form.Item name="endDate" label="Ngày kết thúc">
-                <Input
-                  style={{ width: "100%" }}
-                  name="endDate"
-                  value={selectedPromotion.endDate}
-                />
-              </Form.Item>
-
-              <Form.Item name="statusPromotionEnum" label="Trạng thái">
-                <Select
-                  placeholder="Chọn trạng thái khuyến mãi"
-                  value={selectedPromotion?.statusPromotionEnum}
-                  disabled
-                >
-                  {Object.entries(StatusPromotionEnum).map(([key, value]) => (
-                    <Select.Option key={value} value={value}>
-                      {StatusPromotionLable[value]}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Tooltip title="Lên lịch giảm giá" placement="topLeft">
-                <Button
-                  type="primary"
-                  style={{
-                    display: "flex",
-                    backgroundColor: "green",
-                    color: "white",
-                  }}
-                  onClick={addProductDetailsToPromotion}
-                  disabled={isPromotionEnded}
-                >
-                  Lưu
-                </Button>
-              </Tooltip>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
-      <Col span={24} className="mt-5">
-        <Card
-          title="Thông tin chi tiết sản phẩm"
-          bordered={false}
-          extra={
-            <Flex align="center" gap="middle">
-              {hasSelectedDetail
-                ? `Áp dụng cho ${selectedRowKeysDetail.length} chi tiết sản phẩm`
-                : ""}
-              <Tooltip title="Làm mới" placement="topLeft">
-                <Button
-                  type="default"
-                  style={{
-                    display: "flex",
-                    backgroundColor: "black",
-                    color: "white",
-                  }}
-                  onClick={startDetail}
-                  disabled={!hasSelectedDetail}
-                >
-                  <i className="fa-solid fa-rotate-left"></i>
-                </Button>
-              </Tooltip>
-            </Flex>
-          }
-        >
-          <Table
-            rowSelection={rowSelectionDetail}
-            columns={columnsProductDetail}
-            dataSource={productDetails}
-            loading={{
-              spinning: loading,
-              indicator: <LoadingCustom />,
-            }}
-            rowKey="id"
-            pagination={{
-              pageSize: 5,
-            }}
-          />
-        </Card>
-      </Col>
+      </Spin>
     </Container>
   );
 };

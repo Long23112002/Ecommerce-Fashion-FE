@@ -16,17 +16,24 @@ import Order, { OrderStatus, OrderUpdateRequest } from '../../../types/Order'
 import { useNavigate } from "react-router-dom"
 import useLoadingScreen from "../../../hook/useLoadingScreen"
 import useCart from "../../../hook/useCart"
+import { Modal, ModalClose, Sheet } from "@mui/joy"
+import { ProductDetailItem } from "./ProductOrderInfo"
+import useToast from "../../../hook/useToast"
 
 interface IProps {
   order: Order,
   orderRequest: OrderUpdateRequest,
   setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>
+  validAddress: boolean
 }
 
-const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest }) => {
+const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest, validAddress }) => {
   const navigate = useNavigate()
   const { setLoadingScreen } = useLoadingScreen();
   const { removeItemAfterOrder } = useCart();
+  const { catchToast } = useToast()
+  const [confirm, setConfirm] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(false)
 
   const isValidPaymentMethod = (value: string): boolean => {
     return Object.values(PaymentMethodEnum).includes(value as PaymentMethodEnum);
@@ -52,7 +59,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       toast.error('Số điện thoại không hợp lệ')
       return false
     }
-    else if (!orderRequest.specificAddress.trim()) {
+    else if (!orderRequest.specificAddress.trim() || !validAddress) {
       toast.error('Địa chỉ không được để trống')
       return false
     }
@@ -67,12 +74,17 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
   }
 
   const handleCashPayment = async () => {
-    setLoadingScreen(true)
-    await payOrder(order.id, orderRequest)
-    removeItemAfterOrder()
-    setLoadingScreen(false)
-    toast.success("Đặt hàng thành công")
-    navigate("/");
+    try {
+      setLoadingScreen(true)
+      await payOrder(order.id, orderRequest)
+      removeItemAfterOrder()
+      toast.success("Đặt hàng thành công")
+      navigate("/");
+    } catch (error) {
+      catchToast(error)
+    } finally {
+      setLoadingScreen(false)
+    }
   }
 
   const handleVietQrPayment = async () => {
@@ -92,7 +104,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       const paymentMethod = orderRequest.paymentMethod
       switch (paymentMethod) {
         case PaymentMethodEnum.CASH: {
-          await handleCashPayment()
+          setOpen(true)
           break
         }
         case PaymentMethodEnum.VNPAY: {
@@ -107,6 +119,17 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       toast.error(error.response.data.message)
     }
   }
+
+  useEffect(() => {
+    if (confirm) {
+      const handle = async () => {
+        await handleCashPayment()
+        setConfirm(false)
+      }
+      handle()
+    }
+    setOpen(false)
+  }, [confirm])
 
   return (
     <Box
@@ -199,6 +222,38 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest })
       >
         Thanh toán
       </Button>
+
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Sheet
+          variant="outlined"
+          sx={{
+            maxWidth: 800,
+            maxHeight: '90vh',
+            width: '100%',
+            borderRadius: 'md',
+            p: 3,
+            boxShadow: 'lg',
+            overflowY: 'auto',
+          }}
+        >
+          <ModalClose variant="plain" sx={{ m: 1 }} />
+          <Typography variant="h5">
+            Xác nhận thanh toán
+          </Typography>
+          <Box sx={{ my: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>Thông tin đơn hàng</Typography>
+            {order.orderDetails?.map(od => <ProductDetailItem key={od.id} od={od} />)}
+            <Typography variant="h6">Tổng thanh toán đơn hàng của bạn là: {order.payAmount.toLocaleString('vi-VN')}đ</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'end' }}>
+              <Button color="success" variant="contained" onClick={() => setConfirm(true)}>Xác nhận</Button>
+            </Box>
+          </Box>
+        </Sheet>
+      </Modal>
 
 
     </Box>

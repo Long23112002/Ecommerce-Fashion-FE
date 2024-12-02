@@ -5,6 +5,7 @@ import ProductDetail from '../../../types/ProductDetail';
 import DiscountSelector from '../../../components/Discount/DiscountSelector';
 import { updateDiscountOrder } from '../../../api/OrderApi';
 import { Discount } from '../../../types/discount';
+import OrderDetail from '../../../types/OrderDetail';
 
 interface IProps {
     order: Order
@@ -31,11 +32,13 @@ const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
                 backgroundColor: 'white',
                 p: { xs: 2, md: 3 },
                 my: 2,
-                borderRadius: 4
+                borderRadius: 4,
+                position: 'sticky',
+                top: 70
             }}
         >
             <Typography variant='h6' mb={2} fontWeight="bold">Thông tin sản phẩm</Typography>
-            {order.orderDetails?.map(od => <ProductDetailItem key={od.id} pd={od.productDetail} />)}
+            {order.orderDetails?.map(od => <ProductDetailItem key={od.id} od={od} />)}
 
             <DiscountSelector order={order} onSelect={handleSelectVoucher} onCancel={handleCancel} />
 
@@ -62,38 +65,30 @@ const ProductOrderInfo: React.FC<IProps> = ({ order, setOrder }) => {
     );
 };
 
-const ProductDetailItem: React.FC<{ pd: ProductDetail }> = ({ pd }) => {
+export const ProductDetailItem: React.FC<{ od: OrderDetail }> = ({ od }) => {
+    const pd = od.productDetail
     return (
-        <Grid
-            container
-            spacing={2}
-            sx={{
-                pb: 2,
-                mb: 2,
-            }}
-        >
-            <Grid item xs={4} sm={3}>
-                <Box
-                    component="img"
-                    src={pd.images?.[0].url || ''}
-                    alt={pd.product.name}
-                    sx={{
-                        height: 100,
-                        width: '100%',
-                        borderRadius: 2,
-                        objectFit: 'cover'
-                    }}
-                />
-            </Grid>
-            <Grid item xs={8} sm={9}>
-                <Typography variant='subtitle1' fontWeight="bold">{pd.product.name}</Typography>
+        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Box
+                component="img"
+                src={pd.images?.[0].url || ''}
+                alt={pd.product.name}
+                sx={{
+                    width: 100,
+                    aspectRatio: '1/1',
+                    borderRadius: 2,
+                    objectFit: 'cover'
+                }}
+            />
+            <Box>
+                <Typography variant='subtitle1' fontWeight="bold">{pd.product.name} x{od.quantity}</Typography>
                 <Typography variant='body2' color="text.secondary">Màu: {pd.color.name}</Typography>
                 <Typography variant='body2' color="text.secondary">Kích thước: {pd.size.name}</Typography>
                 <Typography variant='body2' color="primary" fontWeight="bold">
                     Giá: {pd.price.toLocaleString()} VND
                 </Typography>
-            </Grid>
-        </Grid>
+            </Box>
+        </Box>
     )
 }
 
