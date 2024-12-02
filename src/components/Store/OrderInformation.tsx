@@ -4,11 +4,12 @@ import { User } from "../../types/User";
 import { Voucher } from "../../types/voucher";
 import OrderDetailListTable from "./ListOrderDraft";
 import Order from "../../types/Order";
-import React, {useEffect, useState} from "react";
-import {QrReader} from "react-qr-reader";
-import {addProductToOrderDetail, OrderDetailData} from "../../api/StoreApi";
-import {toast} from "react-toastify";
-import {getOrderById} from "../../api/OrderApi";
+import React, { useEffect, useState } from "react";
+import { QrReader } from "react-qr-reader";
+import { addProductToOrderDetail, OrderDetailData } from "../../api/StoreApi";
+import { toast } from "react-toastify";
+import { getOrderById } from "../../api/OrderApi";
+import DiscountSelector from "./DiscountSelector";
 
 interface OrderInformationProps {
     form: FormInstance;
@@ -18,6 +19,7 @@ interface OrderInformationProps {
     handlePay: (e: any) => void;
     fetchListOrderDetail: (order: any) => void;
     isUpdateGuestDiscount: boolean;
+    showModalDiscount: (e: any) => void;
 }
 
 
@@ -47,7 +49,8 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     handleCancel,
     handlePay,
     fetchListOrderDetail,
-    isUpdateGuestDiscount
+    isUpdateGuestDiscount,
+    showModalDiscount
 
 }) => {
     const formatCurrency = (value: number) => {
@@ -155,17 +158,17 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 name="control-hooks"
                 onFinish={onFinish}
                 initialValues={{
-                //     createdAt: order?.createdAt
-                //         ? new Date(order.createdAt).toLocaleDateString()
-                //         : "",
-                //     code: order?.code || "",
+                    //     createdAt: order?.createdAt
+                    //         ? new Date(order.createdAt).toLocaleDateString()
+                    //         : "",
+                    //     code: order?.code || "",
                     fullName: order?.fullName || "",
                     totalMoney: order?.totalMoney || 0,
-                //     payAmount: order?.payAmount || ""
+                    //     payAmount: order?.payAmount || ""
                 }}
             >
                 <div className="card text-white mb-3" style={{
-                    marginLeft:'18px'
+                    marginLeft: '18px'
                 }}>
                     <div className="card-body">
                         <h5 className="card-title text-center text-dark mb-2">Quét QR Sản Phẩm</h5>
@@ -177,7 +180,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                                     facingMode: 'environment'
                                 }}
                                 className="w-100"
-                                style={{aspectRatio: '1/1'}}
+                                style={{ aspectRatio: '1/1' }}
                             />
                             <div
                                 className="position-absolute top-50 start-50 translate-middle pointer-events-none"
@@ -189,16 +192,16 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                             >
                                 <div
                                     className="position-absolute top-0 start-0 w-25 h-25 border-top border-start border-dark-subtle rounded-top-left"
-                                    style={{borderWidth: '4px'}}></div>
+                                    style={{ borderWidth: '4px' }}></div>
                                 <div
                                     className="position-absolute top-0 end-0 w-25 h-25 border-top border-end border-dark-subtle rounded-top-right"
-                                    style={{borderWidth: '4px'}}></div>
+                                    style={{ borderWidth: '4px' }}></div>
                                 <div
                                     className="position-absolute bottom-0 start-0 w-25 h-25 border-bottom border-start border-dark-subtle rounded-bottom-left"
-                                    style={{borderWidth: '4px'}}></div>
+                                    style={{ borderWidth: '4px' }}></div>
                                 <div
                                     className="position-absolute bottom-0 end-0 w-25 h-25 border-bottom border-end border-dark-subtle rounded-bottom-right"
-                                    style={{borderWidth: '4px'}}></div>
+                                    style={{ borderWidth: '4px' }}></div>
                             </div>
 
                         </div>
@@ -209,25 +212,25 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     name="createdAt"
                     label="Ngày tạo"
                 >
-                    <Input disabled size="large" style={{fontSize: '16px', color: '#000'}}
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }}
                     />
                 </Form.Item>
 
                 <Form.Item label="Mã hóa đơn" name="code">
-                    <Input disabled size="large" style={{fontSize: '16px', color: '#000'}}/>
+                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item
                     name="fullName"
                     label="Tên khách"
-                    // rules={[
-                    //     {
-                    //         required: true,
-                    //         message: "Tên khách hàng không được trống",
-                    //     },
-                    // ]}
+                // rules={[
+                //     {
+                //         required: true,
+                //         message: "Tên khách hàng không được trống",
+                //     },
+                // ]}
                 >
-                    <Input placeholder="Nhập tên khách hàng"/>
+                    <Input placeholder="Nhập tên khách hàng" />
                 </Form.Item>
                 <Form.Item {...tailLayout}>
                     <Space>
@@ -243,12 +246,12 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 >
                     <Input
                         disabled
-                        size="large" style={{fontSize: '16px', color: '#000'}}
+                        size="large" style={{ fontSize: '16px', color: '#000' }}
                     />
                 </Form.Item>
 
-                <Form.Item
-                    name="idDiscount"
+                {/* <Form.Item
+                    name="discountId"
                     label="Giảm giá"
                     rules={[
                         {
@@ -260,9 +263,19 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     <Select
                         placeholder="Chọn mã giảm giá"
                         allowClear
-
                     >
                     </Select>
+                </Form.Item> */}
+                <Form.Item name="discountId" {...tailLayout}>
+                    <DiscountSelector
+                        order={order} />
+                    {/* <Space>
+                        <Button type="primary" htmlType="submit" 
+                        onClick={showModalDiscount}
+                        >
+                            Mã giảm giá
+                        </Button>
+                    </Space> */}
                 </Form.Item>
 
                 {/* <Form.Item

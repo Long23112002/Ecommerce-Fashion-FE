@@ -25,6 +25,7 @@ import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
 import { makeSlug } from "../../../utils/slug";
 import { QrReader } from 'react-qr-reader';
+import DiscountSelector from "../../../components/Store/DiscountSelector";
 
 
 const SellingAtStore = () => {
@@ -58,6 +59,7 @@ const SellingAtStore = () => {
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [isOrderDetailChange, setIsOrderDetailChange] = useState(false);
     const [isPay, setIsPay] = useState(false);
+    const [isAddQroductSuccess, setIsAddQroductSuccess] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
@@ -67,6 +69,8 @@ const SellingAtStore = () => {
     const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
     const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
+    const [showModalDiscount, setShowModalDiscount] = useState(false);
+
 
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
@@ -106,13 +110,13 @@ const SellingAtStore = () => {
                     const response = await getOrderById(order?.id, token); // API lấy hóa đơn mới
                     setOrder(response);
 
-                    setIsOrderDetailChange(true)
+                    // setIsOrderDetailChange(true)
                     toast.success('Thêm sản phẩm Thành Công');
                     handleAddQuantityCancel()
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
                     });
-                    // setIsOrderDetailChange(false)
+                    setIsAddQroductSuccess(true)
 
                 } else {
                     toast.error("Authorization failed");
@@ -311,6 +315,12 @@ const SellingAtStore = () => {
         // fetchListOrderDetail(order)
         setIsOrderDetailChange(true)
     }
+    const showModalChooseDiscount = () => {
+        setShowModalDiscount(true);
+    };
+    const onSelectDiscount = () => {
+        setShowModalDiscount(true);
+    }
 
     const handleQuantityChange = (value: number | null, id: number) => {
         if (value && value > 0) {
@@ -382,6 +392,7 @@ const SellingAtStore = () => {
                         isOrderDetailChange={isOrderDetailChange}
                         onChange={onChangeQuantity}
                         isPay={isPay}
+                        isAddQroductSuccess={isAddQroductSuccess}
                     />
 
                     <ListProduct
@@ -410,6 +421,7 @@ const SellingAtStore = () => {
                         handlePay={handlePay}
                         // fetchListOrderDetail={fetchListOrderDetail}
                         isUpdateGuestDiscount={isUpdateGuestDiscount}
+                        showModalDiscount={showModalChooseDiscount}
                     />
                 </Col>
             </Row>
@@ -429,6 +441,7 @@ const SellingAtStore = () => {
                 filterParams={filterParams}
                 setFilterParams={setFilterParams}
             />
+
         </div>
     )
 

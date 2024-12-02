@@ -133,6 +133,8 @@ const ManageProductDetail = () => {
                 toast.success('Thêm sản phẩm Thành Công');
                 handleAddCancel();
                 refreshProductdetails();
+                setFileList([]);
+                setImageList([]);
             } else {
                 toast.error("Authorization failed");
             }

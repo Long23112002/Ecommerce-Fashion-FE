@@ -14,6 +14,7 @@ interface ListOrderDetailProps {
     order: Order | null;
     isOrderDetailChange: boolean;
     isPay: boolean;
+    isAddQroductSuccess: boolean;
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     // orderDetailList,
@@ -21,7 +22,8 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     onChange,
     order,
     isOrderDetailChange,
-    isPay
+    isPay,
+    isAddQroductSuccess
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -44,7 +46,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         if (order) {
             fetchListOrderDetail(order);
         }
-    }, [order, isOrderDetailChange])
+    }, [order, isOrderDetailChange , isAddQroductSuccess])
 
     const columns = [
         {
