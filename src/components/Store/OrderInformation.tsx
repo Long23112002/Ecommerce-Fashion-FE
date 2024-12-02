@@ -10,6 +10,7 @@ import { addProductToOrderDetail, OrderDetailData } from "../../api/StoreApi";
 import { toast } from "react-toastify";
 import { getOrderById, updateDiscountOrder } from "../../api/OrderApi";
 import DiscountSelector from "./DiscountSelector";
+import { Box } from "@mui/material";
 
 interface OrderInformationProps {
     form: FormInstance;
@@ -149,123 +150,121 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     }
 
     return (
+        //TODO: SỬA STYLE
         <div
             style={{
-                position: "fixed",
-                top: "54%",
-                right: "35px",
-                transform: "translateY(-50%)",
-                width: "320px",
-                maxHeight: "calc(100vh - 40px)",
-                overflowY: "auto",
-                border: "1px solid black",
-                padding: "15px",
-                borderRadius: "8px",
-                backgroundColor: "white",
-                zIndex: 1000,
-                marginLeft: 'auto',
-                paddingRight: 30
+                position: 'fixed',
+                top: 80,
+                right: 30,
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                borderRadius: 20,
             }}
         >
-            <Form
-                form={form}
-                {...layout}
-                name="control-hooks"
-                onFinish={onFinish}
-                initialValues={{
-                    //     createdAt: order?.createdAt
-                    //         ? new Date(order.createdAt).toLocaleDateString()
-                    //         : "",
-                    //     code: order?.code || "",
-                    fullName: order?.fullName || "",
-                    totalMoney: order?.totalMoney || 0,
-                    payAmount: order?.payAmount || 0
+            <Box
+                sx={{
+                    margin: 3,
+                    marginLeft: 1
                 }}
             >
-                <div className="card text-white mb-3" style={{
-                    marginLeft: '18px'
-                }}>
-                    <div className="card-body">
-                        <h5 className="card-title text-center text-dark mb-2">Quét QR Sản Phẩm</h5>
+                <Form
+                    form={form}
+                    {...layout}
+                    name="control-hooks"
+                    onFinish={onFinish}
+                    initialValues={{
+                        //     createdAt: order?.createdAt
+                        //         ? new Date(order.createdAt).toLocaleDateString()
+                        //         : "",
+                        //     code: order?.code || "",
+                        fullName: order?.fullName || "",
+                        totalMoney: order?.totalMoney || 0,
+                        payAmount: order?.payAmount || 0
+                    }}
+                >
+                    <div className="card text-white mb-3" style={{
+                        marginLeft: '18px'
+                    }}>
+                        <div className="card-body">
+                            <h5 className="card-title text-center text-dark mb-2">Quét QR Sản Phẩm</h5>
 
-                        <div className="position-relative">
-                            <QrReader
-                                onResult={handleResult}
-                                constraints={{
-                                    facingMode: 'environment'
-                                }}
-                                className="w-100"
-                                style={{ aspectRatio: '1/1' }}
-                            />
-                            <div
-                                className="position-absolute top-50 start-50 translate-middle pointer-events-none"
-                                style={{
-                                    width: `136px`,
-                                    height: `126px`,
-                                    transition: 'all 0.3s ease-in-out'
-                                }}
-                            >
+                            <div className="position-relative">
+                                <QrReader
+                                    onResult={handleResult}
+                                    constraints={{
+                                        facingMode: 'environment'
+                                    }}
+                                    className="w-100"
+                                    style={{ aspectRatio: '1/1' }}
+                                />
                                 <div
-                                    className="position-absolute top-0 start-0 w-25 h-25 border-top border-start border-dark-subtle rounded-top-left"
-                                    style={{ borderWidth: '4px' }}></div>
-                                <div
-                                    className="position-absolute top-0 end-0 w-25 h-25 border-top border-end border-dark-subtle rounded-top-right"
-                                    style={{ borderWidth: '4px' }}></div>
-                                <div
-                                    className="position-absolute bottom-0 start-0 w-25 h-25 border-bottom border-start border-dark-subtle rounded-bottom-left"
-                                    style={{ borderWidth: '4px' }}></div>
-                                <div
-                                    className="position-absolute bottom-0 end-0 w-25 h-25 border-bottom border-end border-dark-subtle rounded-bottom-right"
-                                    style={{ borderWidth: '4px' }}></div>
+                                    className="position-absolute top-50 start-50 translate-middle pointer-events-none"
+                                    style={{
+                                        width: `136px`,
+                                        height: `126px`,
+                                        transition: 'all 0.3s ease-in-out'
+                                    }}
+                                >
+                                    <div
+                                        className="position-absolute top-0 start-0 w-25 h-25 border-top border-start border-dark-subtle rounded-top-left"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute top-0 end-0 w-25 h-25 border-top border-end border-dark-subtle rounded-top-right"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute bottom-0 start-0 w-25 h-25 border-bottom border-start border-dark-subtle rounded-bottom-left"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute bottom-0 end-0 w-25 h-25 border-bottom border-end border-dark-subtle rounded-bottom-right"
+                                        style={{ borderWidth: '4px' }}></div>
+                                </div>
+
                             </div>
 
                         </div>
-
                     </div>
-                </div>
-                <Form.Item
-                    name="createdAt"
-                    label="Ngày tạo"
-                >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }}
-                    />
-                </Form.Item>
+                    <Form.Item
+                        name="createdAt"
+                        label="Ngày tạo"
+                    >
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }}
+                        />
+                    </Form.Item>
 
-                <Form.Item label="Mã hóa đơn" name="code">
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
+                    <Form.Item label="Mã hóa đơn" name="code">
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    </Form.Item>
 
-                <Form.Item
-                    name="fullName"
-                    label="Tên khách"
-                // rules={[
-                //     {
-                //         required: true,
-                //         message: "Tên khách hàng không được trống",
-                //     },
-                // ]}
-                >
-                    <Input placeholder="Nhập tên khách hàng" />
-                </Form.Item>
-                <Form.Item {...tailLayout}>
-                    <Space>
-                        <Button type="primary" htmlType="submit" onClick={showModalUser}>
-                            Chọn khách hàng
-                        </Button>
-                    </Space>
-                </Form.Item>
+                    <Form.Item
+                        name="fullName"
+                        label="Tên khách"
+                    // rules={[
+                    //     {
+                    //         required: true,
+                    //         message: "Tên khách hàng không được trống",
+                    //     },
+                    // ]}
+                    >
+                        <Input placeholder="Nhập tên khách hàng" />
+                    </Form.Item>
+                    <Form.Item {...tailLayout}>
+                        <Space>
+                            <Button type="primary" htmlType="submit" onClick={showModalUser}>
+                                Chọn khách hàng
+                            </Button>
+                        </Space>
+                    </Form.Item>
 
-                <Form.Item
-                    name="totalMoney"
-                    label="Tổng tiền"
-                >
-                    <Input
-                        disabled
-                        size="large" style={{ fontSize: '16px', color: '#000' }}
-                    />
-                </Form.Item>
+                    <Form.Item
+                        name="totalMoney"
+                        label="Tổng tiền"
+                    >
+                        <Input
+                            disabled
+                            size="large" style={{ fontSize: '16px', color: '#000' }}
+                        />
+                    </Form.Item>
 
-                {/* <Form.Item
+                    {/* <Form.Item
                     name="discountId"
                     label="Giảm giá"
                     rules={[
@@ -281,22 +280,22 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     >
                     </Select>
                 </Form.Item> */}
-                <Form.Item name="discountId" {...tailLayout}>
-                    <DiscountSelector
-                        order={order}
-                        onSelect={onSelect}
-                        onCancel={onCancel}
-                    />
-                    {/* <Space>
+                    <Form.Item name="discountId" {...tailLayout}>
+                        <DiscountSelector
+                            order={order}
+                            onSelect={onSelect}
+                            onCancel={onCancel}
+                        />
+                        {/* <Space>
                         <Button type="primary" htmlType="submit" 
                         onClick={showModalDiscount}
                         >
                             Mã giảm giá
                         </Button>
                     </Space> */}
-                </Form.Item>
+                    </Form.Item>
 
-                {/* <Form.Item
+                    {/* <Form.Item
                     label="Thành tiền"
                     dependencies={['totalMoney', 'idVoucher']}
                     shouldUpdate={(prevValues, currentValues) =>
@@ -320,33 +319,34 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     }}
                 </Form.Item> */}
 
-                <Form.Item
-                    name="payAmount"
-                    label="Thành tiền"
-                >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item>
+                    <Form.Item
+                        name="payAmount"
+                        label="Thành tiền"
+                    >
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    </Form.Item>
 
-                <Form.Item {...tailLayout}>
-                    <Space>
-                        <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
-                            Thanh toán
-                        </Button>
-
-                        <Popconfirm
-                            title="Bạn chắc chắn muốn xóa hóa đơn này?"
-                            onConfirm={() => handleCancel(order)}
-                            okText="Có"
-                            cancelText="Không"
-                        >
-                            <Button>
-                                Hủy đơn
+                    <Form.Item {...tailLayout}>
+                        <Space>
+                            <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
+                                Thanh toán
                             </Button>
-                        </Popconfirm>
-                    </Space>
-                </Form.Item>
-            </Form>
 
+                            <Popconfirm
+                                title="Bạn chắc chắn muốn xóa hóa đơn này?"
+                                onConfirm={() => handleCancel(order)}
+                                okText="Có"
+                                cancelText="Không"
+                            >
+                                <Button>
+                                    Hủy đơn
+                                </Button>
+                            </Popconfirm>
+                        </Space>
+                    </Form.Item>
+                </Form>
+
+            </Box>
         </div>
 
     )

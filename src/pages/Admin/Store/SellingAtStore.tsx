@@ -409,16 +409,12 @@ const SellingAtStore = () => {
                         isOrderSuccess={isOrderSuccess} />
                 </Col>
 
-                <Col style={{
-                    width: "320px",
-                    maxHeight: "calc(100vh - 40px)",
-                    overflowY: "auto",
-                    // border: "1px solid black",
-                    padding: "15px",
-                    borderRadius: "8px",
-                    backgroundColor: "white",
-                    zIndex: 1000,
-                }}>
+                {/* //TODO: SỬA STYLE */}
+                <Col
+                    style={{
+                        width: 320
+                    }}
+                >
                     <OrderInformation
                         order={order}
                         setOrder={setOrder}
