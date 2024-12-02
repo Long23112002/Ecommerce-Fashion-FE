@@ -133,6 +133,14 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
         };
     }, []);
 
+    const onSelect = (discount: Discount) => {
+        
+    }
+
+    const onCancel = () => {
+        
+    }
+
     return (
         <div
             style={{
