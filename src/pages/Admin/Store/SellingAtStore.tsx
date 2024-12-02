@@ -1,10 +1,7 @@
 import { Button, Col, Form, Row } from "antd";
 import OrderInformation from "../../../components/Store/OrderInformation"
-import { fetchAllVouchers } from "../../../api/VoucherApi";
 import { useCallback, useEffect, useState } from "react";
 import { debounce, truncate } from "lodash";
-import { Voucher } from "../../../types/voucher";
-import { User } from "../../../types/User";
 import ListProduct from "../../../components/Store/ListProduct";
 import ListOrderDetail from "../../../components/Store/ListOrderDetail";
 import ListOrderDraft from "../../../components/Store/ListOrderDraft";
@@ -25,7 +22,6 @@ import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
 import { makeSlug } from "../../../utils/slug";
 import { QrReader } from 'react-qr-reader';
-import DiscountSelector from "../../../components/Store/DiscountSelector";
 
 
 const SellingAtStore = () => {
@@ -33,11 +29,6 @@ const SellingAtStore = () => {
     const [formOrder] = Form.useForm();
     const [form] = Form.useForm();
 
-
-    const [vouchers, setVouchers] = useState<Voucher[]>([]); // State for voucher details
-    const [loadingVouchers, setLoadingVouchers] = useState(true);
-
-    const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [filterParams, setFilterParams] = useState<UserParam>({
         page: 0,
@@ -62,12 +53,8 @@ const SellingAtStore = () => {
     const [isAddQroductSuccess, setIsAddQroductSuccess] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
-    const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
-    const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
-
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
     const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
-    const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
     const [showModalDiscount, setShowModalDiscount] = useState(false);
 
@@ -120,9 +107,13 @@ const SellingAtStore = () => {
                     handleAddQuantityCancel()
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
-                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0"
+                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : formatCurrency(response.totalMoney),
+                        createdAt: order?.createdAt
+                            ? new Date(order.createdAt).toLocaleDateString()
+                            : "",
                     });
                     setIsAddQroductSuccess(true)
+                    // setIsPay(false)
 
                 } else {
                     toast.error("Authorization failed");
@@ -137,7 +128,9 @@ const SellingAtStore = () => {
     const formInfor = (order: Order | null) => {
         if (order) {
             formOrder.setFieldsValue({
-                createdAt: order.createdAt,
+                createdAt: order?.createdAt
+                    ? new Date(order.createdAt).toLocaleDateString()
+                    : "",
                 code: order.code,
                 // idVoucher: order.discountId,
                 totalMoney: order.totalMoney
@@ -148,7 +141,8 @@ const SellingAtStore = () => {
                 code: "",
                 // idVoucher: "",
                 totalMoney: "",
-                fullName: ""
+                fullName: "",
+                payAmount: ""
             })
         }
     }
@@ -158,12 +152,12 @@ const SellingAtStore = () => {
             const token = Cookies.get("accessToken");
             if (token && order) {
                 await deleteOrder(order.id, token);
+                setIsPay(true)
+
                 toast.success("Xóa hóa đơn thành công");
 
                 formInfor(null)
                 fetchListOrderDraft()
-                // fetchListOrderDetail(null)
-                setOrder(null)
             } else {
                 toast.error("Xác thực thất bại");
             }
@@ -182,6 +176,7 @@ const SellingAtStore = () => {
                 setOrder(res);
                 formOrder.setFieldsValue({
                     totalMoney: res?.totalMoney ? formatCurrency(res.totalMoney) : "0",
+                    payAmount: res?.totalMoney ? formatCurrency(res.totalMoney) : "0",
                 });
                 setIsOrderDetailChange(false)
             } else {
@@ -201,13 +196,14 @@ const SellingAtStore = () => {
                 formOrder.resetFields();
                 formOrder.setFieldsValue({
                     totalMoney: "0 " + "đ",
-                    fullName: "Khách lẻ"
+                    fullName: "Khách lẻ",
+                    payAmount: "0 " + "đ",
+                    creatAt: ""
                 });
 
                 fetchListOrderDraft();
                 setIsPay(true);
                 setIsOrderSuccess(true);
-                // setIsOrderDetailChange(true);
                 downloadOrderPdf(order.id);
 
             } else {
@@ -254,11 +250,9 @@ const SellingAtStore = () => {
 
     const handleUpdateOrder = async (idGuest: number) => {
         try {
-            const idDiscount = 34;
-
             if (order) {
                 console.log("Guest ID:", idGuest);
-                const updatedOrder = await updateOrderAtStore(order.id, { idGuest, idDiscount });
+                const updatedOrder = await updateOrderAtStore(order.id, { idGuest });
                 setOrder({ ...order, fullName: updatedOrder.fullName });
 
                 handleCancel();
@@ -317,9 +311,10 @@ const SellingAtStore = () => {
             setOrder(order);
             resolve(true);
         });
-        formOrder.setFieldsValue(order)
+        // formOrder.setFieldsValue(order)
         // fetchListOrderDetail(order)
         setIsOrderDetailChange(true)
+        formInfor(order)
     }
     const showModalChooseDiscount = () => {
         setShowModalDiscount(true);
@@ -354,6 +349,19 @@ const SellingAtStore = () => {
         console.log('handleDecreaseQuantity');
 
     };
+
+    const fetchListOrderDetail = async (order: Order | null) => {
+        if (order) {
+            const response = await getOrderById(order?.id);
+            setOrder(response);
+
+        } else {
+            setOrder(null)
+            setOrderDetailList([])
+            setIsAddQroductSuccess(true)
+        }
+
+    }
 
 
     useEffect(() => {
@@ -392,7 +400,6 @@ const SellingAtStore = () => {
                         handleOrder={handleOrder}
                     />
                     <ListOrderDetail
-                        // orderDetailList={orderDetailList}
                         handleDelete={handleDeleteOrderDetail}
                         order={order}
                         isOrderDetailChange={isOrderDetailChange}
@@ -422,7 +429,7 @@ const SellingAtStore = () => {
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
                         handlePay={handlePay}
-                        // fetchListOrderDetail={fetchListOrderDetail}
+                        fetchListOrderDetail={fetchListOrderDetail}
                         isUpdateGuestDiscount={isUpdateGuestDiscount}
                         showModalDiscount={showModalChooseDiscount}
                     />
