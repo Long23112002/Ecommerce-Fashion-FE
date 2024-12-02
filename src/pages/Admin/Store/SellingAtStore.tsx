@@ -71,6 +71,11 @@ const SellingAtStore = () => {
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
     const [showModalDiscount, setShowModalDiscount] = useState(false);
 
+    useEffect(() => {
+        formOrder.setFieldsValue({
+            ...order
+        })
+    }, [order])
 
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
@@ -107,7 +112,7 @@ const SellingAtStore = () => {
                 if (token) {
                     await addProductToOrderDetail({ idOrder, idProductDetail: currentProductDetailId, quantity });
 
-                    const response = await getOrderById(order?.id, token); // API lấy hóa đơn mới
+                    const response = await getOrderById(order?.id); // API lấy hóa đơn mới
                     setOrder(response);
 
                     // setIsOrderDetailChange(true)
@@ -115,6 +120,7 @@ const SellingAtStore = () => {
                     handleAddQuantityCancel()
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0"
                     });
                     setIsAddQroductSuccess(true)
 
@@ -203,7 +209,7 @@ const SellingAtStore = () => {
                 setIsOrderSuccess(true);
                 // setIsOrderDetailChange(true);
                 downloadOrderPdf(order.id);
-                
+
             } else {
                 toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
             }
@@ -415,6 +421,7 @@ const SellingAtStore = () => {
                 }}>
                     <OrderInformation
                         order={order}
+                        setOrder={setOrder}
                         form={formOrder}
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}

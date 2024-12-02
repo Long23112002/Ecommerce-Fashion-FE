@@ -46,7 +46,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         if (order) {
             fetchListOrderDetail(order);
         }
-    }, [order, isOrderDetailChange , isAddQroductSuccess])
+    }, [order, isOrderDetailChange, isAddQroductSuccess])
 
     const columns = [
         {
@@ -59,7 +59,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             dataIndex: 'productDetail',
             key: 'productDetail',
             render: (productDetail: any): any => (
-                productDetail.product.image ? (
+                productDetail?.product?.image ? (
                     <Image
                         width={60}
                         src={productDetail.product.image}
@@ -77,19 +77,19 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             title: 'Tên sản phẩm',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail.product.name
+            render: (productDetail: any) => productDetail?.product?.name || ''
         },
         {
             title: 'Màu sắc',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail.color.name
+            render: (productDetail: any) => productDetail?.color?.name ||''
         },
         {
             title: 'Kích cỡ',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail.size.name
+            render: (productDetail: any) => productDetail?.size?.name ||''
         },
         {
             title: 'Đơn giá',

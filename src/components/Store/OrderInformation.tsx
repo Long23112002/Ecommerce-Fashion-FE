@@ -8,13 +8,14 @@ import React, { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import { addProductToOrderDetail, OrderDetailData } from "../../api/StoreApi";
 import { toast } from "react-toastify";
-import { getOrderById } from "../../api/OrderApi";
+import { getOrderById, updateDiscountOrder } from "../../api/OrderApi";
 import DiscountSelector from "./DiscountSelector";
 
 interface OrderInformationProps {
     form: FormInstance;
     showModalUser: (e: any) => void;
     order: Order | null;
+    setOrder: React.Dispatch<React.SetStateAction<Order | null>>;
     handleCancel: (e: any) => void;
     handlePay: (e: any) => void;
     fetchListOrderDetail: (order: any) => void;
@@ -46,6 +47,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
     showModalUser,
     order,
+    setOrder,
     handleCancel,
     handlePay,
     fetchListOrderDetail,
@@ -133,12 +135,17 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
         };
     }, []);
 
-    const onSelect = (discount: Discount) => {
-        
+    const onSelect = async (discount: Discount) => {
+        if (!discount.id || discount.id <= 0 || !order || !order.id) return
+        console.log(discount)
+        const res = await updateDiscountOrder(order?.id, discount.id)
+        setOrder({ ...res })
     }
 
-    const onCancel = () => {
-        
+    const onCancel = async () => {
+        if (!order || !order.id) return
+        const res = await updateDiscountOrder(order?.id, null)
+        setOrder({ ...res })
     }
 
     return (
@@ -172,7 +179,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     //     code: order?.code || "",
                     fullName: order?.fullName || "",
                     totalMoney: order?.totalMoney || 0,
-                    //     payAmount: order?.payAmount || ""
+                    payAmount: order?.payAmount || 0
                 }}
             >
                 <div className="card text-white mb-3" style={{
@@ -276,7 +283,10 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 </Form.Item> */}
                 <Form.Item name="discountId" {...tailLayout}>
                     <DiscountSelector
-                        order={order} />
+                        order={order}
+                        onSelect={onSelect}
+                        onCancel={onCancel}
+                    />
                     {/* <Space>
                         <Button type="primary" htmlType="submit" 
                         onClick={showModalDiscount}
@@ -310,12 +320,12 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     }}
                 </Form.Item> */}
 
-                {/* <Form.Item
+                <Form.Item
                     name="payAmount"
                     label="Thành tiền"
                 >
                     <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item> */}
+                </Form.Item>
 
                 <Form.Item {...tailLayout}>
                     <Space>

@@ -51,11 +51,7 @@ export const getOrderById = async (id: number | string) => {
     return data
 }
 
-export const updateAdressOrder = async (request: OrderAddressUpdate) => {
-    const orderId = Cookies.get('orderId')
-    if (!orderId) {
-        throw Error('Người dùng không có đơn hàng')
-    }
+export const updateAdressOrder = async (orderId: string | number, request: OrderAddressUpdate) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/update-address/${orderId}`,
@@ -64,11 +60,7 @@ export const updateAdressOrder = async (request: OrderAddressUpdate) => {
     return data
 }
 
-export const updateDiscountOrder = async (discountId: number | string | null) => {
-    const orderId = Cookies.get('orderId')
-    if (!orderId) {
-        throw Error('Người dùng không có đơn hàng')
-    }
+export const updateDiscountOrder = async (orderId: string | number, discountId: number | string | null) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/update-discount/${orderId}`,
@@ -79,11 +71,7 @@ export const updateDiscountOrder = async (discountId: number | string | null) =>
     return data
 }
 
-export const payOrder = async (request: OrderUpdateRequest) => {
-    const orderId = Cookies.get('orderId')
-    if (!orderId) {
-        throw Error('Người dùng không có đơn hàng')
-    }
+export const payOrder = async (orderId: string | number, request: OrderUpdateRequest) => {
     const { data } = await axiosInstance({
         method: 'PUT',
         url: `${BASE_API}/api/v1/orders/payment/${orderId}`,
@@ -161,20 +149,20 @@ export const checkSumPayment = async (amount: number, description: string) => {
         throw error;
     }
 }
-export const downloadOrderPdf = async (orderId:number) => {
+export const downloadOrderPdf = async (orderId: number) => {
     try {
-      const response = await axiosInstance.get(`${BASE_URL}/export-pdf/${orderId}`, {
-        responseType: "blob", 
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `order_${orderId}.pdf`); 
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+        const response = await axiosInstance.get(`${BASE_URL}/export-pdf/${orderId}`, {
+            responseType: "blob",
+        });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `order_${orderId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     } catch (error) {
-      console.error("Lỗi khi tải PDF:", error);
-      throw error;
+        console.error("Lỗi khi tải PDF:", error);
+        throw error;
     }
-  };
+};

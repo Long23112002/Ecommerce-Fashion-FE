@@ -17,7 +17,7 @@ const DiscountSelector: React.FC<IProps> = ({ order, onSelect, onCancel }) => {
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [discounts, setDiscounts] = useState<Discount[]>([])
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -38,7 +38,7 @@ const DiscountSelector: React.FC<IProps> = ({ order, onSelect, onCancel }) => {
 
     useEffect(() => {
         if (!order) return
-        if(order.orderDetails?.length == 0) {
+        if (order.orderDetails?.length == 0) {
             setDiscounts([])
             return
         }
