@@ -1,29 +1,26 @@
 import { Button, Col, Divider, Image, InputNumber, Popconfirm, Row, Table, Tooltip } from 'antd'
 import React, { useEffect, useState } from 'react'
-import LoadingCustom from '../Loading/LoadingCustom'
 import OrderDetail from '../../types/OrderDetail'
-import createPaginationConfig from '../../config/paginationConfig';
 import { FileImageOutlined } from '@ant-design/icons';
 import Order from '../../types/Order';
 import { getOrderDetailByIdOrder } from '../../api/StoreApi';
 
 interface ListOrderDetailProps {
-    // orderDetailList: OrderDetail[];
     handleDelete: (e: any) => void;
     onChange: (value: any, e: any) => void;
     order: Order | null;
     isOrderDetailChange: boolean;
     isPay: boolean;
     isAddQroductSuccess: boolean;
+
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
-    // orderDetailList,
     handleDelete,
     onChange,
     order,
     isOrderDetailChange,
     isPay,
-    isAddQroductSuccess
+    isAddQroductSuccess,
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -149,16 +146,10 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
                 <Table
                     dataSource={orderDetailList}
                     columns={columns}
-                    // loading={{
-                    //     spinning: loading,
-                    //     indicator: <LoadingCustom />,
-                    // }}
                     rowKey="id"
-                    // pagination={createPaginationConfig(pagination, setPagination)}
                     expandable={{ childrenColumnName: 'children' }}
                 />}
         </>
     )
 }
-
 export default ListOrderDetail

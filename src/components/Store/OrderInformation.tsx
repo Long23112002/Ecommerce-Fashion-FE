@@ -172,13 +172,17 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     name="control-hooks"
                     onFinish={onFinish}
                     initialValues={{
-                        //     createdAt: order?.createdAt
-                        //         ? new Date(order.createdAt).toLocaleDateString()
-                        //         : "",
+                            createdAt: order?.createdAt
+                                ? new Date(order.createdAt).toLocaleDateString()
+                                : "",
                         //     code: order?.code || "",
                         fullName: order?.fullName || "",
-                        totalMoney: order?.totalMoney || 0,
-                        payAmount: order?.payAmount || 0
+                        totalMoney: order?.totalMoney? formatCurrency(order?.totalMoney) : 0 + " đ",
+                        payAmount: order 
+                        ? order?.payAmount !== null 
+                          ? formatCurrency(order?.payAmount) 
+                          : formatCurrency(order?.totalMoney)
+                        : 0 + " đ"
                     }}
                 >
                     <div className="card text-white mb-3" style={{
@@ -237,12 +241,6 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     <Form.Item
                         name="fullName"
                         label="Tên khách"
-                    // rules={[
-                    //     {
-                    //         required: true,
-                    //         message: "Tên khách hàng không được trống",
-                    //     },
-                    // ]}
                     >
                         <Input placeholder="Nhập tên khách hàng" />
                     </Form.Item>
@@ -264,60 +262,13 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                         />
                     </Form.Item>
 
-                    {/* <Form.Item
-                    name="discountId"
-                    label="Giảm giá"
-                    rules={[
-                        {
-                            required: false,
-                            message: "Vui lòng chọn voucher",
-                        },
-                    ]}
-                >
-                    <Select
-                        placeholder="Chọn mã giảm giá"
-                        allowClear
-                    >
-                    </Select>
-                </Form.Item> */}
                     <Form.Item name="discountId" {...tailLayout}>
                         <DiscountSelector
                             order={order}
                             onSelect={onSelect}
                             onCancel={onCancel}
                         />
-                        {/* <Space>
-                        <Button type="primary" htmlType="submit" 
-                        onClick={showModalDiscount}
-                        >
-                            Mã giảm giá
-                        </Button>
-                    </Space> */}
                     </Form.Item>
-
-                    {/* <Form.Item
-                    label="Thành tiền"
-                    dependencies={['totalMoney', 'idVoucher']}
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues.totalMoney !== currentValues.totalMoney || prevValues.idVoucher !== currentValues.idVoucher
-                    }
-                >
-                    {({ getFieldValue }) => {
-                        const totalMoney = getFieldValue('totalMoney') || 0;
-                        const idVoucher = getFieldValue('idVoucher');
-                        const discount = vouchers.find(voucher => voucher.id === idVoucher)?.discountAmount || 0;
-                        const payAmount = totalMoney - discount;
-
-                        return (
-                            <Input
-                                disabled
-                                value={payAmount > 0 ? payAmount : 0}
-                                size="large"
-                                style={{ fontSize: '16px', color: '#000' }}
-                            />
-                        );
-                    }}
-                </Form.Item> */}
 
                     <Form.Item
                         name="payAmount"
