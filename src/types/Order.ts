@@ -9,7 +9,6 @@ export enum OrderStatus {
     SHIPPING = "SHIPPING",
     SUCCESS = "SUCCESS",
     DRAFT = "DRAFT",
-    REFUND = "REFUND",
     PENDING_AT_STORE = "PENDING_AT_STORE"
 }
 
@@ -19,14 +18,13 @@ export const OrderStatusLabel: Record<OrderStatus, string> = {
     [OrderStatus.SHIPPING]: "Đang vận chuyển",
     [OrderStatus.SUCCESS]: "Thành công",
     [OrderStatus.DRAFT]: "Nháp",
-    [OrderStatus.REFUND]: "Hoàn tiền",
     [OrderStatus.PENDING_AT_STORE]: "Tại Quầy",
 };
 
 export interface Order {
     id: number;
     discountId: number;
-    user: User|null;
+    user: User | null;
     status: OrderStatus;
     paymentMethod: PaymentMethodEnum;
     fullName: string,
@@ -76,6 +74,6 @@ export interface OrderLog {
     newValue: string;
     createdAt: number;
     updatedAt: number;
-  }
+}
 
 export default Order
