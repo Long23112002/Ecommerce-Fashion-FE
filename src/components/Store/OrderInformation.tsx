@@ -163,7 +163,9 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
             <Box
                 sx={{
                     margin: 3,
-                    marginLeft: 1
+                    marginLeft: 1,
+                    height: '100%',
+                    overflowY: 'auto'
                 }}
             >
                 <Form
@@ -172,17 +174,17 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                     name="control-hooks"
                     onFinish={onFinish}
                     initialValues={{
-                            createdAt: order?.createdAt
-                                ? new Date(order.createdAt).toLocaleDateString()
-                                : "",
+                        createdAt: order?.createdAt
+                            ? new Date(order.createdAt).toLocaleDateString()
+                            : "",
                         //     code: order?.code || "",
                         fullName: order?.fullName || "",
-                        totalMoney: order?.totalMoney? formatCurrency(order?.totalMoney) : 0 + " đ",
-                        payAmount: order 
-                        ? order?.payAmount !== null 
-                          ? formatCurrency(order?.payAmount) 
-                          : formatCurrency(order?.totalMoney)
-                        : 0 + " đ"
+                        totalMoney: order?.totalMoney ? formatCurrency(order?.totalMoney) : 0 + " đ",
+                        payAmount: order
+                            ? order?.payAmount !== null
+                                ? formatCurrency(order?.payAmount)
+                                : formatCurrency(order?.totalMoney)
+                            : 0 + " đ"
                     }}
                 >
                     <div className="card text-white mb-3" style={{
