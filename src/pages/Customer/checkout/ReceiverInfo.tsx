@@ -15,10 +15,11 @@ interface IProps {
   setOrder: React.Dispatch<React.SetStateAction<Order | undefined>>
   orderRequest: OrderUpdateRequest,
   setOrderRequest: React.Dispatch<React.SetStateAction<OrderUpdateRequest>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setValidAddress: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading }) => {
+const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrderRequest, setLoading, setValidAddress }) => {
   const { catchToast } = useToast()
   const user = useSelector(userSelector)
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -29,24 +30,18 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
   const [selectedWard, setSelectedWard] = useState<Ward | null>(null)
 
   const handleSelectProvince = (_: any, value: Province | null) => {
-    if (value && (!selectedProvince || selectedProvince.ProvinceID != value.ProvinceID)) {
-      setSelectedProvince({ ...value })
-      setSelectedDistrict(null)
-      setSelectedWard(null)
-    }
+    setSelectedProvince(value)
+    setSelectedDistrict(null)
+    setSelectedWard(null)
   }
 
   const handleSelectDistrict = (_: any, value: District | null) => {
-    if (value && (selectedProvince && selectedDistrict?.DistrictID != value.DistrictID)) {
-      setSelectedDistrict({ ...value })
-      setSelectedWard(null)
-    }
+    setSelectedDistrict(value)
+    setSelectedWard(null)
   }
 
   const handleSelectWard = (_: any, value: Ward | null) => {
-    if (value) {
-      setSelectedWard({ ...value })
-    }
+    setSelectedWard(value)
   }
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -95,16 +90,22 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
 
   useEffect(() => {
     const fetchDistricts = async () => {
-      if (selectedProvince?.ProvinceID) {
-        const { data } = await getAllDistrictByProvinceId(selectedProvince.ProvinceID)
-        setDistricts([...data])
+      console.log(selectedProvince)
+      if (!selectedProvince?.ProvinceID) {
+        setDistricts([])
+        return
       }
+      const { data } = await getAllDistrictByProvinceId(selectedProvince.ProvinceID)
+      setDistricts([...data])
     }
     fetchDistricts()
   }, [selectedProvince])
 
   useEffect(() => {
-    if (!selectedDistrict || !selectedDistrict.DistrictID) return
+    if (!selectedDistrict || !selectedDistrict.DistrictID) {
+      setWards([])
+      return
+    }
 
     const fetchWards = async () => {
       const { data } = await getAllWardByDistrictId(selectedDistrict.DistrictID)
@@ -141,6 +142,14 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
     }
     callUpdateAdressOrder()
   }, [selectedWard])
+
+  useEffect(() => {
+    if (selectedDistrict && selectedProvince && selectedWard) {
+      setValidAddress(true)
+      return
+    }
+    setValidAddress(false)
+  }, [selectedDistrict, selectedProvince, selectedWard])
 
   useEffect(() => {
     if (user.id != -1) {
@@ -201,6 +210,7 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         disablePortal
         options={districts}
+        disabled={districts.length == 0}
         value={selectedDistrict}
         getOptionLabel={(option) => option.DistrictName}
         fullWidth
@@ -212,6 +222,7 @@ const ReceiverInfo: React.FC<IProps> = ({ order, setOrder, orderRequest, setOrde
         size='small'
         disablePortal
         options={wards}
+        disabled={wards.length == 0}
         value={selectedWard}
         getOptionLabel={(option) => option.WardName}
         fullWidth

@@ -145,13 +145,13 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
             return `-${promotion.value}%`
         }
-        return `-${promotion.value}đ`
+        return `-${promotion.value.toLocaleString('vi-VN')}đ`
     }
 
     const handlePrice = () => {
-        const priceBefore = product?.minPrice || 0
+        const priceBefore = selectedProductDetail?.price || 0
         let currentPrice = null
-        const promotion = product?.promotion
+        const promotion = selectedProductDetail?.promotion
         if (promotion) {
             if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
                 currentPrice = priceBefore - ((priceBefore / 100) * promotion.value)
@@ -175,8 +175,8 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                     {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
                 </Typography>
                 {currentPrice &&
-                    <Typography color="textDisabled" variant="h6" sx={{ mt: 1, textDecoration: 'line-through' }}>
-                        {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
+                    <Typography color="textDisabled" variant="h6" sx={{ textDecoration: 'line-through' }}>
+                        {priceBefore.toLocaleString('vi-VN')} VNĐ
                     </Typography>
                 }
             </Box>

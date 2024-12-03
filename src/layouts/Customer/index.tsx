@@ -31,7 +31,6 @@ const UserLayout: React.FC = () => {
                     }}
                 >
                     <Outlet />
-                    {/* <Footer /> */}
                     <Box
                         component='span'
                         sx={{
@@ -44,6 +43,7 @@ const UserLayout: React.FC = () => {
                         <Chat />
                     </Box>
                 </main>
+                <Footer />
             </div>
         </div>
     );

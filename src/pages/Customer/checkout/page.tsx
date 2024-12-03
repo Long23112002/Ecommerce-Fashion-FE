@@ -1,6 +1,6 @@
 import { Container, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { getOrderById } from '../../../api/OrderApi'
+import { getOrderById, OrderAddressUpdate } from '../../../api/OrderApi'
 import Order, { OrderUpdateRequest } from '../../../types/Order'
 import PaymentInfo from './PaymentInfo'
 import ProductOrderInfo from './ProductOrderInfo'
@@ -8,6 +8,7 @@ import ReceiverInfo from './ReceiverInfo'
 import Cookies from 'js-cookie'
 import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 import PaymentMethodEnum from '../../../enum/PaymentMethodEnum'
+import Address from '../../../types/Address'
 
 const CheckoutPage: React.FC = () => {
 
@@ -19,6 +20,7 @@ const CheckoutPage: React.FC = () => {
     note: '',
     paymentMethod: PaymentMethodEnum.CASH
   });
+  const [validAddress, setValidAddress] = useState(false)
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -65,11 +67,13 @@ const CheckoutPage: React.FC = () => {
                 orderRequest={orderRequest}
                 setOrderRequest={setOrderRequest}
                 setLoading={setLoading}
+                setValidAddress={setValidAddress}
               />
               <PaymentInfo
                 order={order}
                 orderRequest={orderRequest}
                 setOrderRequest={setOrderRequest}
+                validAddress={validAddress}
               />
             </Grid>
             <Grid item sm={12} md={5.5}>

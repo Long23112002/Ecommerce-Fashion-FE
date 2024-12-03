@@ -8,8 +8,11 @@ const CartReducer = createSlice({
   name: 'cart',
   reducers: {
     setCart: (_, action: PayloadAction<CartValues[]>) => {
-      return action.payload;
+      return action.payload.filter(c => c.quantity > 0);
     },
+    clearCart: () => {
+      return []
+    }
   }
 });
 
@@ -19,5 +22,5 @@ export const totalCartSelector = (state: { cart: CartValues[] }) => {
     .map(cart => cart.quantity)
     .reduce((total, quantity) => total += quantity, 0);
 }
-export const { setCart } = CartReducer.actions
+export const { setCart, clearCart } = CartReducer.actions
 export default CartReducer.reducer;
