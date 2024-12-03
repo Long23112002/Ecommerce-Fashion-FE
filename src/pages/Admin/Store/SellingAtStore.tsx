@@ -155,7 +155,7 @@ const SellingAtStore = () => {
                 setIsPay(true)
 
                 toast.success("Xóa hóa đơn thành công");
-
+                setOrder(null)
                 formInfor(null)
                 fetchListOrderDraft()
             } else {
@@ -205,7 +205,7 @@ const SellingAtStore = () => {
                 setIsPay(true);
                 setIsOrderSuccess(true);
                 downloadOrderPdf(order.id);
-
+                setOrder(null)
             } else {
                 toast.error("Bạn chưa chọn hóa đơn cần thanh toán");
             }
@@ -414,7 +414,6 @@ const SellingAtStore = () => {
                         isOrderSuccess={isOrderSuccess} />
                 </Col>
 
-                {/* //TODO: SỬA STYLE */}
                 <Col
                     style={{
                         width: 320

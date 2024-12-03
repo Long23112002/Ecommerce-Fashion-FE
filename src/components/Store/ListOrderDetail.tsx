@@ -28,20 +28,18 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
     const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
 
-    const fetchListOrderDetail = async (order: Order | null) => {
-        if (order) {
-            setLoaingOrderDetailList(true)
-            const res = await getOrderDetailByIdOrder(order.id);
-            setOrderDetailList([...res.data])
-            setLoaingOrderDetailList(false)
-        } else {
-            setOrderDetailList([]);
-        }
+    const fetchListOrderDetail = async (order: Order) => {
+        setLoaingOrderDetailList(true)
+        const res = await getOrderDetailByIdOrder(order.id);
+        setOrderDetailList([...res.data])
+        setLoaingOrderDetailList(false)
     }
 
     useEffect(() => {
         if (order) {
             fetchListOrderDetail(order);
+        } else {
+            setOrderDetailList([]);
         }
     }, [order, isOrderDetailChange, isAddQroductSuccess])
 
@@ -80,13 +78,13 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             title: 'Màu sắc',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.color?.name ||''
+            render: (productDetail: any) => productDetail?.color?.name || ''
         },
         {
             title: 'Kích cỡ',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.size?.name ||''
+            render: (productDetail: any) => productDetail?.size?.name || ''
         },
         {
             title: 'Đơn giá',
@@ -138,19 +136,12 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     return (
         <>
             <Divider orientation="left">Danh sách hóa đơn chi tiết</Divider>
-            {isPay === true ? (
-                <Table
-                    columns={columns}
-                    rowKey="id"
-                    expandable={{ childrenColumnName: 'children' }}
-                />
-            ) :
-                <Table
-                    dataSource={orderDetailList}
-                    columns={columns}
-                    rowKey="id"
-                    expandable={{ childrenColumnName: 'children' }}
-                />}
+            <Table
+                dataSource={orderDetailList}
+                columns={columns}
+                rowKey="id"
+                expandable={{ childrenColumnName: 'children' }}
+            />
         </>
     )
 }
