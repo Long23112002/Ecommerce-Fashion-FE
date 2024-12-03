@@ -360,9 +360,7 @@ const SellingAtStore = () => {
             setOrderDetailList([])
             setIsAddQroductSuccess(true)
         }
-
     }
-
 
     useEffect(() => {
         fetchListOrderDraft()
