@@ -71,7 +71,11 @@ const ManagerOrder = () => {
     const fetchOrders = (current: number, pageSize: number) => {
         fetchOrdersDebounced(current, pageSize, filterParams);
     };
-    const handleStatusChange = async (orderId: number, newStatus: string) => {
+    const handleStatusChange = async (orderId: number, newStatus: string,currentStatus: string) => {
+        if (currentStatus === OrderStatus.PENDING_AT_STORE && newStatus !== OrderStatus.CANCEL) {
+            toast.error("Trạng thái Tại Quầy chỉ có thể đổi sang Đã hủy.");
+            return;
+        }
         setLoading(true);
         try {
             const token = Cookies.get("accessToken");
@@ -176,7 +180,7 @@ const ManagerOrder = () => {
                             value={status}
                             onChange={async (newStatus) => {
                                 if (!isStatusSuccess) {
-                                    await handleStatusChange(record.id, newStatus);
+                                    await handleStatusChange(record.id, newStatus,status);
                                 }
                             }}
                             style={{ width: 140 }}
