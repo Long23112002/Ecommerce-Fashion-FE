@@ -311,7 +311,7 @@ const OrderStatusCustomer = () => {
             </Grid>
           )}
 
-        {order?.status === OrderStatus.SUCCESS && (
+        {/* {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
@@ -326,7 +326,7 @@ const OrderStatusCustomer = () => {
               </Button>
             </Grid>
           </Grid>
-        )}
+        )} */}
 
         {order?.status === OrderStatus.CANCEL && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
@@ -376,7 +376,7 @@ const OrderStatusCustomer = () => {
           </Grid>
         )}
 
-        {order?.status === OrderStatus.SUCCESS && (
+        {/* {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
@@ -391,7 +391,7 @@ const OrderStatusCustomer = () => {
               </Button>
             </Grid>
           </Grid>
-        )}
+        )} */}
 
         {/* <div className="mt-6 flex justify-between gap-4">
         <Button type="primary" className="bg-red-500 hover:bg-red-600 flex-1">
