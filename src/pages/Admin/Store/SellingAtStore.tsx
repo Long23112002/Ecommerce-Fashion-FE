@@ -409,7 +409,6 @@ const SellingAtStore = () => {
                         isOrderSuccess={isOrderSuccess} />
                 </Col>
 
-                {/* //TODO: SỬA STYLE */}
                 <Col
                     style={{
                         width: 320

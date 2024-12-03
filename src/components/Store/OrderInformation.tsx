@@ -150,11 +150,11 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     }
 
     return (
-        //TODO: SỬA STYLE
         <div
             style={{
                 position: 'fixed',
                 top: 80,
+                bottom: 10,
                 right: 30,
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                 borderRadius: 20,

@@ -43,9 +43,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     }
 
     useEffect(() => {
-        if (order) {
-            fetchListOrderDetail(order);
-        }
+        fetchListOrderDetail(order);
     }, [order, isOrderDetailChange, isAddQroductSuccess])
 
     const columns = [
@@ -83,13 +81,13 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             title: 'Màu sắc',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.color?.name ||''
+            render: (productDetail: any) => productDetail?.color?.name || ''
         },
         {
             title: 'Kích cỡ',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.size?.name ||''
+            render: (productDetail: any) => productDetail?.size?.name || ''
         },
         {
             title: 'Đơn giá',
