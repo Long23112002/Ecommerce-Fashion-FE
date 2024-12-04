@@ -91,11 +91,11 @@ const OrderStatusCustomer = () => {
       description: statusTimeMap[OrderStatus.SUCCESS] || "Đã giao hàng",
       icon: <InboxOutlined />,
     },
-    {
-      title: OrderStatusLabel[OrderStatus.REFUND],
-      description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
-      icon: <SyncOutlined />,
-    },
+    // {
+    //   title: OrderStatusLabel[OrderStatus.REFUND],
+    //   description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
+    //   icon: <SyncOutlined />,
+    // },
   ];
 
 
@@ -120,8 +120,8 @@ const OrderStatusCustomer = () => {
         return 1;
       case OrderStatus.SUCCESS:
         return 2;
-      case OrderStatus.REFUND:
-        return 3;
+      // case OrderStatus.REFUND:
+      //   return 3;
         case OrderStatus.CANCEL:
         return 1;
       default:
