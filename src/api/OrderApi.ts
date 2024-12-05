@@ -1,13 +1,13 @@
 import { BASE_API } from "../constants/BaseApi";
 import PaymentMethodEnum from "../enum/PaymentMethodEnum";
 import { OrderDetailValue, OrderUpdateRequest } from "../types/Order";
-import axiosInstance from "./AxiosInstance";
+import axiosInstance, { PageableRequest } from "./AxiosInstance";
 import Cookies from "js-cookie";
 
 const BASE_URL = `${BASE_API}/api/v1/orders`;
 
 export interface OrderParam {
-    userId?: string;
+    userId?: string | number;
     status?: string;
     phoneNumber?: string;
     keyword?: string;
@@ -103,6 +103,21 @@ export const fetchAllOrders = async (param: OrderParam, page: number = 0, size: 
                 page,
                 size,
             },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        throw error;
+    }
+};
+
+export const getAllOrders = async (query: { param: OrderParam, pageableRequest: PageableRequest }) => {
+    try {
+        const response = await axiosInstance.get(`${BASE_URL}`, {
+            params: {
+                ...query.param,
+                ...query.pageableRequest
+            }
         });
         return response.data;
     } catch (error) {
