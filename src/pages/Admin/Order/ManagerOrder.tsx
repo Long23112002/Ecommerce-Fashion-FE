@@ -71,7 +71,23 @@ const ManagerOrder = () => {
     const fetchOrders = (current: number, pageSize: number) => {
         fetchOrdersDebounced(current, pageSize, filterParams);
     };
-    const handleStatusChange = async (orderId: number, newStatus: string) => {
+    const handleStatusChange = async (orderId: number, newStatus: string, currentStatus: string) => {
+        if (currentStatus === OrderStatus.PENDING_AT_STORE && newStatus !== OrderStatus.CANCEL) {
+            toast.error("Trạng thái Tại Quầy chỉ có thể đổi sang Đã hủy.");
+            return;
+        }
+        const validTransitions: Record<string, string[]> = {
+            [OrderStatus.PENDING]: [OrderStatus.SHIPPING, OrderStatus.CANCEL],
+            [OrderStatus.SHIPPING]: [OrderStatus.SUCCESS, OrderStatus.CANCEL],
+            [OrderStatus.SUCCESS]: [], // Không thể thay đổi từ SUCCESS
+            [OrderStatus.CANCEL]: [], // Không thể thay đổi từ CANCEL
+            [OrderStatus.PENDING_AT_STORE]: [OrderStatus.CANCEL], // Đã làm
+        };
+
+        if (!validTransitions[currentStatus]?.includes(newStatus)) {
+            toast.error(`Không thể chuyển từ trạng thái "${OrderStatusLabel[currentStatus]}" sang "${OrderStatusLabel[newStatus]}".`);
+            return;
+        }
         setLoading(true);
         try {
             const token = Cookies.get("accessToken");
@@ -137,7 +153,7 @@ const ManagerOrder = () => {
             title: 'Tên người dùng',
             dataIndex: 'fullName',
             key: 'fullName',
-            render: (fullName) => fullName|| 'khách lẻ',
+            render: (fullName) => fullName || 'khách lẻ',
         },
         {
             title: 'Trạng thái',
@@ -176,7 +192,7 @@ const ManagerOrder = () => {
                             value={status}
                             onChange={async (newStatus) => {
                                 if (!isStatusSuccess) {
-                                    await handleStatusChange(record.id, newStatus);
+                                    await handleStatusChange(record.id, newStatus, status);
                                 }
                             }}
                             style={{ width: 140 }}
