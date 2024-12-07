@@ -65,7 +65,9 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
   };
 
   return (
-    <Container className="mt-5">
+    <Container className="mt-5" style={{
+      marginBottom:"220px"
+    }}>
       <Spin
         spinning={loading}
         indicator={<LoadingCustom />}
@@ -149,7 +151,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                   </Grid>
                 )}
 
-              {order.status === OrderStatus.SUCCESS && (
+              {/* {order.status === OrderStatus.SUCCESS && (
                 <Grid
                   container
                   justifyContent="flex-end"
@@ -168,7 +170,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                     </Button>
                   </Grid>
                 </Grid>
-              )}
+              )} */}
 
               {(order.status === OrderStatus.CANCEL) && (
                   <Grid
@@ -225,7 +227,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                   </Grid>
                 )}
 
-              {order.status === OrderStatus.SUCCESS && (
+              {/* {order.status === OrderStatus.SUCCESS && (
                 <Grid
                   container
                   justifyContent="flex-end"
@@ -244,7 +246,7 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                     </Button>
                   </Grid>
                 </Grid>
-              )}
+              )} */}
             </Card>
           ))
         )}

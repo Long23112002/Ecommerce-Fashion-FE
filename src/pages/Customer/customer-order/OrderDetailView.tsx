@@ -91,11 +91,11 @@ const OrderStatusCustomer = () => {
       description: statusTimeMap[OrderStatus.SUCCESS] || "Đã giao hàng",
       icon: <InboxOutlined />,
     },
-    {
-      title: OrderStatusLabel[OrderStatus.REFUND],
-      description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
-      icon: <SyncOutlined />,
-    },
+    // {
+    //   title: OrderStatusLabel[OrderStatus.REFUND],
+    //   description: statusTimeMap[OrderStatus.REFUND] || "Hoàn tiền",
+    //   icon: <SyncOutlined />,
+    // },
   ];
 
 
@@ -120,8 +120,8 @@ const OrderStatusCustomer = () => {
         return 1;
       case OrderStatus.SUCCESS:
         return 2;
-      case OrderStatus.REFUND:
-        return 3;
+      // case OrderStatus.REFUND:
+      //   return 3;
         case OrderStatus.CANCEL:
         return 1;
       default:
@@ -134,9 +134,6 @@ const OrderStatusCustomer = () => {
   return (
     <Container
       className="bg-white"
-      style={{
-        height: "100vh",
-      }}
     >
       <div className="max-w-5xl mx-auto p-4 font-sans">
         <Row justify="space-between" align="middle" className="mt-3 mb-3">
@@ -286,12 +283,12 @@ const OrderStatusCustomer = () => {
 
         <Divider style={{ margin: "10px 0" }} className="" />
 
-        <div className="mt-8 text-gray-600 text-sm">
+        {/* <div className="mt-8 text-gray-600 text-sm">
           <p>
             Nếu hàng nhận được có vấn đề, bạn có thể gửi yêu cầu Trả hàng/Hoàn
             tiền trước <span className="text-gray-900">...</span>
           </p>
-        </div>
+        </div> */}
 
         {order?.status === OrderStatus.PENDING &&
           order?.paymentMethod === PaymentMethodEnum.CASH && (
@@ -311,7 +308,7 @@ const OrderStatusCustomer = () => {
             </Grid>
           )}
 
-        {order?.status === OrderStatus.SUCCESS && (
+        {/* {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
@@ -326,7 +323,7 @@ const OrderStatusCustomer = () => {
               </Button>
             </Grid>
           </Grid>
-        )}
+        )} */}
 
         {order?.status === OrderStatus.CANCEL && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
@@ -376,7 +373,7 @@ const OrderStatusCustomer = () => {
           </Grid>
         )}
 
-        {order?.status === OrderStatus.SUCCESS && (
+        {/* {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
             <Grid item>
               <Button
@@ -391,7 +388,7 @@ const OrderStatusCustomer = () => {
               </Button>
             </Grid>
           </Grid>
-        )}
+        )} */}
 
         {/* <div className="mt-6 flex justify-between gap-4">
         <Button type="primary" className="bg-red-500 hover:bg-red-600 flex-1">
