@@ -134,9 +134,6 @@ const OrderStatusCustomer = () => {
   return (
     <Container
       className="bg-white"
-      style={{
-        height: "100vh",
-      }}
     >
       <div className="max-w-5xl mx-auto p-4 font-sans">
         <Row justify="space-between" align="middle" className="mt-3 mb-3">
@@ -286,12 +283,12 @@ const OrderStatusCustomer = () => {
 
         <Divider style={{ margin: "10px 0" }} className="" />
 
-        <div className="mt-8 text-gray-600 text-sm">
+        {/* <div className="mt-8 text-gray-600 text-sm">
           <p>
             Nếu hàng nhận được có vấn đề, bạn có thể gửi yêu cầu Trả hàng/Hoàn
             tiền trước <span className="text-gray-900">...</span>
           </p>
-        </div>
+        </div> */}
 
         {order?.status === OrderStatus.PENDING &&
           order?.paymentMethod === PaymentMethodEnum.CASH && (
