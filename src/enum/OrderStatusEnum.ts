@@ -5,7 +5,7 @@ export enum OrderStatus {
     CANCEL = 'CANCEL',
     SHIPPING = 'SHIPPING',
     SUCCESS = 'SUCCESS',
-    REFUND = 'REFUND',
+    // REFUND = 'REFUND',
   }
 
   export const OrderStatusLabel: Record<OrderStatus, string> = {
@@ -13,12 +13,12 @@ export enum OrderStatus {
     [OrderStatus.CANCEL]: "ĐÃ HỦY",
     [OrderStatus.SHIPPING]: "ĐANG GIAO",
     [OrderStatus.SUCCESS]: "THÀNH CÔNG",
-    [OrderStatus.REFUND]: "HOÀN HÀNG",
+    // [OrderStatus.REFUND]: "HOÀN HÀNG",
   };
 
 
   export const OrderMeThodLabel: Record<PaymentMethodEnum,string> = {
     [PaymentMethodEnum.CASH]: "Tiền mặt",
-    [PaymentMethodEnum.BANK_TRANSFER]: "Chuyển khoản",
+    [PaymentMethodEnum.VIET_QR]: "Chuyển khoản",
     [PaymentMethodEnum.VNPAY]: "VNPAY",
   };

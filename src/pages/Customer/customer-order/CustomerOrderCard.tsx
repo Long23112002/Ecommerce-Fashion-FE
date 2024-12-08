@@ -7,19 +7,19 @@ const OrderDetailCard = ({ order, detail }: any) => {
       <Row gutter={16} key={detail.id}>
         <Col span={3}>
           <img
-            src={detail.productDetail.images?.[0]?.url}
-            alt={detail.productDetail.product?.name}
+            src={detail?.productDetail?.images?.[0]?.url}
+            alt={detail?.productDetail?.product?.name}
             style={{ width: 100, height: 100, objectFit: "cover" }}
           />
         </Col>
         <Col span={15}>
           <Typography variant="h5">
-            {detail.productDetail.product?.name}
+            {detail.productDetail?.product?.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" className="mt-2">
-            {`Phân loại hàng: ${detail.productDetail.size?.name}, ${detail.productDetail.color?.name}`}
+            {`Phân loại hàng: ${detail?.productDetail?.size?.name}, ${detail.productDetail?.color?.name}`}
           </Typography>
-          <Typography className="mt-2">{`x${detail.quantity}`}</Typography>
+          <Typography className="mt-2">{`x${detail?.quantity}`}</Typography>
         </Col>
         <Col span={6}>
           <Grid container direction="column" justifyContent="space-between" style={{ height: "100%" }}>
