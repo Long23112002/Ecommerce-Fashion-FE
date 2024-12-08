@@ -290,8 +290,7 @@ const OrderStatusCustomer = () => {
           </p>
         </div> */}
 
-        {order?.status === OrderStatus.PENDING &&
-          order?.paymentMethod === PaymentMethodEnum.CASH && (
+        {order?.status === OrderStatus.PENDING && (
             <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
               <Grid item>
                 <Button
