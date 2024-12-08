@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { deleteOrder, fetchAllOrders, updateStateOrder, getOrderById, downloadOrderPdf } from "../../../api/OrderApi.ts";
+import { deleteOrder, fetchAllOrders, updateStateOrder, downloadOrderPdf } from "../../../api/OrderApi.ts";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
 import createPaginationConfig, { PaginationState } from "../../../config/paginationConfig.ts";
 import { Order, OrderStatus, OrderStatusLabel } from "../../../types/order.ts";
@@ -71,7 +71,23 @@ const ManagerOrder = () => {
     const fetchOrders = (current: number, pageSize: number) => {
         fetchOrdersDebounced(current, pageSize, filterParams);
     };
-    const handleStatusChange = async (orderId: number, newStatus: string) => {
+    const handleStatusChange = async (orderId: number, newStatus: string, currentStatus: string) => {
+        if (currentStatus === OrderStatus.PENDING_AT_STORE && newStatus !== OrderStatus.CANCEL) {
+            toast.error("Trạng thái Tại Quầy chỉ có thể đổi sang Đã hủy.");
+            return;
+        }
+        const validTransitions: Record<string, string[]> = {
+            [OrderStatus.PENDING]: [OrderStatus.SHIPPING, OrderStatus.CANCEL],
+            [OrderStatus.SHIPPING]: [OrderStatus.SUCCESS, OrderStatus.CANCEL],
+            [OrderStatus.SUCCESS]: [], // Không thể thay đổi từ SUCCESS
+            [OrderStatus.CANCEL]: [], // Không thể thay đổi từ CANCEL
+            [OrderStatus.PENDING_AT_STORE]: [OrderStatus.CANCEL], // Đã làm
+        };
+
+        if (!validTransitions[currentStatus]?.includes(newStatus)) {
+            toast.error(`Không thể chuyển từ trạng thái "${OrderStatusLabel[currentStatus]}" sang "${OrderStatusLabel[newStatus]}".`);
+            return;
+        }
         setLoading(true);
         try {
             const token = Cookies.get("accessToken");
@@ -135,9 +151,9 @@ const ManagerOrder = () => {
         },
         {
             title: 'Tên người dùng',
-            dataIndex: 'user',
-            key: 'user',
-            render: (user) => user.fullName,
+            dataIndex: 'fullName',
+            key: 'fullName',
+            render: (fullName) => fullName || 'khách lẻ',
         },
         {
             title: 'Trạng thái',
@@ -161,9 +177,6 @@ const ManagerOrder = () => {
                     case OrderStatus.DRAFT:
                         color = "#FF9933";
                         break;
-                    case OrderStatus.REFUND:
-                        color = "grey";
-                        break;
                     case OrderStatus.PENDING_AT_STORE:
                         color = "Navy";
                         break;
@@ -179,7 +192,7 @@ const ManagerOrder = () => {
                             value={status}
                             onChange={async (newStatus) => {
                                 if (!isStatusSuccess) {
-                                    await handleStatusChange(record.id, newStatus);
+                                    await handleStatusChange(record.id, newStatus, status);
                                 }
                             }}
                             style={{ width: 140 }}

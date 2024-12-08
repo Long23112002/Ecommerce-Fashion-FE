@@ -7,76 +7,144 @@ import {
 } from "@mui/material";
 import { Tooltip } from "antd";
 import Cookies from "js-cookie";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrder } from "../../../api/OrderApi.js";
 import useCart from "../../../hook/useCart.js";
+import { useUserHeaderSize } from "../../../hook/useSize.js";
+import useToast from "../../../hook/useToast.js";
 import { CartValueInfos, CartValues } from "../../../types/Cart";
-import { OrderDetailValue } from "../../../types/Order.js";
+import Order, { OrderDetailValue, OrderValue } from "../../../types/Order.js";
+import MuiLoading from "../../../components/Loading/MuiLoading.js";
+import { setLoadingScreen } from "../../../redux/reducers/LoadingScreenReducer.js";
+
+interface CartValueInfoWithSelected extends CartValueInfos {
+  selected: boolean
+}
+
+interface CartValueInfoWithSelected extends CartValueInfos {
+  selected: boolean
+}
 
 const CartPage = () => {
   const navigate = useNavigate()
-  const { cart, modifyCartValues, modifyItemInCart } = useCart()
+  const height = useUserHeaderSize()
+  const { getCartValueInfo, setItemInCart, save } = useCart()
+  const { catchToast } = useToast();
   const [moneyTotal, setMoneyTotal] = useState(0);
-  const [selectProductDetails, setSelectProductDetails] = useState<CartValueInfos[]>([]);
+  const [productDetails, setProductDetails] = useState<CartValueInfoWithSelected[]>([])
   const [isSelectAll, setIsSelectAll] = useState<boolean>(false)
+  const [quantityLoading, setQuantityLoading] = useState<boolean>(false)
+  const [productsLoading, setProductsLoading] = useState<boolean>(false)
+  const quantityTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSelectProductDetail = (pd: CartValueInfos) => {
-    const productDetailIds = selectProductDetails.map(spd => spd.productDetail.id)
-    if (productDetailIds.includes(pd.productDetail.id)) {
-      setSelectProductDetails(prev => prev.filter(cart => cart !== pd));
-    } else {
-      setSelectProductDetails(prev => [...prev, pd]);
+  const setSelect = (pd: CartValueInfos, selected: boolean): CartValueInfoWithSelected => {
+    return {
+      ...pd,
+      selected
     }
+  }
+
+  const getSelect = () => {
+    return productDetails.filter(pd => pd.selected)
+  }
+
+  const setPdByValue = (cartValue: CartValues) => {
+    setProductDetails(prev => prev.map(p => {
+      if (p.productDetail.id === cartValue.productDetailId) {
+        return {
+          ...p,
+          quantity: cartValue.quantity
+        }
+      }
+      return p
+    }))
+  }
+
+  const handleSelectProductDetail = (cart: CartValueInfos) => {
+    setProductDetails(prev => prev.map(pd => {
+      if (pd.productDetail.id == cart.productDetail.id) {
+        return setSelect(pd, !pd.selected)
+      }
+      return pd
+    }))
   }
 
   const handleClearSelectProduct = () => {
-    const selectProductIds = selectProductDetails.map(pd => pd.productDetail.id)
-    const newItem = cart?.cartValues.filter(cart => !selectProductIds.includes(cart.productDetailId))
-    if (newItem) {
-      modifyCartValues(newItem)
-    }
+    const productNotSelect = productDetails.filter(pd => !pd.selected)
+    setProductDetails([...productNotSelect])
+    const values: CartValues[] = productNotSelect.map(pd => {
+      return {
+        productDetailId: pd.productDetail.id,
+        quantity: pd.quantity
+      }
+    })
+    save(values)
   }
 
-  const handleQuantityChange = (cart: CartValueInfos, flipValue: number) => {
-    const newQuantity = Math.min(cart.quantity + flipValue, cart.productDetail.quantity);
-    const cartValue: CartValues = {
-      productDetailId: cart.productDetail.id,
-      quantity: newQuantity
+  const handleQuantityChange = async (cart: CartValueInfos, flipValue: number) => {
+    try {
+      setQuantityLoading(true)
+      const newQuantity = cart.quantity + flipValue;
+      const cartValue: CartValues = {
+        productDetailId: cart.productDetail.id,
+        quantity: newQuantity
+      }
+      const { valid } = await setItemInCart(cartValue)
+      if (valid) {
+        setPdByValue(cartValue)
+      }
     }
-    modifyItemInCart(cartValue)
+    finally {
+      setQuantityLoading(false)
+    }
   }
 
   const handleChangeQuantityInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, cart: CartValueInfos) => {
-
-    const newQuantity = Math.min(Number(e.target.value), cart.productDetail.quantity);
-    setSelectProductDetails(prev =>
-      prev.map(item =>
-        item.productDetail.id === cart.productDetail.id ? { ...item, quantity: newQuantity } : item
+    const value = Math.max(1, Math.min(cart.productDetail.quantity, Number(e.target.value)));
+    setProductDetails((prev) =>
+      prev.map((pd) =>
+        pd.productDetail.id === cart.productDetail.id ? { ...pd, quantity: value } : pd
       )
-    )
-    const cartValue: CartValues = {
-      productDetailId: cart.productDetail.id,
-      quantity: newQuantity
-    }
-    modifyItemInCart(cartValue)
-  }
+    );
+    if (quantityTimeout.current) clearTimeout(quantityTimeout.current);
+    quantityTimeout.current = setTimeout(async () => {
+      const cartValue = { productDetailId: cart.productDetail.id, quantity: value };
+      await setItemInCart(cartValue);
+      setPdByValue(cartValue);
+    }, 500);
+  };
 
   const handleBuy = async () => {
-    if (selectProductDetails.length < 0) return
-    const orderDetails: OrderDetailValue[] = selectProductDetails.map(value => {
+    const select = getSelect()
+    if (select.length < 0) return
+    const orderDetails: OrderDetailValue[] = select.map(value => {
       return {
         productDetailId: value.productDetail.id,
         quantity: value.quantity
       }
     })
-    const data = await createOrder(orderDetails);
-    Cookies.set('orderId', data.id, { expires: 1 / 6 })
-    navigate('/checkout')
+    try {
+      const res: Order = await createOrder(orderDetails);
+      const data: OrderValue = {
+        id: res.id,
+        orderValues: res.orderDetails?.map(o => {
+          return {
+            productDetailId: o.productDetail.id,
+            quantity: o.quantity
+          }
+        }) || []
+      }
+      Cookies.set('order', JSON.stringify(data), { expires: 1 / 6 })
+      navigate('/checkout')
+    } catch (error: any) {
+      console.log(error)
+      catchToast(error)
+    }
   }
 
   useEffect(() => {
-    const total = selectProductDetails
+    const total = getSelect()
       .map(value => {
         const price = value.productDetail.price
         const quantity = value.quantity
@@ -85,24 +153,28 @@ const CartPage = () => {
       .reduce((total, money) => total + money, 0)
 
     setMoneyTotal(total)
-  }, [selectProductDetails])
+  }, [productDetails])
 
   useEffect(() => {
-    const cartValueInfos = cart?.cartValueInfos
-    if (cartValueInfos) {
-      setSelectProductDetails(prev => {
-        const mapProductDetailIds = prev.map(p => p.productDetail.id)
-        return cartValueInfos.filter(value => mapProductDetailIds.includes(value.productDetail.id))
-      })
+    const fetch = async () => {
+      try {
+        setProductsLoading(true)
+        const res = await getCartValueInfo();
+        setProductDetails(res.map(r => setSelect(r, false)))
+      } finally {
+        setProductsLoading(false)
+      }
     }
-  }, [cart])
+    fetch()
+  }, [])
 
   useEffect(() => {
-    if (!cart?.cartValueInfos) return
+    if (!productDetails) return
     if (isSelectAll) {
-      setSelectProductDetails(cart.cartValueInfos)
+      setProductDetails(prev => prev.map(pd => setSelect(pd, true)))
     } else {
-      setSelectProductDetails([])
+      setProductDetails(prev => prev.map(pd => setSelect(pd, false)))
+
     }
   }, [isSelectAll])
 
@@ -145,136 +217,150 @@ const CartPage = () => {
                 <Button
                   color="error"
                   onClick={handleClearSelectProduct}
-                  disabled={selectProductDetails.length === 0}
+                  disabled={getSelect().length === 0}
                 >
                   Xóa sản phẩm đã chọn
                 </Button>
               </Tooltip>
             </Box>
 
-            {cart?.cartValueInfos.map((pd) => (
-              <Box
-                key={pd.productDetail.id}
-                sx={{
-                  display: "flex",
-                  my: 2,
-                  borderBottom: "1px solid #ccc",
-                  paddingBottom: 1,
-                  cursor: 'pointer'
-                }}
-              >
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Checkbox
-                    checked={selectProductDetails.map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
-                    onChange={() => handleSelectProductDetail(pd)}
-                  />
-                </div>
-                <Box sx={{ display: 'flex', width: '100%' }}
-                  onClick={() => navigate(`/product/${pd.productDetail.product.id}`)}
-                >
-                  <img
-                    src={pd.productDetail.images?.[0].url}
-                    alt={pd.productDetail.product?.name}
-                    style={{ width: 100, height: 100, objectFit: "cover" }}
-                  />
-                  <Box sx={{ ml: 2, flexGrow: 1 }}>
-                    <Typography variant="h5">
-                      {pd.productDetail.product?.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
-                    </Typography>
-                    <Typography
-                      color="text.secondary"
+            {
+              !productsLoading
+                ?
+                productDetails.map((pd) => (
+                  <Box
+                    key={pd.productDetail.id}
+                    sx={{
+                      display: "flex",
+                      my: 2,
+                      borderBottom: "1px solid #ccc",
+                      paddingBottom: 1,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div
                       style={{
-                        display: "flex",
+                        display: "inline-flex",
                         alignItems: "center",
                       }}
-                      className="mt-3"
-                      component="div"
                     >
-                      <Typography
-                        variant="h6"
-                        color="info.main"
-                        component="div"
-                      >
-                        <b>
-                          {(pd.productDetail.price || 0).toLocaleString(
-                            "vi-VN"
-                          )}{" "}
-                          ₫
-                        </b>
-                      </Typography>
-                      {pd.productDetail.originPrice && (
-                        <span
+                      <Checkbox
+                        checked={getSelect().map(spd => spd.productDetail.id).includes(pd.productDetail.id)}
+                        onChange={() => handleSelectProductDetail(pd)}
+                      />
+                    </div>
+                    <Box sx={{ display: 'flex', width: '100%' }}
+                      onClick={() => navigate(`/product/${pd.productDetail.product.id}`)}
+                    >
+                      <img
+                        src={pd.productDetail.images?.[0].url}
+                        alt={pd.productDetail.product?.name}
+                        style={{ width: 100, height: 100, objectFit: "cover" }}
+                      />
+                      <Box sx={{ ml: 2, flexGrow: 1 }}>
+                        <Typography variant="h5">
+                          {pd.productDetail.product?.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {`${pd.productDetail.size?.name}, ${pd.productDetail.color?.name}`}
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
                           style={{
-                            textDecoration: "line-through",
-                            marginLeft: "20px",
-                            color: "gray",
+                            display: "flex",
+                            alignItems: "center",
                           }}
+                          className="mt-3"
+                          component="div"
                         >
-                          {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
-                          ₫
-                        </span>
-                      )}
-                    </Typography>
+                          <Typography
+                            variant="h6"
+                            color="info.main"
+                            component="div"
+                          >
+                            <b>
+                              {(pd.productDetail.price || 0).toLocaleString(
+                                "vi-VN"
+                              )}{" "}
+                              ₫
+                            </b>
+                          </Typography>
+                          {pd.productDetail.originPrice && (
+                            <span
+                              style={{
+                                textDecoration: "line-through",
+                                marginLeft: "20px",
+                                color: "gray",
+                              }}
+                            >
+                              {pd.productDetail.originPrice.toLocaleString("vi-VN")}{" "}
+                              ₫
+                            </span>
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center" }} >
+                      <IconButton
+                        onClick={() => handleQuantityChange(pd, -1)}
+                        disabled={pd.quantity <= 1 || quantityLoading}
+                        sx={{
+                          color: quantityLoading ? "#a1a1a1" : "#333333",
+                        }}
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                      <TextField
+                        type="number"
+                        value={pd.quantity}
+                        disabled={quantityLoading}
+                        onChange={(e) => handleChangeQuantityInput(e, pd)}
+                        sx={{
+                          width: 60,
+                          textAlign: "center",
+                          "& .MuiInput-underline:before": {
+                            borderBottom: "none",
+                          },
+                          "& .MuiInput-underline:after": { borderBottom: "none" },
+                          "& input": {
+                            padding: 0,
+                            textAlign: "center",
+                          },
+                          "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                          {
+                            WebkitAppearance: "none",
+                            margin: 0,
+                          },
+                        }}
+                        inputProps={{
+                          min: 0,
+                          max: pd.productDetail.quantity,
+                        }}
+                        variant="standard"
+                      />
+                      <IconButton
+                        onClick={() =>
+                          handleQuantityChange(pd, 1)
+                        }
+                        disabled={quantityLoading}
+                        sx={{
+                          color: quantityLoading ? "#a1a1a1" : "#333333",
+                        }}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <IconButton
-                    onClick={() => handleQuantityChange(pd, -1)}
-                    disabled={pd.quantity <= 1}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <TextField
-                    type="number"
-                    value={pd.quantity}
-                    onChange={(e) => handleChangeQuantityInput(e, pd)}
-                    sx={{
-                      width: 60,
-                      textAlign: "center",
-                      "& .MuiInput-underline:before": {
-                        borderBottom: "none",
-                      },
-                      "& .MuiInput-underline:after": { borderBottom: "none" },
-                      "& input": {
-                        padding: 0,
-                        textAlign: "center",
-                      },
-                      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
-                      {
-                        WebkitAppearance: "none",
-                        margin: 0,
-                      },
-                    }}
-                    inputProps={{
-                      min: 0,
-                      max: pd.productDetail.quantity,
-                    }}
-                    variant="standard"
-                  />
-                  <IconButton
-                    onClick={() =>
-                      handleQuantityChange(pd, 1)
-                    }
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-            ))}
+                ))
+                :
+                <MuiLoading />
+            }
           </Box>
         </Grid>
         <Grid item xs={12} md={4}>
           <Box
             className="shadow-section"
-            sx={{ backgroundColor: "white", borderRadius: 5, padding: 2 }}
+            sx={{ backgroundColor: "white", borderRadius: 5, padding: 2, position: 'sticky', top: height ? (height + 18) : (62 + 10) }}
           >
             <Typography variant="h6" gutterBottom>
               Chi tiết đơn hàng

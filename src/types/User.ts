@@ -23,6 +23,7 @@ export interface UserRequest {
     birth: string;
     gender: GenderEnum,
     avatar: string;
+    isCheck: boolean
 }
 
 export interface UserInfoRequest {

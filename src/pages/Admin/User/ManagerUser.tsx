@@ -85,10 +85,10 @@ const ManagerUser = () => {
         try {
             const values = await form.validateFields();
             if (currentUser) {
-                await updateUser(currentUser.id, {...currentUser, ...values});
+                await updateUser(currentUser.id, { ...currentUser, ...values, isCheck: true });
                 toast.success("Cập nhập người dùng thành công.");
             } else {
-                await createUser(values);
+                await createUser({ ...values, isCheck: true });
                 toast.success("Thêm mới người dùng thành công.");
             }
             setIsModalOpen(false);

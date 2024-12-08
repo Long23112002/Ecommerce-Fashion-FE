@@ -154,15 +154,39 @@ export const downloadOrderPdf = async (orderId: number) => {
         const response = await axiosInstance.get(`${BASE_URL}/export-pdf/${orderId}`, {
             responseType: "blob",
         });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `order_${orderId}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+
+        // const url = window.URL.createObjectURL(new Blob([response.data]));
+        // const link = document.createElement("a");
+        // link.href = url;
+        // link.setAttribute("download", `order_${orderId}.pdf`);
+        // document.body.appendChild(link);
+        // link.click();
+        // link.remove();
+
+
+        const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = url;
+
+        document.body.appendChild(iframe);
+
+        iframe.onload = () => {
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
+
+            // // Cleanup: Xóa iframe sau khi in
+            // setTimeout(() => {
+            //     document.body.removeChild(iframe);
+            // }, 1000);
+        };
+
     } catch (error) {
         console.error("Lỗi khi tải PDF:", error);
         throw error;
     }
+
 };
+
+

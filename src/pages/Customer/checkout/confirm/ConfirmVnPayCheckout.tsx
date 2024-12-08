@@ -9,7 +9,7 @@ import useCart from '../../../../hook/useCart';
 const ConfirmVnPayCheckout: React.FC = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams();
-    const { reload } = useCart();
+    const { removeItemAfterOrder } = useCart();
 
     useEffect(() => {
         const orderId = searchParams.get('vnp_TxnRef')
@@ -25,7 +25,7 @@ const ConfirmVnPayCheckout: React.FC = () => {
                     paymentMethod: PaymentMethodEnum.VNPAY
                 }
                 await confirmOrder(data)
-                await reload()
+                await removeItemAfterOrder()
                 toast.success("Bạn đã thanh toán thành công")
             } catch (error: any) {
                 const message = error.response.data.message;

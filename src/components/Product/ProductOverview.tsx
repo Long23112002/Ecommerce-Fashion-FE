@@ -19,10 +19,11 @@ import SizeButton from '../SizeButton'
 import ImageCarousel from './ImageCarousel'
 import { CartValues } from '../../types/Cart'
 import useCart from '../../hook/useCart'
-import { OrderDetailValue } from '../../types/Order'
+import Order, { OrderDetailValue, OrderValue } from '../../types/Order'
 import Cookies from 'js-cookie'
 import { createOrder } from '../../api/OrderApi'
 import { TypePromotionEnum } from '../../enum/TypePromotionEnum'
+import { toast } from 'react-toastify'
 
 interface IProps {
     product: Product,
@@ -94,7 +95,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
     }
 
     const handleAddToCart = () => {
-        if (!selectedProductDetail?.id) return
+        if (!selectedProductDetail?.id || quantity <= 0) return
+        if (selectedProductDetail.quantity < quantity) {
+            toast.error('Số lượng vượt quá sản phẩm')
+            return
+        }
         const cartValues: CartValues = { productDetailId: selectedProductDetail.id, quantity: quantity }
         cart.addToCart(cartValues)
     }
@@ -105,8 +110,17 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
             productDetailId: selectedProductDetail.id,
             quantity: quantity
         }]
-        const data = await createOrder(orderDetail);
-        Cookies.set('orderId', data.id, { expires: 1 / 6 })
+        const res: Order = await createOrder(orderDetail);
+        const data: OrderValue = {
+            id: res.id,
+            orderValues: res.orderDetails?.map(o => {
+                return {
+                    productDetailId: o.productDetail.id,
+                    quantity: o.quantity
+                }
+            }) || []
+        }
+        Cookies.set('order', JSON.stringify(data), { expires: 1 / 6 })
         navigate('/checkout')
     }
 
@@ -131,13 +145,13 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
             return `-${promotion.value}%`
         }
-        return `-${promotion.value}đ`
+        return `-${promotion.value.toLocaleString('vi-VN')}đ`
     }
 
     const handlePrice = () => {
-        const priceBefore = product?.minPrice || 0
+        const priceBefore = selectedProductDetail?.price || 0
         let currentPrice = null
-        const promotion = product?.promotion
+        const promotion = selectedProductDetail?.promotion
         if (promotion) {
             if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
                 currentPrice = priceBefore - ((priceBefore / 100) * promotion.value)
@@ -161,8 +175,8 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                     {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
                 </Typography>
                 {currentPrice &&
-                    <Typography color="textDisabled" variant="h6" sx={{ mt: 1, textDecoration: 'line-through' }}>
-                        {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
+                    <Typography color="textDisabled" variant="h6" sx={{ textDecoration: 'line-through' }}>
+                        {priceBefore.toLocaleString('vi-VN')} VNĐ
                     </Typography>
                 }
             </Box>
@@ -278,6 +292,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                             <Button
                                 variant="contained"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                disabled={selectedProductDetail?.quantity == 0}
                                 sx={{
                                     minWidth: 40,
                                     height: 40,
@@ -296,6 +311,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                             <TextField
                                 variant="outlined"
                                 value={quantity}
+                                disabled={selectedProductDetail?.quantity == 0}
                                 onChange={(e) => {
                                     const value = Number(e.target.value);
                                     if (value >= 1 && value <= (selectedProductDetail?.quantity ?? 0)) {
@@ -320,6 +336,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
                             <Button
                                 variant="contained"
+                                disabled={selectedProductDetail?.quantity == 0}
                                 onClick={() => setQuantity(Math.min(selectedProductDetail?.quantity ?? 0, quantity + 1))}
                                 sx={{
                                     minWidth: 40,
