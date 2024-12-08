@@ -4,23 +4,24 @@ import { User } from "../../types/User";
 import { Voucher } from "../../types/voucher";
 import OrderDetailListTable from "./ListOrderDraft";
 import Order from "../../types/Order";
-import React, {useEffect, useState} from "react";
-import {QrReader} from "react-qr-reader";
-import {addProductToOrderDetail, OrderDetailData} from "../../api/StoreApi";
-import {toast} from "react-toastify";
-import {getOrderById} from "../../api/OrderApi";
+import React, { useEffect, useState } from "react";
+import { QrReader } from "react-qr-reader";
+import { addProductToOrderDetail, OrderDetailData } from "../../api/StoreApi";
+import { toast } from "react-toastify";
+import { getOrderById, updateDiscountOrder } from "../../api/OrderApi";
+import DiscountSelector from "./DiscountSelector";
+import { Box } from "@mui/material";
 
 interface OrderInformationProps {
-    // onFill: () => void;
-    vouchers: Voucher[];
-    // users: User[];
     form: FormInstance;
     showModalUser: (e: any) => void;
     order: Order | null;
+    setOrder: React.Dispatch<React.SetStateAction<Order | null>>;
     handleCancel: (e: any) => void;
     handlePay: (e: any) => void;
     fetchListOrderDetail: (order: any) => void;
     isUpdateGuestDiscount: boolean;
+    showModalDiscount: (e: any) => void;
 }
 
 
@@ -45,14 +46,14 @@ const onFinish = (values: any) => {
 
 const OrderInformation: React.FC<OrderInformationProps> = ({
     form,
-    vouchers,
-    // users,
     showModalUser,
     order,
+    setOrder,
     handleCancel,
     handlePay,
     fetchListOrderDetail,
-    isUpdateGuestDiscount
+    isUpdateGuestDiscount,
+    showModalDiscount
 
 }) => {
     const formatCurrency = (value: number) => {
@@ -135,197 +136,170 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
         };
     }, []);
 
+    const onSelect = async (discount: Discount) => {
+        if (!discount.id || discount.id <= 0 || !order || !order.id) return
+        console.log(discount)
+        const res = await updateDiscountOrder(order?.id, discount.id)
+        setOrder({ ...res })
+    }
+
+    const onCancel = async () => {
+        if (!order || !order.id) return
+        const res = await updateDiscountOrder(order?.id, null)
+        setOrder({ ...res })
+    }
+
     return (
         <div
             style={{
-                position: "fixed",
-                top: "54%",
-                right: "35px",
-                transform: "translateY(-50%)",
-                width: "320px",
-                maxHeight: "calc(100vh - 40px)",
-                overflowY: "auto",
-                border: "1px solid black",
-                padding: "15px",
-                borderRadius: "8px",
-                backgroundColor: "white",
-                zIndex: 1000,
-                marginLeft: 'auto',
-                paddingRight: 30
+                position: 'fixed',
+                top: 80,
+                bottom: 10,
+                right: 30,
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                borderRadius: 20,
             }}
         >
-            <Form
-                form={form}
-                {...layout}
-                name="control-hooks"
-                onFinish={onFinish}
-                // initialValues={{
-                //     createdAt: order?.createdAt
-                //         ? new Date(order.createdAt).toLocaleDateString()
-                //         : "",
-                //     code: order?.code || "",
-                //     fullName: order?.fullName || "",
-                //     totalMoney: order?.totalMoney || 0,
-                //     payAmount: order?.payAmount || ""
-                // }}
+            <Box
+                sx={{
+                    margin: 3,
+                    marginLeft: 1,
+                    height: '100%',
+                    overflowY: 'auto'
+                }}
             >
-                <div className="card text-white mb-3" style={{
-                    marginLeft:'18px'
-                }}>
-                    <div className="card-body">
-                        <h5 className="card-title text-center text-dark mb-4">Quét QR Sản Phẩm</h5>
+                <Form
+                    form={form}
+                    {...layout}
+                    name="control-hooks"
+                    onFinish={onFinish}
+                    initialValues={{
+                        createdAt: order?.createdAt
+                            ? new Date(order.createdAt).toLocaleDateString()
+                            : "",
+                        //     code: order?.code || "",
+                        fullName: order?.fullName || "",
+                        totalMoney: order?.totalMoney ? formatCurrency(order?.totalMoney) : 0 + " đ",
+                        payAmount: order
+                            ? order?.payAmount !== null
+                                ? formatCurrency(order?.payAmount)
+                                : formatCurrency(order?.totalMoney)
+                            : 0 + " đ"
+                    }}
+                >
+                    <div className="card text-white mb-3" style={{
+                        marginLeft: '18px'
+                    }}>
+                        <div className="card-body">
+                            <h5 className="card-title text-center text-dark mb-2">Quét QR Sản Phẩm</h5>
 
-                        <div className="position-relative">
-                            <QrReader
-                                onResult={handleResult}
-                                constraints={{
-                                    facingMode: 'environment'
-                                }}
-                                className="w-100"
-                                style={{aspectRatio: '1/1'}}
-                            />
-                            <div
-                                className="position-absolute top-50 start-50 translate-middle pointer-events-none"
-                                style={{
-                                    width: `136px`,
-                                    height: `126px`,
-                                    transition: 'all 0.3s ease-in-out'
-                                }}
-                            >
+                            <div className="position-relative">
+                                <QrReader
+                                    onResult={handleResult}
+                                    constraints={{
+                                        facingMode: 'environment'
+                                    }}
+                                    className="w-100"
+                                    style={{ aspectRatio: '1/1' }}
+                                />
                                 <div
-                                    className="position-absolute top-0 start-0 w-25 h-25 border-top border-start border-dark-subtle rounded-top-left"
-                                    style={{borderWidth: '4px'}}></div>
-                                <div
-                                    className="position-absolute top-0 end-0 w-25 h-25 border-top border-end border-dark-subtle rounded-top-right"
-                                    style={{borderWidth: '4px'}}></div>
-                                <div
-                                    className="position-absolute bottom-0 start-0 w-25 h-25 border-bottom border-start border-dark-subtle rounded-bottom-left"
-                                    style={{borderWidth: '4px'}}></div>
-                                <div
-                                    className="position-absolute bottom-0 end-0 w-25 h-25 border-bottom border-end border-dark-subtle rounded-bottom-right"
-                                    style={{borderWidth: '4px'}}></div>
+                                    className="position-absolute top-50 start-50 translate-middle pointer-events-none"
+                                    style={{
+                                        width: `136px`,
+                                        height: `126px`,
+                                        transition: 'all 0.3s ease-in-out'
+                                    }}
+                                >
+                                    <div
+                                        className="position-absolute top-0 start-0 w-25 h-25 border-top border-start border-dark-subtle rounded-top-left"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute top-0 end-0 w-25 h-25 border-top border-end border-dark-subtle rounded-top-right"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute bottom-0 start-0 w-25 h-25 border-bottom border-start border-dark-subtle rounded-bottom-left"
+                                        style={{ borderWidth: '4px' }}></div>
+                                    <div
+                                        className="position-absolute bottom-0 end-0 w-25 h-25 border-bottom border-end border-dark-subtle rounded-bottom-right"
+                                        style={{ borderWidth: '4px' }}></div>
+                                </div>
+
                             </div>
 
                         </div>
-
                     </div>
-                </div>
-                <Form.Item
-                    name="createdAt"
-                    label="Ngày tạo"
-                >
-                    <Input disabled size="large" style={{fontSize: '16px', color: '#000'}}
-                    />
-                </Form.Item>
-
-                <Form.Item label="Mã hóa đơn" name="code">
-                    <Input disabled size="large" style={{fontSize: '16px', color: '#000'}}/>
-                </Form.Item>
-
-                <Form.Item
-                    name="fullName"
-                    label="Tên khách"
-                    // rules={[
-                    //     {
-                    //         required: true,
-                    //         message: "Tên khách hàng không được trống",
-                    //     },
-                    // ]}
-                >
-                    <Input placeholder="Nhập tên khách hàng"/>
-                </Form.Item>
-                <Form.Item {...tailLayout}>
-                    <Space>
-                        <Button type="primary" htmlType="submit" onClick={showModalUser}>
-                            Chọn khách hàng
-                        </Button>
-                    </Space>
-                </Form.Item>
-
-                <Form.Item
-                    name="totalMoney"
-                    label="Tổng tiền"
-                >
-                    <Input
-                        disabled
-                        size="large" style={{fontSize: '16px', color: '#000'}}
-                    />
-                </Form.Item>
-
-                <Form.Item
-                    name="idDiscount"
-                    label="Giảm giá"
-                    rules={[
-                        {
-                            required: false,
-                            message: "Vui lòng chọn voucher",
-                        },
-                    ]}
-                >
-                    <Select
-                        placeholder="Chọn mã giảm giá"
-                        allowClear
-
+                    <Form.Item
+                        name="createdAt"
+                        label="Ngày tạo"
                     >
-                        {vouchers.map(voucher => (
-                            <Select.Option key={voucher.id} value={voucher.id}>
-                                {voucher.code}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }}
+                        />
+                    </Form.Item>
 
-                {/* <Form.Item
-                    label="Thành tiền"
-                    dependencies={['totalMoney', 'idVoucher']}
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues.totalMoney !== currentValues.totalMoney || prevValues.idVoucher !== currentValues.idVoucher
-                    }
-                >
-                    {({ getFieldValue }) => {
-                        const totalMoney = getFieldValue('totalMoney') || 0;
-                        const idVoucher = getFieldValue('idVoucher');
-                        const discount = vouchers.find(voucher => voucher.id === idVoucher)?.discountAmount || 0;
-                        const payAmount = totalMoney - discount;
+                    <Form.Item label="Mã hóa đơn" name="code">
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    </Form.Item>
 
-                        return (
-                            <Input
-                                disabled
-                                value={payAmount > 0 ? payAmount : 0}
-                                size="large"
-                                style={{ fontSize: '16px', color: '#000' }}
-                            />
-                        );
-                    }}
-                </Form.Item> */}
-
-                {/* <Form.Item
-                    name="payAmount"
-                    label="Thành tiền"
-                >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
-                </Form.Item> */}
-
-                <Form.Item {...tailLayout}>
-                    <Space>
-                        <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
-                            Thanh toán
-                        </Button>
-
-                        <Popconfirm
-                            title="Bạn chắc chắn muốn xóa hóa đơn này?"
-                            onConfirm={() => handleCancel(order)}
-                            okText="Có"
-                            cancelText="Không"
-                        >
-                            <Button>
-                                Hủy đơn
+                    <Form.Item
+                        name="fullName"
+                        label="Tên khách"
+                    >
+                        <Input placeholder="Nhập tên khách hàng" />
+                    </Form.Item>
+                    <Form.Item {...tailLayout}>
+                        <Space>
+                            <Button type="primary" htmlType="submit" onClick={showModalUser}>
+                                Chọn khách hàng
                             </Button>
-                        </Popconfirm>
-                    </Space>
-                </Form.Item>
-            </Form>
+                        </Space>
+                    </Form.Item>
 
+                    <Form.Item
+                        name="totalMoney"
+                        label="Tổng tiền"
+                    >
+                        <Input
+                            disabled
+                            size="large" style={{ fontSize: '16px', color: '#000' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="discountId" {...tailLayout}>
+                        <DiscountSelector
+                            order={order}
+                            onSelect={onSelect}
+                            onCancel={onCancel}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="payAmount"
+                        label="Thành tiền"
+                    >
+                        <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    </Form.Item>
+
+                    <Form.Item {...tailLayout}>
+                        <Space>
+                            <Button type="primary" htmlType="submit" onClick={() => handlePay(order)}>
+                                Thanh toán
+                            </Button>
+
+                            <Popconfirm
+                                title="Bạn chắc chắn muốn xóa hóa đơn này?"
+                                onConfirm={() => handleCancel(order)}
+                                okText="Có"
+                                cancelText="Không"
+                            >
+                                <Button>
+                                    Hủy đơn
+                                </Button>
+                            </Popconfirm>
+                        </Space>
+                    </Form.Item>
+                </Form>
+
+            </Box>
         </div>
 
     )

@@ -67,6 +67,12 @@ const ManageProductDetail = () => {
         return e && e.fileList;
     };
 
+    const formatCurrency = (value: number | null | undefined): string => {
+        if (!value) return "0";
+        return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+            .format(value);
+    };
+
     const fetchColors = async () => {
         setIsColorLoading(true);
         try {
@@ -127,6 +133,8 @@ const ManageProductDetail = () => {
                 toast.success('Thêm sản phẩm Thành Công');
                 handleAddCancel();
                 refreshProductdetails();
+                setFileList([]);
+                setImageList([]);
             } else {
                 toast.error("Authorization failed");
             }
@@ -171,7 +179,7 @@ const ManageProductDetail = () => {
 
                 })
                 setEditingProductDetail(productDetailItem);
-            } catch (error) {
+            } catch (error: any) {
                 toast.error(error.response?.data?.message || 'Failed to fetch product detail item');
             }
             setIsItemUpdateOpen(true);
@@ -179,26 +187,27 @@ const ManageProductDetail = () => {
     }
     const handleUpdateCancel = () => {
         setIsItemUpdateOpen(false);
-      };
+    };
 
     const handleUpdateOk = async () => {
         try {
-          const values = await form.validateFields();
-          const { price, quantity, idProduct, idSize, idColor } = values;
-          const token = Cookies.get("accessToken");
-    
-          if (token && editingProductDetail) {
-            await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor }, token);
-            toast.success('Cật Nhật Thành Công');
-            handleUpdateCancel();
-            refreshProductdetails();
-          } else {
-            toast.error("Authorization failed");
-          }
+            const values = await form.validateFields();
+            const { price, quantity, idProduct, idSize, idColor } = values;
+            const token = Cookies.get("accessToken");
+            const images = urls;
+
+            if (token && editingProductDetail) {
+                await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor , images}, token);
+                toast.success('Cật Nhật Thành Công');
+                handleUpdateCancel();
+                refreshProductdetails();
+            } else {
+                toast.error("Authorization failed");
+            }
         } catch (error: any) {
-          toast.error(getErrorMessage(error))
+            toast.error(getErrorMessage(error))
         }
-      };
+    };
 
 
     const handleUpload = async (file: RcFile): Promise<boolean | void> => {
@@ -232,7 +241,7 @@ const ManageProductDetail = () => {
                     url: url, // sử dụng URL nhận được từ API
                 },
             ]);
-
+ 
             message.success(`${file.name} tải lên thành công!`);
             return false; // Ngăn chặn upload mặc định của Ant Design
         } catch (error) {
@@ -326,6 +335,7 @@ const ManageProductDetail = () => {
             title: 'Giá bán',
             dataIndex: 'price',
             key: 'price',
+            render: (price: number) => formatCurrency(price),
         },
         {
             title: 'Số lượng',
@@ -405,16 +415,16 @@ const ManageProductDetail = () => {
                 onCancel={handleDetailCancel}
                 productDetail={productDetail}
             />
-            <UpdateProductDetailModal 
-             isModalOpen= {isItemUpdateOpen}
-             handleOk= {handleUpdateOk}
-             handleCancel= {handleUpdateCancel}
-             form= {form}
-             productDetail= {productDetail}
-             sizes= {sizes}
-             colors= {colors}
-             products= {productList}
-             fileList={fileList}
+            <UpdateProductDetailModal
+                isModalOpen={isItemUpdateOpen}
+                handleOk={handleUpdateOk}
+                handleCancel={handleUpdateCancel}
+                form={form}
+                productDetail={editingProductDetail}
+                sizes={sizes}
+                colors={colors}
+                products={productList}
+                fileList={fileList}
             />
         </div>
     )

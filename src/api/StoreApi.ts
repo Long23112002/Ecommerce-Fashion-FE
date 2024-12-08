@@ -52,7 +52,7 @@ export const deleteOrderDetail = async (orderDetailId: number, token: string) =>
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        });
+        });        
         return response.data;
     } catch (error) {
         console.error('Lỗi khi xóa hóa đơn chi tiết:', error);
@@ -87,4 +87,12 @@ export const updateOrderAtStore = async (id: number, orderUpdateData: OrderUpdat
         console.log("Error update order ", error);
         throw error;
     }
+}
+
+export const exportOrder = async (idOrder: number | string) => {
+    const { data } = await axiosInstance({
+        method: 'GET',
+        url: `${BASE_URL}/export-pdf/${idOrder}`
+    })
+    return data
 }
