@@ -1,14 +1,15 @@
 import { Button, Divider, Form, FormInstance, Image, Input, Table } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Product from '../../types/Product';
 import LoadingCustom from '../Loading/LoadingCustom';
 import { FileImageOutlined } from '@ant-design/icons';
 import ProductDetail from '../../types/ProductDetail';
 import AddQuantityModal from './AddQuantityModal';
 import { PageableRequest } from '../../api/AxiosInstance';
-import { getAllProductDetails } from '../../api/ProductDetailApi';
+import { fetchAllProductDetails, getAllProductDetails, ProductParams } from '../../api/ProductDetailApi';
 import createPaginationConfig from '../../config/product/paginationConfig';
 import { PaginationState } from '../../config/paginationConfig';
+import { debounce } from 'lodash';
 
 interface ProductProps {
     form: FormInstance;
@@ -22,22 +23,16 @@ const ListProduct: React.FC<ProductProps> = ({
     showModalAddQuantity,
     isOrderSuccess
 }) => {
-    const [searchParams, setSearchParams] = useState<{
-        keyword: string,
-    }>({
-        keyword: '',
-    })
-    interface SearchParams {
-        keyword?: string;
-    }
     const [products, setProducts] = useState<ProductDetail[]>([]);
-    const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+    const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
+    const [keyword, setKeyword] = useState<string>("");
     const [pagination, setPagination] = useState<PaginationState>({
         current: 1,
         pageSize: 5,
         total: 20,
         totalPage: 4
     })
+
     const columns = [
         {
             title: 'Mã sản phẩm',
@@ -102,35 +97,53 @@ const ListProduct: React.FC<ProductProps> = ({
             ),
         },
     ]
-    const handleSearch = (changedValues: Partial<SearchParams>) => {
-        console.log('search');
 
-        setSearchParams((prevParams) => ({
-            ...prevParams,
-            ...changedValues,
-        }));
+    const handleSearch = (keyword: string) => {
+        setKeyword(keyword);
 
         setPagination((prevPagination) => ({
             ...prevPagination,
             current: 1,
         }));
     };
+    // const param: ProductParams = {
+    //     allowZero: false,
+    //     // keyword: keyword
+    // }
+    const fetchProductsDebounced = useCallback(debounce(async (current: number, pageSize: number, keyword: string) => {
+        setLoadingProducts(true);
+        try {
+            const response = await fetchAllProductDetails(pageSize, current - 1, keyword);
+            setProducts(response.data);
 
-    const fetchListProduct = async (params: SearchParams) => {
-        const pageable: PageableRequest = { page: 0, size: 15, sort: 'DESC', sortBy: 'id' }
-        const res = await getAllProductDetails({ pageable, ...params })
-        setProducts([...res.data])
-        setLoadingProducts(false)
+            setPagination({
+                current: response.metaData.page + 1,
+                pageSize: response.metaData.size,
+                total: response.metaData.total,
+                totalPage: response.metaData.totalPage
+            })
+        } catch (error) {
+            console.error("Error fetching products: ", error)
+        } finally {
+            setLoadingProducts(false)
+        }
+    }, 500), [])
+
+
+    const fetchProducts = (current: number, pageSize: number) => {
+        fetchProductsDebounced(current, pageSize, keyword);
     }
+
     useEffect(() => {
-        fetchListProduct(searchParams);
-    }, [searchParams, pagination.current, isOrderSuccess])
+        fetchProducts(pagination.current, pagination.pageSize);
+    }, [pagination.current, pagination.pageSize, isOrderSuccess, keyword]);
+
     return (
         <>
             <Divider orientation="left">Danh sách sản phẩm</Divider>
             <Form
                 layout="inline"
-                onValuesChange={(_, values) => handleSearch(values)}
+                onValuesChange={(_, values) => handleSearch(values.keyword)}
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 className="mt-2 mb-2"
             >
@@ -142,12 +155,13 @@ const ListProduct: React.FC<ProductProps> = ({
                 dataSource={products}
                 columns={columns}
                 loading={{
-                    spinning: loading,
+                    spinning: loadingProducts,
                     indicator: <LoadingCustom />,
                 }}
                 rowKey="id"
                 pagination={createPaginationConfig(pagination, setPagination)}
                 expandable={{ childrenColumnName: 'children' }}
+
             />
 
         </>
