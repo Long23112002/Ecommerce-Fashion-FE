@@ -88,9 +88,6 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest, v
   }
 
   const handleVietQrPayment = async () => {
-    setLoadingScreen(true)
-    await payOrder(order.id, orderRequest)
-    setLoadingScreen(false)
     navigate("/checkout/qr", { state: { order, orderRequest } });
   }
 

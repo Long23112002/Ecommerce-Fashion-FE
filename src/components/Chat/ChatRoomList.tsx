@@ -13,6 +13,7 @@ import MuiLoading from '../Loading/MuiLoading';
 import { toast } from 'react-toastify';
 import MenuCustom from '../MenuCustom';
 import UserOrderModal from '../User/UserOrderModal';
+import ConfirmModal from '../ConfirmModal';
 
 interface IProps {
   setIdRoom: React.Dispatch<React.SetStateAction<string>>
@@ -187,10 +188,17 @@ const ChatRoomList: React.FC<IProps> = ({ setIdRoom }) => {
                             <i className="fa-solid fa-eye me-3" />
                             Xem người dùng
                           </MenuItem>
-                          <MenuItem onClick={() => handleDelete(room.id + '')}>
-                            <i className="fa-solid fa-trash-can me-3" />
-                            Xóa phòng
-                          </MenuItem>
+                          <ConfirmModal
+                            triggerButton={
+                              <MenuItem>
+                                <i className="fa-solid fa-trash-can me-3" />
+                                Xóa phòng
+                              </MenuItem>
+                            }
+                            onConfirm={() => handleDelete(room.id + '')}
+                            title={`Xóa phòng`}
+                            content={`Bạn có chắc chắn muốn xóa phòng này`}
+                          />
                         </MenuCustom>
                       }
                     </ListItem>
