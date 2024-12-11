@@ -71,6 +71,17 @@ export const addProductToOrderDetail = async (orderDetailData: OrderDetailData) 
     }
 }
 
+export const updateProductToOrderDetail = async (orderDetailData: { orderDetailId: number, quantity: number }) => {
+    try {
+        const response = await axiosInstance.put(`${BASE_URL_DETAIL}`, orderDetailData)
+        return response.data;
+
+    } catch (error: any) {
+        console.log("Error add product into order detail", error);
+        throw error;
+    }
+}
+
 export const updateOrderSuccess = async (id: number | string) => {
     const { data } = await axiosInstance({
         method: 'GET',

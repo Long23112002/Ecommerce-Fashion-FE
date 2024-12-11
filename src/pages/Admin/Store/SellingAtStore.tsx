@@ -14,7 +14,7 @@ import { PageableRequest } from "../../../api/AxiosInstance";
 import ProductDetail from "../../../types/ProductDetail";
 import AddQuantityModal from "../../../components/Store/AddQuantityModal";
 import Order from "../../../types/Order";
-import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderAtStore, updateOrderSuccess } from "../../../api/StoreApi";
+import { addProductToOrderDetail, createOrderPendingAtStore, deleteOrderDetail, getAllOrderPendingAtStore, getOrderDetailByIdOrder, updateOrderAtStore, updateOrderSuccess, updateProductToOrderDetail } from "../../../api/StoreApi";
 import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
@@ -49,6 +49,7 @@ const SellingAtStore = () => {
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
     const [isOpenModalAddQuantity, setIsOpenModalAddQuantity] = useState(false);
+    const [isOpenModalUpdateQuantity, setIsOpenModalUpdateQuantity] = useState(false);
     const [isOpenModalChooseGuest, setIsOpenModalChooseGuest] = useState(false);
 
     const [orderDraftList, setOrderDraftList] = useState<Order[]>([]);
@@ -62,7 +63,8 @@ const SellingAtStore = () => {
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
-    const [currentGuestId, setCurrentGuestId] = useState<number| null>(null);
+    const [currentOrderDetailId, setCurrentOrderDetailId] = useState<number | null>(null);
+    const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
     const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
 
@@ -119,6 +121,54 @@ const SellingAtStore = () => {
                     const response = await getOrderById(idOrder);
                     setOrder(response)
                     toast.success('Thêm sản phẩm Thành Công');
+                    handleUpdateQuantityCancel()
+
+                    await refreshOrderDetails();
+                    formOrder.setFieldsValue({
+                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                        code: response.code,
+                        createdAt: response.createdAt
+                            ? new Date(response.createdAt).toLocaleDateString()
+                            : "",
+
+                    });
+
+                    // formOrder.setFieldsValue(order)
+                } else {
+                    toast.error("Authorization failed");
+                }
+            } catch (error: any) {
+                toast.error(getErrorMessage(error))
+            }
+        }
+
+    };
+
+    const showUpdateQuantityModal = (idOrderDetail: number) => {
+        formAddQuantity.resetFields();
+        console.log(idOrderDetail)
+        setCurrentOrderDetailId(idOrderDetail);
+        setIsOpenModalUpdateQuantity(true);
+    }
+
+    const handleUpdateQuantityCancel = () => {
+        setIsOpenModalUpdateQuantity(false);
+    };
+
+    const handleUpdateQuantityOk = async () => {
+        const idOrder = order?.id;
+        if (idOrder == null) {
+            toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
+        } else {
+            try {
+                const values = await formAddQuantity.validateFields();
+                const { quantity } = values;
+                const token = Cookies.get("accessToken");
+                if (token) {
+                    await updateProductToOrderDetail({ orderDetailId: currentOrderDetailId, quantity });
+
+                    const response = await getOrderById(idOrder);
+                    setOrder(response)
                     handleAddQuantityCancel()
 
                     await refreshOrderDetails();
@@ -185,7 +235,16 @@ const SellingAtStore = () => {
         try {
             const token = Cookies.get("accessToken");
             if (token) {
-                await deleteOrderDetail(orderDetailId, token);
+                const res = await deleteOrderDetail(orderDetailId, token);
+                setOrder({ ...res })
+                formOrder.setFieldsValue({
+                    totalMoney: res.totalMoney ? formatCurrency(res.totalMoney) : "0",
+                    code: res.code,
+                    createdAt: res.createdAt
+                        ? new Date(res.createdAt).toLocaleDateString()
+                        : "",
+
+                });
                 toast.success("Xóa sản phẩm thành công");
                 refreshOrderDetails();
             } else {
@@ -217,32 +276,30 @@ const SellingAtStore = () => {
 
     }
 
-    const chooseThisGuest = (idGuest: number) => {        
+    const chooseThisGuest = (idGuest: number) => {
         setCurrentGuestId(idGuest);
-        console.log(currentGuestId);
         setIsOpenModalChooseGuest(false)
         handleUpdateOrder();
-
     }
 
     const handleUpdateOrder = async () => {
         try {
-          const  idDiscount = 34;
+            const idDiscount = 34;
 
-          if (order) {
-            console.log(currentGuestId);
-            
-            await updateOrderAtStore(order.id, { idGuest: currentGuestId, idDiscount});
-            // handleUpdateCancel();
-            // refreshProducts();
-            setIsUpdateGuestDiscount(true);
-          } else {
-            toast.error("Authorization failed");
-          }
+            if (order) {
+                console.log(currentGuestId);
+
+                await updateOrderAtStore(order.id, { idGuest: currentGuestId, idDiscount });
+                // handleUpdateCancel();
+                // refreshProducts();
+                setIsUpdateGuestDiscount(true);
+            } else {
+                toast.error("Authorization failed");
+            }
         } catch (error: any) {
-          toast.error(getErrorMessage(error))
+            toast.error(getErrorMessage(error))
         }
-      };
+    };
 
 
     const handleCancel = () => {
@@ -295,7 +352,6 @@ const SellingAtStore = () => {
 
     const fetchListOrderDetail = async (order: Order | null) => {
         if (order) {
-            console.log(order)
             setLoaingOrderDetailList(true)
             const res = await getOrderDetailByIdOrder(order.id);
             setOrderDetailList([...res.data])
@@ -334,6 +390,7 @@ const SellingAtStore = () => {
                     />
                     <ListOrderDetail
                         orderDetailList={orderDetailList}
+                        showModalUpdateQuantity={showUpdateQuantityModal}
                         handleDelete={handleDeleteOrderDetail}
                     />
 
@@ -365,6 +422,12 @@ const SellingAtStore = () => {
                 form={formAddQuantity}
                 handleCancel={handleAddQuantityCancel}
                 handleOk={handleAddQuantityOk}
+            />
+            <AddQuantityModal
+                isModalOpen={isOpenModalUpdateQuantity}
+                form={formAddQuantity}
+                handleCancel={handleUpdateQuantityCancel}
+                handleOk={handleUpdateQuantityOk}
             />
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}

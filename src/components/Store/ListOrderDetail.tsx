@@ -8,10 +8,13 @@ import { FileImageOutlined } from '@ant-design/icons';
 interface ListOrderDetailProps {
     orderDetailList: OrderDetail[];
     handleDelete: (e: any) => void;
+    showModalUpdateQuantity: (e: any) => void;
+
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
     orderDetailList,
-    handleDelete
+    handleDelete,
+    showModalUpdateQuantity
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -82,6 +85,11 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             key: 'actions',
             render: (_: any, record: any) => (
                 <div>
+                    <Button
+                        onClick={() => showModalUpdateQuantity(record.id)}
+                        style={{ margin: '0 4px' }} className="btn-outline-primary">
+                        <i className="fa-solid fa-circle-plus"></i>
+                    </Button>
                     <Popconfirm
                         title="Bạn chắc chắn muốn xóa mặt hàng này?"
                         onConfirm={() => handleDelete(record.id)}
