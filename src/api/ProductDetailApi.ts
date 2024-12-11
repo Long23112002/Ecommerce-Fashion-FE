@@ -25,7 +25,8 @@ export interface ProductParams {
     idColors?: number | null,
     idSizes?: number | null,
     maxPrice?: number | null,
-    minPrice?: number | null
+    minPrice?: number | null,
+    allowZero?: boolean
 }
 
 export const getDetailByIdProduct = async (id: number | string, pageable?: PageableRequest) => {
@@ -95,14 +96,32 @@ export const updateProductDetail = async (productDetailId: number, productData: 
     }
 }
 
-export const getAllProductDetails = async (query: { params?: ProductParams; pageable?: PageableRequest } = {}) => {
+export const getAllProductDetails = async (query: { keyword?: String; pageable?: PageableRequest}) => {    
     const { data } = await axiosInstance({
         method: 'GET',
         url: `${API_BASE_URL}/all`,
-        params: { ...query.params, ...query.pageable },
+        params: {...query.keyword, ...query.pageable },
         paramsSerializer: {
             indexes: null,
         }
-    });
+    });    
     return data;
 };
+
+export const fetchAllProductDetails = async (
+    pageSize: number,
+    page: number,
+    keyword?: string,
+    ) => {
+    const params = {
+        size: pageSize,
+        page: page,
+        keyword: keyword || '',
+    };
+    try {
+        const response = await axiosInstance.get(`${API_BASE_URL}`, { params });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(`Error fetching products: ${error.response?.data?.message || error.message}`)
+    }
+}
