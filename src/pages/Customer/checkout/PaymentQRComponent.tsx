@@ -18,8 +18,6 @@ const PaymentQRComponent = () => {
     const { order, orderRequest } = location.state || {}
     const { removeItemAfterOrder } = useCart();
 
-
-    console.log(order)
     const bankImageUrl = [
         {
             id: 1,
@@ -98,7 +96,7 @@ const PaymentQRComponent = () => {
     useEffect(() => {
         const checkPaymentStatus = async () => {
             const result = await checkSumPayment(order?.payAmount, `DH${order?.id}`);
-            if (result === true) {
+            if (result == true) {
                 await payOrder(order.id, orderRequest);
                 toast.success("Đã thanh toán thành công");
                 removeItemAfterOrder()

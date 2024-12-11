@@ -45,10 +45,10 @@ const ProductDetailPage: React.FC = () => {
                     ?
                     product
                         ?
-                        <Container maxWidth='lg'>
+                        <Container maxWidth='lg' sx={{mb: 5}}>
                             <ProductOverview product={product} productDetails={productDetails} />
                             <ProductSlider title='Sản phẩm tương tự' products={similarProducts} />
-                            <ProductReviews product={product} />
+                            {/* <ProductReviews product={product} /> */}
                         </Container>
                         :
                         <NotFound />

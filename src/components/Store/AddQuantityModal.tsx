@@ -51,7 +51,7 @@ const AddQuantityModal: React.FC<AddQuantityModalProps> = ({
                     type="primary"
                     onClick={onSubmit}
                 >
-                    Thêm
+                    Đồng ý
                 </Button>
             ]}
         >
