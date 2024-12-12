@@ -174,6 +174,7 @@ const SellingAtStore = () => {
                     await refreshOrderDetails();
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0",
                         code: response.code,
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
@@ -239,6 +240,7 @@ const SellingAtStore = () => {
                 setOrder({ ...res })
                 formOrder.setFieldsValue({
                     totalMoney: res.totalMoney ? formatCurrency(res.totalMoney) : "0",
+                    payAmount: res.payAmount ? formatCurrency(res.payAmount) : "0",
                     code: res.code,
                     createdAt: res.createdAt
                         ? new Date(res.createdAt).toLocaleDateString()
@@ -346,6 +348,15 @@ const SellingAtStore = () => {
             resolve(true);
         });
         formOrder.setFieldsValue(order)
+        formOrder.setFieldsValue({
+            ...order,
+            totalMoney: order.totalMoney ? formatCurrency(order.totalMoney) : "0",
+            payAmount: order.payAmount ? formatCurrency(order.payAmount) : "0",
+            code: order.code,
+            createdAt: order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString()
+                : "",
+        });
         fetchListOrderDetail(order)
         fetchVouchersDebounced()
     }
