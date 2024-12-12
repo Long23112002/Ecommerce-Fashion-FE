@@ -19,6 +19,24 @@ export const formatDateTime = (dateInput: string | Date | number | null | undefi
     return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
 };
 
+export const formatDate = (dateInput: string | Date | number | null | undefined): string => {
+    if (!dateInput) {
+        return "";
+    }
+
+    const date = typeof dateInput === 'string' || typeof dateInput === 'number' ? new Date(dateInput) : dateInput;
+
+    if (isNaN(date.getTime())) {
+        return "Invalid date";
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
 export const monthStringToNumber = (month: string): number | null => {
     switch (month) {
         case 'January': return 1;

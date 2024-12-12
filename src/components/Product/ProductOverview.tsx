@@ -3,7 +3,6 @@ import {
     Box,
     Button,
     Grid,
-    Rating,
     Stack,
     TextField,
     Typography
@@ -228,12 +227,12 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                     <Typography variant="h4" fontWeight="bold">{product.name}</Typography>
                     {handlePrice()}
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                    {/* <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                         <Rating name="half-rating-read" value={product.rating} precision={0.5} readOnly />
                         <Typography variant="body2" sx={{ ml: 1 }}>
                             {product.reviews?.length} đánh giá
                         </Typography>
-                    </Box>
+                    </Box> */}
 
                     <Typography variant="body1" sx={{ mt: 2 }}>
                         {product.description}

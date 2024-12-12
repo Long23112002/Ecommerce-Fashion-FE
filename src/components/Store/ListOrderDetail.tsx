@@ -1,47 +1,24 @@
-import { Button, Col, Divider, Image, InputNumber, Popconfirm, Row, Table, Tooltip } from 'antd'
-import React, { useEffect, useState } from 'react'
+import { Button, Col, Divider, Image, Popconfirm, Row, Table, Tooltip } from 'antd'
+import React, { useState } from 'react'
+import LoadingCustom from '../Loading/LoadingCustom'
 import OrderDetail from '../../types/OrderDetail'
+import createPaginationConfig from '../../config/paginationConfig';
 import { FileImageOutlined } from '@ant-design/icons';
-import Order from '../../types/Order';
-import { getOrderDetailByIdOrder } from '../../api/StoreApi';
 
 interface ListOrderDetailProps {
+    orderDetailList: OrderDetail[];
     handleDelete: (e: any) => void;
-    onChange: (value: any, e: any) => void;
-    order: Order | null;
-    isOrderDetailChange: boolean;
-    isPay: boolean;
-    isAddQroductSuccess: boolean;
+    showModalUpdateQuantity: (e: any) => void;
 
 }
 const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
+    orderDetailList,
     handleDelete,
-    onChange,
-    order,
-    isOrderDetailChange,
-    isPay,
-    isAddQroductSuccess,
+    showModalUpdateQuantity
 }) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
     };
-    const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
-    const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
-
-    const fetchListOrderDetail = async (order: Order) => {
-        setLoaingOrderDetailList(true)
-        const res = await getOrderDetailByIdOrder(order.id);
-        setOrderDetailList([...res.data])
-        setLoaingOrderDetailList(false)
-    }
-
-    useEffect(() => {
-        if (order) {
-            fetchListOrderDetail(order);
-        } else {
-            setOrderDetailList([]);
-        }
-    }, [order, isOrderDetailChange, isAddQroductSuccess])
 
     const columns = [
         {
@@ -54,7 +31,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             dataIndex: 'productDetail',
             key: 'productDetail',
             render: (productDetail: any): any => (
-                productDetail?.product?.image ? (
+                productDetail.product.image ? (
                     <Image
                         width={60}
                         src={productDetail.product.image}
@@ -72,19 +49,19 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             title: 'Tên sản phẩm',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.product?.name || ''
+            render: (productDetail: any) => productDetail.product.name
         },
         {
             title: 'Màu sắc',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.color?.name || ''
+            render: (productDetail: any) => productDetail.color.name
         },
         {
             title: 'Kích cỡ',
             dataIndex: 'productDetail',
             key: 'productDetail',
-            render: (productDetail: any) => productDetail?.size?.name || ''
+            render: (productDetail: any) => productDetail.size.name
         },
         {
             title: 'Đơn giá',
@@ -96,17 +73,6 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             title: 'Số lượng',
             dataIndex: 'quantity',
             key: 'quantity',
-            render: (quantity: number, record: any) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <InputNumber
-                        size="small"
-                        min={1}
-                        max={record.productDetail.quantity}
-                        value={quantity}
-                        onChange={(value) => onChange(value, record)}
-                    />
-                </div>
-            ),
         },
         {
             title: 'Tổng tiền',
@@ -119,6 +85,11 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             key: 'actions',
             render: (_: any, record: any) => (
                 <div>
+                    <Button
+                        onClick={() => showModalUpdateQuantity(record.id)}
+                        style={{ margin: '0 4px' }} className="btn-outline-primary">
+                        <i className="fa-solid fa-circle-plus"></i>
+                    </Button>
                     <Popconfirm
                         title="Bạn chắc chắn muốn xóa mặt hàng này?"
                         onConfirm={() => handleDelete(record.id)}
@@ -139,10 +110,16 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             <Table
                 dataSource={orderDetailList}
                 columns={columns}
+                // loading={{
+                //     spinning: loading,
+                //     indicator: <LoadingCustom />,
+                // }}
                 rowKey="id"
+                // pagination={createPaginationConfig(pagination, setPagination)}
                 expandable={{ childrenColumnName: 'children' }}
             />
         </>
     )
 }
+
 export default ListOrderDetail
