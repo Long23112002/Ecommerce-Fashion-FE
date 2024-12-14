@@ -1,11 +1,11 @@
 import axios from "axios";
-import { API_IMAGE } from "../constants/BaseApi";
+import { IMAGE_API } from "../constants/BaseApi";
 
 export const uploadMutiImage = async (file: File[], objectId: number, objectName: string): Promise<string[]> => {
     const requestBody = { file, objectId, objectName };
     const response = await axios({
         method: 'post',
-        url: `${API_IMAGE}/api/v1/images`,
+        url: `${IMAGE_API}/api/v1/images`,
         data: requestBody,
         headers: {
             'Content-Type': 'multipart/form-data',
