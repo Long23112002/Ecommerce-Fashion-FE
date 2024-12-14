@@ -147,22 +147,10 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
         return `-${promotion.value.toLocaleString('vi-VN')}đ`
     }
 
-    const handlePrice = () => {
-        const priceBefore = selectedProductDetail?.price || 0
-        let currentPrice = null
-        const promotion = selectedProductDetail?.promotion
-        if (promotion) {
-            if (promotion.typePromotionEnum == TypePromotionEnum.PERCENTAGE_DISCOUNT) {
-                currentPrice = priceBefore - ((priceBefore / 100) * promotion.value)
-            }
-            else {
-                currentPrice = priceBefore - (promotion.value)
-            }
-        }
-        return renderPrice(currentPrice, priceBefore);
-    };
-
-    const renderPrice = (currentPrice: number | null, priceBefore: number) => {
+    const renderPrice = () => {
+        console.log(selectedProductDetail)
+        const price = selectedProductDetail?.price
+        const originPrice = selectedProductDetail?.originPrice
         return (
             <Box sx={{
                 display: 'flex',
@@ -171,11 +159,11 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
                 mt: 1
             }}>
                 <Typography variant="h5" color="primary">
-                    {(currentPrice ? currentPrice : priceBefore).toLocaleString('vi-VN')} VNĐ
+                    {(price || 0).toLocaleString('vi-VN')} VNĐ
                 </Typography>
-                {currentPrice &&
+                {originPrice &&
                     <Typography color="textDisabled" variant="h6" sx={{ textDecoration: 'line-through' }}>
-                        {priceBefore.toLocaleString('vi-VN')} VNĐ
+                        {(originPrice || 0).toLocaleString('vi-VN')} VNĐ
                     </Typography>
                 }
             </Box>
@@ -225,7 +213,7 @@ const ProductOverview: React.FC<IProps> = ({ product, productDetails }) => {
 
                 <Grid item xs={12} md={6}>
                     <Typography variant="h4" fontWeight="bold">{product.name}</Typography>
-                    {handlePrice()}
+                    {renderPrice()}
 
                     {/* <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                         <Rating name="half-rating-read" value={product.rating} precision={0.5} readOnly />
