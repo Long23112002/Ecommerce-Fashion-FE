@@ -1,7 +1,7 @@
-import {BASE_API} from "../constants/BaseApi";
-import axiosInstance, {PageableRequest} from "./AxiosInstance";
-import {toast} from "react-toastify";
-import {getErrorMessage} from "../pages/Error/getErrorMessage";
+import { BASE_API } from "../constants/BaseApi";
+import axiosInstance, { PageableRequest } from "./AxiosInstance";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../pages/Error/getErrorMessage";
 
 const API_BASE_URL = `${BASE_API}/api/v1/product`
 const API_SERVICE_UPLOAD_URL = `http://ecommerce-fashion.site:9099`;
@@ -46,6 +46,23 @@ export const getAllProducts = async (query: { params?: ProductParams; pageable?:
 export const getProductById = async (id: number | string) => {
     try {
         const response = await axiosInstance.get(`${API_BASE_URL}/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching product by ID", error);
+        throw error;
+    }
+}
+
+export const getSimilarProducts = async (query: { id: number | string, pageable: PageableRequest }) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `${API_BASE_URL}/similar`,
+            params: {
+                id: query.id,
+                ...query.pageable
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Error fetching product by ID", error);
@@ -128,7 +145,7 @@ export const downloadTemplate = async () => {
     }
 };
 
-export const historyImport = async ( page: number,size: number) => {
+export const historyImport = async (page: number, size: number) => {
     try {
         const response = await axiosInstance.get(`${API_SERVICE_UPLOAD_URL}/api/v1/files`, {
             params: {
@@ -191,14 +208,14 @@ export const importProduct = async (file: File): Promise<any> => {
             },
         });
     } catch (error) {
-       toast.error(getErrorMessage(error));
+        toast.error(getErrorMessage(error));
     }
 };
 
-export const exportQRCode = async (productDetailId: number , qty:number) => {
+export const exportQRCode = async (productDetailId: number, qty: number) => {
     try {
         const response = await axiosInstance.get(`${BASE_API}/api/v1/qr_code`, {
-            params: { productDetailId , qty },
+            params: { productDetailId, qty },
             responseType: 'blob',
         });
 
