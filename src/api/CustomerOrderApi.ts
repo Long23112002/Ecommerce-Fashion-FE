@@ -47,13 +47,15 @@ export const fetchOrderDetails = async (orderId: number) => {
   }
 }
 
-export const cancelOrder = async (orderId: number, status : string) => {
+export const cancelOrder = async (orderId: number, status : string, note: string) => {
   
   try {
     const url = `${BASE_API}/api/v1/orders/${orderId}`;
     const response = await axiosInstance.put(
       url,
-      { status }
+      { status,
+        note
+       }
     );
     console.log("Order updated:", response.data);
     return response.data;
