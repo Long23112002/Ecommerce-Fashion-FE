@@ -65,7 +65,39 @@ export const getSimilarProducts = async (query: { id: number | string, pageable:
         });
         return response.data;
     } catch (error) {
-        console.error("Error fetching product by ID", error);
+        console.error("Error getSimilarProducts", error);
+        throw error;
+    }
+}
+
+export const getHotProducts = async (pageable: PageableRequest) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `${API_BASE_URL}/hot`,
+            params: {
+                ...pageable
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error getHotProducts", error);
+        throw error;
+    }
+}
+
+export const getProductInPromotion = async (pageable: PageableRequest) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `${API_BASE_URL}/in_promotion`,
+            params: {
+                ...pageable
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error getProductInPromotion", error);
         throw error;
     }
 }

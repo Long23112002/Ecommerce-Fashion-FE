@@ -126,6 +126,7 @@ const SellingAtStore = () => {
                     await refreshOrderDetails();
                     formOrder.setFieldsValue({
                         totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
+                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0",
                         code: response.code,
                         createdAt: response.createdAt
                             ? new Date(response.createdAt).toLocaleDateString()
