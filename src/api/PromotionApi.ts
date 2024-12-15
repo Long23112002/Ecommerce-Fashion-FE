@@ -95,3 +95,13 @@ export const getPromotionById = async (promotionId: number): Promise<any> => {
         throw error;
     }
 }
+
+export const isAnyPromotionActive = async (): Promise<boolean> => {
+    try {
+        const url = `${BASE_API}/api/v1/promotion/any_active`;
+        const response:boolean = await axiosInstance.get(url);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
