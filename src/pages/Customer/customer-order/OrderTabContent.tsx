@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tabs, Card, Spin, Row, Col, Divider } from "antd";
+import { Tabs, Card, Spin, Row, Col, Divider, Modal, Radio, Input } from "antd";
 import type { TabsProps } from "antd";
 import { Container, Typography, Grid, Button } from "@mui/material";
 import LoadingCustom from "../../../components/Loading/LoadingCustom.js";
@@ -18,6 +18,10 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<Order[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [lyDoHuy, setLyDoHuy] = useState("");
+  const [note, setNote] = useState("");
+  const [orderId, setOrderId] = useState<number>();
 
   const fetchData = async () => {
     const token = Cookies.get("accessToken");
@@ -49,14 +53,28 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
   };
 
   const handleCancelOrder = async (orderId: number) => {
+    setIsModalVisible(true);
+    setOrderId(orderId);
+  };
+
+  const handleOk = async () => {
     const token = Cookies.get("accessToken");
     // if (!token) {
     //   toast.error("Lỗi xác thực");
     //   return;
     // }
+    if (!orderId) {
+      toast.error("OrderId không tồn tại");
+      return;
+    }
+    if (!note) {
+      toast.error("Vui lòng nhập lý do hủy đơn");
+      return;
+    }
     try {
-      await cancelOrder(orderId, OrderStatus.CANCEL);
+      await cancelOrder(orderId, OrderStatus.CANCEL, note);
       toast.success("Đơn hàng đã được hủy thành công.");
+      setIsModalVisible(false);
       fetchData();
     } catch (error) {
       console.error("Error canceling order:", error);
@@ -64,16 +82,49 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
     }
   };
 
+  const handleInputChange = (e: any) => {
+    setNote(e.target.value);
+  };
+
+  const handleRadioChange = (e: any) => {
+    setLyDoHuy(e.target.value);
+    setNote(e.target.value);
+  };
+
   return (
-    <Container className="mt-5" style={{
-      marginBottom:"220px"
-    }}>
+    <Container
+      className="mt-5"
+      style={{
+        marginBottom: "220px",
+      }}
+    >
       <Spin
         spinning={loading}
         indicator={<LoadingCustom />}
         size="large"
         className="centered-spin"
       >
+        <Modal
+          title="Hủy đơn hàng"
+          open={isModalVisible}
+          onOk={handleOk}
+          onCancel={() => setIsModalVisible(false)}
+        >
+          <Radio.Group onChange={handleRadioChange} value={lyDoHuy}>
+            <Radio value="Không có nhu cầu mua sản phẩm nữa">
+            Không có nhu cầu mua sản phẩm nữa
+            </Radio><br />
+            <Radio value="Thay đổi thông tin nhận hàng">Thay đổi thông tin nhận hàng</Radio><br />
+            <Radio value="Thêm mã giảm giá cho đơn hàng">Thêm mã giảm giá cho đơn hàng</Radio><br />
+            <Radio value="">Khác</Radio><br /><br />
+          </Radio.Group>
+          <Input
+            value={note}
+            onChange={handleInputChange}
+            placeholder="Nhập lý do hủy đơn"
+            required
+          />
+        </Modal>
         {data.length === 0 ? (
           <Container
             style={{ textAlign: "center", paddingTop: "65px" }}
@@ -130,26 +181,26 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
               </Grid>
 
               {order.status === OrderStatus.PENDING && (
-                  <Grid
-                    container
-                    justifyContent="flex-end"
-                    style={{ marginTop: 20 }}
-                  >
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCancelOrder(order.id);
-                        }}
-                        style={{ marginTop: 10 }}
-                      >
-                        Hủy đơn hàng
-                      </Button>
-                    </Grid>
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelOrder(order.id);
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Hủy đơn hàng
+                    </Button>
                   </Grid>
-                )}
+                </Grid>
+              )}
 
               {/* {order.status === OrderStatus.SUCCESS && (
                 <Grid
@@ -172,60 +223,60 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
                 </Grid>
               )} */}
 
-              {(order.status === OrderStatus.CANCEL) && (
-                  <Grid
-                    container
-                    justifyContent="flex-end"
-                    style={{ marginTop: 20 }}
-                  >
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="inherit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const productId =
-                            order.orderDetails?.[0]?.productDetail?.product?.id;
-                          if (productId !== undefined) {
-                            handleBuyAgain(productId);
-                          } else {
-                            toast.error("Product ID không khả dụng");
-                          }
-                        }}
-                        style={{ marginTop: 10 }}
-                      >
-                        Mua lại
-                      </Button>
-                    </Grid>
+              {order.status === OrderStatus.CANCEL && (
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const productId =
+                          order.orderDetails?.[0]?.productDetail?.product?.id;
+                        if (productId !== undefined) {
+                          handleBuyAgain(productId);
+                        } else {
+                          toast.error("Product ID không khả dụng");
+                        }
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Mua lại
+                    </Button>
                   </Grid>
-                )}
-                {(order.status === OrderStatus.SUCCESS) && (
-                  <Grid
-                    container
-                    justifyContent="flex-end"
-                    style={{ marginTop: 20 }}
-                  >
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="inherit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const productId =
-                            order.orderDetails?.[0]?.productDetail?.product?.id;
-                          if (productId !== undefined) {
-                            handleBuyAgain(productId);
-                          } else {
-                            toast.error("Product ID không khả dụng");
-                          }
-                        }}
-                        style={{ marginTop: 10 }}
-                      >
-                        Mua lại
-                      </Button>
-                    </Grid>
+                </Grid>
+              )}
+              {order.status === OrderStatus.SUCCESS && (
+                <Grid
+                  container
+                  justifyContent="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const productId =
+                          order.orderDetails?.[0]?.productDetail?.product?.id;
+                        if (productId !== undefined) {
+                          handleBuyAgain(productId);
+                        } else {
+                          toast.error("Product ID không khả dụng");
+                        }
+                      }}
+                      style={{ marginTop: 10 }}
+                    >
+                      Mua lại
+                    </Button>
                   </Grid>
-                )}
+                </Grid>
+              )}
 
               {/* {order.status === OrderStatus.SUCCESS && (
                 <Grid
@@ -255,17 +306,26 @@ const OrderTabContent: React.FC<{ status: OrderStatus }> = ({ status }) => {
   );
 };
 
-export const handleCancelOrder = async (
+export const handleOk = async (
   orderId: number,
-  navigate: (path: string) => void
+  navigate: (path: string) => void,
+  note:string
 ) => {
   const token = Cookies.get("accessToken");
   if (!token) {
     toast.error("Lỗi xác thực");
     return;
   }
+  if (!orderId) {
+    toast.error("OrderId không tồn tại");
+    return;
+  }
+  if (!note) {
+    toast.error("Vui lòng nhập lý do hủy đơn");
+    return;
+  }
   try {
-    await cancelOrder(orderId, OrderStatus.CANCEL);
+    await cancelOrder(orderId, OrderStatus.CANCEL, note);
     toast.success("Đơn hàng đã được hủy thành công.");
     navigate("/customer-order");
   } catch (error) {
