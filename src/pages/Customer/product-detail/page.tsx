@@ -1,7 +1,7 @@
 import { Container } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getAllProducts, getProductById } from '../../../api/ProductApi'
+import { getAllProducts, getProductById, getSimilarProducts } from '../../../api/ProductApi'
 import MuiLoadingScreen from '../../../components/Loading/MuiLoadingScreen'
 import NotFound from '../../../components/NotFound'
 import ProductOverview from '../../../components/Product/ProductOverview'
@@ -9,6 +9,7 @@ import ProductReviews from '../../../components/Product/ProductReviews'
 import ProductSlider from '../../../components/product/ProductSlider'
 import Product from '../../../types/Product'
 import ProductDetail from '../../../types/ProductDetail'
+import { PageableRequest } from '../../../api/AxiosInstance'
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams()
@@ -29,7 +30,11 @@ const ProductDetailPage: React.FC = () => {
         }
     }
     const fetchProductSimilar = async () => {
-        const res = await getAllProducts()
+        const pId = id+''
+        const pageable: PageableRequest = {
+            size: 15
+        }
+        const res = await getSimilarProducts({id: pId, pageable})
         setSimilarProduct([...res.data])
     }
 
