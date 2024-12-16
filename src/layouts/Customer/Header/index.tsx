@@ -24,7 +24,6 @@ import { useNavigate } from 'react-router-dom';
 
 const categories = [
     { name: 'Sản phẩm mới', link: 'sort=newest' },
-    { name: 'Sản phẩm hot', link: '' },
     { name: 'Áo', link: 'idCategory=1' },
     { name: 'Quần', link: 'idCategory=5' }
 ];

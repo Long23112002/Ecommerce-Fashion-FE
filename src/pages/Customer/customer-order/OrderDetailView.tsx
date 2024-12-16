@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Steps } from "antd";
+import { Input, Modal, Radio, Steps } from "antd";
 import {
   FileTextOutlined,
   DollarOutlined,
@@ -32,13 +32,13 @@ import { fetchOrderDetails } from "../../../api/CustomerOrderApi";
 import { OrderMeThodLabel } from "../../../enum/OrderStatusEnum";
 import PaymentMethodEnum from "../../../enum/PaymentMethodEnum";
 import OrderPaymentDetails from "./OrderPaymentDetails";
-import { handleBuyAgain, handleCancelOrder } from "./OrderTabContent";
+import { handleBuyAgain, handleOk } from "./OrderTabContent";
 import { toast } from "react-toastify";
 const OrderStatusCustomer = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams<{ id:any}>();
-  const {orders} = location.state;
+  const { id } = useParams<{ id: any }>();
+  const { orders } = location.state;
   const [order, setOrders] = useState<Order>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -48,7 +48,7 @@ const OrderStatusCustomer = () => {
       setOrders(orderData);
       setLoading(false);
     } catch (err) {
-      console.error('Không thể tải dữ liệu đơn hàng');
+      console.error("Không thể tải dữ liệu đơn hàng");
       setLoading(false);
     }
   };
@@ -60,13 +60,11 @@ const OrderStatusCustomer = () => {
     ? dayjs(order.updatedAt).format("HH:mm DD-MM-YYYY")
     : "";
 
-    const currentOrderStatus = order?.status ?? OrderStatus.PENDING;
-
+  const currentOrderStatus = order?.status ?? OrderStatus.PENDING;
 
   useEffect(() => {
     getOrderDetails();
-  },[currentOrderStatus]);
-
+  }, [currentOrderStatus]);
 
   const statusTimeMap: { [key: string]: string } = {};
   order?.orderLogs?.forEach((log: OrderLog) => {
@@ -78,7 +76,8 @@ const OrderStatusCustomer = () => {
   const steps = [
     {
       title: OrderStatusLabel[OrderStatus.PENDING],
-      description: statusTimeMap[OrderStatus.PENDING] || createdAt || "Đang chờ xử lý",
+      description:
+        statusTimeMap[OrderStatus.PENDING] || createdAt || "Đang chờ xử lý",
       icon: <FileTextOutlined />,
     },
     {
@@ -97,7 +96,6 @@ const OrderStatusCustomer = () => {
     //   icon: <SyncOutlined />,
     // },
   ];
-
 
   const cancelSteps = [
     {
@@ -122,7 +120,7 @@ const OrderStatusCustomer = () => {
         return 2;
       // case OrderStatus.REFUND:
       //   return 3;
-        case OrderStatus.CANCEL:
+      case OrderStatus.CANCEL:
         return 1;
       default:
         return 0;
@@ -131,11 +129,62 @@ const OrderStatusCustomer = () => {
 
   const currentStep = getCurrentStep(currentOrderStatus);
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [lyDoHuy, setLyDoHuy] = useState("");
+  const [note, setNote] = useState("");
+
+  const handleCancelOrder = async (orderId: number) => {
+    setIsModalVisible(true);
+  };
+
+  const handleInputChange = (e: any) => {
+    setNote(e.target.value);
+  };
+
+  const handleRadioChange = (e: any) => {
+    setLyDoHuy(e.target.value);
+    setNote(e.target.value);
+  };
   return (
-    <Container
-      className="bg-white"
-    >
+    <Container className="bg-white">
       <div className="max-w-5xl mx-auto p-4 font-sans">
+        <Modal
+          title="Hủy đơn hàng"
+          open={isModalVisible}
+          onOk={()=>{
+            if (!order) {
+              toast.error("Order không tồn tại");
+              return;
+            }
+            handleOk(order?.id,navigate,note);
+          }
+          }
+          onCancel={() => setIsModalVisible(false)}
+        >
+          <Radio.Group onChange={handleRadioChange} value={lyDoHuy}>
+            <Radio value="Không có nhu cầu mua sản phẩm nữa">
+              Không có nhu cầu mua sản phẩm nữa
+            </Radio>
+            <br />
+            <Radio value="Thay đổi thông tin nhận hàng">
+              Thay đổi thông tin nhận hàng
+            </Radio>
+            <br />
+            <Radio value="Thêm mã giảm giá cho đơn hàng">
+              Thêm mã giảm giá cho đơn hàng
+            </Radio>
+            <br />
+            <Radio value="">Khác</Radio>
+            <br />
+            <br />
+          </Radio.Group>
+          <Input
+            value={note}
+            onChange={handleInputChange}
+            placeholder="Nhập lý do hủy đơn"
+            required
+          />
+        </Modal>
         <Row justify="space-between" align="middle" className="mt-3 mb-3">
           <Button
             className="flex items-center text-dark"
@@ -178,11 +227,7 @@ const OrderStatusCustomer = () => {
             className="custom-steps"
           />
         ) : (
-          <Steps
-            current={currentStep}
-            items={steps}
-            className="custom-steps"
-          />
+          <Steps current={currentStep} items={steps} className="custom-steps" />
         )}
 
         <div className="w-full overflow-hidden mt-5 mb-5">
@@ -291,21 +336,22 @@ const OrderStatusCustomer = () => {
         </div> */}
 
         {order?.status === OrderStatus.PENDING && (
-            <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={(e) => {
-                    handleCancelOrder(order?.id, navigate);
-                  }}
-                  style={{ marginTop: 10 }}
-                >
-                  Hủy đơn hàng
-                </Button>
-              </Grid>
+          <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCancelOrder(order.id);
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Hủy đơn hàng
+              </Button>
             </Grid>
-          )}
+          </Grid>
+        )}
 
         {/* {order?.status === OrderStatus.SUCCESS && (
           <Grid container justifyContent="flex-end" style={{ marginTop: 20 }}>
