@@ -5,6 +5,8 @@ import { Color } from "../../pages/Admin/Attributes/color/color";
 import ProductDetail from "../../types/ProductDetail";
 import Product from "../../types/Product";
 import { UploadOutlined } from "@ant-design/icons";
+import { RcFile } from "antd/es/upload";
+import { PlusOutlined } from "@ant-design/icons";
 
 interface UpdateProductDetailModalProps {
     isModalOpen: boolean;
@@ -15,7 +17,10 @@ interface UpdateProductDetailModalProps {
     sizes: Size[];
     colors: Color[];
     products: Product[];
-    fileList: UploadFile[]
+    fileList: UploadFile[];
+    handleUpload: (file: RcFile) => Promise<boolean | void>;
+    normFile: (e: any) => any[] | undefined;
+    onRemove: (file: UploadFile) => boolean;
 
 }
 
@@ -28,7 +33,10 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
     sizes,
     colors,
     products,
-    fileList: initialFileList
+    fileList: initialFileList,
+    handleUpload,
+    normFile,
+    onRemove
 }) => {
     const [fileList, setFileList] = useState<UploadFile[]>(initialFileList);
 
@@ -40,7 +48,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                images: productDetail.images ? [{ url: productDetail.images }] : [],
+                images: productDetail?.images,
             });
             console.log(productDetail.images);
 
@@ -56,7 +64,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
             //   );
         }
 
-    }, [productDetail, form])
+    }, [productDetail])
 
     const onOk = () => {
         form.validateFields()
@@ -103,20 +111,25 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         >
             <Form form={form} layout="vertical"
             >
-                <Form.Item label="Danh sách ảnh:" name="images">
+                <Form.Item label="Danh sách ảnh:" name="images"
+                valuePropName="fileList"
+                // getValueFromEvent={normFile}
+                >
                     <Upload
                         listType="picture-card"
                         fileList={fileList}
                         onChange={handleUploadChange}
-                        action="/upload"
+                        customRequest={({ file }) => handleUpload(file as RcFile)}
+                        onRemove={onRemove}
                         showUploadList={{
                             showPreviewIcon: true,
                             showRemoveIcon: true,
                         }}
                     >
-                        {fileList.length < 5 && (
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                        )}
+                        <button style={{ border: 0, background: 'none' }} type="button">
+                            <PlusOutlined />
+                            <div style={{ marginTop: 8 }}>Upload</div>
+                        </button>
                     </Upload>
                 </Form.Item>
                 <Form.Item
