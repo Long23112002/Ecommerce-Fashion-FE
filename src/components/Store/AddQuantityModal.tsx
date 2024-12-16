@@ -55,33 +55,7 @@ const AddQuantityModal: React.FC<AddQuantityModalProps> = ({
                 </Button>
             ]}
         >
-            <Form
-                form={form} layout="vertical"
-                style={{
-                    margin: '10px',
-                    border: '1px solid #d9d9d9',
-                    padding: '24px',
-                }}
-                >
-                <Form.Item
-                    name="quantity"
-                    label="Số lượng"
-                    rules={[
-                        {
-                            required: true,
-                            message: "Vui lòng nhập số lượng",
-                        },
-                        {
-                            type: "number",
-                            min: 1,
-                            message: "Số lượng phải lớn hơn 0",
-                            transform: (value) => Number(value),
-                        },
-                    ]}
-                >
-                    <Input placeholder="Nhập số lượng" />
-                </Form.Item>
-            </Form>
+            
         </Modal>
     )
 }

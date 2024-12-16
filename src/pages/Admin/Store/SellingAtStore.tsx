@@ -59,7 +59,7 @@ const SellingAtStore = () => {
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
 
     const [orderDetailList, setOrderDetailList] = useState<OrderDetail[]>([]);
-    const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(true);
+    const [loadingOrderDetailList, setLoaingOrderDetailList] = useState(false);
     const [newOrderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [currentProductDetailId, setCurrentProductDetailId] = useState<number | null>(null);
@@ -67,6 +67,20 @@ const SellingAtStore = () => {
     const [currentGuestId, setCurrentGuestId] = useState<number | null>(null);
     const [currentDiscountId, setCurrentDiscountId] = useState<number | null>(null);
     const [isUpdateGuestDiscount, setIsUpdateGuestDiscount] = useState(false);
+
+    useEffect(() => {
+        if (order != null) {
+            formOrder.setFieldsValue({
+                ...order,
+                totalMoney: order.totalMoney ? formatCurrency(order.totalMoney) : "0",
+                payAmount: order.payAmount ? formatCurrency(order.payAmount) : "0",
+                code: order.code,
+                createdAt: order.createdAt
+                    ? new Date(order.createdAt).toLocaleDateString()
+                    : "",
+            });
+        }
+    }, [order])
 
     const formatCurrency = (value: number | null | undefined): string => {
         if (!value) return "0";
@@ -96,103 +110,6 @@ const SellingAtStore = () => {
                 setLoadingVouchers(false);
             }
         }, 500), []);
-
-    const showAddQuantityModal = (idProductDetail: number) => {
-        formAddQuantity.resetFields();
-        setCurrentProductDetailId(idProductDetail);
-        setIsOpenModalAddQuantity(true);
-    }
-    const handleAddQuantityCancel = () => {
-        setIsOpenModalAddQuantity(false);
-    };
-
-    const handleAddQuantityOk = async () => {
-        const idOrder = order?.id;
-        if (idOrder == null) {
-            toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
-        } else {
-            try {
-                const values = await formAddQuantity.validateFields();
-                const { quantity } = values;
-                const token = Cookies.get("accessToken");
-                if (token) {
-                    await addProductToOrderDetail({ idOrder, idProductDetail: currentProductDetailId, quantity });
-
-                    const response = await getOrderById(idOrder);
-                    setOrder(response)
-                    toast.success('Thêm sản phẩm Thành Công');
-                    handleUpdateQuantityCancel()
-
-                    await refreshOrderDetails();
-                    formOrder.setFieldsValue({
-                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
-                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0",
-                        code: response.code,
-                        createdAt: response.createdAt
-                            ? new Date(response.createdAt).toLocaleDateString()
-                            : "",
-
-                    });
-
-                    // formOrder.setFieldsValue(order)
-                } else {
-                    toast.error("Authorization failed");
-                }
-            } catch (error: any) {
-                toast.error(getErrorMessage(error))
-            }
-        }
-
-    };
-
-    const showUpdateQuantityModal = (idOrderDetail: number) => {
-        formAddQuantity.resetFields();
-        console.log(idOrderDetail)
-        setCurrentOrderDetailId(idOrderDetail);
-        setIsOpenModalUpdateQuantity(true);
-    }
-
-    const handleUpdateQuantityCancel = () => {
-        setIsOpenModalUpdateQuantity(false);
-    };
-
-    const handleUpdateQuantityOk = async () => {
-        const idOrder = order?.id;
-        if (idOrder == null) {
-            toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
-        } else {
-            try {
-                const values = await formAddQuantity.validateFields();
-                const { quantity } = values;
-                const token = Cookies.get("accessToken");
-                if (token) {
-                    await updateProductToOrderDetail({ orderDetailId: currentOrderDetailId, quantity });
-
-                    const response = await getOrderById(idOrder);
-                    setOrder(response)
-                    handleAddQuantityCancel()
-
-                    await refreshOrderDetails();
-                    formOrder.setFieldsValue({
-                        totalMoney: response.totalMoney ? formatCurrency(response.totalMoney) : "0",
-                        payAmount: response.payAmount ? formatCurrency(response.payAmount) : "0",
-                        code: response.code,
-                        createdAt: response.createdAt
-                            ? new Date(response.createdAt).toLocaleDateString()
-                            : "",
-
-                    });
-
-                    // formOrder.setFieldsValue(order)
-                } else {
-                    toast.error("Authorization failed");
-                }
-            } catch (error: any) {
-                toast.error(getErrorMessage(error))
-            }
-        }
-
-    };
 
     const formInfor = (order: Order | null) => {
         if (order) {
@@ -239,15 +156,6 @@ const SellingAtStore = () => {
             if (token) {
                 const res = await deleteOrderDetail(orderDetailId, token);
                 setOrder({ ...res })
-                formOrder.setFieldsValue({
-                    totalMoney: res.totalMoney ? formatCurrency(res.totalMoney) : "0",
-                    payAmount: res.payAmount ? formatCurrency(res.payAmount) : "0",
-                    code: res.code,
-                    createdAt: res.createdAt
-                        ? new Date(res.createdAt).toLocaleDateString()
-                        : "",
-
-                });
                 toast.success("Xóa sản phẩm thành công");
                 refreshOrderDetails();
             } else {
@@ -348,16 +256,6 @@ const SellingAtStore = () => {
             setOrder(order);
             resolve(true);
         });
-        formOrder.setFieldsValue(order)
-        formOrder.setFieldsValue({
-            ...order,
-            totalMoney: order.totalMoney ? formatCurrency(order.totalMoney) : "0",
-            payAmount: order.payAmount ? formatCurrency(order.payAmount) : "0",
-            code: order.code,
-            createdAt: order.createdAt
-                ? new Date(order.createdAt).toLocaleDateString()
-                : "",
-        });
         fetchListOrderDetail(order)
         fetchVouchersDebounced()
     }
@@ -378,6 +276,37 @@ const SellingAtStore = () => {
         // fetchUsers()
 
     }, [loadingOrderDraftList, isUpdateGuestDiscount])
+
+    const addProductToOrder = async (idProductDetail: number) => {
+        const idOrder = order?.id;
+        if (idOrder == null) {
+            toast.error("Vui lòng chọn hóa đơn cần thanh toán trước")
+        } else {
+            try {
+                const quantity = 1;
+                const token = Cookies.get("accessToken");
+                if (token) {
+                    setLoaingOrderDetailList(true)
+                    await addProductToOrderDetail({ idOrder, idProductDetail, quantity });
+
+                    const response = await getOrderById(idOrder);
+                    setOrder(response)
+                    toast.success('Thêm sản phẩm Thành Công');
+
+                    await refreshOrderDetails();
+
+                    // formOrder.setFieldsValue(order)
+                } else {
+                    toast.error("Authorization failed");
+                }
+            } catch (error: any) {
+                toast.error(getErrorMessage(error))
+            }
+            finally {
+                setLoaingOrderDetailList(false)
+            }
+        }
+    }
 
     return (
         <div
@@ -402,7 +331,12 @@ const SellingAtStore = () => {
                     />
                     <ListOrderDetail
                         orderDetailList={orderDetailList}
-                        showModalUpdateQuantity={showUpdateQuantityModal}
+                        setOrderDetailList={setOrderDetailList}
+                        order={order}
+                        setOrder={setOrder}
+                        refreshOrderDetails={refreshOrderDetails}
+                        loadingOrderDetailList={loadingOrderDetailList}
+                        // showModalUpdateQuantity={showUpdateQuantityModal}
                         handleDelete={handleDeleteOrderDetail}
                     />
 
@@ -410,7 +344,7 @@ const SellingAtStore = () => {
                         form={form}
                         // products={products}
                         loading={loadingProducts}
-                        showModalAddQuantity={showAddQuantityModal}
+                        addProductToOrder={addProductToOrder}
                         isOrderSuccess={isOrderSuccess} />
                 </Col>
 
@@ -418,7 +352,7 @@ const SellingAtStore = () => {
                     <OrderInformation
                         order={order}
                         form={formOrder}
-                        vouchers={vouchers}
+                        setOrder={setOrder}
                         // users={users}
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
@@ -428,19 +362,6 @@ const SellingAtStore = () => {
                     />
                 </Col>
             </Row>
-
-            <AddQuantityModal
-                isModalOpen={isOpenModalAddQuantity}
-                form={formAddQuantity}
-                handleCancel={handleAddQuantityCancel}
-                handleOk={handleAddQuantityOk}
-            />
-            <AddQuantityModal
-                isModalOpen={isOpenModalUpdateQuantity}
-                form={formAddQuantity}
-                handleCancel={handleUpdateQuantityCancel}
-                handleOk={handleUpdateQuantityOk}
-            />
             <ModalChooseGuest
                 isModalOpen={isOpenModalChooseGuest}
                 chooseThisGuest={chooseThisGuest}
