@@ -153,8 +153,8 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
         <div
             style={{
                 position: 'fixed',
-                top: 80,
-                bottom: 10,
+                top: 75,
+                bottom: 5,
                 right: 30,
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                 borderRadius: 20,

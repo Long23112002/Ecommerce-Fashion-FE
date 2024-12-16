@@ -10,17 +10,18 @@ import { fetchAllProductDetails, getAllProductDetails, ProductParams } from '../
 import createPaginationConfig from '../../config/product/paginationConfig';
 import { PaginationState } from '../../config/paginationConfig';
 import { debounce } from 'lodash';
+import Order from '../../types/Order';
 
 interface ProductProps {
     form: FormInstance;
     loading?: boolean;
-    showModalAddQuantity: (e: any) => void;
+    addProductToOrder?: (id: number) => void
     isOrderSuccess: boolean;
 }
 
 const ListProduct: React.FC<ProductProps> = ({
     loading,
-    showModalAddQuantity,
+    addProductToOrder,
     isOrderSuccess
 }) => {
     const [products, setProducts] = useState<ProductDetail[]>([]);
@@ -32,6 +33,12 @@ const ListProduct: React.FC<ProductProps> = ({
         total: 20,
         totalPage: 4
     })
+
+    const handleAddProductToOrder = (record: any) => {
+        if (record && (typeof record.id === 'number')) {
+            addProductToOrder?.(record.id);
+        }
+    };
 
     const columns = [
         {
@@ -89,7 +96,7 @@ const ListProduct: React.FC<ProductProps> = ({
             render: (_: any, record: any) => (
                 <>
                     <Button
-                        onClick={() => showModalAddQuantity(record.id)}
+                        onClick={() => handleAddProductToOrder(record)}
                         style={{ margin: '0 4px' }} className="btn-outline-primary">
                         <i className="fa-solid fa-circle-plus"></i>
                     </Button>
