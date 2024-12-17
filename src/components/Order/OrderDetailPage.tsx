@@ -63,10 +63,20 @@ const OrderDetailPage: React.FC = () => {
             key: 'quantity',
         },
         {
+            title: 'Phí Ship',
+            key: 'moneyShip',
+            render: (_: any, record: any) => `${order.moneyShip.toLocaleString()|| '0'}₫`,
+        },
+        {
+            title: 'mã giảm giá',
+            key: 'discountAmount',
+            render: (_: any, record: any) => `${order.discountAmount.toLocaleString()|| '0'}₫`,
+        },
+        {
             title: 'Tổng Tiền',
-            dataIndex: 'totalMoney',
-            key: 'totalMoney',
-            render: (totalMoney: number) => `${totalMoney.toLocaleString()}₫`,
+            dataIndex: 'payAmount',
+            key: 'payAmount',
+            render: (_: any, record: any) => `${order.payAmount.toLocaleString()}₫`,
         }
     ];
 
@@ -78,7 +88,6 @@ const OrderDetailPage: React.FC = () => {
         return null;
     }
     const fullAddress = `${order.address?.specificAddress || 'Không có'} , ${order.address?.wardName || ''} , ${order.address?.districtName|| ''} , ${order.address?.provinceName|| ''}`;
-
     return (
         <div style={{ padding: '24px' }}>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -99,7 +108,7 @@ const OrderDetailPage: React.FC = () => {
                     status: OrderStatusLabel[order.status],
                     phoneNumber: order.phoneNumber,
                     address: fullAddress,
-                    totalMoney: order.totalMoney.toLocaleString() + "₫"
+                    payAmount: order.payAmount.toLocaleString() + "₫"
                 }}
             >
                 <Row gutter={16}>
@@ -129,7 +138,7 @@ const OrderDetailPage: React.FC = () => {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label={<Text strong>Tổng Tiền:</Text>} name="totalMoney">
+                        <Form.Item label={<Text strong>Tổng Tiền:</Text>} name="payAmount">
                             <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
                         </Form.Item>
                     </Col>

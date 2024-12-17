@@ -124,6 +124,16 @@ const AddDiscount = () => {
             key: 'name',
         },
         {
+            title: 'Tên sản phẩm',
+            dataIndex: ['size', 'name'],
+            key: 'name',
+        },
+        {
+            title: 'Tên sản phẩm',
+            dataIndex: ['color', 'name'],
+            key: 'name',
+        },
+        {
             title: 'Giá',
             dataIndex: 'price',
             key: 'price',
