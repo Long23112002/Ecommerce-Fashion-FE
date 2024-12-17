@@ -263,7 +263,7 @@ const SellingAtStore = () => {
     const fetchListOrderDetail = async (order: Order | null) => {
         if (order) {
             setLoaingOrderDetailList(true)
-            const res = await getOrderDetailByIdOrder(order.id);
+            const res = await getOrderDetailByIdOrder(order.id, {sortBy: 'id'});
             setOrderDetailList([...res.data])
             setLoaingOrderDetailList(false)
         } else {
@@ -331,12 +331,10 @@ const SellingAtStore = () => {
                     />
                     <ListOrderDetail
                         orderDetailList={orderDetailList}
-                        setOrderDetailList={setOrderDetailList}
                         order={order}
                         setOrder={setOrder}
                         refreshOrderDetails={refreshOrderDetails}
                         loadingOrderDetailList={loadingOrderDetailList}
-                        // showModalUpdateQuantity={showUpdateQuantityModal}
                         handleDelete={handleDeleteOrderDetail}
                     />
 

@@ -1,5 +1,5 @@
 import { BASE_API } from "../constants/BaseApi";
-import axiosInstance from "./AxiosInstance";
+import axiosInstance, { PageableRequest } from "./AxiosInstance";
 import {toast} from "react-toastify";
 
 const BASE_URL = `${BASE_API}/api/v1/orders`;
@@ -38,10 +38,13 @@ export const createOrderPendingAtStore = async () => {
     }
 };
 
-export const getOrderDetailByIdOrder = async (idOrder: number | string) => {
+export const getOrderDetailByIdOrder = async (idOrder: number | string, pageable?: PageableRequest) => {
     const { data } = await axiosInstance({
         method: 'GET',
-        url: `${BASE_URL_DETAIL}/${idOrder}`
+        url: `${BASE_URL_DETAIL}/${idOrder}`,
+        params: {
+            ...pageable
+        }
     })
     return data
 }

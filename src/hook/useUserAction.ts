@@ -4,7 +4,7 @@ import { handleLogin, handleLogout, storeUserData } from "../api/AuthApi";
 import { clearUser, setUser, userSelector } from "../redux/reducers/UserReducer";
 import { LoginRequest } from "../types/login/request/loginRequest";
 import { useNavigate } from "react-router-dom";
-import { clearCart } from "../redux/reducers/CartReducer";
+import { clearCart, setCart } from "../redux/reducers/CartReducer";
 
 export const useUserAction = () => {
     const user = useSelector(userSelector);

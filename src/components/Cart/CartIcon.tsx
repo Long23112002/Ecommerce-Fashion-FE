@@ -10,9 +10,6 @@ const CartIcon: React.FC = () => {
     const navigate = useNavigate()
     const { total, reload } = useCart()
     const user = useUserAction().get()
-    useEffect(() => {
-        reload()
-    }, [user])
 
     return (
         <>
