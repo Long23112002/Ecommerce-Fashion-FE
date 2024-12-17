@@ -42,15 +42,15 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
 
     const [data, setData] = useState<(OrderDetail & InputQuantity)[]>(orderToData)
     const [loading, setLoading] = useState<boolean>(false)
-    const orderDetailId = useRef<number>()
+    const orderDetailId = useRef<number | null>()
 
     useEffect(() => {
         setData(orderToData)
     }, [orderDetailList])
 
-    useEffect(()=>{
+    useEffect(() => {
         setLoading(loadingOrderDetailList)
-    },[loadingOrderDetailList])
+    }, [loadingOrderDetailList])
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(value);
@@ -60,7 +60,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
         record: any
     ) => {
-        changeOrderDetail(record)
+        changeOrderDetail(record.id)
         const { value } = e.target
         const numericValue = parseFloat(value);
         record.inputQuantity = numericValue
@@ -100,11 +100,10 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         }
     };
 
-    const changeOrderDetail = (record: any) => {
-        if (orderDetailId.current != record.id) {
-            orderDetailId.current = record.id
-            setData(orderToData)
-        }
+    const changeOrderDetail = (id: any) => {
+        if (orderDetailId.current == id) return
+        orderDetailId.current = id
+        setData(orderToData)
     }
 
     const columns = [
@@ -158,8 +157,19 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         },
         {
             title: 'Số lượng',
-            dataIndex: 'quantity',
             key: 'quantity',
+            render: (_: any, record: any) => (
+                <TextField
+                    value={record.inputQuantity}
+                    size='small'
+                    type='number'
+                    sx={{ width: 80 }}
+                    onClick={() => changeOrderDetail(record.id)}
+                    onBlur={() => changeOrderDetail(null)}
+                    onChange={(e) => handleChange(e, record)}
+                    onKeyDown={(e) => handleEnter(e, record)}
+                />
+            )
         },
         {
             title: 'Tổng tiền',
@@ -172,16 +182,6 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
             key: 'actions',
             render: (_: any, record: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <TextField
-                        label="Số lượng"
-                        value={record.inputQuantity}
-                        size='small'
-                        type='number'
-                        sx={{ width: 80 }}
-                        onClick={() => changeOrderDetail(record)}
-                        onChange={(e) => handleChange(e, record)}
-                        onKeyDown={(e) => handleEnter(e, record)}
-                    />
                     <Popconfirm
                         title="Bạn chắc chắn muốn xóa mặt hàng này?"
                         onConfirm={() => handleDelete(record.id)}
