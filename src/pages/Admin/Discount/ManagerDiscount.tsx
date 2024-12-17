@@ -139,6 +139,13 @@ const ManagerDiscount = () => {
             title: 'Giá trị',
             dataIndex: 'value',
             key: 'value',
+            render: (value) => {
+                if (value <= 100) {
+                    return `${value} %`;
+                } else {
+                    return `${value.toLocaleString('vi-VN')} đ`;
+                }
+            },
         },
         {
             title: 'Kiểu phiếu',
