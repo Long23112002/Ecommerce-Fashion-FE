@@ -1,12 +1,10 @@
 import { UserData } from "../api/AuthApi";
 export enum TypeDiscount {
-    "NONE" = "",
     PERCENTAGE = 'PERCENTAGE',  // Phần trăm
     FIXED_AMOUNT = 'FIXED_AMOUNT'  // Số tiền cố định
 }
 
 export enum StatusDiscount {
-    "NONE" = "",
     UPCOMING = 'UPCOMING',
     ACTIVE = 'ACTIVE',
     ENDED = 'ENDED'
@@ -37,11 +35,11 @@ export const StatusDiscountLable: Record<StatusDiscount, string> = {
     [StatusDiscount.UPCOMING]: "Chưa diễn ra",
     [StatusDiscount.ACTIVE]: "Đang diễn ra",
     [StatusDiscount.ENDED]: "Đã kết thúc",
-    [StatusDiscount.NONE]: "chưa xác định",
+
 }
 
 export const TypeDiscountLabel: Record<TypeDiscount, string> = {
     [TypeDiscount.PERCENTAGE]: "Giảm theo %",
     [TypeDiscount.FIXED_AMOUNT]: "Giảm theo số tiền",
-    [TypeDiscount.NONE]: "Chưa xác định",
+
 };

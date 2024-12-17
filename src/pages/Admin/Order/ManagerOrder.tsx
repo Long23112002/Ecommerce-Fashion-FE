@@ -212,7 +212,7 @@ const ManagerOrder = () => {
 
         },
         {
-            title: 'Phương thức thanh toán',
+            title: 'Phương thức ',
             dataIndex: 'paymentMethod',
             key: 'paymentMethod',
             render: (paymentMethod) => paymentMethod,
@@ -243,8 +243,12 @@ const ManagerOrder = () => {
         },
         {
             title: 'Tổng tiền',
-            dataIndex: 'totalMoney',
-            key: 'totalMoney',
+            dataIndex: 'payAmount',
+            key: 'payAmount',
+            render: (payAmount) => {
+                if (!payAmount && payAmount !== 0) return '0 đ'; // Xử lý khi giá trị là null hoặc undefined
+                return `${payAmount.toLocaleString('vi-VN')} đ`; // Hiển thị theo format Việt Nam
+            },
         },
         {
             title: 'Hành động',
@@ -259,7 +263,7 @@ const ManagerOrder = () => {
                             <i className="fa-solid fa-download"></i>
                         </Button>
                     )}
-                    <Button onClick={() => navigate(`/admin/order/${record.id}`)} style={{ marginRight: 8 }} className="btn-outline-primary">
+                    <Button onClick={() => navigate(`/admin/order/${record.id}`)} style={{ marginRight: 8, marginLeft: 8 }} className="btn-outline-primary">
                         <i className="fa-regular fa-eye"></i>
                     </Button>
                     <Popconfirm

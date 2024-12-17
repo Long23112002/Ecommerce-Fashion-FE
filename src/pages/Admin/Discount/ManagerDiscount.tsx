@@ -105,7 +105,9 @@ const ManagerDiscount = () => {
     useEffect(() => {
         const fetchProductdetails = async () => {
             try {
-                const response = await getAllProductDetails();
+                const response = await getAllProductDetails({
+                    keyword: ''
+                });
                 // Chuyển đổi dữ liệu
                 const transformedData = response.data.map((item) => ({
                     id: item.id, // ID của ProductDetail
@@ -137,6 +139,13 @@ const ManagerDiscount = () => {
             title: 'Giá trị',
             dataIndex: 'value',
             key: 'value',
+            render: (value) => {
+                if (value <= 100) {
+                    return `${value} %`;
+                } else {
+                    return `${value.toLocaleString('vi-VN')} đ`;
+                }
+            },
         },
         {
             title: 'Kiểu phiếu',
@@ -226,9 +235,9 @@ const ManagerDiscount = () => {
                 className="mt-2 mb-2"
             >
                 <Form.Item name="name" label="Tên Phiếu">
-                    <Input placeholder="Tìm kiếm theo tên khuyến mãi" allowClear/>
+                    <Input placeholder="Tìm kiếm theo tên khuyến mãi" allowClear />
                 </Form.Item>
-                <Form.Item name="idProductDetail" label="Tên Sản Phẩm" style={{width:300}}>
+                <Form.Item name="idProductDetail" label="Tên Sản Phẩm" style={{ width: 300 }}>
                     <Select
                         placeholder="Chọn sản phẩm"
                         allowClear
@@ -249,7 +258,7 @@ const ManagerDiscount = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name="Price" label="Giá tối thiểu" >
-                    <Input placeholder="Nhập giá" type="number"allowClear />
+                    <Input placeholder="Nhập giá" type="number" allowClear />
                 </Form.Item>
                 <Form.Item name="status" label="Trạng thái">
                     <Select placeholder="Chọn trạng thái" allowClear>
