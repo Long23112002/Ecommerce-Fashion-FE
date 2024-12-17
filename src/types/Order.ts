@@ -5,19 +5,17 @@ import { User } from "./User";
 
 export enum OrderStatus {
     PENDING = "PENDING",
-    CANCEL = "CANCEL",
     SHIPPING = "SHIPPING",
     SUCCESS = "SUCCESS",
-    DRAFT = "DRAFT",
+    CANCEL = "CANCEL",
     PENDING_AT_STORE = "PENDING_AT_STORE"
 }
 
 export const OrderStatusLabel: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]: "Đang chờ xử lý",
-    [OrderStatus.CANCEL]: "Đã hủy",
     [OrderStatus.SHIPPING]: "Đang vận chuyển",
     [OrderStatus.SUCCESS]: "Thành công",
-    [OrderStatus.DRAFT]: "Nháp",
+    [OrderStatus.CANCEL]: "Đã hủy",
     [OrderStatus.PENDING_AT_STORE]: "Tại Quầy",
 };
 
