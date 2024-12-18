@@ -19,7 +19,7 @@ import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../Error/getErrorMessage";
 import OrderDetail from "../../../types/OrderDetail";
-import { deleteOrder, getOrderById } from "../../../api/OrderApi";
+import { deleteOrder, downloadOrderPdf, getOrderById } from "../../../api/OrderApi";
 import { getAllUsers, UserParam } from "../../../api/UserApi";
 import ModalChooseGuest from "../../../components/Store/ModalChooseGuest";
 import { PaginationState } from "../../../config/paginationConfig";
@@ -173,7 +173,7 @@ const SellingAtStore = () => {
             if (token && order) {
                 await updateOrderSuccess(order.id);
                 toast.success("Thanh toán hóa đơn thành công");
-
+                await downloadOrderPdf(order.id)
                 setOrder(null);
                 formOrder.resetFields();
 
