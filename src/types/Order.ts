@@ -4,6 +4,7 @@ import OrderDetail from "./OrderDetail";
 import { User } from "./User";
 
 export enum OrderStatus {
+    DRAFT = "DRAFT",
     PENDING = "PENDING",
     SHIPPING = "SHIPPING",
     SUCCESS = "SUCCESS",
@@ -11,7 +12,7 @@ export enum OrderStatus {
     PENDING_AT_STORE = "PENDING_AT_STORE"
 }
 
-export const OrderStatusLabel: Record<OrderStatus, string> = {
+export const OrderStatusLabel = {
     [OrderStatus.PENDING]: "Đang chờ xử lý",
     [OrderStatus.SHIPPING]: "Đang vận chuyển",
     [OrderStatus.SUCCESS]: "Thành công",
