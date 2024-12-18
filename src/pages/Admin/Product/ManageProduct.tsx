@@ -1,5 +1,5 @@
 import { Button, Col, Dropdown, Form, Image, Input, MenuProps, message, Popconfirm, Row, Select, Space, Spin, Table, Tooltip, UploadFile, Modal } from 'antd'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import {
   addProduct,
   deleteProduct,
@@ -794,7 +794,6 @@ const ProductManager = () => {
         pagination={createPaginationConfig(pagination, setPagination)}
         expandable={{ childrenColumnName: 'children' }}
       />
-      <ToastContainer />
 
       <ModalHistoryImport
         isModalOpen={isModalOpen}
@@ -839,7 +838,6 @@ const ProductManager = () => {
         isOpen={isModalOpens}
         handleCloseModal={handleCloseModal}
       />
-      <ToastContainer />
 
     </div >
   )
