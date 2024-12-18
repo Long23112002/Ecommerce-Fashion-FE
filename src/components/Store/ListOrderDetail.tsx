@@ -63,6 +63,7 @@ const ListOrderDetail: React.FC<ListOrderDetailProps> = ({
         changeOrderDetail(record.id)
         const { value } = e.target
         const numericValue = parseFloat(value);
+        if (numericValue < 1) return
         record.inputQuantity = numericValue
         setData(prev => prev.map(od => od.id == record.id ? record : od))
     };
