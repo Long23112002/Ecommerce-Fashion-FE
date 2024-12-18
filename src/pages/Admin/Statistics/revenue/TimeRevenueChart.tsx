@@ -119,7 +119,17 @@ const TimeRevenueChart: React.FC<IProps> = ({ selectedMonth, setSelectedMonth })
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={filteredData} onClick={handleDataOrder}>
                                     <XAxis dataKey="name" />
-                                    <YAxis />
+                                    <YAxis
+                                        width={115}
+                                        tick={({ x, y, payload }) => (
+                                            <text
+                                                x={x-5}
+                                                y={y}
+                                                textAnchor="end"
+                                            >
+                                                {payload.value.toLocaleString('vi-VN')}đ
+                                            </text>
+                                        )} />
                                     <Tooltip
                                         labelStyle={{ fontWeight: 'bold' }}
                                         content={<RevenueTooltip />}

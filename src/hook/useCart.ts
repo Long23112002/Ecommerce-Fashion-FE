@@ -7,6 +7,7 @@ import { fetchCartByUserId, getCartValueInfos, updateCart, validCart } from "../
 import useToast from "./useToast";
 import { toast } from "react-toastify";
 import Order, { OrderValue } from "../types/Order";
+import { useEffect } from "react";
 
 const useCart = () => {
     const user = useSelector(userSelector)
@@ -15,25 +16,25 @@ const useCart = () => {
     const dispatch = useDispatch()
     const { catchToast } = useToast()
 
+    useEffect(() => {
+        reload()
+    }, [user])
+
     const fetch = async (token: string) => {
         const { cartValues } = await fetchCartByUserId(token)
         return cartValues
     }
 
     const getCartValues = async (): Promise<CartValues[]> => {
-        if (cart.length != 0) {
-            return cart
+        const token = Cookies.get('accessToken')
+        if (token) {
+            const res = await fetch(token)
+            return res
         } else {
-            const token = Cookies.get('accessToken')
-            if (token) {
-                const res = await fetch(token)
-                return res
-            } else {
-                const json = localStorage.getItem('cart')
-                if (json) {
-                    const cart: CartValues[] = JSON.parse(json)
-                    return Promise.resolve(cart)
-                }
+            const json = localStorage.getItem('cart')
+            if (json) {
+                const cart: CartValues[] = JSON.parse(json)
+                return Promise.resolve(cart)
             }
         }
         return []

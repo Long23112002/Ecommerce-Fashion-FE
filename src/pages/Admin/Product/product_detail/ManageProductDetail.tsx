@@ -24,6 +24,7 @@ import Product from "../../../../types/Product";
 
 const ManageProductDetail = () => {
     const [form] = Form.useForm();
+    const [formUpload] = Form.useForm();
     const [loading, setLoading] = useState(true);
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
 
@@ -59,7 +60,7 @@ const ManageProductDetail = () => {
     })
 
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-
+   
     const normFile = (e: any): any[] | undefined => {
         if (Array.isArray(e)) {
             return e;
@@ -133,8 +134,8 @@ const ManageProductDetail = () => {
                 toast.success('Thêm sản phẩm Thành Công');
                 handleAddCancel();
                 refreshProductdetails();
-                setFileList([]);
-                setImageList([]);
+                // setFileList([]);
+                // setImageList([]);
             } else {
                 toast.error("Authorization failed");
             }
@@ -419,12 +420,15 @@ const ManageProductDetail = () => {
                 isModalOpen={isItemUpdateOpen}
                 handleOk={handleUpdateOk}
                 handleCancel={handleUpdateCancel}
-                form={form}
+                form={formUpload}
                 productDetail={editingProductDetail}
                 sizes={sizes}
                 colors={colors}
                 products={productList}
                 fileList={fileList}
+                handleUpload={handleUpload}
+                normFile={normFile}
+                onRemove={onRemove}
             />
         </div>
     )

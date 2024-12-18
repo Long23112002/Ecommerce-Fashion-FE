@@ -17,6 +17,7 @@ const AccountCreationForm: React.FC<AccountCreationFormProps> = ({email, onBack}
     const onFinish = async (values: any) => {
         setLoading(true);
         try {
+            const errors = form.getFieldsError();
             const response = await createUser({
                 email,
                 fullName: values.name,
@@ -24,7 +25,8 @@ const AccountCreationForm: React.FC<AccountCreationFormProps> = ({email, onBack}
                 password: values.password,
                 birth: new Date(),
                 gender: GenderEnum.OTHER,
-                avatar: null
+                avatar: null,
+                isCheck: true
             });
             message.success('Tài khoản đã được tạo thành công!');
             form.resetFields(); // Reset form khi thành công

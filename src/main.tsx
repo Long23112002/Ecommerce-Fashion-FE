@@ -9,12 +9,12 @@ import ScrollToTop from './hook/ScrollToTop.tsx'
 import MuiLoadingScreen from './components/Loading/MuiLoadingScreen.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
         <ScrollToTop />
         <App />
       </BrowserRouter>
     </Provider>
-  </StrictMode>
+  // </StrictMode>
 )
