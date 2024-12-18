@@ -43,7 +43,7 @@ const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/authenticate" element={<AuthenticateGoogle />} />
+            <Route path="/google-authenticate" element={<AuthenticateGoogle />} />
             <Route path="/authenticate-fb" element={<AuthenticateFacebook />} />
 
             <Route element={<UserLayout />}>
