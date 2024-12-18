@@ -92,6 +92,7 @@ const PaymentInfo: React.FC<IProps> = ({ order, orderRequest, setOrderRequest, v
   }
 
   const handlePay = async () => {
+    console.log(order)
     if (order.status !== OrderStatus.DRAFT) {
       toast.error("Đơn hàng không thể giao dịch được nữa")
       return
