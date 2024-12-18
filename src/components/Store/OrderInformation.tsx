@@ -181,7 +181,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                         createdAt: order?.createdAt
                             ? new Date(order.createdAt).toLocaleDateString()
                             : "",
-                        //     code: order?.code || "",
+                             code: order?.code || "",
                         fullName: order?.fullName || "",
                         totalMoney: order?.totalMoney ? formatCurrency(order?.totalMoney) : 0 + " đ",
                         payAmount: order
