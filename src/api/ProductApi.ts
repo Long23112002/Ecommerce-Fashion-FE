@@ -134,7 +134,7 @@
             const response = await axiosInstance.delete(`${API_BASE_URL}/${productId}`)
             return response.data;
         } catch (error: any) {
-            throw new Error(`Error deleting product: ${error.response?.data?.message || error.message}`);
+            throw error;
         }
     }
 

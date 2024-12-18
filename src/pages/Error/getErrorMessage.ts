@@ -1,5 +1,4 @@
 export const getErrorMessage = (error:any)=> {
-    console.log(error)
     if (error.response && error.response.data) {
       const { message } = error.response.data;
   
