@@ -174,9 +174,6 @@ const ManagerOrder = () => {
                     case OrderStatus.SUCCESS:
                         color = "green";
                         break;
-                    case OrderStatus.DRAFT:
-                        color = "#FF9933";
-                        break;
                     case OrderStatus.PENDING_AT_STORE:
                         color = "Navy";
                         break;
