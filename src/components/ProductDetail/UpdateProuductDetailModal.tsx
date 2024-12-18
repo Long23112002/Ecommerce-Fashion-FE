@@ -48,9 +48,9 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                images: productDetail.images,
+                images: productDetail?.images || [],
             });
-            setFileList([...productDetail.images])
+            setFileList([...productDetail?.images || []])
             // setFileList(
             //     productDetail.images
             //       ? JSON.parse(productDetail.images).map((image: { url: string }, index: number) => ({
