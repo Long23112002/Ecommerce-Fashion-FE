@@ -46,7 +46,10 @@ const OrderDetailPage: React.FC = () => {
     }, [orderId]);
     const handleStatusChange = async (newStatus: string) => {
         if (!order) return;
-
+        if (order.status === OrderStatus.PENDING_AT_STORE && newStatus !== OrderStatus.CANCEL) {
+            toast.error("Trạng thái tại quầy chỉ có thể chuyển sang 'Hủy'");
+            return;
+        }
         setLoading(true);
         try {
             await updateStateOrder(order.id, { status: newStatus });
