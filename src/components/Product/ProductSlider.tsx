@@ -8,6 +8,7 @@ import "slick-carousel/slick/slick.css";
 import { useIsMobile } from '../../hook/useSize';
 import Product from '../../types/Product';
 import ProductCard from './ProductCard';
+import '../../styles/slick-slide.css';
 
 interface IProps {
     title?: string;
@@ -33,8 +34,8 @@ const ProductSlider: React.FC<IProps> = ({
         speed: 500,
         slidesToShow,
         slidesToScroll: slidesToShow,
-        nextArrow: <Arrow direction="right" />,
-        prevArrow: <Arrow direction="left" />,
+        nextArrow: products.length >= slidesToShow ? < Arrow direction="right" /> : null,
+        prevArrow: products.length >= slidesToShow ? < Arrow direction="left" /> : null,
         responsive: [
             { breakpoint: 1200, settings: { slidesToShow: 4, slidesToScroll: 4, dots: false } },
             { breakpoint: 600, settings: { slidesToShow: 2, slidesToScroll: 2, dots: false } },
@@ -44,7 +45,7 @@ const ProductSlider: React.FC<IProps> = ({
     const renderSlider = () => {
         if (!products.length) {
             return (
-                <Slider {...settings}>
+                <Slider {...settings} className='slick-track'>
                     {new Array(slidesToShow).fill(null).map((_, i) => (
                         <Box key={i} px={1} pb={0.5}>
                             <ProductCard loading={loading} />
@@ -54,7 +55,7 @@ const ProductSlider: React.FC<IProps> = ({
             )
         }
         return (
-            <Slider {...settings}>
+            <Slider {...settings} className='slick-track'>
                 {products.map((product) => (
                     <Box key={product.id} px={1} pb={0.5}>
                         <ProductCard product={product} loading={loading} />
@@ -67,7 +68,7 @@ const ProductSlider: React.FC<IProps> = ({
     const renderGrid = () => {
         if (!products.length) {
             return (
-                <Grid container spacing={2}>
+                <Grid container justifyContent='start' spacing={2}>
                     {new Array(slidesToShow).fill(null).map((_, i) => (
                         <Grid item key={i} xs={6} sm={4} md={12 / slidesToShow}>
                             <ProductCard loading={loading} />
@@ -76,7 +77,7 @@ const ProductSlider: React.FC<IProps> = ({
                 </Grid>
             )
         }
-        <Grid container spacing={2}>
+        <Grid container justifyContent='start' spacing={2}>
             {products.slice(0, slidesToShow).map((product) => (
                 <Grid item key={product.id} xs={6} sm={4} md={12 / slidesToShow}>
                     <ProductCard product={product} loading={true} />

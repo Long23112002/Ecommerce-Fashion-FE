@@ -17,6 +17,7 @@ interface OrderInformationProps {
     showModalUser: (e: any) => void;
     order: Order | null;
     setOrder: React.Dispatch<React.SetStateAction<Order | null>>;
+    setLoaingOrderDetailList: React.Dispatch<React.SetStateAction<boolean>>;
     handleCancel: (e: any) => void;
     handlePay: (e: any) => void;
     fetchListOrderDetail: (order: any) => void;
@@ -52,6 +53,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
     handleCancel,
     handlePay,
     fetchListOrderDetail,
+    setLoaingOrderDetailList,
     isUpdateGuestDiscount,
     showModalDiscount
 
@@ -91,6 +93,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
 
             setLoading(true);
             try {
+                setLoaingOrderDetailList(true)
                 await addProductToOrderDetail(requestBody);
                 fetchListOrderDetail(order);
                 toast.success("Thêm sản phẩm vào hóa đơn thành công!");
@@ -99,6 +102,7 @@ const OrderInformation: React.FC<OrderInformationProps> = ({
                 console.error(error);
             } finally {
                 setLoading(false);
+                setLoaingOrderDetailList(false)
                 setData("");
             }
         } else {

@@ -40,6 +40,12 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     fileList: initialFileList,
 }) => {
     const [fileList, setFileList] = useState<UploadFile[]>(initialFileList);
+    useEffect(()=>{
+        console.log(initialFileList)
+        form.setFieldsValue({
+            image: initialFileList,
+        });
+    },[initialFileList])
 
     useEffect(() => {
         if (product) {

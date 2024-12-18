@@ -4,9 +4,9 @@ import { Size } from "../../pages/Admin/Attributes/size/size";
 import { Color } from "../../pages/Admin/Attributes/color/color";
 import ProductDetail from "../../types/ProductDetail";
 import Product from "../../types/Product";
-import { UploadOutlined } from "@ant-design/icons";
-import { RcFile } from "antd/es/upload";
+import { RcFile, UploadChangeParam } from "antd/es/upload";
 import { PlusOutlined } from "@ant-design/icons";
+import { uploadOneImage } from "../../api/ImageApi";
 
 interface UpdateProductDetailModalProps {
     isModalOpen: boolean;
@@ -18,6 +18,7 @@ interface UpdateProductDetailModalProps {
     colors: Color[];
     products: Product[];
     fileList: UploadFile[];
+    setFileList: React.Dispatch<React.SetStateAction<UploadFile<any>[]>>;
     handleUpload: (file: RcFile) => Promise<boolean | void>;
     normFile: (e: any) => any[] | undefined;
     onRemove: (file: UploadFile) => boolean;
@@ -33,12 +34,11 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
     sizes,
     colors,
     products,
-    fileList: initialFileList,
-    handleUpload,
+    fileList,
+    setFileList,
     normFile,
     onRemove
 }) => {
-    const [fileList, setFileList] = useState<UploadFile[]>(initialFileList);
 
     useEffect(() => {
         if (productDetail) {
@@ -48,10 +48,9 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                 idProduct: productDetail.product?.id,
                 idSize: productDetail.size?.id,
                 idColor: productDetail.color?.id,
-                images: productDetail?.images,
+                images: productDetail.images,
             });
-            console.log(productDetail.images);
-
+            setFileList([...productDetail.images])
             // setFileList(
             //     productDetail.images
             //       ? JSON.parse(productDetail.images).map((image: { url: string }, index: number) => ({
@@ -77,29 +76,47 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
             });
     };
 
-    const handleUploadChange = (info: any) => {
-        let updatedFileList = [...info.fileList];
+    // const handleUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
+    //     let updatedFileList = [...info.fileList];
 
-        // Only keep successfully uploaded files
-        updatedFileList = updatedFileList.map(file => {
-            if (file.response) {
-                return {
-                    ...file,
-                    url: file.response.url,
-                };
+    //     // Only keep successfully uploaded files
+    //     updatedFileList = updatedFileList.map(file => {
+    //         if (file.response) {
+    //             return {
+    //                 ...file,
+    //                 url: file.response.url,
+    //             };
+    //         }
+    //         return file;
+    //     });
+
+    //     setFileList(updatedFileList);
+    // };
+
+    const handleUpload = async (file: RcFile): Promise<boolean | void> => {
+        const url = await uploadOneImage(file, productDetail?.id || 0, 'PRODUCT_DETAIL')
+        setFileList(prev => [
+            ...prev,
+            {
+                uid: file.uid,
+                name: 'PRODUCT_DETAIL',
+                status: "done",
+                url: url,
             }
-            return file;
-        });
-
-        setFileList(updatedFileList);
+        ])
     };
+
+    const onHandle = () => {
+        handleCancel()
+        setFileList([])
+    }
 
     return (
         <Modal
             title="Update Product Detail"
             visible={isModalOpen}
             onOk={onOk}
-            onCancel={handleCancel}
+            onCancel={onHandle}
             footer={[
                 <Button key="cancel" onClick={handleCancel}>
                     Thoát
@@ -111,27 +128,22 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
         >
             <Form form={form} layout="vertical"
             >
-                <Form.Item label="Danh sách ảnh:" name="images"
-                valuePropName="fileList"
-                // getValueFromEvent={normFile}
+                <Upload
+                    listType="picture-card"
+                    fileList={fileList}
+                    customRequest={({ file }) => handleUpload(file as RcFile)}
+                    onRemove={onRemove}
+                    showUploadList={{
+                        showPreviewIcon: true,
+                        showRemoveIcon: true,
+                    }}
                 >
-                    <Upload
-                        listType="picture-card"
-                        fileList={fileList}
-                        onChange={handleUploadChange}
-                        customRequest={({ file }) => handleUpload(file as RcFile)}
-                        onRemove={onRemove}
-                        showUploadList={{
-                            showPreviewIcon: true,
-                            showRemoveIcon: true,
-                        }}
-                    >
-                        <button style={{ border: 0, background: 'none' }} type="button">
-                            <PlusOutlined />
-                            <div style={{ marginTop: 8 }}>Upload</div>
-                        </button>
-                    </Upload>
-                </Form.Item>
+                    <button style={{ border: 0, background: 'none' }} type="button">
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                    </button>
+                </Upload>
+
                 <Form.Item
                     name="price"
                     label="Giá Sản Phẩm"

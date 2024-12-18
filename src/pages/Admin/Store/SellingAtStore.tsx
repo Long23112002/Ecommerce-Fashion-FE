@@ -351,6 +351,7 @@ const SellingAtStore = () => {
                         order={order}
                         form={formOrder}
                         setOrder={setOrder}
+                        setLoaingOrderDetailList={setLoaingOrderDetailList}
                         // users={users}
                         handleCancel={handleDeleteOrder}
                         showModalUser={showModalChooseGuest}
