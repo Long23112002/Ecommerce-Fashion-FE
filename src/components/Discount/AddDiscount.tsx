@@ -124,12 +124,12 @@ const AddDiscount = () => {
             key: 'name',
         },
         {
-            title: 'Tên sản phẩm',
+            title: 'size',
             dataIndex: ['size', 'name'],
             key: 'name',
         },
         {
-            title: 'Tên sản phẩm',
+            title: 'màu',
             dataIndex: ['color', 'name'],
             key: 'name',
         },

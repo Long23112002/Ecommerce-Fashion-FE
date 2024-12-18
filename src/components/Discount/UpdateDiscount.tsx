@@ -161,6 +161,16 @@ const UpdateDiscount = () => {
             key: 'name',
         },
         {
+            title: 'size',
+            dataIndex: ['size', 'name'],
+            key: 'name',
+        },
+        {
+            title: 'màu',
+            dataIndex: ['color', 'name'],
+            key: 'name',
+        },
+        {
             title: 'Giá',
             dataIndex: 'price',
             key: 'price',
