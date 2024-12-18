@@ -21,6 +21,7 @@ import ModalViewProductDetail from "../../../../components/ProductDetail/ModalVi
 import { FileImageOutlined } from "@ant-design/icons";
 import UpdateProductDetailModal from "../../../../components/ProductDetail/UpdateProuductDetailModal";
 import Product from "../../../../types/Product";
+import File from "../../../../types/File";
 
 const ManageProductDetail = () => {
     const [form] = Form.useForm();
@@ -60,7 +61,7 @@ const ManageProductDetail = () => {
     })
 
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-   
+
     const normFile = (e: any): any[] | undefined => {
         if (Array.isArray(e)) {
             return e;
@@ -172,13 +173,8 @@ const ManageProductDetail = () => {
     const showUpdateModal = async (productDetail: ProductDetail | null = null) => {
         if (productDetail) {
             try {
+                form.resetFields();
                 const productDetailItem = await getProductDetailById(productDetail.id);
-                form.setFieldsValue({
-                    price: productDetail.price,
-                    quantity: productDetail.quantity,
-                    // images: productDetail.images,
-
-                })
                 setEditingProductDetail(productDetailItem);
             } catch (error: any) {
                 toast.error(error.response?.data?.message || 'Failed to fetch product detail item');
@@ -193,12 +189,17 @@ const ManageProductDetail = () => {
     const handleUpdateOk = async () => {
         try {
             const values = await form.validateFields();
+            console.log(values)
             const { price, quantity, idProduct, idSize, idColor } = values;
             const token = Cookies.get("accessToken");
-            const images = urls;
+            const images = fileList.map(file => {
+                if (file && file.url) {
+                    return { url: file.url }
+                }
+            })
 
             if (token && editingProductDetail) {
-                await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor , images}, token);
+                await updateProductDetail(editingProductDetail.id, { price, quantity, idProduct, idSize, idColor, images }, token);
                 toast.success('Cật Nhật Thành Công');
                 handleUpdateCancel();
                 refreshProductdetails();
@@ -242,7 +243,7 @@ const ManageProductDetail = () => {
                     url: url, // sử dụng URL nhận được từ API
                 },
             ]);
- 
+
             message.success(`${file.name} tải lên thành công!`);
             return false; // Ngăn chặn upload mặc định của Ant Design
         } catch (error) {
@@ -252,11 +253,7 @@ const ManageProductDetail = () => {
     };
 
     const onRemove = (file: UploadFile): boolean => {
-        const updatedImages = productDetail.images.filter((image) => image.url !== file.url);
-        setFileList((prevDetail) => ({
-            ...prevDetail,
-            images: updatedImages,
-        }));
+        setFileList((prev) => prev.filter(p => p.uid != file.uid));
         return true; // Cho phép xóa file
     };
 
@@ -420,12 +417,13 @@ const ManageProductDetail = () => {
                 isModalOpen={isItemUpdateOpen}
                 handleOk={handleUpdateOk}
                 handleCancel={handleUpdateCancel}
-                form={formUpload}
+                form={form}
                 productDetail={editingProductDetail}
                 sizes={sizes}
                 colors={colors}
                 products={productList}
                 fileList={fileList}
+                setFileList={setFileList}
                 handleUpload={handleUpload}
                 normFile={normFile}
                 onRemove={onRemove}
