@@ -1,7 +1,7 @@
 export const OAuth2Config = {
     clientId: "66868945505-h3vmrupcejs6ru5hrd71s2unpvmpjnpb.apps.googleusercontent.com",
-    redirectUri: "http://localhost:5173/google-authenticate",
-    // redirectUri: "http://ecommerce-fashion.site/google-authenticate",
+ // redirectUri: "http://localhost:5173/google-authenticate",
+    redirectUri: "http://ecommerce-fashion.site/google-authenticate",
     authUri: "https://accounts.google.com/o/oauth2/auth",
 };
 
