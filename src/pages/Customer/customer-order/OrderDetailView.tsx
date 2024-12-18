@@ -263,8 +263,8 @@ const OrderStatusCustomer = () => {
               <p className="text-gray-700 mt-4">
                 <b>{order?.fullName}</b> <br />
                 (+84) {order?.phoneNumber} <br />
-                {order?.address.specificAddress}, {order?.address.wardName},{" "}
-                {order?.address.districtName}, {order?.address.provinceName}
+                {order?.address?.specificAddress}, {order?.address?.wardName},{" "}
+                {order?.address?.districtName}, {order?.address?.provinceName}
               </p>
             </div>
           </Grid>
