@@ -33,6 +33,7 @@ import Product from '../../../types/Product'
 import ModalHistoryImport from "./components/ModalHistoryImport";
 import ProductDetailQRModal from "./components/ProductDetailQRModal";
 import { Box } from '@mui/material'
+import useToast from '../../../hook/useToast'
 
 
 
@@ -185,7 +186,8 @@ const ProductManager = () => {
         toast.error("Authorization failed")
       }
     } catch (error) {
-      toast.error(getErrorMessage(error))
+      useToast().catchToast(error)
+      // toast.error(getErrorMessage(error))
     }
   }
 
@@ -240,6 +242,7 @@ const ProductManager = () => {
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to fetch product item');
       }
+      setUrl(product.image)
       setIsItemUpdateOpen(true);
     }
   }

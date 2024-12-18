@@ -12,8 +12,8 @@ export interface OrderDetailData {
 }
 
 export interface OrderUpdateData {
-    idGuest: number;
-    idDiscount: number;
+    idGuest?: number;
+    idDiscount?: number;
 }
 
 

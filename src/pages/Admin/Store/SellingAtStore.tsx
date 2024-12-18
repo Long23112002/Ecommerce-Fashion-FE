@@ -79,6 +79,8 @@ const SellingAtStore = () => {
                     ? new Date(order.createdAt).toLocaleDateString()
                     : "",
             });
+        }{
+            formOrder.resetFields()
         }
     }, [order])
 
@@ -188,21 +190,15 @@ const SellingAtStore = () => {
     }
 
     const chooseThisGuest = (idGuest: number) => {
-        setCurrentGuestId(idGuest);
         setIsOpenModalChooseGuest(false)
-        handleUpdateOrder();
+        handleUpdateOrder(idGuest);
     }
 
-    const handleUpdateOrder = async () => {
+    const handleUpdateOrder = async (idGuest: number) => {
         try {
-            const idDiscount = 34;
-
             if (order) {
-                console.log(currentGuestId);
-
-                await updateOrderAtStore(order.id, { idGuest: currentGuestId, idDiscount });
-                // handleUpdateCancel();
-                // refreshProducts();
+                const res = await updateOrderAtStore(order.id, { idGuest });
+                setOrder({ ...res })
                 setIsUpdateGuestDiscount(true);
             } else {
                 toast.error("Authorization failed");
@@ -263,7 +259,7 @@ const SellingAtStore = () => {
     const fetchListOrderDetail = async (order: Order | null) => {
         if (order) {
             setLoaingOrderDetailList(true)
-            const res = await getOrderDetailByIdOrder(order.id, {sortBy: 'id'});
+            const res = await getOrderDetailByIdOrder(order.id, { sortBy: 'id' });
             setOrderDetailList([...res.data])
             setLoaingOrderDetailList(false)
         } else {

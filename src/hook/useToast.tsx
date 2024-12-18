@@ -2,7 +2,7 @@ import { toast } from "react-toastify"
 
 const useToast = () => {
     const catchToast = (error: any) => {
-        const message = error.response.data.message
+        const message = error?.response?.data?.message
         if (typeof message == 'string') {
             toast.error(message)
         }
@@ -11,6 +11,12 @@ const useToast = () => {
         }
         else if (typeof error.message === 'string') {
             toast.error(error.message)
+        }
+        else if (typeof error === 'string') {
+            toast.error(error)
+        }
+        else {
+            return toast.error("Có lỗi xảy ra. Vui lòng thử lại sau")
         }
     }
     return { catchToast }
