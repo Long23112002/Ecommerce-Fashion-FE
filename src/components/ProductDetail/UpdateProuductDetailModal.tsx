@@ -179,7 +179,7 @@ const UpdateProductDetailModal: React.FC<UpdateProductDetailModalProps> = ({
                         },
                     ]}
                 >
-                    <Input disabled size="large" style={{ fontSize: '16px', color: '#000' }} />
+                    <Input size="large" style={{ fontSize: '16px', color: '#000' }} />
                 </Form.Item>
 
                 <Form.Item
